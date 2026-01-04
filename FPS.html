@@ -1043,9 +1043,9 @@
             }
             camera = new THREE.PerspectiveCamera(70, initAspect, 0.005, 1000);
 
-            const ambient = new THREE.AmbientLight(0xffffff, 0.4); 
-            scene.add(ambient);
-            ceilingLight = new THREE.PointLight(0xffaa00, 0.8, 30);
+            ambientLight = new THREE.AmbientLight(0xffffff, 0.4); 
+            scene.add(ambientLight);
+            ceilingLight = new THREE.PointLight(0xffaa00, 2.0, 50);
             ceilingLight.position.set(0, 10, 0);
             ceilingLight.castShadow = true;
             ceilingLight.visible = false; // 초기에는 꺼져있음
