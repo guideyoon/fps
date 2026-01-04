@@ -2525,6 +2525,206 @@
                 if(k === ' ') keys.space = false;
             });
         }
+        
+        // 모바일 터치 컨트롤 설정
+        function setupMobileControls() {
+            const joystick = document.getElementById('joystick');
+            const joystickHandle = document.getElementById('joystick-handle');
+            const touchLeft = document.getElementById('touch-left');
+            const touchRight = document.getElementById('touch-right');
+            
+            if (!joystick || !joystickHandle || !touchLeft || !touchRight) {
+                console.warn('Mobile control elements not found');
+                return;
+            }
+            
+            // 조이스틱 초기 위치 설정
+            function updateJoystickPosition() {
+                const rect = joystick.getBoundingClientRect();
+                joystickCenter.x = rect.left + rect.width / 2;
+                joystickCenter.y = rect.top + rect.height / 2;
+            }
+            updateJoystickPosition();
+            window.addEventListener('resize', updateJoystickPosition);
+            
+            // 조이스틱 터치 이벤트
+            let joystickTouchId = null;
+            joystick.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                if (joystickTouchId === null && e.touches.length > 0) {
+                    joystickTouchId = e.touches[0].identifier;
+                    joystickActive = true;
+                    updateJoystickPosition();
+                }
+            }, { passive: false });
+            
+            joystick.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                if (!joystickActive) return;
+                const touch = Array.from(e.touches).find(t => t.identifier === joystickTouchId);
+                if (!touch) return;
+                
+                const dx = touch.clientX - joystickCenter.x;
+                const dy = touch.clientY - joystickCenter.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                const maxDistance = 35;
+                
+                if (distance > maxDistance) {
+                    joystickPos.x = (dx / distance) * maxDistance;
+                    joystickPos.y = (dy / distance) * maxDistance;
+                } else {
+                    joystickPos.x = dx;
+                    joystickPos.y = dy;
+                }
+                
+                joystickHandle.style.transform = `translate(${joystickPos.x}px, ${joystickPos.y}px)`;
+                
+                // 이동 입력
+                const moveX = joystickPos.x / maxDistance;
+                const moveY = -joystickPos.y / maxDistance;
+                keys.w = Math.max(0, moveY);
+                keys.s = Math.max(0, -moveY);
+                keys.a = Math.max(0, -moveX);
+                keys.d = Math.max(0, moveX);
+            }, { passive: false });
+            
+            joystick.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                const touch = Array.from(e.changedTouches).find(t => t.identifier === joystickTouchId);
+                if (touch) {
+                    joystickActive = false;
+                    joystickTouchId = null;
+                    joystickPos.x = 0;
+                    joystickPos.y = 0;
+                    joystickHandle.style.transform = 'translate(0, 0)';
+                    keys.w = 0;
+                    keys.s = 0;
+                    keys.a = 0;
+                    keys.d = 0;
+                }
+            }, { passive: false });
+            
+            // 오른쪽 화면 터치 - 시야 조작 및 발사
+            let rightTouchId = null;
+            touchRight.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                if (rightTouchId === null && e.touches.length > 0) {
+                    rightTouchId = e.touches[0].identifier;
+                    touchLookActive = true;
+                    lastTouchX = e.touches[0].clientX;
+                    lastTouchY = e.touches[0].clientY;
+                    isFiring = true;
+                }
+            }, { passive: false });
+            
+            touchRight.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                if (!touchLookActive) return;
+                const touch = Array.from(e.touches).find(t => t.identifier === rightTouchId);
+                if (!touch) return;
+                
+                const dx = touch.clientX - lastTouchX;
+                const dy = touch.clientY - lastTouchY;
+                const sens = isAiming ? SENSITIVITY_ADS * 2 : SENSITIVITY_MOUSE * 2;
+                
+                rotation.y -= dx * sens;
+                rotation.x -= dy * sens;
+                rotation.x = Math.max(-1.5, Math.min(1.5, rotation.x));
+                
+                lastTouchX = touch.clientX;
+                lastTouchY = touch.clientY;
+            }, { passive: false });
+            
+            touchRight.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                const touch = Array.from(e.changedTouches).find(t => t.identifier === rightTouchId);
+                if (touch) {
+                    touchLookActive = false;
+                    rightTouchId = null;
+                    isFiring = false;
+                    hasFiredSemi = false;
+                }
+            }, { passive: false });
+            
+            // 모바일 버튼 이벤트
+            const btnJump = document.getElementById('btn-jump');
+            const btnReload = document.getElementById('btn-reload');
+            const btnWeapon1 = document.getElementById('btn-weapon1');
+            const btnWeapon2 = document.getElementById('btn-weapon2');
+            const btnWeapon3 = document.getElementById('btn-weapon3');
+            const btnWeapon4 = document.getElementById('btn-weapon4');
+            const btnAim = document.getElementById('btn-aim');
+            
+            if (btnJump) {
+                btnJump.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    if (!keys.space && isGrounded) {
+                        velocityY = 8.0;
+                        isGrounded = false;
+                        SoundGen.playJump(false);
+                    }
+                    keys.space = true;
+                }, { passive: false });
+                btnJump.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    keys.space = false;
+                }, { passive: false });
+            }
+            
+            if (btnReload) {
+                btnReload.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    doReload();
+                }, { passive: false });
+            }
+            
+            if (btnWeapon1) {
+                btnWeapon1.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    switchWeaponTo(0);
+                }, { passive: false });
+            }
+            if (btnWeapon2) {
+                btnWeapon2.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    switchWeaponTo(1);
+                }, { passive: false });
+            }
+            if (btnWeapon3) {
+                btnWeapon3.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    switchWeaponTo(2);
+                }, { passive: false });
+            }
+            if (btnWeapon4) {
+                btnWeapon4.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    switchWeaponTo(3);
+                }, { passive: false });
+            }
+            
+            if (btnAim) {
+                btnAim.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    isAiming = true;
+                }, { passive: false });
+                btnAim.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    isAiming = false;
+                }, { passive: false });
+            }
+            
+            // 왼쪽 화면 더블 탭 - 조준
+            let lastTapTime = 0;
+            touchLeft.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                const now = Date.now();
+                if (now - lastTapTime < 300) {
+                    isAiming = !isAiming;
+                }
+                lastTapTime = now;
+            }, { passive: false });
+        }
 
         function switchWeaponTo(idx) {
             if(curWeaponIdx === idx) return;
