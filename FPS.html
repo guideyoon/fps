@@ -966,7 +966,8 @@
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', init);
         } else {
-            window.addEventListener('load', init);
+            // 이미 로드 완료되었으면 바로 호출
+            init();
         }
 
         function init() {
