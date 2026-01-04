@@ -2770,17 +2770,21 @@
                 // 모든 터치 처리
                 Array.from(e.touches).forEach(touch => {
                     const isLeftSide = touch.clientX < leftHalf;
+                    const btnAim = document.getElementById('btn-aim');
+                    const btnRect = btnAim ? btnAim.getBoundingClientRect() : null;
+                    const isOnAimButton = btnRect && touch.clientX >= btnRect.left && touch.clientX <= btnRect.right &&
+                                          touch.clientY >= btnRect.top && touch.clientY <= btnRect.bottom;
                     
-                    if (isLeftSide && touchMoveId === null) {
-                        // 왼쪽 화면 - 이동 제어
+                    if (isLeftSide && touchMoveId === null && !isOnAimButton) {
+                        // 왼쪽 화면 - 이동 제어 (조준 버튼 제외)
                         touchMoveId = touch.identifier;
                         touchMoveActive = true;
                         touchStartX = touch.clientX;
                         touchStartY = touch.clientY;
                         lastTouchX = touch.clientX;
                         lastTouchY = touch.clientY;
-                    } else if (!isLeftSide && touchLookId === null) {
-                        // 오른쪽 화면 - 시점 제어
+                    } else if (!isLeftSide && touchLookId === null && !isOnAimButton) {
+                        // 오른쪽 화면 - 시점 제어 (조준 버튼 제외)
                         touchLookId = touch.identifier;
                         touchLookActive = true;
                         lastTouchX = touch.clientX;
@@ -2869,10 +2873,10 @@
                 // 조준 버튼을 누르고 있는 상태에서도 오른쪽 화면 터치로 시점 변경 가능
                 if (isAimingHeld) {
                     // 조준 버튼이 아닌 오른쪽 화면의 다른 터치 찾기
+                    const btnAim = document.getElementById('btn-aim');
+                    const btnRect = btnAim ? btnAim.getBoundingClientRect() : null;
                     const rightSideTouch = Array.from(e.touches).find(t => {
-                        const btnAim = document.getElementById('btn-aim');
-                        if (!btnAim) return false;
-                        const btnRect = btnAim.getBoundingClientRect();
+                        if (!btnRect) return false;
                         const isOnButton = t.clientX >= btnRect.left && t.clientX <= btnRect.right &&
                                           t.clientY >= btnRect.top && t.clientY <= btnRect.bottom;
                         return !isOnButton && t.clientX >= currentLeftHalf && t.identifier !== touchMoveId;
@@ -2885,17 +2889,23 @@
                             touchLookActive = true;
                             lastTouchX = rightSideTouch.clientX;
                             lastTouchY = rightSideTouch.clientY;
-                        } else {
-                            const moveDx = rightSideTouch.clientX - lastTouchX;
-                            const moveDy = rightSideTouch.clientY - lastTouchY;
+                        }
+                    }
+                    
+                    // touchLookId가 설정되어 있으면 시점 변경 처리
+                    if (touchLookActive && touchLookId !== null) {
+                        const lookTouch = Array.from(e.touches).find(t => t.identifier === touchLookId);
+                        if (lookTouch && lookTouch.clientX >= currentLeftHalf) {
+                            const moveDx = lookTouch.clientX - lastTouchX;
+                            const moveDy = lookTouch.clientY - lastTouchY;
                             const sens = SENSITIVITY_ADS * 1.5; // 조준 모드 감도 (모바일)
                             
                             rotation.y -= moveDx * sens;
                             rotation.x -= moveDy * sens;
                             rotation.x = Math.max(-1.5, Math.min(1.5, rotation.x));
                             
-                            lastTouchX = rightSideTouch.clientX;
-                            lastTouchY = rightSideTouch.clientY;
+                            lastTouchX = lookTouch.clientX;
+                            lastTouchY = lookTouch.clientY;
                         }
                     }
                 }
@@ -3004,29 +3014,44 @@
                 }, { passive: false });
             }
             
-            // 조준 버튼 - 저격 모드는 조준만, 다른 무기는 자동 발사
+            // 조준 버튼 - 저격 모드는 조준만, 소총은 조준+발사, 권총은 발사만
             if (btnAim) {
                 btnAim.addEventListener('touchstart', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    isAimingHeld = true;
-                    isAiming = true;
                     const w = WEAPONS[curWeaponIdx];
-                    // 저격 모드는 조준만, 다른 무기는 자동 발사
-                    if (w.type !== 'SNIPER') {
-                        isFiring = true; // 자동 발사 시작
+                    
+                    if (w.type === 'PISTOL') {
+                        // 권총은 조준 모드가 이미 활성화되어 있으므로 발사만
+                        isFiring = true;
                     } else {
-                        isFiring = false; // 저격 모드는 왼쪽 터치로 발사
+                        // 소총, 저격총은 조준 모드 활성화
+                        isAimingHeld = true;
+                        isAiming = true;
+                        if (w.type !== 'SNIPER') {
+                            isFiring = true; // 소총은 자동 발사 시작
+                        } else {
+                            isFiring = false; // 저격 모드는 왼쪽 터치로 발사
+                        }
                     }
                 }, { passive: false });
                 
                 btnAim.addEventListener('touchend', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    isAimingHeld = false;
-                    isAiming = false;
-                    isFiring = false;
-                    hasFiredSemi = false;
+                    const w = WEAPONS[curWeaponIdx];
+                    
+                    if (w.type === 'PISTOL') {
+                        // 권총은 발사만 중지
+                        isFiring = false;
+                        hasFiredSemi = false;
+                    } else {
+                        // 소총, 저격총은 조준 모드도 해제
+                        isAimingHeld = false;
+                        isAiming = false;
+                        isFiring = false;
+                        hasFiredSemi = false;
+                    }
                 }, { passive: false });
             }
         }
@@ -3070,7 +3095,13 @@
         function switchWeaponTo(idx) {
             if(curWeaponIdx === idx) return;
             isReloading = false;
-            isAiming = false; 
+            const w = WEAPONS[idx];
+            // 모바일에서 권총으로 변경 시 자동으로 조준 모드 활성화
+            if (isMobile && w.type === 'PISTOL') {
+                isAiming = true;
+            } else {
+                isAiming = false;
+            }
             curWeaponIdx = idx;
             buildWeapon(curWeaponIdx);
             // 무기 전환 시 초기 위치 설정 (나이프가 아닌 경우만)
@@ -3657,11 +3688,14 @@
 
                 const isSniperAiming = isAiming && w.type === 'SNIPER';
                 if (isSniperAiming) {
-                    weaponContainer.visible = false; elScope.style.display = 'block'; elCrosshair.style.display = 'none';
+weaponContainer.visible = false; elScope.style.display = 'block'; elCrosshair.style.display = 'none';
                 } else {
                     weaponContainer.visible = true; elScope.style.display = 'none';
-                    // 모바일에서는 십자가 표시 안 함
-                    if (!isMobile) {
+                    // 모바일에서는 권총일 때 조준자 표시
+                    if (isMobile && w.type === 'PISTOL') {
+                        elCrosshair.style.display = 'block';
+                        elCrosshair.style.opacity = 1;
+                    } else if (!isMobile) {
                         elCrosshair.style.display = 'block'; 
                         elCrosshair.style.opacity = (isAiming && w.type !== 'KNIFE') ? 0 : 1;
                     } else {
