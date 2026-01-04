@@ -1112,7 +1112,7 @@
             // 리사이즈 이벤트는 init() 끝부분에서 별도로 처리 (중복 방지)
             document.addEventListener('contextmenu', e => e.preventDefault());
 
-            document.body.addEventListener('mousedown', () => {
+            const loadAudioFiles = () => {
                 if(!SoundGen.ctx) SoundGen.init();
                 if(SoundGen.ctx.state === 'suspended') SoundGen.ctx.resume();
                 
@@ -1151,7 +1151,11 @@
                 // 권총 발사 오디오 파일 로드
                 SoundGen.loadAudioFile('gunshot.mp3', 'gunshot')
                     .catch(err => console.warn('Failed to load gunshot sound:', err));
-            }, {once:true});
+            };
+            
+            // 데스크톱과 모바일 모두에서 오디오 파일 로드
+            document.body.addEventListener('mousedown', loadAudioFiles, {once:true});
+            document.body.addEventListener('touchstart', loadAudioFiles, {once:true});
 
             document.getElementById('restart-btn').addEventListener('click', restartGame);
             
