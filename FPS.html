@@ -1058,6 +1058,13 @@
 
             setupControls();
             animate();
+            
+            // 화면 회전 감지 및 레이아웃 조정
+            window.addEventListener('orientationchange', () => {
+                setTimeout(() => {
+                    onResize();
+                }, 100);
+            });
         }
 
         // --- 텍스처 시스템 초기화 ---
@@ -2397,7 +2404,20 @@
             }
         }
 
+        // 모바일 터치 컨트롤 변수
+        let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        let joystickActive = false;
+        let joystickCenter = { x: 0, y: 0 };
+        let joystickPos = { x: 0, y: 0 };
+        let touchLookActive = false;
+        let lastTouchX = 0, lastTouchY = 0;
+        
         function setupControls() {
+            // 모바일 터치 컨트롤 설정
+            if (isMobile || 'ontouchstart' in window) {
+                setupMobileControls();
+            }
+            
             // 포인터 잠금 변경 감지
             document.addEventListener('pointerlockchange', () => {
                 if(document.pointerLockElement !== document.body && isPaused) {
