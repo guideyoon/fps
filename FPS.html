@@ -2764,10 +2764,10 @@
                                 hasFiredSemi = false;
                             }
                         } else if (isAimingHeld) {
-                            // 조준 모드일 때는 왼쪽 터치도 시점 변경으로 처리
+                            // 조준 모드일 때는 왼쪽 터치도 시점 변경으로 처리 (부드럽게)
                             const moveDx = touch.clientX - lastTouchX;
                             const moveDy = touch.clientY - lastTouchY;
-                            const sens = SENSITIVITY_ADS * 2; // 조준 모드 감도
+                            const sens = SENSITIVITY_ADS * 1.2; // 조준 모드 감도 (더 부드럽게)
                             
                             rotation.y -= moveDx * sens;
                             rotation.x -= moveDy * sens;
