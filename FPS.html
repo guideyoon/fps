@@ -541,6 +541,7 @@
         let isReloading = false;
         let knifeSwing = 0;
         let hasClickedEmpty = false;
+        let sniperReloadGesture = false; // PC 모드 저격총 재장전 제스처 플래그
         
         let fireCooldown = 0;
 
@@ -3450,11 +3451,40 @@
                 }
 
                 if(w.type === 'SNIPER') {
-                    setTimeout(() => {
-                        SoundGen.playBoltAction();
-                        weaponModel.rotation.z = 0.2;
-                        setTimeout(() => weaponModel.rotation.z = 0, 200);
-                    }, 600);
+                    // PC 모드에서만 재장전 제스처 추가
+                    if(!isMobile) {
+                        setTimeout(() => {
+                            SoundGen.playBoltAction();
+                            sniperReloadGesture = true;
+                            // 재장전 제스처: bolt를 당기고 다시 밀어넣기
+                            const originalRotZ = weaponModel.rotation.z;
+                            const originalPosZ = weaponModel.position.z;
+                            const originalPosY = weaponModel.position.y;
+                            
+                            // bolt를 뒤로 당기기
+                            weaponModel.rotation.z = originalRotZ + 0.4;
+                            weaponModel.position.z = originalPosZ - 0.08;
+                            weaponModel.position.y = originalPosY - 0.04;
+                            setTimeout(() => {
+                                // bolt를 앞으로 밀어넣기
+                                weaponModel.rotation.z = originalRotZ + 0.15;
+                                setTimeout(() => {
+                                    // 원래 위치로 복귀
+                                    weaponModel.rotation.z = originalRotZ;
+                                    weaponModel.position.z = originalPosZ;
+                                    weaponModel.position.y = originalPosY;
+                                    sniperReloadGesture = false;
+                                }, 150);
+                            }, 250);
+                        }, 600);
+                    } else {
+                        // 모바일에서는 기존 로직 유지
+                        setTimeout(() => {
+                            SoundGen.playBoltAction();
+                            weaponModel.rotation.z = 0.2;
+                            setTimeout(() => weaponModel.rotation.z = 0, 200);
+                        }, 600);
+                    }
                 }
 
                 // FIXED: REMOVED THE BUGGY EMISSIVE FLASH CODE HERE
@@ -3763,7 +3793,10 @@ weaponContainer.visible = false; elScope.style.display = 'block'; elCrosshair.st
                     weaponModel.position.y = THREE.MathUtils.lerp(weaponModel.position.y, 0, 10 * dt);
                     weaponModel.rotation.x = recoil.x + (isReloading ? 0.5 : 0); 
                     weaponModel.position.z = recoil.z;
-                    weaponModel.rotation.z = 0;
+                    // 재장전 제스처 중이 아닐 때만 rotation.z 초기화
+                    if(!sniperReloadGesture) {
+                        weaponModel.rotation.z = 0;
+                    }
                 }
                 elVignette.style.opacity = (isAiming && w.type !== 'KNIFE') ? 0.5 : 0;
             }
