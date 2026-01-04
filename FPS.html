@@ -1,0 +1,2985 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>FPS Ultimate Final Fix v4 (Pistol Sight Fix)</title>
+    <style>
+        * { box-sizing: border-box; }
+        html, body { 
+            margin: 0; padding: 0; width: 100%; height: 100%; 
+            overflow: hidden; background-color: #000; 
+            touch-action: none; 
+            user-select: none; -webkit-user-select: none;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        #game-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; cursor: crosshair; }
+
+        #ui-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 10;
+        }
+
+        #crosshair {
+            position: absolute; top: 50%; left: 50%; width: 0; height: 0;
+            transition: opacity 0.1s;
+        }
+        #crosshair::before, #crosshair::after {
+            content: ''; position: absolute; background: rgba(255, 255, 255, 0.8); 
+            transform: translate(-50%, -50%); box-shadow: 0 0 2px black;
+        }
+        #crosshair::before { width: 16px; height: 1.5px; }
+        #crosshair::after { width: 1.5px; height: 16px; }
+        
+        #crosshair.enemy-detected::before, 
+        #crosshair.enemy-detected::after {
+            background: #ff0000; box-shadow: 0 0 4px red;
+        }
+
+        #hit-marker {
+            position: absolute; top: 50%; left: 50%; width: 40px; height: 40px;
+            transform: translate(-50%, -50%) rotate(45deg);
+            pointer-events: none; opacity: 0; 
+            transition: opacity 0.1s, transform 0.1s, filter 0.1s;
+            z-index: 10;
+        }
+        #hit-marker::before, #hit-marker::after {
+            content: ''; position: absolute; top: 50%; left: 50%;
+            background-color: #ff3333; transform: translate(-50%, -50%);
+            box-shadow: 0 0 8px red, 0 0 12px rgba(255, 0, 0, 0.6);
+        }
+        #hit-marker::before { width: 28px; height: 4px; }
+        #hit-marker::after { width: 4px; height: 28px; }
+
+        #scope-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: none; z-index: 20;
+            background: radial-gradient(circle, transparent 30%, black 31%);
+        }
+        #scope-line-h { position: absolute; top: 50%; left: 0; width: 100%; height: 2px; background-color: rgba(0,0,0,0.8); transform: translateY(-50%); }
+        #scope-line-v { position: absolute; top: 0; left: 50%; width: 2px; height: 100%; background-color: rgba(0,0,0,0.8); transform: translateX(-50%); }
+        #scope-dot { position: absolute; top: 50%; left: 50%; width: 4px; height: 4px; background: red; border-radius: 50%; transform: translate(-50%, -50%); }
+
+        #vignette {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle, transparent 50%, black 150%);
+            opacity: 0; transition: opacity 0.2s;
+            z-index: 5; pointer-events: none;
+        }
+        #damage-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle, transparent 50%, rgba(255, 0, 0, 0.5) 100%);
+            opacity: 0; transition: opacity 0.1s;
+            z-index: 6; pointer-events: none;
+        }
+
+        #headshot-msg {
+            position: absolute; top: 20%; left: 50%; transform: translate(-50%, -50%) scale(0.5);
+            color: #ff0000; font-size: 40px; font-weight: 900; font-style: italic;
+            text-shadow: 0 0 10px rgba(255, 0, 0, 0.8), 2px 2px 0 #000;
+            opacity: 0; transition: transform 0.1s, opacity 0.1s;
+            z-index: 15; pointer-events: none;
+        }
+        #headshot-msg.active { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+
+        #ammo-info {
+            position: absolute; bottom: 40px; right: 40px;
+            color: white; font-size: 40px; font-weight: 900;
+            font-style: italic; text-shadow: 2px 2px 0px #000; letter-spacing: 2px;
+            text-align: right;
+        }
+        #weapon-label { font-size: 18px; color: #fbbc05; display: block; margin-bottom: 5px; }
+        #ammo-val { display: block; }
+        .no-ammo { color: #ff3333; animation: shake 0.2s; }
+        @keyframes shake { 0% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } 100% { transform: translateX(0); } }
+
+        #hp-container {
+            position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
+            width: 300px; height: 20px; background: rgba(0,0,0,0.5);
+            border: 2px solid rgba(255,255,255,0.2); border-radius: 10px;
+            overflow: hidden;
+        }
+        #hp-bar {
+            width: 100%; height: 100%; background: #4caf50;
+            transition: width 0.2s, background-color 0.2s;
+        }
+        #hp-text {
+            position: absolute; bottom: 65px; left: 50%; transform: translateX(-50%);
+            color: white; font-weight: bold; text-shadow: 1px 1px 2px black;
+        }
+
+        #game-over {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); color: red;
+            display: none; flex-direction: column;
+            justify-content: center; align-items: center;
+            z-index: 100; font-size: 60px; font-weight: 900;
+        }
+        #pause-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); color: white;
+            display: none; flex-direction: column;
+            justify-content: center; align-items: center;
+            z-index: 99; font-size: 40px; font-weight: 900;
+            cursor: default;
+            pointer-events: auto;
+        }
+        #restart-btn {
+            margin-top: 20px; padding: 10px 30px; font-size: 20px;
+            background: white; border: none; cursor: pointer;
+        }
+
+        #controls-guide {
+            position: absolute; top: 20px; left: 20px;
+            color: rgba(255, 255, 255, 0.6); font-size: 13px; line-height: 1.6;
+            text-shadow: 1px 1px 1px black; pointer-events: none;
+            background: rgba(0,0,0,0.3); padding: 10px; border-radius: 5px;
+        }
+        .key { color: #fbbc05; font-weight: bold; }
+
+        #controls { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 20; display: flex; }
+        #touch-left, #touch-right { width: 50%; height: 100%; }
+        
+        @media (hover: hover) and (pointer: fine) {
+            #controls { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container"></div>
+    <div id="vignette"></div>
+    <div id="damage-overlay"></div>
+    <div id="scope-overlay">
+        <div id="scope-line-h"></div>
+        <div id="scope-line-v"></div>
+        <div id="scope-dot"></div>
+    </div>
+    <div id="headshot-msg">HEADSHOT!</div>
+    <div id="hit-marker"></div>
+
+    <div id="game-over">
+        YOU DIED
+        <button id="restart-btn">TRY AGAIN</button>
+    </div>
+
+    <div id="pause-overlay">
+        PAUSED
+    </div>
+
+    <div id="ui-layer">
+        <div id="crosshair"></div>
+        <div id="ammo-info">
+            <span id="weapon-label">ASSAULT RIFLE</span>
+            <span id="ammo-val">30 / 120</span>
+        </div>
+        
+        <div id="hp-text">HP: 100</div>
+        <div id="hp-container">
+            <div id="hp-bar"></div>
+        </div>
+
+        <div id="controls-guide">
+            <span class="key">1</span>소총 <span class="key">2</span>권총 <span class="key">3</span>저격 <span class="key">4</span>칼<br>
+            <span class="key">WASD</span> 이동 <br>
+            <span class="key">Space</span> 점프 / <span class="key">Shift</span> 달리기 <br>
+            <span class="key">R</span> 재장전 <br>
+            <span class="key">Click</span> 발사/조준
+        </div>
+    </div>
+
+    <div id="controls">
+        <div id="touch-left"></div>
+        <div id="touch-right"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- 추가 라이브러리 (선택적 - 필요시 주석 해제) -->
+    <!-- 
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/BloomPass.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.20.0/cannon.min.js"></script>
+    -->
+    <script>
+        let camera, scene, renderer;
+        let lastTime = performance.now();
+        
+        // 확장 기능 변수
+        let gltfLoader, textureLoader;
+        let composer; // 후처리 컴포저
+        let physicsWorld; // 물리 엔진 세계
+        let usePhysics = true; // 물리 엔진 사용 여부 (활성화)
+        let usePostProcessing = true; // 후처리 효과 사용 여부 (활성화)
+        
+        const SENSITIVITY_MOUSE = 0.002;
+        const SENSITIVITY_ADS = 0.0005;
+
+        // Player State
+        let position = new THREE.Vector3(0, 1.7, 5);
+        let rotation = { x: 0, y: 0 };
+        let velocityY = 0;
+        let isGrounded = false;
+        let playerHP = 100;
+        let isDead = false;
+        let isPaused = false;
+        const PLAYER_RADIUS = 0.4;
+        
+        // Footsteps
+        let moveDistance = 0;
+        const STEP_INTERVAL = 2.5;
+
+        const keys = { w:0, a:0, s:0, d:0, shift:false, ctrl:false, space:false };
+        
+        // --- Weapon System ---
+        const WEAPONS = [
+            { 
+                id: 0, name: "ASSAULT RIFLE", 
+                type: 'RIFLE', maxAmmo: 30, ammo: 30, automatic: true,
+                posHip: new THREE.Vector3(0.2, -0.25, -0.45), 
+                posAds: new THREE.Vector3(0, -0.0621, -0.05),
+                fovAds: 20, fireRate: 0.08, recoil: 0.06, damage: 30 
+            },
+            { 
+                id: 1, name: "TACTICAL PISTOL", 
+                type: 'PISTOL', maxAmmo: 12, ammo: 12, automatic: false,
+                posHip: new THREE.Vector3(0.15, -0.2, -0.35), 
+                // 수정: ADS 좌표 정밀 보정 (가늠자 높이와 일치)
+                posAds: new THREE.Vector3(0, -0.0482, -0.35), 
+                fovAds: 35, fireRate: 0.15, recoil: 0.1, damage: 20 
+            },
+            { 
+                id: 2, name: "TAC-50 SNIPER", 
+                type: 'SNIPER', maxAmmo: 5, ammo: 5, automatic: false,
+                posHip: new THREE.Vector3(0.2, -0.3, -0.5), 
+                posAds: new THREE.Vector3(0, -0.06, -0.15),
+                fovAds: 8, fireRate: 2.0, recoil: 0.4, damage: 100 
+            },
+            { 
+                id: 3, name: "KARAMBIT", 
+                type: 'KNIFE', maxAmmo: 0, ammo: 0, automatic: true,
+                posHip: new THREE.Vector3(0.25, -0.25, -0.5), 
+                posAds: new THREE.Vector3(0.25, -0.25, -0.45), 
+                fovAds: 65, fireRate: 0.4, recoil: 0, damage: 15 
+            }
+        ];
+        let curWeaponIdx = 0;
+        
+        let weaponContainer, weaponModel;
+        let currentPos = WEAPONS[0].posHip.clone();
+        
+        let isAiming = false;
+        let isFiring = false;
+        let hasFiredSemi = false;
+        let isReloading = false;
+        let knifeSwing = 0;
+        let hasClickedEmpty = false;
+        
+        let fireCooldown = 0;
+
+        let recoil = { x: 0, z: 0 };
+        let muzzleFlash;
+        let hitShake = { x: 0, y: 0, intensity: 0 }; // 피격 시 화면 흔들림
+
+        let shells = [];
+        let shellGeo, shellMat;
+        let bloodParticles = [];
+        let decals = [];
+        let healthPills = [];
+        const matHealthPill = new THREE.MeshStandardMaterial({ color: 0xff00ff, roughness: 0.2, metalness: 0.8, emissive: 0xff00ff, emissiveIntensity: 0.5 }); 
+
+        let enemies = [];
+        const ZOMBIE_SPEED = 2.5; 
+        const ZOMBIE_DMG = 10;
+        const ATTACK_RANGE = 2.5; 
+        const ENEMY_RADIUS = 0.4; 
+        
+        const MAX_ENEMIES = 12;
+        const SPAWN_INTERVAL = 2.0;
+        let spawnTimer = 0;
+
+        let colliders = [];
+
+        // UI
+        const elAmmoVal = document.getElementById('ammo-val');
+        const elWeaponLabel = document.getElementById('weapon-label');
+        const elCrosshair = document.getElementById('crosshair');
+        const elVignette = document.getElementById('vignette');
+        const elScope = document.getElementById('scope-overlay');
+        const elHpBar = document.getElementById('hp-bar');
+        const elHpText = document.getElementById('hp-text');
+        const elDamage = document.getElementById('damage-overlay');
+        const elGameOver = document.getElementById('game-over');
+        const elPauseOverlay = document.getElementById('pause-overlay');
+        const elHeadshot = document.getElementById('headshot-msg');
+        const elHitMarker = document.getElementById('hit-marker');
+
+        // Materials
+        const matBody = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.4, metalness: 0.6 });
+        const matParts = new THREE.MeshStandardMaterial({ color: 0x050505, roughness: 0.8 });
+        const matSilver = new THREE.MeshStandardMaterial({ color: 0xcccccc, roughness: 0.2, metalness: 0.9 });
+        const matSkin = new THREE.MeshStandardMaterial({ color: 0xcbb093, roughness: 0.7 });
+        const matSleeve = new THREE.MeshStandardMaterial({ color: 0x1c1f1c, roughness: 1.0 });
+        const matGlove = new THREE.MeshStandardMaterial({ color: 0x151515, roughness: 0.9 });
+        const matSight = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        const matBlade = new THREE.MeshStandardMaterial({ color: 0xdddddd, roughness: 0.1, metalness: 1.0 });
+        const matHandle = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.9 });
+        const matLens = new THREE.MeshStandardMaterial({ color: 0x2244aa, roughness: 0.1, metalness: 0.9 });
+        const matDecal = new THREE.MeshBasicMaterial({ color: 0x000000, polygonOffset: true, polygonOffsetFactor: -1 });
+
+        const matZombieSkin = new THREE.MeshStandardMaterial({ color: 0x5e7052, roughness: 0.8 }); 
+        const matZombieClothes = new THREE.MeshStandardMaterial({ color: 0x4a3b2a, roughness: 0.9 }); 
+        const matHpBg = new THREE.MeshBasicMaterial({ color: 0x000000 });
+        const matHpFg = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+
+        const SoundGen = {
+            ctx: null,
+            audioBuffers: {}, // 로드된 오디오 파일 캐시
+            masterVolume: 1.0, // 마스터 볼륨 (0.0 ~ 1.0)
+            reloadVolume: 0.8, // 재장전 볼륨 (0.0 ~ 1.0)
+            init: function() {
+                try {
+                    window.AudioContext = window.AudioContext || window.webkitAudioContext;
+                    this.ctx = new AudioContext();
+                } catch(e) {
+                    console.warn('AudioContext initialization failed:', e);
+                }
+            },
+            // 외부 오디오 파일 로드 함수
+            loadAudioFile: function(url, name) {
+                if(!this.ensureContext()) {
+                    console.warn('AudioContext not available');
+                    return Promise.reject('AudioContext not available');
+                }
+                
+                // 이미 로드된 경우 캐시에서 반환
+                if(this.audioBuffers[name]) {
+                    return Promise.resolve(this.audioBuffers[name]);
+                }
+                
+                return fetch(url)
+                    .then(response => {
+                        if(!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.arrayBuffer();
+                    })
+                    .then(arrayBuffer => {
+                        return this.ctx.decodeAudioData(arrayBuffer);
+                    })
+                    .then(audioBuffer => {
+                        this.audioBuffers[name] = audioBuffer;
+                        console.log(`Audio file loaded: ${name}`);
+                        return audioBuffer;
+                    })
+                    .catch(error => {
+                        console.error(`Failed to load audio file ${url}:`, error);
+                        throw error;
+                    });
+            },
+            // 로드된 오디오 파일 재생 함수
+            playAudioFile: function(name, volume = 1.0, loop = false) {
+                if(!this.ensureContext()) return;
+                
+                const audioBuffer = this.audioBuffers[name];
+                if(!audioBuffer) {
+                    console.warn(`Audio file not loaded: ${name}. Use loadAudioFile() first.`);
+                    return;
+                }
+                
+                try {
+                    const source = this.ctx.createBufferSource();
+                    const gainNode = this.ctx.createGain();
+                    
+                    source.buffer = audioBuffer;
+                    source.loop = loop;
+                    // 마스터 볼륨 적용
+                    gainNode.gain.value = volume * this.masterVolume;
+                    
+                    source.connect(gainNode);
+                    gainNode.connect(this.ctx.destination);
+                    
+                    source.start(0);
+                    
+                    return source; // 재생 중지 등을 위해 반환
+                } catch(e) {
+                    console.error(`Failed to play audio file ${name}:`, e);
+                }
+            },
+            ensureContext: function() {
+                if(!this.ctx) {
+                    this.init();
+                }
+                if(this.ctx && this.ctx.state === 'suspended') {
+                    this.ctx.resume().catch(e => console.warn('AudioContext resume failed:', e));
+                }
+                return !!this.ctx;
+            },
+            playShoot: function(type) {
+                if(!this.ensureContext()) return;
+                
+                // 저격총은 오디오 파일 사용, 없으면 기존 소리 생성
+                if(type === 'SNIPER' && this.audioBuffers['rifle']) {
+                    this.playAudioFile('rifle', 0.25); // 볼륨 25%
+                    return;
+                }
+                
+                // 권총은 오디오 파일 사용, 없으면 기존 소리 생성
+                if(type === 'PISTOL' && this.audioBuffers['gunshot']) {
+                    this.playAudioFile('gunshot', 0.8);
+                    return;
+                }
+                
+                // 기존 소리 생성 (폴백)
+                const t = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                const filter = this.ctx.createBiquadFilter();
+
+                const bufferSize = this.ctx.sampleRate * 0.2;
+                const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) { data[i] = Math.random() * 2 - 1; }
+                const noise = this.ctx.createBufferSource();
+                noise.buffer = buffer;
+
+                filter.type = 'lowpass';
+                if(type === 'SNIPER') {
+                    filter.frequency.value = 600;
+                    gain.gain.setValueAtTime(1.5, t);
+                    gain.gain.exponentialRampToValueAtTime(0.01, t + 0.8);
+                } else if(type === 'RIFLE') {
+                    filter.frequency.value = 1000;
+                    gain.gain.setValueAtTime(1, t);
+                    gain.gain.exponentialRampToValueAtTime(0.01, t + 0.15);
+                } else {
+                    filter.frequency.value = 1500;
+                    gain.gain.setValueAtTime(0.8, t);
+                    gain.gain.exponentialRampToValueAtTime(0.01, t + 0.1);
+                }
+
+                noise.connect(filter); filter.connect(gain); gain.connect(this.ctx.destination);
+                noise.start();
+            },
+            playDryFire: function() {
+                if(!this.ensureContext()) return;
+                
+                // 빈 격발 오디오 파일 사용, 없으면 기존 소리 생성
+                if(this.audioBuffers['empty']) {
+                    this.playAudioFile('empty', 0.8);
+                } else {
+                    // 기존 소리 생성 (폴백)
+                    const t = this.ctx.currentTime;
+                    
+                    // 기계음의 틱틱 같은 철제 소리
+                    try {
+                        // 첫 번째 틱 - 짧고 날카로운 소리
+                        const osc1 = this.ctx.createOscillator();
+                        const gain1 = this.ctx.createGain();
+                        osc1.type = 'square'; // 기계음 느낌
+                        osc1.frequency.setValueAtTime(1200, t);
+                        osc1.frequency.exponentialRampToValueAtTime(800, t + 0.02);
+                        gain1.gain.setValueAtTime(0.2, t);
+                        gain1.gain.exponentialRampToValueAtTime(0.01, t + 0.03);
+                        osc1.connect(gain1);
+                        gain1.connect(this.ctx.destination);
+                        osc1.start(t);
+                        osc1.stop(t + 0.03);
+                        
+                        // 두 번째 틱 - 약간 지연된 메탈릭 소리
+                        const osc2 = this.ctx.createOscillator();
+                        const gain2 = this.ctx.createGain();
+                        osc2.type = 'sawtooth'; // 철제 느낌
+                        osc2.frequency.setValueAtTime(1500, t + 0.01);
+                        osc2.frequency.exponentialRampToValueAtTime(600, t + 0.04);
+                        gain2.gain.setValueAtTime(0.15, t + 0.01);
+                        gain2.gain.exponentialRampToValueAtTime(0.01, t + 0.05);
+                        osc2.connect(gain2);
+                        gain2.connect(this.ctx.destination);
+                        osc2.start(t + 0.01);
+                        osc2.stop(t + 0.05);
+                        
+                        // 메탈릭 공명 효과
+                        const osc3 = this.ctx.createOscillator();
+                        const gain3 = this.ctx.createGain();
+                        osc3.type = 'sine';
+                        osc3.frequency.setValueAtTime(2000, t);
+                        osc3.frequency.exponentialRampToValueAtTime(1000, t + 0.04);
+                        gain3.gain.setValueAtTime(0.1, t);
+                        gain3.gain.exponentialRampToValueAtTime(0.01, t + 0.04);
+                        osc3.connect(gain3);
+                        gain3.connect(this.ctx.destination);
+                        osc3.start(t);
+                        osc3.stop(t + 0.04);
+                    } catch(e) {
+                        console.warn('Dry fire sound error:', e);
+                    }
+                }
+            },
+            playBoltAction: function() {
+                if(!this.ensureContext()) return;
+                const t = this.ctx.currentTime;
+                const osc1 = this.ctx.createOscillator();
+                const gain1 = this.ctx.createGain();
+                osc1.type = 'sawtooth';
+                osc1.frequency.setValueAtTime(150, t);
+                gain1.gain.setValueAtTime(0.2, t);
+                gain1.gain.linearRampToValueAtTime(0, t + 0.1);
+                osc1.connect(gain1); gain1.connect(this.ctx.destination);
+                osc1.start(t); osc1.stop(t + 0.1);
+
+                const osc2 = this.ctx.createOscillator();
+                const gain2 = this.ctx.createGain();
+                osc2.type = 'square';
+                osc2.frequency.setValueAtTime(200, t + 0.15);
+                gain2.gain.setValueAtTime(0.2, t + 0.15);
+                gain2.gain.linearRampToValueAtTime(0, t + 0.25);
+                osc2.connect(gain2); gain2.connect(this.ctx.destination);
+                osc2.start(t + 0.15); osc2.stop(t + 0.25);
+            },
+            playZombieAttack: function() {
+                if(!this.ensureContext()) return;
+                const t = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(150, t);
+                osc.frequency.exponentialRampToValueAtTime(50, t + 0.1);
+                gain.gain.setValueAtTime(0.5, t);
+                gain.gain.exponentialRampToValueAtTime(0.01, t + 0.1);
+                osc.connect(gain); gain.connect(this.ctx.destination);
+                osc.start(); osc.stop(t+0.1);
+            },
+            playKnife: function() {
+                if(!this.ensureContext()) return;
+                
+                // 나이프 휘두르기 오디오 파일 사용, 없으면 기존 소리 생성
+                if(this.audioBuffers['sword']) {
+                    this.playAudioFile('sword', 0.8);
+                } else {
+                    // 기존 소리 생성 (폴백)
+                    const t = this.ctx.currentTime;
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(600, t);
+                    osc.frequency.exponentialRampToValueAtTime(100, t + 0.2);
+                    gain.gain.setValueAtTime(0.1, t);
+                    gain.gain.linearRampToValueAtTime(0, t + 0.2);
+                    osc.connect(gain); gain.connect(this.ctx.destination);
+                    osc.start(); osc.stop(t + 0.2);
+                }
+            },
+            playJump: function(land) {
+                if(!this.ensureContext()) return;
+                const t = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.frequency.setValueAtTime(100, t);
+                osc.frequency.exponentialRampToValueAtTime(50, t + 0.1);
+                gain.gain.setValueAtTime(land ? 0.2 : 0.1, t);
+                gain.gain.linearRampToValueAtTime(0, t + 0.1);
+                osc.connect(gain); gain.connect(this.ctx.destination);
+                osc.start(); osc.stop(t + 0.15);
+            },
+            playStep: function() {
+                if(!this.ensureContext()) return;
+                const t = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                const bufferSize = this.ctx.sampleRate * 0.1;
+                const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+                
+                const noise = this.ctx.createBufferSource();
+                noise.buffer = buffer;
+                
+                const filter = this.ctx.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.value = 150;
+
+                noise.connect(filter);
+                filter.connect(gain);
+                gain.connect(this.ctx.destination);
+                
+                gain.gain.setValueAtTime(0.3, t);
+                gain.gain.exponentialRampToValueAtTime(0.01, t + 0.1);
+                noise.start();
+            },
+            playReload: function() {
+                if(!this.ensureContext()) return;
+                
+                // 오디오 파일이 로드되어 있으면 사용, 없으면 기존 소리 생성
+                if(this.audioBuffers['reload']) {
+                    this.playAudioFile('reload', this.reloadVolume);
+                } else {
+                    // 기존 소리 생성 (폴백)
+                    const t = this.ctx.currentTime;
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(200, t);
+                    osc.frequency.exponentialRampToValueAtTime(50, t + 0.1);
+                    gain.gain.setValueAtTime(0.1, t);
+                    gain.gain.linearRampToValueAtTime(0, t + 0.1);
+                    osc.connect(gain); gain.connect(this.ctx.destination);
+                    osc.start(); osc.stop(t + 0.1);
+                }
+            },
+            playHeadshot: function() {
+                if(!this.ensureContext()) return;
+                const t = this.ctx.currentTime;
+                
+                // 깨지는 소리 - 노이즈 기반
+                const bufferSize = this.ctx.sampleRate * 0.15;
+                const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+                const data = buffer.getChannelData(0);
+                
+                // 깨지는 느낌의 노이즈 생성
+                for (let i = 0; i < bufferSize; i++) {
+                    const progress = i / bufferSize;
+                    // 깨지는 소리: 고주파 노이즈 + 급격한 감쇠
+                    const noise = (Math.random() * 2 - 1) * (1 - progress * 0.8);
+                    // 고주파 강조
+                    const highFreq = Math.sin(progress * Math.PI * 20) * 0.3;
+                    data[i] = noise * (1 - progress) + highFreq * (1 - progress);
+                }
+                
+                const noiseSource = this.ctx.createBufferSource();
+                noiseSource.buffer = buffer;
+                
+                // 고역 필터로 깨지는 느낌 강조
+                const filter = this.ctx.createBiquadFilter();
+                filter.type = 'highpass';
+                filter.frequency.setValueAtTime(2000, t);
+                filter.frequency.exponentialRampToValueAtTime(800, t + 0.15);
+                
+                const gain = this.ctx.createGain();
+                gain.gain.setValueAtTime(0.4, t);
+                gain.gain.exponentialRampToValueAtTime(0.01, t + 0.15);
+                
+                noiseSource.connect(filter);
+                filter.connect(gain);
+                gain.connect(this.ctx.destination);
+                
+                noiseSource.start(t);
+                noiseSource.stop(t + 0.15);
+                
+                // 추가 깨지는 소리 레이어
+                const osc = this.ctx.createOscillator();
+                const gain2 = this.ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(3000, t);
+                osc.frequency.exponentialRampToValueAtTime(500, t + 0.1);
+                gain2.gain.setValueAtTime(0.2, t);
+                gain2.gain.exponentialRampToValueAtTime(0.01, t + 0.1);
+                osc.connect(gain2);
+                gain2.connect(this.ctx.destination);
+                osc.start(t);
+                osc.stop(t + 0.1);
+            },
+            playHit: function() {
+                if(!this.ensureContext()) return;
+                const t = this.ctx.currentTime;
+                // 피격 사운드 - 짧고 날카로운 소리 (볼륨 약간 감소)
+                const osc1 = this.ctx.createOscillator();
+                const gain1 = this.ctx.createGain();
+                osc1.type = 'square';
+                osc1.frequency.setValueAtTime(800, t);
+                osc1.frequency.exponentialRampToValueAtTime(400, t + 0.05);
+                gain1.gain.setValueAtTime(0.12, t); // 0.2 -> 0.12 (볼륨 감소)
+                gain1.gain.exponentialRampToValueAtTime(0.01, t + 0.08);
+                osc1.connect(gain1); gain1.connect(this.ctx.destination);
+                osc1.start(); osc1.stop(t + 0.08);
+                
+                // 추가 타격음 (볼륨 약간 감소)
+                const osc2 = this.ctx.createOscillator();
+                const gain2 = this.ctx.createGain();
+                osc2.type = 'sawtooth';
+                osc2.frequency.setValueAtTime(200, t);
+                osc2.frequency.exponentialRampToValueAtTime(100, t + 0.1);
+                gain2.gain.setValueAtTime(0.09, t); // 0.15 -> 0.09 (볼륨 감소)
+                gain2.gain.exponentialRampToValueAtTime(0.01, t + 0.1);
+                osc2.connect(gain2); gain2.connect(this.ctx.destination);
+                osc2.start(); osc2.stop(t + 0.1);
+            },
+            playSwitch: function() {
+                if(!this.ensureContext()) return;
+                const t = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                // Mechanical Clank
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(100, t);
+                osc.frequency.linearRampToValueAtTime(50, t + 0.15);
+                gain.gain.setValueAtTime(0.2, t);
+                gain.gain.exponentialRampToValueAtTime(0.01, t + 0.15);
+                osc.connect(gain); gain.connect(this.ctx.destination);
+                osc.start(); osc.stop(t + 0.15);
+            },
+            playHealthPill: function() {
+                if(!this.ensureContext()) return;
+                const t = this.ctx.currentTime;
+                const osc1 = this.ctx.createOscillator();
+                const gain1 = this.ctx.createGain();
+                osc1.type = 'sine';
+                osc1.frequency.setValueAtTime(800, t);
+                osc1.frequency.exponentialRampToValueAtTime(1200, t + 0.2);
+                gain1.gain.setValueAtTime(0.3, t);
+                gain1.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+                osc1.connect(gain1); gain1.connect(this.ctx.destination);
+                osc1.start(); osc1.stop(t + 0.3);
+                
+                const osc2 = this.ctx.createOscillator();
+                const gain2 = this.ctx.createGain();
+                osc2.type = 'triangle';
+                osc2.frequency.setValueAtTime(600, t);
+                osc2.frequency.exponentialRampToValueAtTime(400, t + 0.2);
+                gain2.gain.setValueAtTime(0.2, t);
+                gain2.gain.exponentialRampToValueAtTime(0.01, t + 0.25);
+                osc2.connect(gain2); gain2.connect(this.ctx.destination);
+                osc2.start(); osc2.stop(t + 0.25);
+            }
+        };
+
+        // ============================================
+        // 볼륨 조절 방법:
+        // ============================================
+        // 
+        // 1. 재장전 볼륨 조절:
+            SoundGen.reloadVolume = 0.3; // 0.0 (무음) ~ 1.0 (최대)
+        //
+        // 2. 마스터 볼륨 조절 (모든 오디오 파일에 적용):
+        //    SoundGen.masterVolume = 0.7; // 0.0 (무음) ~ 1.0 (최대)
+        //
+        // 3. 브라우저 콘솔에서 실시간 조절:
+        //    개발자 도구(F12) > Console 탭에서:
+        //    SoundGen.reloadVolume = 0.3; // 재장전 소리만 작게
+        //    SoundGen.masterVolume = 0.5; // 모든 소리 작게
+        //
+        // ============================================
+        // 외부 오디오 파일 사용 예시:
+        // ============================================
+        // 
+        // 1. 오디오 파일 로드 (게임 시작 시 또는 필요할 때):
+        // SoundGen.loadAudioFile('sounds/shoot.mp3', 'shootSound')
+        //     .then(() => console.log('Sound loaded!'))
+        //     .catch(err => console.error('Failed to load sound:', err));
+        //
+        // 2. 로드된 오디오 파일 재생:
+        // SoundGen.playAudioFile('shootSound', 0.8); // 볼륨 0.8로 재생
+        //
+        // 3. 여러 오디오 파일 동시 로드:
+        // Promise.all([
+        //     SoundGen.loadAudioFile('sounds/shoot.mp3', 'shoot'),
+        //     SoundGen.loadAudioFile('sounds/reload.mp3', 'reload'),
+        //     SoundGen.loadAudioFile('sounds/hit.mp3', 'hit')
+        // ]).then(() => console.log('All sounds loaded!'));
+        //
+        // 4. 기존 함수를 오디오 파일로 대체하려면:
+        // playShoot: function(type) {
+        //     // 기존 코드 대신:
+        //     SoundGen.playAudioFile('shootSound', 1.0);
+        // }
+
+        window.onload = init;
+
+        function init() {
+            scene = new THREE.Scene();
+            const fogColor = 0x10151a;
+            scene.background = new THREE.Color(fogColor);
+            scene.fog = new THREE.FogExp2(fogColor, 0.025);
+
+            camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.005, 1000);
+
+            const ambient = new THREE.AmbientLight(0xffffff, 0.4); 
+            scene.add(ambient);
+            const ceilingLight = new THREE.PointLight(0xffaa00, 0.8, 30);
+            ceilingLight.position.set(0, 10, 0);
+            ceilingLight.castShadow = true;
+            scene.add(ceilingLight);
+            const blueLight = new THREE.DirectionalLight(0x4455ff, 0.5);
+            blueLight.position.set(-10, 5, -10);
+            scene.add(blueLight);
+
+            // 확장 기능 초기화 (맵 생성 전에 텍스처 시스템을 먼저 초기화)
+            try {
+                initTextureSystem();
+                initModelLoader();
+                initPhysics();
+            } catch (error) {
+                console.warn('Some extension features failed to initialize:', error);
+            }
+
+            createFactoryMap();
+
+            weaponContainer = new THREE.Group();
+            scene.add(weaponContainer);
+            weaponModel = new THREE.Group();
+            weaponContainer.add(weaponModel);
+
+            shellGeo = new THREE.CylinderGeometry(0.005, 0.005, 0.025, 6);
+            shellGeo.rotateX(Math.PI / 2); 
+            shellMat = new THREE.MeshStandardMaterial({ color: 0xFFD700, metalness: 1.0, roughness: 0.3 });
+
+            buildWeapon(0);
+            updateUI();
+
+            for(let i=0; i<6; i++) createEnemyAI();
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            document.getElementById('game-container').appendChild(renderer.domElement);
+            
+            // 후처리 효과 초기화 (활성화)
+            try {
+                initPostProcessing();
+            } catch (error) {
+                console.warn('Post-processing initialization failed:', error);
+                usePostProcessing = false;
+            }
+
+            window.addEventListener('resize', onResize);
+            document.addEventListener('contextmenu', e => e.preventDefault());
+
+            document.body.addEventListener('mousedown', () => {
+                if(!SoundGen.ctx) SoundGen.init();
+                if(SoundGen.ctx.state === 'suspended') SoundGen.ctx.resume();
+                
+                // 재장전 오디오 파일 로드
+                SoundGen.loadAudioFile('reload1.mp3', 'reload')
+                    .catch(err => console.warn('Failed to load reload sound:', err));
+                
+                // 저격총 발사 오디오 파일 로드
+                SoundGen.loadAudioFile('rifle.mp3', 'rifle')
+                    .catch(err => console.warn('Failed to load rifle sound:', err));
+                
+                // 나이프 휘두르기 오디오 파일 로드
+                SoundGen.loadAudioFile('sword.mp3', 'sword')
+                    .catch(err => console.warn('Failed to load sword sound:', err));
+                
+                // 나이프 교체 오디오 파일 로드
+                SoundGen.loadAudioFile('c-sword.mp3', 'c-sword')
+                    .catch(err => console.warn('Failed to load c-sword sound:', err));
+                
+                // 소총 교체 오디오 파일 로드
+                SoundGen.loadAudioFile('c-sochong.mp3', 'c-sochong')
+                    .catch(err => console.warn('Failed to load c-sochong sound:', err));
+                
+                // 권총 교체 오디오 파일 로드
+                SoundGen.loadAudioFile('c-gun.mp3', 'c-gun')
+                    .catch(err => console.warn('Failed to load c-gun sound:', err));
+                
+                // 저격총 교체 오디오 파일 로드
+                SoundGen.loadAudioFile('c-rifle.mp3', 'c-rifle')
+                    .catch(err => console.warn('Failed to load c-rifle sound:', err));
+                
+                // 빈 격발 오디오 파일 로드
+                SoundGen.loadAudioFile('empty.mp3', 'empty')
+                    .catch(err => console.warn('Failed to load empty sound:', err));
+                
+                // 권총 발사 오디오 파일 로드
+                SoundGen.loadAudioFile('gunshot.mp3', 'gunshot')
+                    .catch(err => console.warn('Failed to load gunshot sound:', err));
+            }, {once:true});
+
+            document.getElementById('restart-btn').addEventListener('click', restartGame);
+
+            setupControls();
+            animate();
+        }
+
+        // --- 텍스처 시스템 초기화 ---
+        function initTextureSystem() {
+            textureLoader = new THREE.TextureLoader();
+            
+            // 절차적 텍스처 생성 (파일 없이 사용 가능)
+            // Canvas를 사용한 간단한 텍스처 생성
+            const canvas = document.createElement('canvas');
+            canvas.width = 256;
+            canvas.height = 256;
+            const ctx = canvas.getContext('2d');
+            
+            // 콘크리트 텍스처 패턴
+            ctx.fillStyle = '#333333';
+            ctx.fillRect(0, 0, 256, 256);
+            for(let i = 0; i < 1000; i++) {
+                ctx.fillStyle = `rgba(${100 + Math.random() * 50}, ${100 + Math.random() * 50}, ${100 + Math.random() * 50}, 0.3)`;
+                ctx.fillRect(Math.random() * 256, Math.random() * 256, 2, 2);
+            }
+            window.concreteTexture = new THREE.CanvasTexture(canvas);
+            window.concreteTexture.wrapS = THREE.RepeatWrapping;
+            window.concreteTexture.wrapT = THREE.RepeatWrapping;
+            window.concreteTexture.repeat.set(4, 4);
+            
+            // 메탈 텍스처 패턴
+            const metalCanvas = document.createElement('canvas');
+            metalCanvas.width = 256;
+            metalCanvas.height = 256;
+            const metalCtx = metalCanvas.getContext('2d');
+            const gradient = metalCtx.createLinearGradient(0, 0, 256, 256);
+            gradient.addColorStop(0, '#556677');
+            gradient.addColorStop(0.5, '#778899');
+            gradient.addColorStop(1, '#445566');
+            metalCtx.fillStyle = gradient;
+            metalCtx.fillRect(0, 0, 256, 256);
+            window.metalTexture = new THREE.CanvasTexture(metalCanvas);
+            window.metalTexture.wrapS = THREE.RepeatWrapping;
+            window.metalTexture.wrapT = THREE.RepeatWrapping;
+        }
+
+        // --- 3D 모델 로더 초기화 (GLTF 파일 로딩) ---
+        function initModelLoader() {
+            // GLTFLoader는 Three.js 예제 파일이 필요하지만,
+            // 기본 구조와 사용법을 제공합니다.
+            
+            // 사용 예제:
+            // 1. Three.js examples 폴더에서 GLTFLoader.js 다운로드
+            // 2. 로컬 파일로 추가: script 태그로 GLTFLoader.js 포함
+            // 3. loadGLTFModel('model.gltf', (model) => { scene.add(model); });
+            
+            console.log('Model loader system ready (GLTFLoader.js file required)');
+        }
+
+        // --- 3D 모델 로드 함수 ---
+        function loadGLTFModel(url, callback, onError) {
+            // GLTFLoader 사용 예제 함수
+            // 실제 사용하려면 GLTFLoader.js 파일이 필요합니다
+            
+            if (typeof THREE.GLTFLoader !== 'undefined') {
+                if (!gltfLoader) {
+                    gltfLoader = new THREE.GLTFLoader();
+                }
+                gltfLoader.load(
+                    url,
+                    (gltf) => {
+                        callback(gltf.scene);
+                    },
+                    undefined,
+                    (error) => {
+                        console.error('Error loading GLTF model:', error);
+                        if (onError) onError(error);
+                    }
+                );
+            } else {
+                console.warn('GLTFLoader not available. Please include GLTFLoader.js');
+                if (onError) onError(new Error('GLTFLoader not available'));
+            }
+        }
+
+        // --- 절차적 3D 모델 생성 함수 (GLTF 없이 사용 가능) ---
+        function createProceduralModel(type, options = {}) {
+            // GLTF 파일 없이 절차적으로 모델을 생성하는 함수
+            const group = new THREE.Group();
+            
+            switch(type) {
+                case 'crate':
+                    const size = options.size || 1;
+                    const crateGeo = new THREE.BoxGeometry(size, size, size);
+                    const crateMat = new THREE.MeshStandardMaterial({ 
+                        color: options.color || 0x8B4513,
+                        roughness: 0.8
+                    });
+                    const crate = new THREE.Mesh(crateGeo, crateMat);
+                    group.add(crate);
+                    break;
+                    
+                case 'barrel':
+                    const radius = options.radius || 0.5;
+                    const height = options.height || 1;
+                    const barrelGeo = new THREE.CylinderGeometry(radius, radius, height, 16);
+                    const barrelMat = new THREE.MeshStandardMaterial({ 
+                        color: options.color || 0x654321,
+                        roughness: 0.7
+                    });
+                    const barrel = new THREE.Mesh(barrelGeo, barrelMat);
+                    group.add(barrel);
+                    break;
+            }
+            
+            return group;
+        }
+
+        // --- 간단한 물리 엔진 구현 (외부 라이브러리 없이) ---
+        const physicsBodies = []; // 물리 바디 배열
+        
+        function initPhysics() {
+            // 간단한 물리 시스템 초기화
+            physicsWorld = {
+                gravity: new THREE.Vector3(0, -9.82, 0),
+                bodies: []
+            };
+            usePhysics = true;
+            console.log('Simple physics system initialized');
+        }
+
+        // --- 물리 바디 생성 함수 ---
+        function createPhysicsBody(mesh, mass = 1, useGravity = true) {
+            if (!usePhysics) return null;
+            
+            const body = {
+                mesh: mesh,
+                velocity: new THREE.Vector3(0, 0, 0),
+                mass: mass,
+                useGravity: useGravity,
+                position: mesh.position.clone(),
+                active: true
+            };
+            
+            physicsWorld.bodies.push(body);
+            return body;
+        }
+
+        // --- 물리 업데이트 함수 ---
+        function updatePhysics(dt) {
+            if (!usePhysics || !physicsWorld) return;
+            
+            for (let i = 0; i < physicsWorld.bodies.length; i++) {
+                const body = physicsWorld.bodies[i];
+                if (!body.active) continue;
+                
+                // 중력 적용
+                if (body.useGravity && body.mass > 0) {
+                    body.velocity.y += physicsWorld.gravity.y * dt;
+                }
+                
+                // 속도로 위치 업데이트
+                body.position.x += body.velocity.x * dt;
+                body.position.y += body.velocity.y * dt;
+                body.position.z += body.velocity.z * dt;
+                
+                // 메시 위치 동기화
+                body.mesh.position.copy(body.position);
+                
+                // 바닥 충돌 (간단한 예제)
+                if (body.position.y < 0.5) {
+                    body.position.y = 0.5;
+                    body.velocity.y = 0;
+                }
+                
+                // 공기 저항
+                body.velocity.multiplyScalar(0.98);
+            }
+        }
+
+        // --- 간단한 후처리 효과 구현 (WebGL 쉐이더 사용) ---
+        let postProcessingCanvas, postProcessingCtx;
+        let postProcessingEnabled = false;
+        
+        function initPostProcessing() {
+            try {
+                // Canvas를 사용한 간단한 후처리 효과
+                postProcessingCanvas = document.createElement('canvas');
+                postProcessingCanvas.width = window.innerWidth;
+                postProcessingCanvas.height = window.innerHeight;
+                postProcessingCtx = postProcessingCanvas.getContext('2d');
+                
+                // 후처리 효과 변수 (게임 분위기에 맞게 조정)
+                window.postProcessingEffects = {
+                    brightness: 1.1,      // 약간 밝게
+                    contrast: 1.05,       // 약간 대비 증가
+                    saturation: 1.1,     // 약간 채도 증가
+                    vignette: 0.2        // 약한 비네팅 효과
+                };
+                
+                usePostProcessing = true;
+                postProcessingEnabled = true;
+                console.log('Post-processing system initialized with enhanced quality');
+            } catch (error) {
+                console.warn('Post-processing initialization failed:', error);
+                usePostProcessing = false;
+            }
+        }
+
+        // --- 후처리 효과 적용 함수 ---
+        function applyPostProcessing() {
+            if (!usePostProcessing || !postProcessingEnabled) return;
+            
+            const effects = window.postProcessingEffects;
+            if (!effects) return;
+            
+            // 전체 장면의 밝기 조정 (더 부드러운 효과)
+            scene.traverse((object) => {
+                if (object.isMesh && object.material) {
+                    // emissive를 사용한 간접적인 밝기 조정
+                    if (object.material.emissive && effects.brightness !== 1.0) {
+                        const baseEmissive = object.userData.baseEmissive || new THREE.Color(0x000000);
+                        if (!object.userData.baseEmissive) {
+                            object.userData.baseEmissive = object.material.emissive.clone();
+                        }
+                        object.material.emissive.copy(baseEmissive).multiplyScalar(effects.brightness * 0.1);
+                    }
+                }
+            });
+        }
+
+        // --- Map with Collision ---
+        function createFactoryMap() {
+            colliders = []; // Init array
+
+            // 텍스처 적용 (절차적 생성된 텍스처 사용)
+            const matConcrete = new THREE.MeshStandardMaterial({ 
+                color: 0x333333, 
+                roughness: 0.9,
+                map: window.concreteTexture || null // 텍스처 적용 (있는 경우)
+            });
+            const matMetal = new THREE.MeshStandardMaterial({ 
+                color: 0x556677, 
+                roughness: 0.4, 
+                metalness: 0.7,
+                map: window.metalTexture || null // 메탈 텍스처 적용
+            });
+            // Rust 텍스처 생성
+            const rustCanvas = document.createElement('canvas');
+            rustCanvas.width = 256;
+            rustCanvas.height = 256;
+            const rustCtx = rustCanvas.getContext('2d');
+            rustCtx.fillStyle = '#885544';
+            rustCtx.fillRect(0, 0, 256, 256);
+            for(let i = 0; i < 500; i++) {
+                rustCtx.fillStyle = `rgba(${100 + Math.random() * 30}, ${60 + Math.random() * 20}, ${40 + Math.random() * 15}, 0.5)`;
+                rustCtx.fillRect(Math.random() * 256, Math.random() * 256, 3, 3);
+            }
+            window.rustTexture = new THREE.CanvasTexture(rustCanvas);
+            window.rustTexture.wrapS = THREE.RepeatWrapping;
+            window.rustTexture.wrapT = THREE.RepeatWrapping;
+            
+            const matRust = new THREE.MeshStandardMaterial({ 
+                color: 0x885544, 
+                roughness: 0.8, 
+                metalness: 0.2,
+                map: window.rustTexture || null
+            });
+            const matWall = new THREE.MeshStandardMaterial({ 
+                color: 0x20252a, 
+                roughness: 0.9,
+                map: window.concreteTexture || null // 벽에도 콘크리트 텍스처 적용
+            });
+
+            const floor = new THREE.Mesh(new THREE.PlaneGeometry(100, 100), matConcrete);
+            floor.rotation.x = -Math.PI / 2;
+            floor.receiveShadow = true;
+            scene.add(floor);
+
+            function addBoxCollider(mesh) {
+                const box = new THREE.Box3().setFromObject(mesh);
+                colliders.push(box);
+            }
+
+            const pillarGeo = new THREE.BoxGeometry(1, 10, 1);
+            for(let x = -20; x <= 20; x += 10) {
+                for(let z = -20; z <= 20; z += 10) {
+                    if (x === 0 && z === 0) continue;
+                    const pillar = new THREE.Mesh(pillarGeo, matMetal);
+                    pillar.position.set(x, 5, z);
+                    pillar.castShadow = true;
+                    pillar.receiveShadow = true;
+                    scene.add(pillar);
+                    addBoxCollider(pillar);
+                }
+            }
+
+            const beamGeo = new THREE.BoxGeometry(100, 0.5, 0.5);
+            for(let z = -20; z <= 20; z += 5) {
+                const beam = new THREE.Mesh(beamGeo, matMetal);
+                beam.position.set(0, 9, z);
+                scene.add(beam);
+            }
+
+            const wallGeo = new THREE.BoxGeometry(100, 20, 1);
+            const createWall = (x, y, z, rotY) => {
+                const w = new THREE.Mesh(wallGeo, matWall);
+                w.position.set(x, y, z);
+                if(rotY) w.rotation.y = rotY;
+                scene.add(w);
+                addBoxCollider(w);
+            };
+            createWall(0, 5, -25, 0);
+            createWall(0, 5, 25, 0);
+            createWall(-25, 5, 0, Math.PI/2);
+            createWall(25, 5, 0, Math.PI/2);
+
+            // 기존 박스들
+            const boxGeo = new THREE.BoxGeometry(2, 2, 2);
+            const boxPos = [{x:-5,z:-5},{x:5,z:5},{x:-8,z:8},{x:8,z:-8},{x:-2,z:12},{x:12,z:-2}];
+            boxPos.forEach(p => {
+                const box = new THREE.Mesh(boxGeo, matRust);
+                box.position.set(p.x, 1, p.z);
+                box.castShadow = true;
+                box.receiveShadow = true;
+                scene.add(box);
+                addBoxCollider(box);
+            });
+            
+            // 절차적 모델 추가 (crate, barrel) - 게임 퀄리티 향상
+            const cratePositions = [
+                {x: -10, z: -10}, {x: 10, z: 10}, {x: -15, z: 5}, 
+                {x: 15, z: -5}, {x: -3, z: 15}, {x: 3, z: -15}
+            ];
+            cratePositions.forEach(p => {
+                const crate = createProceduralModel('crate', { size: 1.5, color: 0x8B4513 });
+                crate.position.set(p.x, 0.75, p.z);
+                crate.castShadow = true;
+                crate.receiveShadow = true;
+                scene.add(crate);
+                addBoxCollider(crate);
+                
+                // 물리 바디 추가 (선택적)
+                if (usePhysics) {
+                    createPhysicsBody(crate, 0, false); // 정적 객체
+                }
+            });
+            
+            const barrelPositions = [
+                {x: -12, z: 8}, {x: 12, z: -8}, {x: -7, z: -12},
+                {x: 7, z: 12}, {x: 0, z: 18}
+            ];
+            barrelPositions.forEach(p => {
+                const barrel = createProceduralModel('barrel', { radius: 0.6, height: 1.2, color: 0x654321 });
+                barrel.position.set(p.x, 0.6, p.z);
+                barrel.castShadow = true;
+                barrel.receiveShadow = true;
+                scene.add(barrel);
+                
+                // 원통형 충돌 박스 (간단한 박스로 근사)
+                const barrelCollider = new THREE.Box3().setFromCenterAndSize(
+                    new THREE.Vector3(p.x, 0.6, p.z),
+                    new THREE.Vector3(1.2, 1.2, 1.2)
+                );
+                colliders.push(barrelCollider);
+                
+                // 물리 바디 추가
+                if (usePhysics) {
+                    createPhysicsBody(barrel, 0, false);
+                }
+            });
+        }
+
+        // --- Weapon Building ---
+        function buildWeapon(idx) {
+            while(weaponModel.children.length > 0) weaponModel.remove(weaponModel.children[0]);
+            
+            const wData = WEAPONS[idx];
+            if(wData.type === 'RIFLE') buildRifle();
+            else if(wData.type === 'PISTOL') buildPistol();
+            else if(wData.type === 'KNIFE') buildKnife();
+            else if(wData.type === 'SNIPER') buildSniper();
+
+            if(wData.type !== 'KNIFE') {
+                const fGeo = new THREE.PlaneGeometry(0.5, 0.5);
+                const fMat = new THREE.MeshBasicMaterial({ color: 0xffdd88, transparent: true, opacity: 0, side: THREE.DoubleSide });
+                muzzleFlash = new THREE.Mesh(fGeo, fMat);
+                muzzleFlash.visible = false;
+                let zPos = -0.65;
+                if(wData.type === 'PISTOL') zPos = -0.25;
+                if(wData.type === 'SNIPER') zPos = -0.85;
+                const yPos = (wData.type === 'PISTOL') ? 0.045 : 0.02;
+                muzzleFlash.position.set(0, yPos, zPos);
+                weaponModel.add(muzzleFlash);
+            }
+        }
+
+        function buildRifle() {
+            // 리시버 (본체)
+            const receiver = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.06, 0.3), matBody);
+            weaponModel.add(receiver);
+            
+            // 배럴 (더 상세하게)
+            const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.01, 0.01, 0.5, 16), matBody);
+            barrel.rotation.x = Math.PI/2; barrel.position.set(0, 0.015, -0.4);
+            weaponModel.add(barrel);
+            
+            // 배럴 가드 (Barrel Guard) - 배럴 보호대
+            const barrelGuard = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.4, 16), matParts);
+            barrelGuard.rotation.x = Math.PI/2; barrelGuard.position.set(0, 0.015, -0.35);
+            weaponModel.add(barrelGuard);
+            
+            // 가스 블록 (Gas Block)
+            const gasBlock = new THREE.Mesh(new THREE.BoxGeometry(0.025, 0.025, 0.03), matSilver);
+            gasBlock.position.set(0, 0.015, -0.2);
+            weaponModel.add(gasBlock);
+            
+            // 탄창 (Magazine)
+            const mag = new THREE.Mesh(new THREE.BoxGeometry(0.035, 0.18, 0.06), matParts);
+            mag.rotation.x = 0.25; mag.position.set(0, -0.1, 0.05);
+            weaponModel.add(mag);
+            
+            // 탄창 클립 디테일
+            const magClip = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.02, 0.07), matSilver);
+            magClip.position.set(0, -0.18, 0.05);
+            weaponModel.add(magClip);
+            
+            // 개머리판 (Stock)
+            const stock = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.1, 0.2), matParts);
+            stock.position.set(0, -0.02, 0.25);
+            weaponModel.add(stock);
+            
+            // 개머리판 패드
+            const stockPad = new THREE.Mesh(new THREE.BoxGeometry(0.042, 0.12, 0.03), matParts);
+            stockPad.position.set(0, -0.02, 0.36);
+            weaponModel.add(stockPad);
+            
+            // 핸드가드 (Handguard)
+            const hg = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.06, 0.25), matParts);
+            hg.position.set(0, 0.005, -0.28);
+            weaponModel.add(hg);
+            
+            // 핸드가드 라일 (Rail) - 상단
+            const railTop = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.01, 0.2), matSilver);
+            railTop.position.set(0, 0.04, -0.28);
+            weaponModel.add(railTop);
+            
+            // 트리거 가드 (Trigger Guard)
+            const triggerGuard = new THREE.Mesh(new THREE.TorusGeometry(0.02, 0.003, 8, 16), matParts);
+            triggerGuard.rotation.x = Math.PI/2; triggerGuard.position.set(0, -0.05, 0.08);
+            weaponModel.add(triggerGuard);
+            
+            // 트리거 (Trigger)
+            const trigger = new THREE.Mesh(new THREE.BoxGeometry(0.008, 0.015, 0.02), matParts);
+            trigger.position.set(0, -0.06, 0.08);
+            weaponModel.add(trigger);
+            
+            // 볼트 핸들 (Bolt Handle)
+            const boltHandle = new THREE.Mesh(new THREE.BoxGeometry(0.008, 0.008, 0.03), matSilver);
+            boltHandle.position.set(0.025, 0.03, 0.1);
+            weaponModel.add(boltHandle);
+            
+            // 가늠자 (Rear Sight) - 더 상세하게
+            const rs = new THREE.Mesh(new THREE.TorusGeometry(0.012, 0.003, 8, 16), matParts);
+            rs.position.set(0, 0.062, 0.14);
+            weaponModel.add(rs);
+            
+            // 가늠쇠 (Front Sight) - 빨간 점
+            const fs = new THREE.Mesh(new THREE.BoxGeometry(0.0025, 0.0025, 0.0025), matSight);
+            fs.position.set(0, 0.0621, -0.45);
+            fs.userData.isSight = true;
+            weaponModel.add(fs);
+            
+            // 가늠쇠 기둥
+            const fsPost = new THREE.Mesh(new THREE.BoxGeometry(0.002, 0.015, 0.002), matParts);
+            fsPost.position.set(0, 0.055, -0.45);
+            weaponModel.add(fsPost);
+            
+            // 가늠쇠 베이스
+            const fsBase = new THREE.Mesh(new THREE.BoxGeometry(0.008, 0.003, 0.008), matParts);
+            fsBase.position.set(0, 0.048, -0.45);
+            weaponModel.add(fsBase);
+
+            createArm(-0.1, -0.15, -0.2, 0.5, 0.5, -0.2, false);
+            createArm(0.12, -0.15, 0.22, 0.2, -0.2, 0.4, true);
+        }
+
+        function buildSniper() {
+            // 리시버 (본체)
+            const receiver = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.07, 0.4), matBody);
+            weaponModel.add(receiver);
+            
+            // 배럴 (더 상세하게)
+            const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.8, 16), matBody);
+            barrel.rotation.x = Math.PI/2; barrel.position.set(0, 0.015, -0.6);
+            weaponModel.add(barrel);
+            
+            // 머즐 브레이크 (Muzzle Brake) - 더 상세하게
+            const brake = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.015, 0.08, 16), matSilver);
+            brake.rotation.x = Math.PI/2; brake.position.set(0, 0.015, -1.0);
+            weaponModel.add(brake);
+            
+            // 머즐 브레이크 구멍들
+            for(let i = 0; i < 3; i++) {
+                const hole = new THREE.Mesh(new THREE.CylinderGeometry(0.003, 0.003, 0.1, 8), matBody);
+                hole.rotation.x = Math.PI/2;
+                hole.rotation.z = (i - 1) * 0.3;
+                hole.position.set(0, 0.015 + (i - 1) * 0.01, -1.0);
+                weaponModel.add(hole);
+            }
+            
+            // 스코프 몸체 (Scope Body)
+            const scopeBody = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.03, 0.25, 16), matParts);
+            scopeBody.rotation.x = Math.PI/2; scopeBody.position.set(0, 0.075, 0);
+            weaponModel.add(scopeBody);
+            
+            // 스코프 링 (Scope Rings)
+            const scopeRing1 = new THREE.Mesh(new THREE.TorusGeometry(0.025, 0.003, 8, 16), matSilver);
+            scopeRing1.rotation.x = Math.PI/2; scopeRing1.position.set(0, 0.075, -0.1);
+            weaponModel.add(scopeRing1);
+            const scopeRing2 = new THREE.Mesh(new THREE.TorusGeometry(0.025, 0.003, 8, 16), matSilver);
+            scopeRing2.rotation.x = Math.PI/2; scopeRing2.position.set(0, 0.075, 0.1);
+            weaponModel.add(scopeRing2);
+            
+            // 스코프 렌즈 (전면)
+            const lensF = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.028, 0.01, 16), matParts);
+            lensF.rotation.x = Math.PI/2; lensF.position.set(0, 0.075, -0.13);
+            weaponModel.add(lensF);
+            
+            // 스코프 유리 (후면)
+            const glass = new THREE.Mesh(new THREE.CircleGeometry(0.02, 16), matLens);
+            glass.position.set(0, 0.075, 0.13); 
+            weaponModel.add(glass);
+            
+            // 조정 노브 (Adjustment Knobs)
+            const knob1 = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.015, 8), matSilver);
+            knob1.rotation.x = Math.PI/2; knob1.position.set(0.03, 0.075, 0);
+            weaponModel.add(knob1);
+            const knob2 = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.015, 8), matSilver);
+            knob2.rotation.x = Math.PI/2; knob2.position.set(-0.03, 0.075, 0);
+            weaponModel.add(knob2);
+            
+            // 볼트 (Bolt)
+            const bolt = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.02, 0.02), matSilver);
+            bolt.position.set(0.04, 0.02, 0.1);
+            weaponModel.add(bolt);
+            
+            // 볼트 핸들
+            const boltHandle = new THREE.Mesh(new THREE.CylinderGeometry(0.005, 0.005, 0.03, 8), matSilver);
+            boltHandle.rotation.x = Math.PI/2; boltHandle.position.set(0.06, 0.02, 0.1);
+            weaponModel.add(boltHandle);
+            
+            // 개머리판 (Stock)
+            const stock = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.12, 0.25), matParts);
+            stock.position.set(0, -0.02, 0.3);
+            weaponModel.add(stock);
+            
+            // 개머리판 체크 레스트
+            const cheekRest = new THREE.Mesh(new THREE.BoxGeometry(0.047, 0.04, 0.15), matParts);
+            cheekRest.position.set(0, 0.05, 0.25);
+            weaponModel.add(cheekRest);
+            
+            // 개머리판 패드
+            const stockPad = new THREE.Mesh(new THREE.BoxGeometry(0.047, 0.14, 0.03), matParts);
+            stockPad.position.set(0, -0.02, 0.42);
+            weaponModel.add(stockPad);
+            
+            // 바이포드 (Bipod) - 더 상세하게
+            const bipodBase = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.04, 0.15), matParts);
+            bipodBase.position.set(0, -0.05, -0.4);
+            weaponModel.add(bipodBase);
+            
+            // 바이포드 다리들
+            const bipodLeg1 = new THREE.Mesh(new THREE.BoxGeometry(0.005, 0.15, 0.005), matSilver);
+            bipodLeg1.position.set(-0.015, -0.13, -0.4);
+            bipodLeg1.rotation.z = 0.3;
+            weaponModel.add(bipodLeg1);
+            const bipodLeg2 = new THREE.Mesh(new THREE.BoxGeometry(0.005, 0.15, 0.005), matSilver);
+            bipodLeg2.position.set(0.015, -0.13, -0.4);
+            bipodLeg2.rotation.z = -0.3;
+            weaponModel.add(bipodLeg2);
+            
+            // 트리거 가드
+            const triggerGuard = new THREE.Mesh(new THREE.TorusGeometry(0.02, 0.003, 8, 16), matParts);
+            triggerGuard.rotation.x = Math.PI/2; triggerGuard.position.set(0, -0.05, 0.08);
+            weaponModel.add(triggerGuard);
+            
+            // 트리거
+            const trigger = new THREE.Mesh(new THREE.BoxGeometry(0.008, 0.015, 0.02), matParts);
+            trigger.position.set(0, -0.06, 0.08);
+            weaponModel.add(trigger);
+
+            createArm(-0.1, -0.15, -0.2, 0.5, 0.5, -0.2, false);
+            createArm(0.12, -0.15, 0.25, 0.2, -0.2, 0.4, true);
+        }
+
+        function buildPistol() {
+            // 슬라이드 (Slide) - 더 상세하게
+            const slide = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.04, 0.18), matSilver);
+            slide.position.y = 0.02;
+            weaponModel.add(slide);
+            
+            // 슬라이드 세리레이션 (Serrations)
+            for(let i = 0; i < 8; i++) {
+                const serration = new THREE.Mesh(new THREE.BoxGeometry(0.001, 0.01, 0.02), matBody);
+                serration.position.set(0, 0.02, 0.05 - i * 0.015);
+                weaponModel.add(serration);
+            }
+            
+            // 배럴
+            const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.006, 0.15, 12), matBody);
+            barrel.rotation.x = Math.PI/2; barrel.position.set(0, 0.02, -0.08);
+            weaponModel.add(barrel);
+            
+            // 프레임 (Frame)
+            const frame = new THREE.Mesh(new THREE.BoxGeometry(0.028, 0.08, 0.12), matBody);
+            frame.position.set(0, -0.02, 0.03);
+            weaponModel.add(frame);
+            
+            // 그립 (Grip) - 더 상세하게
+            const grip = new THREE.Mesh(new THREE.BoxGeometry(0.028, 0.1, 0.05), matParts);
+            grip.position.set(0, -0.04, 0.05); grip.rotation.x = 0.1;
+            weaponModel.add(grip);
+            
+            // 그립 텍스처 (패턴)
+            for(let i = 0; i < 3; i++) {
+                for(let j = 0; j < 2; j++) {
+                    const gripDot = new THREE.Mesh(new THREE.CylinderGeometry(0.002, 0.002, 0.01, 8), matParts);
+                    gripDot.rotation.x = Math.PI/2;
+                    gripDot.position.set((j - 0.5) * 0.015, -0.04 + i * 0.03, 0.05);
+                    weaponModel.add(gripDot);
+                }
+            }
+            
+            // 해머 (Hammer)
+            const hammer = new THREE.Mesh(new THREE.BoxGeometry(0.008, 0.015, 0.01), matSilver);
+            hammer.position.set(0, 0.01, 0.1);
+            hammer.rotation.x = 0.3;
+            weaponModel.add(hammer);
+            
+            // 트리거 가드 (Trigger Guard)
+            const triggerGuard = new THREE.Mesh(new THREE.TorusGeometry(0.015, 0.003, 8, 16), matParts);
+            triggerGuard.rotation.x = Math.PI/2; triggerGuard.position.set(0, -0.05, 0.08);
+            weaponModel.add(triggerGuard);
+            
+            // 트리거 (Trigger)
+            const trigger = new THREE.Mesh(new THREE.BoxGeometry(0.006, 0.012, 0.015), matParts);
+            trigger.position.set(0, -0.06, 0.08);
+            weaponModel.add(trigger);
+            
+            // 가늠자 (Rear Sight) - ㄷ자 형태
+            const rsBase = new THREE.Mesh(new THREE.BoxGeometry(0.022, 0.003, 0.008), matParts);
+            rsBase.position.set(0, 0.048, 0.08);
+            weaponModel.add(rsBase);
+            // 왼쪽 기둥
+            const rsL = new THREE.Mesh(new THREE.BoxGeometry(0.01, 0.015, 0.005), matParts);
+            rsL.position.set(-0.01, 0.048, 0.08); 
+            weaponModel.add(rsL);
+            // 오른쪽 기둥
+            const rsR = new THREE.Mesh(new THREE.BoxGeometry(0.01, 0.015, 0.005), matParts);
+            rsR.position.set(0.01, 0.048, 0.08);
+            weaponModel.add(rsR);
+            
+            // 가늠쇠 (Front Sight) - 빨간 점
+            const fsPost = new THREE.Mesh(new THREE.BoxGeometry(0.003, 0.012, 0.003), matParts);
+            fsPost.position.set(0, 0.045, -0.09);
+            weaponModel.add(fsPost);
+            const fsDot = new THREE.Mesh(new THREE.BoxGeometry(0.003, 0.003, 0.001), matSight);
+            fsDot.position.set(0, 0.0482, -0.09);
+            fsDot.userData.isSight = true;
+            weaponModel.add(fsDot);
+            
+            // 탄창 (Magazine)
+            const magazine = new THREE.Mesh(new THREE.BoxGeometry(0.025, 0.08, 0.04), matParts);
+            magazine.position.set(0, -0.08, 0.05);
+            weaponModel.add(magazine);
+            
+            // 탄창 바닥 플레이트
+            const magPlate = new THREE.Mesh(new THREE.BoxGeometry(0.027, 0.01, 0.042), matSilver);
+            magPlate.position.set(0, -0.12, 0.05);
+            weaponModel.add(magPlate);
+
+            const lArm = createArm(-0.05, -0.15, 0.1, 0.1, 0.8, -0.1, false);
+            lArm.rotation.y = -0.1;
+            const rArm = createArm(0.05, -0.15, 0.1, 0.1, -0.8, 0.1, true);
+            rArm.rotation.y = 0.1;
+        }
+
+        function buildKnife() {
+            const knifeGroup = new THREE.Group();
+            
+            // === 핸들 (그립) - 더 현실적이고 세밀하게 ===
+            const handleLength = 0.13;
+            const handleWidth = 0.032;
+            const handleHeight = 0.045;
+            
+            // 핸들 메인 바디 (타원형에 가깝게)
+            const handleGeo = new THREE.BoxGeometry(handleWidth, handleHeight, handleLength);
+            const handle = new THREE.Mesh(handleGeo, matHandle);
+            handle.position.set(0, -0.02, handleLength/2 - 0.01);
+            knifeGroup.add(handle);
+            
+            // 핸들 그립 텍스처 (더 많은 디테일, 6개로 증가)
+            for(let i = 0; i < 6; i++) {
+                const grip = new THREE.Mesh(
+                    new THREE.BoxGeometry(handleWidth + 0.003, handleHeight * 0.6, 0.015), 
+                    matHandle
+                );
+                grip.position.set(0, -0.01, 0.005 + i * 0.02);
+                knifeGroup.add(grip);
+            }
+            
+            // 핸들 리벳 (3개로 증가, 더 현실적으로)
+            for(let i = 0; i < 3; i++) {
+                const rivet = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.004, 0.004, 0.012, 12), 
+                    matSilver
+                );
+                rivet.rotation.x = Math.PI/2;
+                rivet.position.set((i - 1) * 0.012, -0.02, 0.02 + i * 0.03);
+                knifeGroup.add(rivet);
+            }
+            
+            // 핸들 끝 부분 (Pommel) - 더 세밀하게
+            const pommel = new THREE.Mesh(
+                new THREE.CylinderGeometry(handleWidth * 0.8, handleWidth * 0.6, 0.015, 12), 
+                matSilver
+            );
+            pommel.rotation.x = Math.PI/2;
+            pommel.position.set(0, -0.02, handleLength - 0.005);
+            knifeGroup.add(pommel);
+            
+            // === 가드 (손보호대) - 더 현실적으로 ===
+            const guardWidth = 0.04;
+            const guard = new THREE.Mesh(
+                new THREE.BoxGeometry(guardWidth, 0.012, 0.025), 
+                matSilver
+            );
+            guard.position.set(0, 0.005, 0);
+            knifeGroup.add(guard);
+            
+            // 가드 끝부분 (양쪽으로 확장)
+            for(let side = -1; side <= 1; side += 2) {
+                const guardTip = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.012, 0.012, 0.008), 
+                    matSilver
+                );
+                guardTip.position.set(side * (guardWidth/2 + 0.006), 0.005, 0.012);
+                knifeGroup.add(guardTip);
+            }
+            
+            // === 칼날 본체 - 더 현실적이고 날카롭게 ===
+            const bladeLength = 0.22; // 더 길게
+            const bladeWidth = 0.018; // 더 넓게
+            const bladeThickness = 0.004; // 더 두껍게
+            
+            // 칼날 메인 바디 (테이퍼링된 형태)
+            const bladeBody = new THREE.Mesh(
+                new THREE.BoxGeometry(bladeThickness, bladeWidth, bladeLength), 
+                matBlade
+            );
+            bladeBody.position.set(0, 0.025, -bladeLength/2);
+            knifeGroup.add(bladeBody);
+            
+            // 칼날 등 (Spine) - 더 부드럽고 현실적으로
+            const bladeSpine = new THREE.Mesh(
+                new THREE.BoxGeometry(bladeThickness * 0.6, bladeWidth * 0.25, bladeLength * 0.85), 
+                matBlade
+            );
+            bladeSpine.position.set(-bladeThickness * 0.2, 0.03, -bladeLength * 0.35);
+            knifeGroup.add(bladeSpine);
+            
+            // 칼날 끝 (Tip) - 더 날카롭고 뾰족하게
+            const bladeTip = new THREE.Mesh(
+                new THREE.ConeGeometry(bladeWidth * 0.4, bladeLength * 0.25, 8), 
+                matBlade
+            );
+            bladeTip.rotation.x = Math.PI / 2;
+            bladeTip.position.set(0, 0.025, -bladeLength);
+            knifeGroup.add(bladeTip);
+            
+            // 칼날 날 (Cutting Edge) - 더 날카롭게
+            const bladeEdge = new THREE.Mesh(
+                new THREE.BoxGeometry(bladeThickness * 0.15, bladeWidth * 0.2, bladeLength * 0.98), 
+                matBlade
+            );
+            bladeEdge.position.set(bladeThickness * 0.125, 0.015, -bladeLength * 0.49);
+            knifeGroup.add(bladeEdge);
+            
+            // 칼날 홈 (Fuller/Blood Groove) - 더 깊고 명확하게
+            const fuller = new THREE.Mesh(
+                new THREE.BoxGeometry(bladeThickness * 0.4, bladeWidth * 0.25, bladeLength * 0.65), 
+                matBlade
+            );
+            fuller.position.set(0, 0.025, -bladeLength * 0.45);
+            fuller.material = new THREE.MeshStandardMaterial({ 
+                color: 0xaaaaaa, 
+                roughness: 0.3, 
+                metalness: 0.7 
+            });
+            knifeGroup.add(fuller);
+            
+            // 칼날 베이스 (Ricasso) - 칼날과 핸들 사이 부분
+            const ricasso = new THREE.Mesh(
+                new THREE.BoxGeometry(bladeThickness * 0.9, bladeWidth * 0.9, bladeLength * 0.18), 
+                matBlade
+            );
+            ricasso.position.set(0, 0.025, -bladeLength * 0.09);
+            knifeGroup.add(ricasso);
+            
+            // 칼날 측면 베벨 (Bevel) - 더 현실적인 날 표현
+            for(let side = -1; side <= 1; side += 2) {
+                const bevel = new THREE.Mesh(
+                    new THREE.BoxGeometry(bladeThickness * 0.3, bladeWidth * 0.15, bladeLength * 0.9), 
+                    matBlade
+                );
+                bevel.position.set(side * bladeThickness * 0.35, 0.02, -bladeLength * 0.45);
+                knifeGroup.add(bevel);
+            }
+
+            // === 나이프 각도 조정 - 더 자연스럽게 ===
+            knifeGroup.rotation.y = Math.PI * 0.25; // 오른쪽으로 회전
+            knifeGroup.rotation.z = -0.15; // 손목 각도
+            knifeGroup.rotation.x = 0.25; // 위로 기울임
+            
+            // 나이프 크기 조정 - 더 크고 명확하게
+            knifeGroup.scale.set(2.0, 2.0, 2.0);
+            
+            const knifeHolder = new THREE.Group();
+            knifeHolder.add(knifeGroup);
+            // 나이프 위치 조정 - 더 잘 보이도록
+            knifeHolder.position.set(0.3, -0.2, -0.35); 
+            weaponModel.add(knifeHolder);
+
+            // === 손 모델 - 나이프를 더 자연스럽게 쥐도록 ===
+            // 오른손 (나이프를 쥐는 손) - 위치와 각도 개선
+            const rightArm = createArm(0.35, -0.2, -0.35, 0.08, -0.15, 0.2, false);
+            rightArm.userData.isKnifeHand = true;
+            
+            // 왼손 - 두 손을 크게 벌린 모습
+            const leftArm = createArm(-0.4, -0.18, -0.25, 0.15, 0.4, -0.1, false);
+            leftArm.userData.isLeftHand = true;
+        }
+
+        function createArm(x, y, z, rotX, rotY, rotZ, isTrigger) {
+            const grp = new THREE.Group();
+            const sleeve = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.06, 0.5, 12), matSleeve);
+            sleeve.rotation.x = Math.PI/2; sleeve.position.z = 0.25;
+            grp.add(sleeve);
+            const hand = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.04, 0.08), matGlove);
+            hand.position.z = -0.05;
+            grp.add(hand);
+            
+            if(isTrigger) {
+                const finger = new THREE.Mesh(new THREE.BoxGeometry(0.015, 0.015, 0.05), matSkin);
+                finger.position.set(0.01, 0.01, -0.1);
+                grp.add(finger);
+            } else {
+                // 나이프를 쥐는 손인 경우 손가락을 더 명확하게
+                if(grp.userData && grp.userData.isKnifeHand) {
+                    // 손 본체 - 나이프 손잡이를 감싸는 형태
+                    const handSize = 0.14;
+                    const handMesh = new THREE.Mesh(
+                        new THREE.BoxGeometry(handSize, 0.07, handSize * 0.8), 
+                        matGlove
+                    );
+                    handMesh.position.z = -0.04;
+                    grp.add(handMesh);
+                    
+                    // 나이프를 쥐는 손가락들 - 더 자연스러운 위치와 각도
+                    for(let i = 0; i < 4; i++) {
+                        const finger = new THREE.Mesh(
+                            new THREE.BoxGeometry(0.02, 0.02, 0.07), 
+                            matSkin
+                        );
+                        // 손가락이 나이프 손잡이를 감싸는 형태로 배치
+                        finger.position.set((i - 1.5) * 0.022, 0.025, -0.13);
+                        finger.rotation.x = 0.1; // 약간 구부린 형태
+                        grp.add(finger);
+                    }
+                    // 엄지 - 나이프 반대편에 위치
+                    const thumb = new THREE.Mesh(
+                        new THREE.BoxGeometry(0.018, 0.018, 0.06), 
+                        matSkin
+                    );
+                    thumb.position.set(0.06, 0.025, -0.1);
+                    thumb.rotation.z = 0.4; // 더 구부린 형태
+                    thumb.rotation.x = 0.2;
+                    grp.add(thumb);
+                } else if(grp.userData && grp.userData.isLeftHand) {
+                    // 왼손 (나이프를 쥐지 않지만 보임)
+                    const handSize = 0.1;
+                    const handMesh = new THREE.Mesh(new THREE.BoxGeometry(handSize, 0.05, handSize), matGlove);
+                    handMesh.position.z = -0.05;
+                    grp.add(handMesh);
+                    
+                    // 왼손 손가락들
+                    for(let i = 0; i < 4; i++) {
+                        const finger = new THREE.Mesh(new THREE.BoxGeometry(0.015, 0.015, 0.05), matSkin);
+                        finger.position.set((i - 1.5) * 0.018, 0.015, -0.1);
+                        grp.add(finger);
+                    }
+                    // 왼손 엄지
+                    const thumb = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.012, 0.04), matSkin);
+                    thumb.position.set(0.04, 0.015, -0.08);
+                    thumb.rotation.z = -0.3;
+                    grp.add(thumb);
+                } else {
+                    const fist = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.04, 0.04), matGlove);
+                    fist.position.set(0, -0.02, -0.08);
+                    grp.add(fist);
+                }
+            }
+
+            grp.position.set(x, y, z);
+            grp.rotation.set(rotX, rotY, rotZ);
+            weaponModel.add(grp);
+            return grp;
+        }
+
+        // --- Enemy AI & Parts ---
+        function createEnemyAI() {
+            const enemy = new THREE.Group();
+            
+            // FIX: Clone Materials to prevent shared color change
+            const mClothes = matZombieClothes.clone();
+            const mSkin = matZombieSkin.clone();
+            
+            // 몸통 (Body) - 더 상세하게
+            const body = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.7, 0.25), mClothes);
+            body.position.y = 1.1; body.name = 'body'; enemy.add(body);
+            
+            // 가슴 부분 디테일
+            const chest = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.3, 0.22), mClothes);
+            chest.position.set(0, 1.25, 0.01);
+            enemy.add(chest);
+            
+            // 어깨 (Shoulders)
+            const lShoulder = new THREE.Mesh(new THREE.SphereGeometry(0.08, 8, 8), mClothes);
+            lShoulder.position.set(-0.25, 1.4, 0);
+            enemy.add(lShoulder);
+            const rShoulder = new THREE.Mesh(new THREE.SphereGeometry(0.08, 8, 8), mClothes);
+            rShoulder.position.set(0.25, 1.4, 0);
+            enemy.add(rShoulder);
+
+            // 머리 (Head) - 더 상세하게
+            const head = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.25, 0.25), mSkin);
+            head.position.y = 1.6; head.name = 'head'; enemy.add(head);
+            
+            // 머리 형태 개선 (약간 구형으로)
+            const headShape = new THREE.Mesh(new THREE.SphereGeometry(0.13, 8, 8), mSkin);
+            headShape.position.set(0, 1.6, 0);
+            enemy.add(headShape);
+            
+            // 눈 (Eyes) - 빨간색으로
+            const eyeMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+            const lEye = new THREE.Mesh(new THREE.SphereGeometry(0.015, 6, 6), eyeMat);
+            lEye.position.set(-0.05, 1.62, 0.12);
+            enemy.add(lEye);
+            const rEye = new THREE.Mesh(new THREE.SphereGeometry(0.015, 6, 6), eyeMat);
+            rEye.position.set(0.05, 1.62, 0.12);
+            enemy.add(rEye);
+            
+            // 목 (Neck)
+            const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.1, 0.15, 8), mSkin);
+            neck.rotation.z = Math.PI/2;
+            neck.position.set(0, 1.45, 0);
+            enemy.add(neck);
+
+            // 오른팔 (Right Arm) - 더 상세하게
+            const rUpperArm = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.1, 0.3, 8), mClothes);
+            rUpperArm.rotation.z = Math.PI/2;
+            rUpperArm.position.set(0.3, 1.3, 0.2);
+            rUpperArm.rotation.x = -1.2;
+            rUpperArm.name = 'limb';
+            enemy.add(rUpperArm);
+            
+            const rForearm = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.08, 0.25, 8), mClothes);
+            rForearm.rotation.z = Math.PI/2;
+            rForearm.position.set(0.35, 1.15, 0.4);
+            rForearm.rotation.x = -1.8;
+            rForearm.name = 'limb';
+            enemy.add(rForearm);
+            enemy.userData.rArm = rForearm;
+            
+            // 왼팔 (Left Arm) - 더 상세하게
+            const lUpperArm = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.1, 0.3, 8), mClothes);
+            lUpperArm.rotation.z = Math.PI/2;
+            lUpperArm.position.set(-0.3, 1.3, 0.2);
+            lUpperArm.rotation.x = -1.2;
+            lUpperArm.name = 'limb';
+            enemy.add(lUpperArm);
+            
+            const lForearm = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.08, 0.25, 8), mClothes);
+            lForearm.rotation.z = Math.PI/2;
+            lForearm.position.set(-0.35, 1.15, 0.4);
+            lForearm.rotation.x = -1.8;
+            lForearm.name = 'limb';
+            enemy.add(lForearm);
+            enemy.userData.lArm = lForearm;
+            
+            // 손 (Hands)
+            const rHand = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.08), mSkin);
+            rHand.position.set(0.4, 1.05, 0.5);
+            enemy.add(rHand);
+            const lHand = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.08), mSkin);
+            lHand.position.set(-0.4, 1.05, 0.5);
+            enemy.add(lHand);
+
+            // 왼다리 (Left Leg) - 더 상세하게
+            const lThigh = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.15, 0.4, 8), mClothes);
+            lThigh.position.set(-0.15, 0.55, 0);
+            lThigh.name = 'limb';
+            enemy.add(lThigh);
+            
+            const lShin = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.12, 0.35, 8), mClothes);
+            lShin.position.set(-0.15, 0.175, 0);
+            lShin.name = 'limb';
+            enemy.add(lShin);
+            
+            // 오른다리 (Right Leg) - 더 상세하게
+            const rThigh = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.15, 0.4, 8), mClothes);
+            rThigh.position.set(0.15, 0.55, 0);
+            rThigh.name = 'limb';
+            enemy.add(rThigh);
+            
+            const rShin = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.12, 0.35, 8), mClothes);
+            rShin.position.set(0.15, 0.175, 0);
+            rShin.name = 'limb';
+            enemy.add(rShin);
+            
+            // 발 (Feet)
+            const lFoot = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.08, 0.2), mClothes);
+            lFoot.position.set(-0.15, 0, 0.1);
+            enemy.add(lFoot);
+            const rFoot = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.08, 0.2), mClothes);
+            rFoot.position.set(0.15, 0, 0.1);
+            enemy.add(rFoot);
+
+            // HP Bar (Billboard)
+            const hpGroup = new THREE.Group();
+            const bgBar = new THREE.Mesh(new THREE.PlaneGeometry(0.6, 0.08), matHpBg);
+            const fgBar = new THREE.Mesh(new THREE.PlaneGeometry(0.6, 0.08), matHpFg);
+            fgBar.position.z = 0.01;
+            hpGroup.add(bgBar);
+            const fgWrapper = new THREE.Group();
+            fgWrapper.add(fgBar);
+            fgBar.position.x = 0.3; fgWrapper.position.x = -0.3; fgWrapper.position.z = 0.01;
+            hpGroup.add(fgWrapper);
+            hpGroup.position.set(0, 2.0, 0); 
+            enemy.add(hpGroup);
+            enemy.userData.hpGroup = hpGroup;
+            enemy.userData.hpBar = fgWrapper;
+
+            const angle = Math.random() * Math.PI * 2;
+            const dist = 15 + Math.random() * 20;
+            enemy.position.set(Math.cos(angle)*dist, 0, Math.sin(angle)*dist);
+            
+            // Generate safe spawn - 더 많은 시도와 더 정확한 체크
+            let safe = false;
+            for(let i=0; i<30; i++) {
+                // Check if inside collider - 더 정확한 크기로 체크
+                const testBox = new THREE.Box3(
+                    new THREE.Vector3(enemy.position.x - ENEMY_RADIUS, enemy.position.y, enemy.position.z - ENEMY_RADIUS),
+                    new THREE.Vector3(enemy.position.x + ENEMY_RADIUS, enemy.position.y + 1.8, enemy.position.z + ENEMY_RADIUS)
+                );
+                let hits = false;
+                for(let c of colliders) { 
+                    if(testBox.intersectsBox(c)) { 
+                        hits=true; 
+                        break; 
+                    } 
+                }
+                if(!hits) { 
+                    safe = true; 
+                    break; 
+                }
+                
+                // Retry pos - 더 넓은 범위에서 시도
+                const ang = Math.random() * Math.PI * 2;
+                const d = 20 + Math.random() * 25;
+                enemy.position.set(Math.cos(ang)*d, 0, Math.sin(ang)*d);
+            }
+            
+            // 안전한 위치를 찾지 못하면 스폰하지 않음
+            if(!safe) {
+                return;
+            }
+
+            enemy.userData.hp = 100;
+            enemy.userData.maxHp = 100;
+            enemy.userData.attackTimer = 0;
+            enemy.userData.isDead = false;
+            enemy.userData.moveSpeed = ZOMBIE_SPEED + Math.random();
+            enemy.userData.animState = 0;
+            enemy.userData.flashTimer = 0;
+            enemy.userData.stuckTimer = 0; // 끼어있는 시간 추적
+            enemy.userData.lastValidPos = enemy.position.clone(); // 마지막 유효한 위치
+            
+            scene.add(enemy);
+            enemies.push(enemy);
+        }
+
+        function updateEnemies(dt) {
+            if(isDead) return;
+            
+            // Spawn - 타이머는 항상 증가, 적 생성만 일시정지 상태가 아닐 때
+            if (!isPaused) {
+                spawnTimer += dt;
+                if (spawnTimer >= SPAWN_INTERVAL) {
+                    spawnTimer = 0; // 타이머 리셋 (생성 여부와 무관)
+                    if (enemies.length < MAX_ENEMIES) {
+                        createEnemyAI();
+                    }
+                }
+            }
+            
+            if(isPaused) return; // 일시정지는 적 이동/공격만 중지
+
+            enemies.forEach(e => {
+                if(e.userData.isDead) return;
+                
+                // Color Flash Update
+                if(e.userData.flashTimer > 0) {
+                    e.userData.flashTimer -= dt;
+                    if(e.userData.flashTimer <= 0) {
+                        e.children.forEach(c => {
+                             if(c.isMesh && c.material && c.material.emissive) c.material.emissive.setHex(0x000000);
+                        });
+                    }
+                }
+
+                e.lookAt(position.x, e.position.y, position.z);
+                e.userData.hpGroup.lookAt(camera.position);
+
+                const dist = e.position.distanceTo(position);
+                
+                // --- Simple Enemy Collision vs Walls ---
+                // Calculate desired move
+                let nextPos = e.position.clone();
+                if(dist > ATTACK_RANGE && e.userData.animState <= 0) { 
+                     const dir = new THREE.Vector3().subVectors(position, e.position).normalize();
+                     const moveStep = dir.multiplyScalar(e.userData.moveSpeed * dt);
+                     
+                     // 현재 위치가 벽에 끼어있는지 체크
+                     const currentBox = new THREE.Box3(
+                         new THREE.Vector3(e.position.x - ENEMY_RADIUS * 1.2, e.position.y, e.position.z - ENEMY_RADIUS * 1.2),
+                         new THREE.Vector3(e.position.x + ENEMY_RADIUS * 1.2, e.position.y + 1.8, e.position.z + ENEMY_RADIUS * 1.2)
+                     );
+                     let isStuck = false;
+                     for(const c of colliders) { 
+                         if(currentBox.intersectsBox(c)) { 
+                             isStuck = true; 
+                             break; 
+                         } 
+                     }
+                     
+                     // 벽에 끼어있으면 벽에서 벗어나도록 이동
+                     if(isStuck) {
+                         e.userData.stuckTimer += dt;
+                         
+                         // 2초 이상 끼어있으면 강제 재배치
+                         if(e.userData.stuckTimer > 2.0) {
+                             // 안전한 위치로 재배치
+                             let newPos = null;
+                             for(let i = 0; i < 50; i++) {
+                                 const angle = Math.random() * Math.PI * 2;
+                                 const dist = 20 + Math.random() * 25;
+                                 const testPos = new THREE.Vector3(
+                                     Math.cos(angle) * dist,
+                                     0,
+                                     Math.sin(angle) * dist
+                                 );
+                                 const testBox = new THREE.Box3(
+                                     new THREE.Vector3(testPos.x - ENEMY_RADIUS * 1.5, testPos.y, testPos.z - ENEMY_RADIUS * 1.5),
+                                     new THREE.Vector3(testPos.x + ENEMY_RADIUS * 1.5, testPos.y + 1.8, testPos.z + ENEMY_RADIUS * 1.5)
+                                 );
+                                 let canSpawn = true;
+                                 for(const c of colliders) {
+                                     if(testBox.intersectsBox(c)) {
+                                         canSpawn = false;
+                                         break;
+                                     }
+                                 }
+                                 if(canSpawn) {
+                                     newPos = testPos;
+                                     break;
+                                 }
+                             }
+                             if(newPos) {
+                                 e.position.copy(newPos);
+                                 e.userData.stuckTimer = 0;
+                                 e.userData.lastValidPos = newPos.clone();
+                             }
+                         } else {
+                             // 벽에서 벗어나기 위해 더 많은 방향과 더 빠른 속도로 시도
+                             const escapeDirs = [
+                                 new THREE.Vector3(1, 0, 0),
+                                 new THREE.Vector3(-1, 0, 0),
+                                 new THREE.Vector3(0, 0, 1),
+                                 new THREE.Vector3(0, 0, -1),
+                                 new THREE.Vector3(1, 0, 1).normalize(),
+                                 new THREE.Vector3(-1, 0, 1).normalize(),
+                                 new THREE.Vector3(1, 0, -1).normalize(),
+                                 new THREE.Vector3(-1, 0, -1).normalize(),
+                                 new THREE.Vector3(0.707, 0, 0.707),
+                                 new THREE.Vector3(-0.707, 0, 0.707),
+                                 new THREE.Vector3(0.707, 0, -0.707),
+                                 new THREE.Vector3(-0.707, 0, -0.707)
+                             ];
+                             
+                             let escaped = false;
+                             for(const escapeDir of escapeDirs) {
+                                 // 더 빠른 탈출 속도
+                                 const escapeStep = escapeDir.multiplyScalar(e.userData.moveSpeed * dt * 5);
+                                 const escapePos = e.position.clone().add(escapeStep);
+                                 const escapeBox = new THREE.Box3(
+                                     new THREE.Vector3(escapePos.x - ENEMY_RADIUS * 1.2, escapePos.y, escapePos.z - ENEMY_RADIUS * 1.2),
+                                     new THREE.Vector3(escapePos.x + ENEMY_RADIUS * 1.2, escapePos.y + 1.8, escapePos.z + ENEMY_RADIUS * 1.2)
+                                 );
+                                 let canEscape = true;
+                                 for(const c of colliders) { 
+                                     if(escapeBox.intersectsBox(c)) { 
+                                         canEscape = false; 
+                                         break; 
+                                     } 
+                                 }
+                                 if(canEscape) {
+                                     e.position.copy(escapePos);
+                                     e.userData.lastValidPos = escapePos.clone();
+                                     escaped = true;
+                                     break;
+                                 }
+                             }
+                             
+                             // 벽에서 벗어나지 못하면 마지막 유효한 위치로 복귀
+                             if(!escaped) {
+                                 const distToLast = e.position.distanceTo(e.userData.lastValidPos);
+                                 if(distToLast > 0.5) {
+                                     e.position.lerp(e.userData.lastValidPos, 0.3);
+                                 } else {
+                                     // Y축으로도 시도
+                                     e.position.y += 0.2;
+                                 }
+                             } else {
+                                 e.userData.stuckTimer = 0; // 탈출 성공
+                             }
+                         }
+                     } else {
+                         // 정상 이동 중이면 마지막 유효 위치 업데이트 및 끼임 타이머 리셋
+                         e.userData.lastValidPos = e.position.clone();
+                         e.userData.stuckTimer = 0;
+                         // 정상 이동
+                         let testPos = e.position.clone();
+                         testPos.x += moveStep.x;
+                         const eBoxX = new THREE.Box3(
+                             new THREE.Vector3(testPos.x - ENEMY_RADIUS, testPos.y, testPos.z - ENEMY_RADIUS),
+                             new THREE.Vector3(testPos.x + ENEMY_RADIUS, testPos.y + 1.8, testPos.z + ENEMY_RADIUS)
+                         );
+                         let colX = false;
+                         for(const c of colliders) { if(eBoxX.intersectsBox(c)) { colX=true; break; } }
+                         if(!colX) e.position.x += moveStep.x;
+                         
+                         testPos = e.position.clone();
+                         testPos.z += moveStep.z;
+                         const eBoxZ = new THREE.Box3(
+                             new THREE.Vector3(testPos.x - ENEMY_RADIUS, testPos.y, testPos.z - ENEMY_RADIUS),
+                             new THREE.Vector3(testPos.x + ENEMY_RADIUS, testPos.y + 1.8, testPos.z + ENEMY_RADIUS)
+                         );
+                         let colZ = false;
+                         for(const c of colliders) { if(eBoxZ.intersectsBox(c)) { colZ=true; break; } }
+                         if(!colZ) e.position.z += moveStep.z;
+                     }
+                     
+                     e.position.y = Math.abs(Math.sin(lastTime * 0.005)) * 0.1;
+                } 
+                else if (dist <= ATTACK_RANGE) {
+                    e.userData.attackTimer += dt;
+                    if(e.userData.attackTimer > 1.0) { 
+                        e.userData.attackTimer = 0;
+                        e.userData.animState = 0.5; 
+                        SoundGen.playZombieAttack();
+                        damagePlayer(ZOMBIE_DMG);
+                    }
+                }
+
+                if (e.userData.animState > 0) {
+                    e.userData.animState -= dt;
+                    const progress = 1 - (e.userData.animState / 0.5); 
+                    e.userData.rArm.rotation.x = -1.6 - Math.sin(progress * Math.PI) * 1.0;
+                    e.userData.lArm.rotation.x = -1.6 - Math.sin(progress * Math.PI) * 1.0;
+                    e.position.add(e.getWorldDirection(new THREE.Vector3()).multiplyScalar(Math.sin(progress * Math.PI) * 0.05));
+                } else {
+                     e.children.forEach(c => {
+                         if(c.name === 'limb' && c.position.y > 1.0) c.rotation.x = -1.6;
+                    });
+                }
+            });
+        }
+
+        function damagePlayer(amount) {
+            if(isDead) return;
+            playerHP -= amount;
+            
+            elHpBar.style.width = Math.max(0, playerHP) + '%';
+            elHpText.innerText = "HP: " + Math.max(0, playerHP);
+            
+            if(playerHP > 50) elHpBar.style.background = "#4caf50";
+            else if(playerHP > 20) elHpBar.style.background = "#ff9800";
+            else elHpBar.style.background = "#f44336";
+
+            elDamage.style.opacity = 0.8;
+            setTimeout(() => elDamage.style.opacity = 0, 100);
+
+            if(playerHP <= 0) {
+                isDead = true;
+                elGameOver.style.display = 'flex';
+                document.exitPointerLock();
+            }
+        }
+
+        function restartGame() {
+            playerHP = 100;
+            isDead = false;
+            isPaused = false;
+            spawnTimer = 0;
+            elPauseOverlay.style.display = 'none'; 
+            elHpBar.style.width = '100%';
+            elHpText.innerText = "HP: 100";
+            elGameOver.style.display = 'none';
+            position.set(0, 1.7, 5);
+            
+            enemies.forEach(e => scene.remove(e));
+            enemies = [];
+            healthPills.forEach(pill => scene.remove(pill));
+            healthPills = [];
+            for(let i=0; i<6; i++) createEnemyAI();
+            
+            // 재시작 후에는 포인터 잠금을 요청하지 않음 (사용자가 클릭해야 함)
+            if(document.pointerLockElement === document.body) {
+                document.exitPointerLock();
+            }
+        }
+
+        function setupControls() {
+            // 포인터 잠금 변경 감지
+            document.addEventListener('pointerlockchange', () => {
+                if(document.pointerLockElement !== document.body && isPaused) {
+                    // 포인터 잠금이 해제되고 일시정지 상태면 오버레이 유지
+                    elPauseOverlay.style.display = 'flex';
+                }
+            });
+            
+            document.body.addEventListener('mousedown', (e) => {
+                if(document.pointerLockElement !== document.body && !isDead && !isPaused) {
+                    const promise = document.body.requestPointerLock();
+                    if (promise) promise.catch(err => {});
+                    return;
+                }
+                if(isDead || isPaused) return;
+                if(e.button === 0) isFiring = true;
+                if(e.button === 2) isAiming = true;
+            });
+            document.body.addEventListener('mouseup', (e) => {
+                if(e.button === 0) { isFiring = false; hasFiredSemi = false; hasClickedEmpty = false; }
+                if(e.button === 2) isAiming = false;
+            });
+            document.body.addEventListener('mousemove', (e) => {
+                if(document.pointerLockElement === document.body && !isDead && !isPaused) {
+                    const sens = isAiming ? SENSITIVITY_ADS : SENSITIVITY_MOUSE;
+                    rotation.y -= e.movementX * sens;
+                    rotation.x -= e.movementY * sens;
+                    rotation.x = Math.max(-1.5, Math.min(1.5, rotation.x));
+                    
+                    const ray = new THREE.Raycaster();
+                    ray.setFromCamera(new THREE.Vector2(0,0), camera);
+                    const targets = scene.children.filter(c => c !== weaponContainer);
+                    const hits = ray.intersectObjects(targets, true);
+                    
+                    let enemyFound = false;
+                    for(let h of hits) {
+                        let p = h.object;
+                        while(p) {
+                            if(p.userData && p.userData.hp !== undefined) {
+                                enemyFound = true;
+                                break;
+                            }
+                            if(p.parent === scene) break;
+                            p = p.parent;
+                        }
+                        if(enemyFound) break;
+                    }
+
+                    if(enemyFound) elCrosshair.classList.add('enemy-detected');
+                    else elCrosshair.classList.remove('enemy-detected');
+                }
+            });
+
+            window.addEventListener('keydown', e => {
+                // ESC 키 처리 - key와 code 모두 체크
+                if(e.key === 'Escape' || e.key === 'Esc' || e.code === 'Escape') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    if(!isPaused && !isDead) {
+                        isPaused = true;
+                        elPauseOverlay.style.display = 'flex';
+                        if(document.pointerLockElement === document.body) {
+                            document.exitPointerLock();
+                        }
+                    } else if(isPaused) {
+                        isPaused = false;
+                        elPauseOverlay.style.display = 'none';
+                        // 재개 시 포인터 잠금은 사용자가 클릭해야 함
+                    }
+                    return false;
+                }
+                const k = e.key.toLowerCase();
+                if(isDead || isPaused) return;
+                if(k === 'w') keys.w = 1;
+                if(k === 's') keys.s = 1;
+                if(k === 'a') keys.a = 1;
+                if(k === 'd') keys.d = 1;
+                if(k === 'shift') keys.shift = true;
+                if(k === 'control') keys.ctrl = true;
+                if(k === ' ') {
+                    if(!keys.space && isGrounded) { 
+                        velocityY = 8.0; 
+                        isGrounded = false; 
+                        SoundGen.playJump(false);
+                    }
+                    keys.space = true;
+                }
+                if(k === '1') switchWeaponTo(0);
+                if(k === '2') switchWeaponTo(1);
+                if(k === '3') switchWeaponTo(2);
+                if(k === '4') switchWeaponTo(3);
+                if(k === 'tab') { e.preventDefault(); switchWeaponTo((curWeaponIdx + 1) % 4); }
+                if(k === 'r') doReload();
+            });
+            
+            window.addEventListener('keyup', e => {
+                const k = e.key.toLowerCase();
+                if(k === 'w') keys.w = 0;
+                if(k === 's') keys.s = 0;
+                if(k === 'a') keys.a = 0;
+                if(k === 'd') keys.d = 0;
+                if(k === 'shift') keys.shift = false;
+                if(k === 'control') keys.ctrl = false;
+                if(k === ' ') keys.space = false;
+            });
+        }
+
+        function switchWeaponTo(idx) {
+            if(curWeaponIdx === idx) return;
+            isReloading = false;
+            isAiming = false; 
+            curWeaponIdx = idx;
+            buildWeapon(curWeaponIdx);
+            // 무기 전환 시 초기 위치 설정 (나이프가 아닌 경우만)
+            const w = WEAPONS[curWeaponIdx];
+            if(w.type !== 'KNIFE') {
+                weaponModel.position.y = -0.5;
+                weaponModel.position.x = 0;
+                weaponModel.position.z = 0;
+                weaponModel.rotation.x = 0;
+                weaponModel.rotation.y = 0;
+                weaponModel.rotation.z = 0;
+            } else {
+                // 나이프는 기본 위치 설정 (개선된 위치)
+                weaponModel.position.x = 0.3;
+                weaponModel.position.y = -0.2;
+                weaponModel.position.z = -0.35;
+                weaponModel.rotation.x = 0.25;
+                weaponModel.rotation.y = 0;
+                weaponModel.rotation.z = -0.15;
+            }
+            
+            // 무기별 교체 소리 적용
+            if(w.type === 'KNIFE' && SoundGen.audioBuffers['c-sword']) {
+                // 나이프로 전환
+                SoundGen.playAudioFile('c-sword', 0.8);
+            } else if(w.type === 'RIFLE' && SoundGen.audioBuffers['c-sochong']) {
+                // 소총으로 전환 (1번)
+                SoundGen.playAudioFile('c-sochong', 0.8);
+            } else if(w.type === 'PISTOL' && SoundGen.audioBuffers['c-gun']) {
+                // 권총으로 전환 (2번)
+                SoundGen.playAudioFile('c-gun', 0.8);
+            } else if(w.type === 'SNIPER' && SoundGen.audioBuffers['c-rifle']) {
+                // 저격총으로 전환 (3번)
+                SoundGen.playAudioFile('c-rifle', 0.8);
+            } else {
+                // 기존 소리 (폴백)
+                SoundGen.playSwitch();
+            }
+            updateUI();
+        }
+
+        function updateUI() {
+            const w = WEAPONS[curWeaponIdx];
+            elWeaponLabel.innerText = w.name;
+            elAmmoVal.classList.remove('no-ammo');
+            if(w.type === 'KNIFE') elAmmoVal.innerText = "-";
+            else elAmmoVal.innerText = w.ammo + " / " + w.maxAmmo * 4;
+        }
+
+        function doReload() {
+            const w = WEAPONS[curWeaponIdx];
+            if(w.type === 'KNIFE') return;
+            isReloading = true;
+            SoundGen.playReload();
+            elWeaponLabel.innerText = "RELOADING...";
+            weaponModel.rotation.z = 0.5; 
+            weaponModel.position.y = -0.1;
+            setTimeout(() => {
+                w.ammo = w.maxAmmo;
+                isReloading = false;
+                weaponModel.rotation.z = 0; 
+                weaponModel.position.y = 0;
+                updateUI();
+            }, 1000);
+        }
+
+        function createDecal(pos, normal) {
+            if (!normal) return; 
+            const size = 0.1 + Math.random() * 0.05;
+            const geo = new THREE.PlaneGeometry(size, size);
+            const decal = new THREE.Mesh(geo, matDecal);
+            decal.position.copy(pos);
+            decal.lookAt(pos.clone().add(normal));
+            decal.position.add(normal.multiplyScalar(0.01));
+            scene.add(decal);
+            decals.push(decal);
+            if(decals.length > 50) {
+                const old = decals.shift();
+                scene.remove(old);
+            }
+        }
+
+        function spawnShell() {
+            const shell = new THREE.Mesh(shellGeo, shellMat);
+            const weaponPos = new THREE.Vector3();
+            weaponModel.getWorldPosition(weaponPos);
+            const weaponQuat = new THREE.Quaternion();
+            weaponModel.getWorldQuaternion(weaponQuat);
+
+            shell.position.copy(weaponPos);
+            shell.quaternion.copy(weaponQuat);
+
+            shell.translateX(0.05); 
+            shell.translateY(0.08); 
+            shell.translateZ(-0.02); 
+
+            const force = 3.0 + Math.random();
+            const vel = new THREE.Vector3(1.0, 0.5 + Math.random() * 0.5, (Math.random()-0.5) * 0.5);
+            vel.normalize().multiplyScalar(force);
+            vel.applyQuaternion(shell.quaternion); 
+
+            scene.add(shell);
+            
+            shells.push({
+                mesh: shell,
+                velocity: vel,
+                rotVel: new THREE.Vector3(Math.random(), Math.random(), Math.random()).multiplyScalar(10),
+                life: 2.0 
+            });
+        }
+
+        function updateShells(dt) {
+            for (let i = shells.length - 1; i >= 0; i--) {
+                const s = shells[i];
+                s.life -= dt;
+                
+                if (s.life <= 0) {
+                    scene.remove(s.mesh);
+                    shells.splice(i, 1);
+                    continue;
+                }
+
+                s.velocity.y -= 9.8 * dt; 
+                s.mesh.position.addScaledVector(s.velocity, dt);
+
+                s.mesh.rotation.x += s.rotVel.x * dt;
+                s.mesh.rotation.y += s.rotVel.y * dt;
+                s.mesh.rotation.z += s.rotVel.z * dt;
+
+                if (s.mesh.position.y < 0.01) {
+                    s.mesh.position.y = 0.01;
+                    s.velocity.y *= -0.5; 
+                    s.velocity.x *= 0.7; 
+                    s.velocity.z *= 0.7;
+                }
+            }
+        }
+
+        // --- Blood Particle System ---
+        function createBlood(pos) {
+            const particleCount = 8;
+            const geo = new THREE.BufferGeometry();
+            const positions = new Float32Array(particleCount * 3);
+            const velocities = [];
+
+            for(let i=0; i<particleCount; i++) {
+                positions[i*3] = pos.x;
+                positions[i*3+1] = pos.y;
+                positions[i*3+2] = pos.z;
+                
+                const vel = new THREE.Vector3(
+                    (Math.random()-0.5), 
+                    (Math.random()-0.5), 
+                    (Math.random()-0.5)
+                ).normalize().multiplyScalar(Math.random() * 2);
+                velocities.push(vel);
+            }
+            geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            
+            const particles = new THREE.Points(geo, new THREE.PointsMaterial({color: 0xaa0000, size: 0.05}));
+            scene.add(particles);
+            
+            bloodParticles.push({ mesh: particles, velocities: velocities, life: 0.5 });
+        }
+        
+        function updateParticles(dt) {
+            for(let i=bloodParticles.length-1; i>=0; i--) {
+                const bp = bloodParticles[i];
+                bp.life -= dt;
+                if(bp.life <= 0) {
+                    scene.remove(bp.mesh);
+                    bloodParticles.splice(i, 1);
+                    continue;
+                }
+                
+                const positions = bp.mesh.geometry.attributes.position.array;
+                for(let j=0; j<bp.velocities.length; j++) {
+                    positions[j*3] += bp.velocities[j].x * dt;
+                    positions[j*3+1] += bp.velocities[j].y * dt;
+                    positions[j*3+2] += bp.velocities[j].z * dt;
+                }
+                bp.mesh.geometry.attributes.position.needsUpdate = true;
+            }
+        }
+
+        function createHealthPill(pos) {
+            const pillGroup = new THREE.Group();
+            // 알약 크기 확대
+            const pillBody = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.15, 8), matHealthPill);
+            pillBody.rotation.x = Math.PI / 2;
+            pillGroup.add(pillBody);
+            
+            // 빛나는 효과를 위한 PointLight 추가
+            const pillLight = new THREE.PointLight(0xff00ff, 1.5, 2);
+            pillLight.position.set(0, 0, 0);
+            pillGroup.add(pillLight);
+            
+            pillGroup.position.copy(pos);
+            pillGroup.position.y = 0.8;
+            pillGroup.userData.isHealthPill = true;
+            pillGroup.userData.pillLight = pillLight;
+            pillGroup.userData.baseY = 0.8; // 원래 Y 위치 저장
+            pillGroup.userData.floatTime = 0; // 부동 애니메이션용 시간
+            pillGroup.userData.lifeTime = 0; // 알약 수명 (30초 후 삭제)
+            scene.add(pillGroup);
+            healthPills.push(pillGroup);
+        }
+
+        function updateHealthPills(dt) {
+            for(let i = healthPills.length - 1; i >= 0; i--) {
+                const pill = healthPills[i];
+                
+                // 수명 증가
+                pill.userData.lifeTime += dt;
+                
+                // 30초 지나면 삭제
+                if(pill.userData.lifeTime >= 30.0) {
+                    scene.remove(pill);
+                    healthPills.splice(i, 1);
+                    continue;
+                }
+                
+                // 회전 애니메이션
+                pill.rotation.y += dt * 2;
+                
+                // 부동 애니메이션 (원래 위치 기준으로 부유)
+                pill.userData.floatTime += dt;
+                pill.position.y = pill.userData.baseY + Math.sin(pill.userData.floatTime * 3) * 0.1;
+                
+                // 플레이어와의 거리 체크 (3D 거리)
+                const dist = pill.position.distanceTo(position);
+                if(dist < 1.2) {
+                    // HP 회복
+                    const oldHP = playerHP;
+                    playerHP = Math.min(100, playerHP + 20);
+                    
+                    if(playerHP !== oldHP) { // 실제로 회복된 경우에만
+                        elHpBar.style.width = playerHP + '%';
+                        elHpText.innerText = "HP: " + playerHP;
+                        if(playerHP > 50) elHpBar.style.background = "#4caf50";
+                        else if(playerHP > 20) elHpBar.style.background = "#ff9800";
+                        else elHpBar.style.background = "#f44336";
+                        
+                        // 효과음 재생
+                        SoundGen.playHealthPill();
+                    }
+                    
+                    scene.remove(pill);
+                    healthPills.splice(i, 1);
+                }
+            }
+        }
+
+        let fireTimer = 0;
+        function handleShooting(dt) {
+            if(isDead) return;
+            const w = WEAPONS[curWeaponIdx];
+            
+            if (fireCooldown > 0) fireCooldown -= dt;
+
+            if(knifeSwing > 0) {
+                knifeSwing -= dt * 4.5; // 약간 느리게 (더 자연스럽게)
+                const swingProgress = knifeSwing; // 1.0 -> 0.0
+                const swingPhase = 1.0 - swingProgress; // 0.0 -> 1.0
+                
+                // 부드러운 가속/감속 곡선 (ease-in-out)
+                const swingEase = 0.5 - 0.5 * Math.cos(swingPhase * Math.PI); // 0.0 -> 1.0 (부드러운 S자 곡선)
+                const swingEaseOut = Math.sin(swingPhase * Math.PI); // 0.0 -> 1.0 -> 0.0
+                
+                // 왼쪽에서 오른쪽으로 크게 휘두르기 - 범위 확대
+                const startX = -0.7;
+                const endX = 0.7;
+                weaponModel.position.x = startX + (endX - startX) * swingEase;
+                
+                // 손목 회전 (Y축) - 더 넓은 범위로 휘두르기
+                const rotationY = -2.5 + (2.5 - (-2.5)) * swingEase;
+                weaponModel.rotation.y = rotationY;
+                
+                // 손목 회전 (Z축) - 자연스러운 휘두름
+                weaponModel.rotation.z = -0.15 + swingEaseOut * 0.7;
+                
+                // 손목 회전 (X축) - 위아래 움직임
+                weaponModel.rotation.x = 0.25 + swingEaseOut * 0.3;
+                
+                // 앞뒤 이동 - 더 큰 범위
+                weaponModel.position.z = -0.3 + swingEaseOut * 0.3;
+                
+                // 위아래 움직임 - 더 자연스럽게
+                weaponModel.position.y = -0.2 + swingEaseOut * 0.15;
+                
+                if(knifeSwing < 0) { 
+                    knifeSwing = 0; 
+                    // 기본 위치로 복귀
+                    weaponModel.rotation.y = 0; 
+                    weaponModel.rotation.z = -0.15;
+                    weaponModel.rotation.x = 0.25;
+                    weaponModel.position.x = 0.3; 
+                    weaponModel.position.z = -0.35;
+                    weaponModel.position.y = -0.2;
+                }
+            }
+            
+            if(isFiring && !isReloading) {
+                if (w.type === 'KNIFE' || w.ammo > 0) {
+                    if (fireCooldown <= 0) {
+                        if (w.automatic) {
+                            fireCooldown = w.fireRate; 
+                            shoot(w);
+                        } else {
+                            if (!hasFiredSemi) {
+                                fireCooldown = w.fireRate; 
+                                shoot(w);
+                                hasFiredSemi = true; 
+                            }
+                        }
+                    }
+                } else if (w.ammo <= 0 && w.type !== 'KNIFE') {
+                    // 매번 빈 격발 소리 재생 (hasClickedEmpty 체크 제거)
+                    if(fireCooldown <= 0) {
+                        SoundGen.playDryFire();
+                        elAmmoVal.classList.add('no-ammo');
+                        setTimeout(()=>elAmmoVal.classList.remove('no-ammo'), 200);
+                        fireCooldown = 0.2; // 빈 격발도 쿨다운 적용
+                    }
+                }
+            }
+        }
+
+        function shoot(w) {
+            if(w.type !== 'KNIFE') {
+                w.ammo--;
+                updateUI();
+                const kick = isAiming ? w.recoil * 0.3 : w.recoil;
+                recoil.x += kick; recoil.z += kick;
+                
+                if(muzzleFlash) {
+                    muzzleFlash.visible = true;
+                    muzzleFlash.rotation.z = Math.random() * 6;
+                    setTimeout(() => muzzleFlash.visible = false, 30);
+                }
+
+                if(w.type === 'SNIPER') {
+                    setTimeout(() => {
+                        SoundGen.playBoltAction();
+                        weaponModel.rotation.z = 0.2;
+                        setTimeout(() => weaponModel.rotation.z = 0, 200);
+                    }, 600);
+                }
+
+                // FIXED: REMOVED THE BUGGY EMISSIVE FLASH CODE HERE
+                
+                spawnShell();
+                SoundGen.playShoot(w.type);
+            } else {
+                knifeSwing = 1.0; 
+                SoundGen.playKnife();
+            }
+
+            const ray = new THREE.Raycaster();
+            ray.setFromCamera(new THREE.Vector2(0,0), camera);
+            if(!isAiming && w.type !== 'KNIFE') {
+                ray.ray.direction.x += (Math.random()-0.5)*0.05;
+                ray.ray.direction.y += (Math.random()-0.5)*0.05;
+            }
+            const range = (w.type === 'KNIFE') ? 3.0 : 100;
+            
+            const targets = scene.children.filter(obj => obj !== weaponContainer);
+            const hits = ray.intersectObjects(targets, true);
+
+            for(let h of hits) {
+                if(h.distance > range) continue;
+                
+                let isEnemy = false;
+                let p = h.object;
+                
+                // Fix: Find parent with userData.hp
+                while(p) {
+                    if(p.userData && p.userData.hp !== undefined) {
+                        isEnemy = true;
+                        break;
+                    }
+                    if(p.parent === scene || !p.parent) break;
+                    p = p.parent;
+                }
+                
+                if(!isEnemy) {
+                    // Check if it's a map collider before placing decal
+                    if(w.type !== 'KNIFE' && h.object.geometry && h.face) createDecal(h.point, h.face.normal);
+                }
+                
+                if(isEnemy && p.userData.hp > 0) {
+                    // 강한 히트마커 효과
+                    elHitMarker.style.opacity = 1;
+                    elHitMarker.style.transform = "translate(-50%, -50%) rotate(45deg) scale(1.5)";
+                    elHitMarker.style.filter = "brightness(1.5) drop-shadow(0 0 8px red)";
+                    setTimeout(() => {
+                        elHitMarker.style.opacity = 0;
+                        elHitMarker.style.transform = "translate(-50%, -50%) rotate(45deg) scale(1)";
+                        elHitMarker.style.filter = "brightness(1) drop-shadow(0 0 4px red)";
+                    }, 150);
+                    
+                    // 화면 흔들림 효과 (피격 감각)
+                    const shakeIntensity = h.object.name === 'head' ? 0.15 : 0.08;
+                    hitShake.intensity = shakeIntensity;
+                    hitShake.x = (Math.random() - 0.5) * shakeIntensity;
+                    hitShake.y = (Math.random() - 0.5) * shakeIntensity;
+                    
+                    // 화면 빨간색 플래시 (피격 감각)
+                    elDamage.style.opacity = h.object.name === 'head' ? 0.6 : 0.4;
+                    elDamage.style.background = h.object.name === 'head' 
+                        ? 'radial-gradient(circle, transparent 40%, rgba(255, 0, 0, 0.7) 100%)'
+                        : 'radial-gradient(circle, transparent 50%, rgba(255, 0, 0, 0.5) 100%)';
+                    setTimeout(() => {
+                        elDamage.style.opacity = 0;
+                    }, 80);
+                    
+                    // 피격 사운드 효과
+                    SoundGen.playHit();
+                    
+                    createBlood(h.point);
+
+                    let dmg = w.damage;
+                    if(h.object.name === 'head') {
+                        dmg *= 3; 
+                        elHeadshot.classList.add('active');
+                        setTimeout(() => elHeadshot.classList.remove('active'), 500);
+                        SoundGen.playHeadshot();
+                    } else if(h.object.name === 'limb') {
+                        dmg *= 0.7; 
+                    }
+
+                    // Flash Red - 더 강하게
+                    p.children.forEach(c => {
+                         if(c.isMesh && c.material && c.material.emissive) {
+                             c.material.emissive.setHex(0xff0000);
+                             c.material.emissiveIntensity = 1.5; // 더 밝게
+                         }
+                    });
+                    p.userData.flashTimer = 0.15; // 더 오래 지속 
+                    
+                    p.userData.hp -= dmg;
+                    const hpPercent = Math.max(0, p.userData.hp / p.userData.maxHp);
+                    p.userData.hpBar.scale.x = hpPercent;
+
+                    if(p.userData.hp <= 0) {
+                        p.userData.isDead = true; 
+                        const enemyPos = p.position.clone();
+                        scene.remove(p);
+                        const index = enemies.indexOf(p);
+                        if (index > -1) enemies.splice(index, 1);
+                        
+                        // 30% 확률로 HP 회복 알약 드랍
+                        if(Math.random() < 0.3) {
+                            createHealthPill(enemyPos);
+                        }
+                        
+                        // setTimeout 제거 - spawnTimer 시스템이 처리함
+                    }
+                    break;
+                }
+                
+                if(!isEnemy) break;
+            }
+        }
+        
+        function checkCollision(newPos) {
+            const playerMin = new THREE.Vector3(newPos.x - PLAYER_RADIUS, newPos.y - 0.5, newPos.z - PLAYER_RADIUS);
+            const playerMax = new THREE.Vector3(newPos.x + PLAYER_RADIUS, newPos.y + 0.5, newPos.z + PLAYER_RADIUS);
+            const playerBox = new THREE.Box3(playerMin, playerMax);
+            for(const collider of colliders) {
+                if(playerBox.intersectsBox(collider)) return true;
+            }
+            return false;
+        }
+
+        function onResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            
+            // 후처리 효과 리사이즈
+            // 후처리 캔버스 리사이즈
+            if (postProcessingCanvas) {
+                postProcessingCanvas.width = window.innerWidth;
+                postProcessingCanvas.height = window.innerHeight;
+            }
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const time = performance.now();
+            const dt = Math.min((time - lastTime) / 1000, 0.1);
+            lastTime = time;
+
+            if(!isDead && !isPaused) {
+                handleShooting(dt);
+                
+                const targetHeight = keys.ctrl ? 1.0 : 1.7;
+                let nextY = position.y + (targetHeight - position.y) * 10 * dt; 
+                velocityY -= 20.0 * dt;
+                if(nextY < targetHeight && velocityY < 0) {
+                     if(!isGrounded) SoundGen.playJump(true); 
+                     nextY = targetHeight; velocityY = 0; isGrounded = true;
+                } else if(!isGrounded) {
+                     nextY += velocityY * dt;
+                }
+                position.y = nextY;
+                
+                const w = WEAPONS[curWeaponIdx];
+                let speed = 5.0;
+                if(keys.shift && !isAiming && !keys.ctrl && w.type !== 'KNIFE') speed = 9.0; 
+                if(keys.ctrl) speed = 2.5; if(isAiming) speed = 2.0; 
+
+                const q = new THREE.Quaternion();
+                q.setFromEuler(new THREE.Euler(rotation.x, rotation.y, 0, 'YXZ'));
+                camera.quaternion.copy(q);
+
+                const dx = keys.d - keys.a; const dy = keys.s - keys.w; 
+                if(dx !== 0 || dy !== 0) {
+                    const fwd = new THREE.Vector3(0, 0, -1).applyAxisAngle(new THREE.Vector3(0,1,0), rotation.y);
+                    const rgt = new THREE.Vector3(1, 0, 0).applyAxisAngle(new THREE.Vector3(0,1,0), rotation.y);
+                    const moveDir = fwd.multiplyScalar(-dy).add(rgt.multiplyScalar(dx)).normalize();
+                    const moveStep = moveDir.multiplyScalar(speed * dt);
+                    let nextPos = position.clone(); nextPos.x += moveStep.x;
+                    if(!checkCollision(nextPos)) position.x = nextPos.x;
+                    nextPos = position.clone(); nextPos.z += moveStep.z;
+                    if(!checkCollision(nextPos)) position.z = nextPos.z;
+
+                    if(!isAiming) {
+                        if (isGrounded) {
+                            moveDistance += speed * dt;
+                            if (moveDistance > STEP_INTERVAL) {
+                                SoundGen.playStep();
+                                moveDistance = 0;
+                            }
+                        }
+
+                        const bobFreq = keys.shift ? 15 : 8; const bobAmp = keys.shift ? 0.05 : 0.02;
+                        weaponContainer.position.y += Math.sin(time * 0.001 * bobFreq) * bobAmp;
+                        weaponContainer.position.x += Math.cos(time * 0.001 * (bobFreq/2)) * bobAmp;
+                    }
+                }
+
+                const isSniperAiming = isAiming && w.type === 'SNIPER';
+                if (isSniperAiming) {
+                    weaponContainer.visible = false; elScope.style.display = 'block'; elCrosshair.style.display = 'none';
+                } else {
+                    weaponContainer.visible = true; elScope.style.display = 'none';
+                    elCrosshair.style.display = 'block'; elCrosshair.style.opacity = (isAiming && w.type !== 'KNIFE') ? 0 : 1;
+                }
+
+                // Hide/Show front sight based on aiming
+                weaponModel.traverse((child) => {
+                    if(child.userData && child.userData.isSight) {
+                        child.visible = isAiming;
+                    }
+                });
+
+                let targetPos = w.posHip; let targetFov = 70;
+                if(isAiming) {
+                    if(w.type === 'SNIPER') targetFov = w.fovAds;
+                    else if(w.type !== 'KNIFE') { targetPos = w.posAds; targetFov = w.fovAds; }
+                    else targetPos = w.posAds; 
+                }
+
+                currentPos.lerp(targetPos, 15 * dt);
+                camera.fov += (targetFov - camera.fov) * 15 * dt;
+                camera.updateProjectionMatrix();
+
+                // 화면 흔들림 효과 적용 (피격 감각)
+                if(hitShake.intensity > 0) {
+                    hitShake.x = (Math.random() - 0.5) * hitShake.intensity;
+                    hitShake.y = (Math.random() - 0.5) * hitShake.intensity;
+                    hitShake.intensity *= 0.85; // 점진적으로 감소
+                    if(hitShake.intensity < 0.01) {
+                        hitShake.intensity = 0;
+                        hitShake.x = 0;
+                        hitShake.y = 0;
+                    }
+                }
+                
+                camera.position.copy(position);
+                camera.position.x += hitShake.x;
+                camera.position.y += hitShake.y;
+                weaponContainer.position.copy(position);
+                weaponContainer.position.x += hitShake.x;
+                weaponContainer.position.y += hitShake.y;
+                weaponContainer.quaternion.copy(camera.quaternion);
+                weaponContainer.translateX(currentPos.x);
+                weaponContainer.translateY(currentPos.y);
+                weaponContainer.translateZ(currentPos.z);
+
+                recoil.x *= (1 - 10*dt); recoil.z *= (1 - 10*dt);
+                
+                // 나이프일 때만 특별한 위치/회전 처리
+                if(w.type === 'KNIFE') {
+                    if(knifeSwing === 0) {
+                        // 나이프 기본 각도 유지 (손에 쥔 각도 - 개선된 위치)
+                        weaponModel.rotation.z = -0.15; // 손목 각도 유지
+                        weaponModel.rotation.x = 0.25; // 위로 기울임
+                        weaponModel.rotation.y = 0; // 기본 Y 회전
+                        weaponModel.position.x = 0.3; // 기본 X 위치
+                        weaponModel.position.z = -0.35; // 기본 Z 위치
+                        weaponModel.position.y = -0.2; // 기본 Y 위치
+                    }
+                } else {
+                    // 다른 무기들은 원래대로 (recoil만 적용)
+                    weaponModel.position.y = THREE.MathUtils.lerp(weaponModel.position.y, 0, 10 * dt);
+                    weaponModel.rotation.x = recoil.x + (isReloading ? 0.5 : 0); 
+                    weaponModel.position.z = recoil.z;
+                    weaponModel.rotation.z = 0;
+                }
+                elVignette.style.opacity = (isAiming && w.type !== 'KNIFE') ? 0.5 : 0;
+            }
+
+            updateShells(dt);
+            updateParticles(dt);
+            if(!isPaused) {
+                updateHealthPills(dt);
+            }
+            updateEnemies(dt);
+            
+            // 물리 엔진 업데이트
+            if (usePhysics && physicsWorld) {
+                updatePhysics(dt);
+            }
+            
+            // 렌더링
+            renderer.render(scene, camera);
+            
+            // 후처리 효과 적용 (렌더링 후)
+            if (usePostProcessing && postProcessingEnabled) {
+                applyPostProcessing();
+            }
+        }
+    </script>
+</body>
+</html>
