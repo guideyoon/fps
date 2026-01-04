@@ -2768,7 +2768,8 @@
                                 hasFiredSemi = false;
                             }
                         } else if (isAimingHeld) {
-                            // 조준 모드일 때는 왼쪽 터치도 시점 변경으로 처리 (부드럽게)
+                            // 조준 모드일 때는 왼쪽 터치도 시점 변경으로 처리
+                            // 일반 대기 상태 오른쪽 터치와 동일한 감도 적용
                             // lastTouchX/Y가 초기화되지 않았으면 현재 위치로 설정
                             if (lastTouchX === 0 && lastTouchY === 0) {
                                 lastTouchX = touch.clientX;
@@ -2776,7 +2777,7 @@
                             }
                             const moveDx = touch.clientX - lastTouchX;
                             const moveDy = touch.clientY - lastTouchY;
-                            const sens = SENSITIVITY_ADS * 1.0; // 조준 모드 감도 (더 부드럽게)
+                            const sens = SENSITIVITY_MOUSE * 2; // 일반 대기 상태와 동일한 감도
                             
                             rotation.y -= moveDx * sens;
                             rotation.x -= moveDy * sens;
