@@ -1158,19 +1158,26 @@
             // 조명 토글 버튼 이벤트
             const lightToggleBtn = document.getElementById('light-toggle-btn');
             if (lightToggleBtn) {
-                lightToggleBtn.addEventListener('click', () => {
-                    if (ceilingLight) {
+                const toggleLight = () => {
+                    if (ceilingLight && ambientLight) {
                         ceilingLight.visible = !ceilingLight.visible;
+                        if (ceilingLight.visible) {
+                            // 조명 켤 때 더 밝게
+                            ceilingLight.intensity = 2.5;
+                            ambientLight.intensity = 0.7;
+                        } else {
+                            // 조명 끌 때 원래대로
+                            ceilingLight.intensity = 2.0;
+                            ambientLight.intensity = 0.4;
+                        }
                         lightToggleBtn.classList.toggle('active', ceilingLight.visible);
                     }
-                });
+                };
+                lightToggleBtn.addEventListener('click', toggleLight);
                 lightToggleBtn.addEventListener('touchstart', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    if (ceilingLight) {
-                        ceilingLight.visible = !ceilingLight.visible;
-                        lightToggleBtn.classList.toggle('active', ceilingLight.visible);
-                    }
+                    toggleLight();
                 }, { passive: false });
             }
 
@@ -2697,6 +2704,9 @@
         function setupMobileControls() {
             console.log('Setting up mobile controls');
             
+            const screenWidth = window.innerWidth;
+            const leftHalf = screenWidth / 2;
+            
             // 화면 전체 터치 이벤트 - document.body에 직접 등록
             document.body.addEventListener('touchstart', (e) => {
                 // 버튼 영역 체크 (버튼 클릭은 무시)
@@ -2705,30 +2715,26 @@
                     return; // 버튼 클릭은 처리하지 않음
                 }
                 
-                if (e.touches.length > 0) {
-                    const touch = e.touches[0];
+                // 모든 터치 처리
+                Array.from(e.touches).forEach(touch => {
+                    const isLeftSide = touch.clientX < leftHalf;
                     
-                    // 두 번째 터치가 발생하면 첫 번째 터치를 취소하고 새로운 터치를 첫 번째로 처리
-                    if (e.touches.length > 1 && touchMoveId !== null) {
-                        // 기존 터치 취소
-                        touchMoveActive = false;
-                        touchMoveId = null;
-                        keys.w = 0;
-                        keys.s = 0;
-                        keys.a = 0;
-                        keys.d = 0;
-                    }
-                    
-                    // 첫 번째 터치만 이동 제어로 사용 (두 번째 터치 사용 안 함)
-                    if (touchMoveId === null) {
+                    if (isLeftSide && touchMoveId === null) {
+                        // 왼쪽 화면 - 이동 제어
                         touchMoveId = touch.identifier;
                         touchMoveActive = true;
                         touchStartX = touch.clientX;
                         touchStartY = touch.clientY;
                         lastTouchX = touch.clientX;
                         lastTouchY = touch.clientY;
+                    } else if (!isLeftSide && touchLookId === null) {
+                        // 오른쪽 화면 - 시점 제어
+                        touchLookId = touch.identifier;
+                        touchLookActive = true;
+                        lastTouchX = touch.clientX;
+                        lastTouchY = touch.clientY;
                     }
-                }
+                });
             }, { passive: false });
             
             document.body.addEventListener('touchmove', (e) => {
@@ -2740,36 +2746,37 @@
                 
                 e.preventDefault();
                 
-                // 이동 제어 (첫 번째 터치)
+                const currentScreenWidth = window.innerWidth;
+                const currentLeftHalf = currentScreenWidth / 2;
+                
+                // 왼쪽 터치 - 앞/뒤 이동 (위/아래 드래그)
                 if (touchMoveActive && touchMoveId !== null) {
                     const touch = Array.from(e.touches).find(t => t.identifier === touchMoveId);
-                    if (touch) {
-                        const dx = touch.clientX - touchStartX;
+                    if (touch && touch.clientX < currentLeftHalf) {
                         const dy = touch.clientY - touchStartY;
-                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        const distance = Math.abs(dy);
                         
-                        // 이동 감지 및 적용 - 더 부드럽고 반응성 좋게
-                        if (distance > 3) {
-                            // 드래그 방향으로 이동 - 감도 개선
-                            const moveX = Math.max(-1, Math.min(1, dx / 50));
-                            const moveY = Math.max(-1, Math.min(1, -dy / 50)); // 위로 드래그 = 앞으로
-                            
-                            // 더 부드러운 이동을 위해 임계값 사용
-                            keys.w = Math.abs(moveY) > 0.1 ? Math.max(0, moveY) : 0;
-                            keys.s = Math.abs(moveY) > 0.1 ? Math.max(0, -moveY) : 0;
-                            keys.a = Math.abs(moveX) > 0.1 ? Math.max(0, -moveX) : 0;
-                            keys.d = Math.abs(moveX) > 0.1 ? Math.max(0, moveX) : 0;
+                        // 위로 드래그 = 앞으로, 아래로 드래그 = 뒤로
+                        if (distance > 5) {
+                            const moveY = Math.max(-1, Math.min(1, -dy / 60)); // 위로 드래그 = 양수
+                            keys.w = Math.max(0, moveY);
+                            keys.s = Math.max(0, -moveY);
+                            keys.a = 0;
+                            keys.d = 0;
                         } else {
                             keys.w = 0;
                             keys.s = 0;
-                            keys.a = 0;
-                            keys.d = 0;
                         }
-                        
-                        // 시점 변경도 함께 (이동과 동시에) - 두 번째 터치 없이
+                    }
+                }
+                
+                // 오른쪽 터치 - 시점 변경
+                if (touchLookActive && touchLookId !== null) {
+                    const touch = Array.from(e.touches).find(t => t.identifier === touchLookId);
+                    if (touch && touch.clientX >= currentLeftHalf) {
                         const moveDx = touch.clientX - lastTouchX;
                         const moveDy = touch.clientY - lastTouchY;
-                        const sens = isAiming ? SENSITIVITY_ADS * 1.5 : SENSITIVITY_MOUSE * 1.5;
+                        const sens = isAiming ? SENSITIVITY_ADS * 2 : SENSITIVITY_MOUSE * 2;
                         
                         rotation.y -= moveDx * sens;
                         rotation.x -= moveDy * sens;
@@ -2795,6 +2802,12 @@
                     keys.d = 0;
                 }
                 
+                // 시점 제어 종료
+                const lookTouch = endedTouches.find(t => t.identifier === touchLookId);
+                if (lookTouch) {
+                    touchLookActive = false;
+                    touchLookId = null;
+                }
             }, { passive: false });
             
             document.body.addEventListener('touchcancel', (e) => {
