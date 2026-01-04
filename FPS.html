@@ -2749,23 +2749,41 @@
                 const currentScreenWidth = window.innerWidth;
                 const currentLeftHalf = currentScreenWidth / 2;
                 
-                // 왼쪽 터치 - 앞/뒤 이동 (위/아래 드래그)
+                // 왼쪽 터치 - 앞/뒤/좌/우 이동 (대각선 이동 가능)
+                const w = WEAPONS[curWeaponIdx];
+                const isSniperAiming = w.type === 'SNIPER' && isAimingHeld;
+                
                 if (touchMoveActive && touchMoveId !== null) {
                     const touch = Array.from(e.touches).find(t => t.identifier === touchMoveId);
                     if (touch && touch.clientX < currentLeftHalf) {
-                        const dy = touch.clientY - touchStartY;
-                        const distance = Math.abs(dy);
-                        
-                        // 위로 드래그 = 앞으로, 아래로 드래그 = 뒤로
-                        if (distance > 5) {
-                            const moveY = Math.max(-1, Math.min(1, -dy / 60)); // 위로 드래그 = 양수
-                            keys.w = Math.max(0, moveY);
-                            keys.s = Math.max(0, -moveY);
-                            keys.a = 0;
-                            keys.d = 0;
+                        // 저격 조준 모드에서는 왼쪽 터치가 발사 버튼 역할
+                        if (isSniperAiming) {
+                            // 발사 처리 (터치 시 한 번만)
+                            if (!isFiring) {
+                                isFiring = true;
+                                hasFiredSemi = false;
+                            }
                         } else {
-                            keys.w = 0;
-                            keys.s = 0;
+                            // 일반 이동 모드
+                            const dx = touch.clientX - touchStartX;
+                            const dy = touch.clientY - touchStartY;
+                            const distance = Math.sqrt(dx * dx + dy * dy);
+                            
+                            // 대각선 이동 가능
+                            if (distance > 5) {
+                                const moveX = Math.max(-1, Math.min(1, dx / 60));
+                                const moveY = Math.max(-1, Math.min(1, -dy / 60)); // 위로 드래그 = 양수
+                                
+                                keys.w = Math.max(0, moveY);
+                                keys.s = Math.max(0, -moveY);
+                                keys.a = Math.max(0, -moveX);
+                                keys.d = Math.max(0, moveX);
+                            } else {
+                                keys.w = 0;
+                                keys.s = 0;
+                                keys.a = 0;
+                                keys.d = 0;
+                            }
                         }
                     }
                 }
@@ -2776,7 +2794,9 @@
                     if (touch && touch.clientX >= currentLeftHalf) {
                         const moveDx = touch.clientX - lastTouchX;
                         const moveDy = touch.clientY - lastTouchY;
-                        const sens = isAiming ? SENSITIVITY_ADS * 2 : SENSITIVITY_MOUSE * 2;
+                        // 이동 중일 때 시점 변경 속도 증가
+                        const moveSpeedMultiplier = (touchMoveActive && keys.w > 0 || keys.s > 0 || keys.a > 0 || keys.d > 0) ? 1.5 : 1.0;
+                        const sens = (isAiming ? SENSITIVITY_ADS * 2 : SENSITIVITY_MOUSE * 2) * moveSpeedMultiplier;
                         
                         rotation.y -= moveDx * sens;
                         rotation.x -= moveDy * sens;
@@ -2920,14 +2940,20 @@
                 }, { passive: false });
             }
             
-            // 조준 버튼 - 누르고 있으면 자동 조준 모드 + 자동 발사
+            // 조준 버튼 - 저격 모드는 조준만, 다른 무기는 자동 발사
             if (btnAim) {
                 btnAim.addEventListener('touchstart', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     isAimingHeld = true;
                     isAiming = true;
-                    isFiring = true; // 자동 발사 시작
+                    const w = WEAPONS[curWeaponIdx];
+                    // 저격 모드는 조준만, 다른 무기는 자동 발사
+                    if (w.type !== 'SNIPER') {
+                        isFiring = true; // 자동 발사 시작
+                    } else {
+                        isFiring = false; // 저격 모드는 왼쪽 터치로 발사
+                    }
                 }, { passive: false });
                 
                 btnAim.addEventListener('touchend', (e) => {
