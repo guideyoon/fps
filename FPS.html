@@ -521,24 +521,31 @@
             },
             playBoltAction: function() {
                 if(!this.ensureContext()) return;
-                const t = this.ctx.currentTime;
-                const osc1 = this.ctx.createOscillator();
-                const gain1 = this.ctx.createGain();
-                osc1.type = 'sawtooth';
-                osc1.frequency.setValueAtTime(150, t);
-                gain1.gain.setValueAtTime(0.2, t);
-                gain1.gain.linearRampToValueAtTime(0, t + 0.1);
-                osc1.connect(gain1); gain1.connect(this.ctx.destination);
-                osc1.start(t); osc1.stop(t + 0.1);
+                
+                // 저격총 볼트 액션 오디오 파일 사용 (c-rifle.mp3), 없으면 기존 소리 생성
+                if(this.audioBuffers['c-rifle']) {
+                    this.playAudioFile('c-rifle', 0.8);
+                } else {
+                    // 기존 소리 생성 (폴백)
+                    const t = this.ctx.currentTime;
+                    const osc1 = this.ctx.createOscillator();
+                    const gain1 = this.ctx.createGain();
+                    osc1.type = 'sawtooth';
+                    osc1.frequency.setValueAtTime(150, t);
+                    gain1.gain.setValueAtTime(0.2, t);
+                    gain1.gain.linearRampToValueAtTime(0, t + 0.1);
+                    osc1.connect(gain1); gain1.connect(this.ctx.destination);
+                    osc1.start(t); osc1.stop(t + 0.1);
 
-                const osc2 = this.ctx.createOscillator();
-                const gain2 = this.ctx.createGain();
-                osc2.type = 'square';
-                osc2.frequency.setValueAtTime(200, t + 0.15);
-                gain2.gain.setValueAtTime(0.2, t + 0.15);
-                gain2.gain.linearRampToValueAtTime(0, t + 0.25);
-                osc2.connect(gain2); gain2.connect(this.ctx.destination);
-                osc2.start(t + 0.15); osc2.stop(t + 0.25);
+                    const osc2 = this.ctx.createOscillator();
+                    const gain2 = this.ctx.createGain();
+                    osc2.type = 'square';
+                    osc2.frequency.setValueAtTime(200, t + 0.15);
+                    gain2.gain.setValueAtTime(0.2, t + 0.15);
+                    gain2.gain.linearRampToValueAtTime(0, t + 0.25);
+                    osc2.connect(gain2); gain2.connect(this.ctx.destination);
+                    osc2.start(t + 0.15); osc2.stop(t + 0.25);
+                }
             },
             playZombieAttack: function() {
                 if(!this.ensureContext()) return;
