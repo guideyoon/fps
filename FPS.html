@@ -1029,7 +1029,7 @@
                 usePostProcessing = false;
             }
 
-            window.addEventListener('resize', onResize);
+            // 리사이즈 이벤트는 init() 끝부분에서 별도로 처리 (중복 방지)
             document.addEventListener('contextmenu', e => e.preventDefault());
 
             document.body.addEventListener('mousedown', () => {
