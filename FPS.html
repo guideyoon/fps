@@ -172,6 +172,35 @@
         }
         .key { color: #fbbc05; font-weight: bold; }
         
+        /* PC 감도 조정 UI */
+        #sensitivity-control {
+            position: absolute;
+            top: 120px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            z-index: 100;
+            pointer-events: auto;
+        }
+        #sensitivity-control label {
+            color: white;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+        #sensitivity-slider {
+            width: 150px;
+            margin-right: 10px;
+        }
+        #sensitivity-value {
+            color: #fbbc05;
+            font-weight: bold;
+            font-size: 14px;
+            min-width: 40px;
+            display: inline-block;
+        }
+        
         /* 조명 토글 버튼 */
         #light-toggle-btn {
             position: fixed;
@@ -432,8 +461,19 @@
         let usePhysics = true; // 물리 엔진 사용 여부 (활성화)
         let usePostProcessing = true; // 후처리 효과 사용 여부 (활성화)
         
-        const SENSITIVITY_MOUSE = 0.002;
-        const SENSITIVITY_ADS = 0.0005;
+        // 감도 설정 (기본값)
+        let SENSITIVITY_MOUSE = 0.002;
+        let SENSITIVITY_ADS = 0.0005;
+        
+        // localStorage에서 감도 로드
+        const savedSensitivity = localStorage.getItem('mouseSensitivity');
+        if (savedSensitivity) {
+            const sensitivity = parseFloat(savedSensitivity);
+            if (!isNaN(sensitivity) && sensitivity > 0) {
+                SENSITIVITY_MOUSE = sensitivity;
+                SENSITIVITY_ADS = sensitivity * 0.25; // ADS는 일반 감도의 25%
+            }
+        }
 
         // Player State
         let position = new THREE.Vector3(0, 1.7, 5);
@@ -2777,7 +2817,7 @@
                             }
                             const moveDx = touch.clientX - lastTouchX;
                             const moveDy = touch.clientY - lastTouchY;
-                            const sens = SENSITIVITY_MOUSE * 2; // 일반 대기 상태와 동일한 감도
+                            const sens = SENSITIVITY_MOUSE * 1.2; // 모바일 감도 (더 낮게)
                             
                             rotation.y -= moveDx * sens;
                             rotation.x -= moveDy * sens;
@@ -2818,7 +2858,7 @@
                         const moveDy = touch.clientY - lastTouchY;
                         // 이동 중일 때 시점 변경 속도 증가
                         const moveSpeedMultiplier = (touchMoveActive && keys.w > 0 || keys.s > 0 || keys.a > 0 || keys.d > 0) ? 1.5 : 1.0;
-                        const sens = (isAiming ? SENSITIVITY_ADS * 2 : SENSITIVITY_MOUSE * 2) * moveSpeedMultiplier;
+                        const sens = (isAiming ? SENSITIVITY_ADS * 1.5 : SENSITIVITY_MOUSE * 1.2) * moveSpeedMultiplier;
                         
                         rotation.y -= moveDx * sens;
                         rotation.x -= moveDy * sens;
@@ -2851,7 +2891,7 @@
                         } else {
                             const moveDx = rightSideTouch.clientX - lastTouchX;
                             const moveDy = rightSideTouch.clientY - lastTouchY;
-                            const sens = SENSITIVITY_ADS * 2; // 조준 모드 감도
+                            const sens = SENSITIVITY_ADS * 1.5; // 조준 모드 감도 (모바일)
                             
                             rotation.y -= moveDx * sens;
                             rotation.x -= moveDy * sens;
