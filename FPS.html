@@ -3105,7 +3105,6 @@
             curWeaponIdx = idx;
             buildWeapon(curWeaponIdx);
             // 무기 전환 시 초기 위치 설정 (나이프가 아닌 경우만)
-            const w = WEAPONS[curWeaponIdx];
             if(w.type !== 'KNIFE') {
                 weaponModel.position.y = -0.5;
                 weaponModel.position.x = 0;
