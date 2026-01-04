@@ -2854,6 +2854,11 @@
                     keys.s = 0;
                     keys.a = 0;
                     keys.d = 0;
+                    // 저격 조준 모드에서 왼쪽 터치 종료 시 발사 중지
+                    const w = WEAPONS[curWeaponIdx];
+                    if (w.type === 'SNIPER' && isAimingHeld) {
+                        isFiring = false;
+                    }
                 }
                 
                 // 시점 제어 종료
