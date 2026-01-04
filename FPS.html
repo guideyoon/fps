@@ -371,6 +371,7 @@
     -->
     <script>
         let camera, scene, renderer;
+        let ceilingLight = null;
         let lastTime = performance.now();
         
         // 확장 기능 변수
@@ -993,9 +994,10 @@
 
             const ambient = new THREE.AmbientLight(0xffffff, 0.4); 
             scene.add(ambient);
-            const ceilingLight = new THREE.PointLight(0xffaa00, 0.8, 30);
+            ceilingLight = new THREE.PointLight(0xffaa00, 0.8, 30);
             ceilingLight.position.set(0, 10, 0);
             ceilingLight.castShadow = true;
+            ceilingLight.visible = false; // 초기에는 꺼져있음
             scene.add(ceilingLight);
             const blueLight = new THREE.DirectionalLight(0x4455ff, 0.5);
             blueLight.position.set(-10, 5, -10);
@@ -1101,6 +1103,25 @@
             }, {once:true});
 
             document.getElementById('restart-btn').addEventListener('click', restartGame);
+            
+            // 조명 토글 버튼 이벤트
+            const lightToggleBtn = document.getElementById('light-toggle-btn');
+            if (lightToggleBtn) {
+                lightToggleBtn.addEventListener('click', () => {
+                    if (ceilingLight) {
+                        ceilingLight.visible = !ceilingLight.visible;
+                        lightToggleBtn.classList.toggle('active', ceilingLight.visible);
+                    }
+                });
+                lightToggleBtn.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (ceilingLight) {
+                        ceilingLight.visible = !ceilingLight.visible;
+                        lightToggleBtn.classList.toggle('active', ceilingLight.visible);
+                    }
+                }, { passive: false });
+            }
 
             setupControls();
             animate();
