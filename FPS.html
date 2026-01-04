@@ -2552,7 +2552,11 @@
         }
 
         // 모바일 터치 컨트롤 변수
-        let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        // 더 확실한 모바일 감지: User Agent + 터치 지원 + 화면 크기
+        let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+                      ('ontouchstart' in window) ||
+                      (navigator.maxTouchPoints > 0) ||
+                      (window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
         let touchMoveActive = false;
         let touchLookActive = false;
         let touchMoveId = null;
@@ -2562,11 +2566,18 @@
         let isAimingHeld = false;
         
         function setupControls() {
-            // 모바일 터치 컨트롤 설정
-            if (isMobile || 'ontouchstart' in window) {
+            // 모바일 터치 컨트롤 설정 - 다시 한번 확인
+            const isMobileDevice = isMobile || 
+                                  ('ontouchstart' in window) || 
+                                  (navigator.maxTouchPoints > 0) ||
+                                  (window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+            
+            if (isMobileDevice) {
                 setupMobileControls();
+                console.log('Mobile controls enabled');
                 // 모바일에서는 포인터 락 사용 안 함
             } else {
+                console.log('Desktop controls enabled');
                 // 데스크톱에서만 포인터 락 사용
                 // 포인터 잠금 변경 감지
                 document.addEventListener('pointerlockchange', () => {
