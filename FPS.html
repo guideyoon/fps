@@ -171,6 +171,39 @@
             background: rgba(0,0,0,0.3); padding: 10px; border-radius: 5px;
         }
         .key { color: #fbbc05; font-weight: bold; }
+        
+        /* 조명 토글 버튼 */
+        #light-toggle-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffaa00;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 1000;
+            user-select: none;
+            transition: background 0.2s, border-color 0.2s;
+            pointer-events: auto;
+            -webkit-tap-highlight-color: transparent;
+        }
+        #light-toggle-btn:hover {
+            background: rgba(0, 0, 0, 0.8);
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+        #light-toggle-btn.active {
+            background: rgba(255, 170, 0, 0.3);
+            border-color: #ffaa00;
+            color: #ffcc44;
+            box-shadow: 0 0 15px rgba(255, 170, 0, 0.5);
+        }
 
         /* 모바일 컨트롤 */
         #controls { 
@@ -286,6 +319,23 @@
             #btn-aim { bottom: 15px; right: 135px; }
             #btn-weapon1, #btn-weapon2, #btn-weapon3, #btn-weapon4 {
                 top: 8px;
+            }
+            #light-toggle-btn {
+                top: 15px;
+                right: 15px;
+                width: 45px;
+                height: 45px;
+                font-size: 22px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            #light-toggle-btn {
+                top: 15px;
+                right: 15px;
+                width: 45px;
+                height: 45px;
+                font-size: 22px;
             }
         }
         
@@ -2640,7 +2690,7 @@
             gameContainer.addEventListener('touchstart', (e) => {
                 // 버튼 영역 체크 (버튼 클릭은 무시)
                 const target = e.target;
-                if (target.classList.contains('mobile-btn') || target.classList.contains('light-toggle-btn')) {
+                if (target.closest('.mobile-btn') || target.closest('#light-toggle-btn')) {
                     return; // 버튼 클릭은 처리하지 않음
                 }
                 
@@ -2669,6 +2719,12 @@
             }, { passive: false });
             
             gameContainer.addEventListener('touchmove', (e) => {
+                // 버튼 영역 체크
+                const target = e.target;
+                if (target.closest('.mobile-btn') || target.closest('#light-toggle-btn')) {
+                    return;
+                }
+                
                 e.preventDefault();
                 
                 // 이동 제어 (첫 번째 터치)
@@ -2680,10 +2736,10 @@
                         const distance = Math.sqrt(dx * dx + dy * dy);
                         
                         // 이동 감지 및 적용
-                        if (distance > 3) {
+                        if (distance > 5) {
                             // 드래그 방향으로 이동
-                            const moveX = Math.max(-1, Math.min(1, dx / 30));
-                            const moveY = Math.max(-1, Math.min(1, -dy / 30)); // 위로 드래그 = 앞으로
+                            const moveX = Math.max(-1, Math.min(1, dx / 40));
+                            const moveY = Math.max(-1, Math.min(1, -dy / 40)); // 위로 드래그 = 앞으로
                             
                             keys.w = Math.max(0, moveY);
                             keys.s = Math.max(0, -moveY);
