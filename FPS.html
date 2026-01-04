@@ -3041,6 +3041,42 @@
                 }, { passive: false });
             }
         }
+        
+        // PC 감도 조정 설정
+        function setupSensitivityControl() {
+            if (isMobile) return; // 모바일에서는 표시 안 함
+            
+            const sensitivityControl = document.getElementById('sensitivity-control');
+            const sensitivitySlider = document.getElementById('sensitivity-slider');
+            const sensitivityValue = document.getElementById('sensitivity-value');
+            
+            if (!sensitivityControl || !sensitivitySlider || !sensitivityValue) return;
+            
+            // PC에서만 표시
+            sensitivityControl.style.display = 'block';
+            
+            // 현재 감도로 슬라이더 설정
+            sensitivitySlider.value = SENSITIVITY_MOUSE;
+            updateSensitivityDisplay();
+            
+            // 슬라이더 변경 이벤트
+            sensitivitySlider.addEventListener('input', (e) => {
+                const newSensitivity = parseFloat(e.target.value);
+                SENSITIVITY_MOUSE = newSensitivity;
+                SENSITIVITY_ADS = newSensitivity * 0.25; // ADS는 일반 감도의 25%
+                
+                // localStorage에 저장
+                localStorage.setItem('mouseSensitivity', newSensitivity.toString());
+                
+                updateSensitivityDisplay();
+            });
+            
+            function updateSensitivityDisplay() {
+                // 0.002를 기준(1.0)으로 표시
+                const displayValue = (SENSITIVITY_MOUSE / 0.002).toFixed(2);
+                sensitivityValue.textContent = displayValue;
+            }
+        }
 
         function switchWeaponTo(idx) {
             if(curWeaponIdx === idx) return;
