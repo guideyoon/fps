@@ -2770,7 +2770,7 @@
                     }
                 }
                 
-                // 오른쪽 터치 - 시점 변경
+                // 오른쪽 터치 - 시점 변경 (조준 버튼을 누르고 있어도 가능)
                 if (touchLookActive && touchLookId !== null) {
                     const touch = Array.from(e.touches).find(t => t.identifier === touchLookId);
                     if (touch && touch.clientX >= currentLeftHalf) {
@@ -2784,6 +2784,40 @@
                         
                         lastTouchX = touch.clientX;
                         lastTouchY = touch.clientY;
+                    }
+                }
+                
+                // 조준 버튼을 누르고 있는 상태에서도 오른쪽 화면 터치로 시점 변경 가능
+                if (isAimingHeld) {
+                    // 조준 버튼이 아닌 오른쪽 화면의 다른 터치 찾기
+                    const rightSideTouch = Array.from(e.touches).find(t => {
+                        const btnAim = document.getElementById('btn-aim');
+                        if (!btnAim) return false;
+                        const btnRect = btnAim.getBoundingClientRect();
+                        const isOnButton = t.clientX >= btnRect.left && t.clientX <= btnRect.right &&
+                                          t.clientY >= btnRect.top && t.clientY <= btnRect.bottom;
+                        return !isOnButton && t.clientX >= currentLeftHalf && t.identifier !== touchMoveId;
+                    });
+                    
+                    if (rightSideTouch) {
+                        // 조준 버튼을 누르고 있는 상태에서 오른쪽 화면 터치로 시점 변경
+                        if (touchLookId === null || touchLookId !== rightSideTouch.identifier) {
+                            touchLookId = rightSideTouch.identifier;
+                            touchLookActive = true;
+                            lastTouchX = rightSideTouch.clientX;
+                            lastTouchY = rightSideTouch.clientY;
+                        } else {
+                            const moveDx = rightSideTouch.clientX - lastTouchX;
+                            const moveDy = rightSideTouch.clientY - lastTouchY;
+                            const sens = SENSITIVITY_ADS * 2; // 조준 모드 감도
+                            
+                            rotation.y -= moveDx * sens;
+                            rotation.x -= moveDy * sens;
+                            rotation.x = Math.max(-1.5, Math.min(1.5, rotation.x));
+                            
+                            lastTouchX = rightSideTouch.clientX;
+                            lastTouchY = rightSideTouch.clientY;
+                        }
                     }
                 }
             }, { passive: false });
