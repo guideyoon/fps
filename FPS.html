@@ -2695,14 +2695,10 @@
         
         // 모바일 터치 컨트롤 설정
         function setupMobileControls() {
-            const gameContainer = document.getElementById('game-container');
-            if (!gameContainer) {
-                console.warn('Game container not found');
-                return;
-            }
+            console.log('Setting up mobile controls');
             
-            // 화면 전체 터치 이벤트 - 화면 어디에서든 드래그로 이동 및 시점 변경
-            gameContainer.addEventListener('touchstart', (e) => {
+            // 화면 전체 터치 이벤트 - document.body에 직접 등록
+            document.body.addEventListener('touchstart', (e) => {
                 // 버튼 영역 체크 (버튼 클릭은 무시)
                 const target = e.target;
                 if (target.closest('.mobile-btn') || target.closest('#light-toggle-btn')) {
@@ -2733,7 +2729,7 @@
                 }
             }, { passive: false });
             
-            gameContainer.addEventListener('touchmove', (e) => {
+            document.body.addEventListener('touchmove', (e) => {
                 // 버튼 영역 체크
                 const target = e.target;
                 if (target.closest('.mobile-btn') || target.closest('#light-toggle-btn')) {
@@ -2801,7 +2797,7 @@
                 }
             }, { passive: false });
             
-            gameContainer.addEventListener('touchend', (e) => {
+            document.body.addEventListener('touchend', (e) => {
                 const endedTouches = Array.from(e.changedTouches);
                 
                 // 이동 제어 종료
@@ -2821,6 +2817,18 @@
                     touchLookActive = false;
                     touchLookId = null;
                 }
+            }, { passive: false });
+            
+            document.body.addEventListener('touchcancel', (e) => {
+                // 터치가 취소되면 모든 키 리셋
+                touchMoveActive = false;
+                touchLookActive = false;
+                touchMoveId = null;
+                touchLookId = null;
+                keys.w = 0;
+                keys.s = 0;
+                keys.a = 0;
+                keys.d = 0;
             }, { passive: false });
             
             // 모바일 버튼 이벤트
