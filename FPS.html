@@ -162,32 +162,10 @@
             pointer-events: auto;
         }
         
-        /* 가상 조이스틱 */
-        #joystick {
-            position: absolute; bottom: 20px; left: 20px;
-            width: 120px; height: 120px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.2);
-            border: 3px solid rgba(255, 255, 255, 0.4);
-            display: none;
-            pointer-events: auto;
-            z-index: 30;
-        }
-        #joystick-handle {
-            position: absolute; top: 50%; left: 50%;
-            width: 50px; height: 50px;
-            margin: -25px 0 0 -25px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.6);
-            border: 2px solid rgba(255, 255, 255, 0.8);
-            transform: translate(0, 0);
-            transition: transform 0.1s;
-        }
-        
         /* 모바일 버튼 */
         .mobile-btn {
             position: absolute;
-            width: 60px; height: 60px;
+            width: 50px; height: 50px;
             border-radius: 50%;
             background: rgba(255, 255, 255, 0.3);
             border: 2px solid rgba(255, 255, 255, 0.5);
@@ -195,7 +173,7 @@
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 20px;
+            font-size: 18px;
             font-weight: bold;
             pointer-events: auto;
             z-index: 30;
@@ -207,27 +185,32 @@
             transform: scale(0.95);
         }
         
+        /* 무기 교체 버튼 - 상단 중앙 */
+        #btn-weapon1 { top: 10px; left: 50%; transform: translateX(-150%); }
+        #btn-weapon2 { top: 10px; left: 50%; transform: translateX(-50%); }
+        #btn-weapon3 { top: 10px; left: 50%; transform: translateX(50%); }
+        #btn-weapon4 { top: 10px; left: 50%; transform: translateX(150%); }
+        
+        /* 기타 버튼 - 하단 */
         #btn-jump { bottom: 20px; right: 20px; }
-        #btn-reload { bottom: 90px; right: 20px; }
-        #btn-weapon1 { bottom: 20px; right: 90px; }
-        #btn-weapon2 { bottom: 20px; right: 160px; }
-        #btn-weapon3 { bottom: 20px; right: 230px; }
-        #btn-weapon4 { bottom: 20px; right: 300px; }
-        #btn-aim { bottom: 160px; right: 20px; }
+        #btn-reload { bottom: 20px; right: 90px; }
+        #btn-aim { bottom: 20px; right: 160px; }
         
         /* 모바일 UI 조정 */
         @media (max-width: 768px) {
             #ammo-info {
-                bottom: 20px; right: 20px;
+                bottom: 80px; right: 20px;
                 font-size: 24px;
             }
             #weapon-label { font-size: 14px; }
             #hp-container {
                 width: 200px; height: 15px;
-                bottom: 20px;
+                bottom: 80px;
+                left: 20px;
             }
             #hp-text {
-                bottom: 40px;
+                bottom: 100px;
+                left: 20px;
                 font-size: 14px;
             }
             #controls-guide {
@@ -235,59 +218,59 @@
                 top: 10px; left: 10px;
                 padding: 8px;
             }
-            #joystick, .mobile-btn {
+            .mobile-btn {
                 display: flex;
+            }
+            /* 무기 버튼 상단 중앙 정렬 */
+            #btn-weapon1, #btn-weapon2, #btn-weapon3, #btn-weapon4 {
+                width: 45px; height: 45px;
+                font-size: 16px;
+                top: 10px;
             }
         }
         
         /* 가로 모드 */
         @media (orientation: landscape) and (max-width: 1024px) {
-            #joystick {
-                width: 100px; height: 100px;
-                bottom: 15px; left: 15px;
-            }
-            #joystick-handle {
-                width: 40px; height: 40px;
-                margin: -20px 0 0 -20px;
-            }
             .mobile-btn {
                 width: 50px; height: 50px;
                 font-size: 16px;
             }
-            #btn-jump { bottom: 15px; right: 15px; }
-            #btn-reload { bottom: 75px; right: 15px; }
-            #btn-weapon1 { bottom: 15px; right: 75px; }
-            #btn-weapon2 { bottom: 15px; right: 135px; }
-            #btn-weapon3 { bottom: 15px; right: 195px; }
-            #btn-weapon4 { bottom: 15px; right: 255px; }
-            #btn-aim { bottom: 135px; right: 15px; }
+            #btn-jump { bottom: 15px; right: 15px; width: 45px; height: 45px; font-size: 16px; }
+            #btn-reload { bottom: 15px; right: 70px; width: 45px; height: 45px; font-size: 16px; }
+            #btn-aim { bottom: 15px; right: 125px; width: 45px; height: 45px; font-size: 16px; }
+            #btn-weapon1, #btn-weapon2, #btn-weapon3, #btn-weapon4 {
+                width: 40px; height: 40px;
+                font-size: 14px;
+                top: 8px;
+            }
             #ammo-info {
-                bottom: 15px; right: 15px;
+                bottom: 70px; right: 15px;
                 font-size: 20px;
             }
             #hp-container {
                 width: 180px; height: 12px;
-                bottom: 15px;
+                bottom: 70px;
+                left: 15px;
+            }
+            #hp-text {
+                bottom: 85px;
+                left: 15px;
+                font-size: 12px;
             }
         }
         
         /* 세로 모드 */
         @media (orientation: portrait) and (max-width: 768px) {
-            #joystick {
-                width: 110px; height: 110px;
-                bottom: 15px; left: 15px;
-            }
             #btn-jump { bottom: 15px; right: 15px; }
-            #btn-reload { bottom: 85px; right: 15px; }
-            #btn-weapon1 { bottom: 15px; right: 85px; }
-            #btn-weapon2 { bottom: 15px; right: 155px; }
-            #btn-weapon3 { bottom: 15px; right: 225px; }
-            #btn-weapon4 { bottom: 15px; right: 295px; }
-            #btn-aim { bottom: 155px; right: 15px; }
+            #btn-reload { bottom: 15px; right: 75px; }
+            #btn-aim { bottom: 15px; right: 135px; }
+            #btn-weapon1, #btn-weapon2, #btn-weapon3, #btn-weapon4 {
+                top: 8px;
+            }
         }
         
         @media (hover: hover) and (pointer: fine) {
-            #controls, #joystick, .mobile-btn { display: none !important; }
+            #controls, .mobile-btn { display: none !important; }
         }
     </style>
 </head>
@@ -339,17 +322,13 @@
     </div>
     
     <!-- 모바일 컨트롤 -->
-    <div id="joystick">
-        <div id="joystick-handle"></div>
-    </div>
-    
-    <button class="mobile-btn" id="btn-jump">↑</button>
-    <button class="mobile-btn" id="btn-reload">R</button>
     <button class="mobile-btn" id="btn-weapon1">1</button>
     <button class="mobile-btn" id="btn-weapon2">2</button>
     <button class="mobile-btn" id="btn-weapon3">3</button>
     <button class="mobile-btn" id="btn-weapon4">4</button>
-    <button class="mobile-btn" id="btn-aim">👁</button>
+    <button class="mobile-btn" id="btn-jump">↑</button>
+    <button class="mobile-btn" id="btn-reload">R</button>
+    <button class="mobile-btn" id="btn-aim">🎯</button>
 
     <!-- Three.js - 더 빠른 CDN 사용 -->
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
@@ -1082,15 +1061,7 @@
             window.addEventListener('orientationchange', () => {
                 setTimeout(() => {
                     onResize();
-                    // 모바일 컨트롤 위치 재조정
-                    if (isMobile || 'ontouchstart' in window) {
-                        const joystick = document.getElementById('joystick');
-                        if (joystick) {
-                            const rect = joystick.getBoundingClientRect();
-                            joystickCenter.x = rect.left + rect.width / 2;
-                            joystickCenter.y = rect.top + rect.height / 2;
-                        }
-                    }
+                    // 모바일 컨트롤 위치 재조정 (필요시 추가)
                 }, 300); // 모바일 브라우저 주소창 애니메이션 대기
             });
             
@@ -2454,11 +2425,13 @@
 
         // 모바일 터치 컨트롤 변수
         let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        let joystickActive = false;
-        let joystickCenter = { x: 0, y: 0 };
-        let joystickPos = { x: 0, y: 0 };
+        let touchMoveActive = false;
         let touchLookActive = false;
+        let touchMoveId = null;
+        let touchLookId = null;
         let lastTouchX = 0, lastTouchY = 0;
+        let touchStartX = 0, touchStartY = 0;
+        let isAimingHeld = false;
         
         function setupControls() {
             // 모바일 터치 컨트롤 설정
@@ -2576,121 +2549,136 @@
         
         // 모바일 터치 컨트롤 설정
         function setupMobileControls() {
-            const joystick = document.getElementById('joystick');
-            const joystickHandle = document.getElementById('joystick-handle');
-            const touchLeft = document.getElementById('touch-left');
-            const touchRight = document.getElementById('touch-right');
-            
-            if (!joystick || !joystickHandle || !touchLeft || !touchRight) {
-                console.warn('Mobile control elements not found');
+            const gameContainer = document.getElementById('game-container');
+            if (!gameContainer) {
+                console.warn('Game container not found');
                 return;
             }
             
-            // 조이스틱 초기 위치 설정
-            function updateJoystickPosition() {
-                const rect = joystick.getBoundingClientRect();
-                joystickCenter.x = rect.left + rect.width / 2;
-                joystickCenter.y = rect.top + rect.height / 2;
-            }
-            updateJoystickPosition();
-            window.addEventListener('resize', updateJoystickPosition);
-            
-            // 조이스틱 터치 이벤트
-            let joystickTouchId = null;
-            joystick.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                if (joystickTouchId === null && e.touches.length > 0) {
-                    joystickTouchId = e.touches[0].identifier;
-                    joystickActive = true;
-                    updateJoystickPosition();
+            // 화면 전체 터치 이벤트 - 드래그로 이동 및 시점 변경
+            gameContainer.addEventListener('touchstart', (e) => {
+                // 버튼 영역 체크 (버튼 클릭은 무시)
+                const target = e.target;
+                if (target.classList.contains('mobile-btn')) {
+                    return; // 버튼 클릭은 처리하지 않음
+                }
+                
+                if (e.touches.length > 0) {
+                    const touch = e.touches[0];
+                    touchStartX = touch.clientX;
+                    touchStartY = touch.clientY;
+                    lastTouchX = touch.clientX;
+                    lastTouchY = touch.clientY;
+                    
+                    // 첫 번째 터치 - 이동 제어
+                    if (touchMoveId === null) {
+                        touchMoveId = touch.identifier;
+                        touchMoveActive = true;
+                    }
+                    // 두 번째 터치 - 시점 제어
+                    else if (touchLookId === null && e.touches.length > 1) {
+                        const secondTouch = e.touches[1];
+                        touchLookId = secondTouch.identifier;
+                        touchLookActive = true;
+                        lastTouchX = secondTouch.clientX;
+                        lastTouchY = secondTouch.clientY;
+                    }
                 }
             }, { passive: false });
             
-            joystick.addEventListener('touchmove', (e) => {
+            gameContainer.addEventListener('touchmove', (e) => {
                 e.preventDefault();
-                if (!joystickActive) return;
-                const touch = Array.from(e.touches).find(t => t.identifier === joystickTouchId);
-                if (!touch) return;
                 
-                const dx = touch.clientX - joystickCenter.x;
-                const dy = touch.clientY - joystickCenter.y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-                const maxDistance = 35;
-                
-                if (distance > maxDistance) {
-                    joystickPos.x = (dx / distance) * maxDistance;
-                    joystickPos.y = (dy / distance) * maxDistance;
-                } else {
-                    joystickPos.x = dx;
-                    joystickPos.y = dy;
+                // 이동 제어 (첫 번째 터치)
+                if (touchMoveActive && touchMoveId !== null) {
+                    const touch = Array.from(e.touches).find(t => t.identifier === touchMoveId);
+                    if (touch) {
+                        const dx = touch.clientX - touchStartX;
+                        const dy = touch.clientY - touchStartY;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        
+                        // 이동 감지 (최소 거리 필요)
+                        if (distance > 10) {
+                            const moveX = dx / 100; // 이동 감도
+                            const moveY = -dy / 100;
+                            
+                            keys.w = Math.max(0, moveY);
+                            keys.s = Math.max(0, -moveY);
+                            keys.a = Math.max(0, -moveX);
+                            keys.d = Math.max(0, moveX);
+                        }
+                    }
                 }
                 
-                joystickHandle.style.transform = `translate(${joystickPos.x}px, ${joystickPos.y}px)`;
-                
-                // 이동 입력
-                const moveX = joystickPos.x / maxDistance;
-                const moveY = -joystickPos.y / maxDistance;
-                keys.w = Math.max(0, moveY);
-                keys.s = Math.max(0, -moveY);
-                keys.a = Math.max(0, -moveX);
-                keys.d = Math.max(0, moveX);
+                // 시점 제어 (두 번째 터치 또는 첫 번째 터치가 이동 영역 밖)
+                if (touchLookActive && touchLookId !== null) {
+                    const touch = Array.from(e.touches).find(t => t.identifier === touchLookId);
+                    if (touch) {
+                        const dx = touch.clientX - lastTouchX;
+                        const dy = touch.clientY - lastTouchY;
+                        const sens = isAiming ? SENSITIVITY_ADS * 2 : SENSITIVITY_MOUSE * 2;
+                        
+                        rotation.y -= dx * sens;
+                        rotation.x -= dy * sens;
+                        rotation.x = Math.max(-1.5, Math.min(1.5, rotation.x));
+                        
+                        lastTouchX = touch.clientX;
+                        lastTouchY = touch.clientY;
+                    }
+                } else if (touchMoveActive && touchMoveId !== null) {
+                    // 첫 번째 터치로도 시점 변경 가능 (이동과 동시에)
+                    const touch = Array.from(e.touches).find(t => t.identifier === touchMoveId);
+                    if (touch) {
+                        const dx = touch.clientX - lastTouchX;
+                        const dy = touch.clientY - lastTouchY;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        
+                        // 시점 변경 (이동보다 우선)
+                        if (distance > 5) {
+                            const sens = isAiming ? SENSITIVITY_ADS * 1.5 : SENSITIVITY_MOUSE * 1.5;
+                            rotation.y -= dx * sens;
+                            rotation.x -= dy * sens;
+                            rotation.x = Math.max(-1.5, Math.min(1.5, rotation.x));
+                        }
+                        
+                        lastTouchX = touch.clientX;
+                        lastTouchY = touch.clientY;
+                    }
+                }
             }, { passive: false });
             
-            joystick.addEventListener('touchend', (e) => {
-                e.preventDefault();
-                const touch = Array.from(e.changedTouches).find(t => t.identifier === joystickTouchId);
-                if (touch) {
-                    joystickActive = false;
-                    joystickTouchId = null;
-                    joystickPos.x = 0;
-                    joystickPos.y = 0;
-                    joystickHandle.style.transform = 'translate(0, 0)';
+            gameContainer.addEventListener('touchend', (e) => {
+                const endedTouches = Array.from(e.changedTouches);
+                
+                // 이동 제어 종료
+                const moveTouch = endedTouches.find(t => t.identifier === touchMoveId);
+                if (moveTouch) {
+                    touchMoveActive = false;
+                    touchMoveId = null;
                     keys.w = 0;
                     keys.s = 0;
                     keys.a = 0;
                     keys.d = 0;
+                    
+                    // 첫 번째 터치가 끝나면 두 번째 터치를 첫 번째로 승격
+                    if (touchLookId !== null && e.touches.length > 0) {
+                        touchMoveId = touchLookId;
+                        touchMoveActive = true;
+                        touchLookId = null;
+                        touchLookActive = false;
+                        const remainingTouch = e.touches[0];
+                        touchStartX = remainingTouch.clientX;
+                        touchStartY = remainingTouch.clientY;
+                        lastTouchX = remainingTouch.clientX;
+                        lastTouchY = remainingTouch.clientY;
+                    }
                 }
-            }, { passive: false });
-            
-            // 오른쪽 화면 터치 - 시야 조작 및 발사
-            let rightTouchId = null;
-            touchRight.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                if (rightTouchId === null && e.touches.length > 0) {
-                    rightTouchId = e.touches[0].identifier;
-                    touchLookActive = true;
-                    lastTouchX = e.touches[0].clientX;
-                    lastTouchY = e.touches[0].clientY;
-                    isFiring = true;
-                }
-            }, { passive: false });
-            
-            touchRight.addEventListener('touchmove', (e) => {
-                e.preventDefault();
-                if (!touchLookActive) return;
-                const touch = Array.from(e.touches).find(t => t.identifier === rightTouchId);
-                if (!touch) return;
                 
-                const dx = touch.clientX - lastTouchX;
-                const dy = touch.clientY - lastTouchY;
-                const sens = isAiming ? SENSITIVITY_ADS * 2 : SENSITIVITY_MOUSE * 2;
-                
-                rotation.y -= dx * sens;
-                rotation.x -= dy * sens;
-                rotation.x = Math.max(-1.5, Math.min(1.5, rotation.x));
-                
-                lastTouchX = touch.clientX;
-                lastTouchY = touch.clientY;
-            }, { passive: false });
-            
-            touchRight.addEventListener('touchend', (e) => {
-                e.preventDefault();
-                const touch = Array.from(e.changedTouches).find(t => t.identifier === rightTouchId);
-                if (touch) {
+                // 시점 제어 종료
+                const lookTouch = endedTouches.find(t => t.identifier === touchLookId);
+                if (lookTouch) {
                     touchLookActive = false;
-                    rightTouchId = null;
-                    isFiring = false;
-                    hasFiredSemi = false;
+                    touchLookId = null;
                 }
             }, { passive: false });
             
@@ -2706,6 +2694,7 @@
             if (btnJump) {
                 btnJump.addEventListener('touchstart', (e) => {
                     e.preventDefault();
+                    e.stopPropagation();
                     if (!keys.space && isGrounded) {
                         velocityY = 8.0;
                         isGrounded = false;
@@ -2715,6 +2704,7 @@
                 }, { passive: false });
                 btnJump.addEventListener('touchend', (e) => {
                     e.preventDefault();
+                    e.stopPropagation();
                     keys.space = false;
                 }, { passive: false });
             }
@@ -2722,6 +2712,7 @@
             if (btnReload) {
                 btnReload.addEventListener('touchstart', (e) => {
                     e.preventDefault();
+                    e.stopPropagation();
                     doReload();
                 }, { passive: false });
             }
@@ -2729,49 +2720,51 @@
             if (btnWeapon1) {
                 btnWeapon1.addEventListener('touchstart', (e) => {
                     e.preventDefault();
+                    e.stopPropagation();
                     switchWeaponTo(0);
                 }, { passive: false });
             }
             if (btnWeapon2) {
                 btnWeapon2.addEventListener('touchstart', (e) => {
                     e.preventDefault();
+                    e.stopPropagation();
                     switchWeaponTo(1);
                 }, { passive: false });
             }
             if (btnWeapon3) {
                 btnWeapon3.addEventListener('touchstart', (e) => {
                     e.preventDefault();
+                    e.stopPropagation();
                     switchWeaponTo(2);
                 }, { passive: false });
             }
             if (btnWeapon4) {
                 btnWeapon4.addEventListener('touchstart', (e) => {
                     e.preventDefault();
+                    e.stopPropagation();
                     switchWeaponTo(3);
                 }, { passive: false });
             }
             
+            // 조준 버튼 - 누르고 있으면 자동 조준 모드 + 자동 발사
             if (btnAim) {
                 btnAim.addEventListener('touchstart', (e) => {
                     e.preventDefault();
+                    e.stopPropagation();
+                    isAimingHeld = true;
                     isAiming = true;
+                    isFiring = true; // 자동 발사 시작
                 }, { passive: false });
+                
                 btnAim.addEventListener('touchend', (e) => {
                     e.preventDefault();
+                    e.stopPropagation();
+                    isAimingHeld = false;
                     isAiming = false;
+                    isFiring = false;
+                    hasFiredSemi = false;
                 }, { passive: false });
             }
-            
-            // 왼쪽 화면 더블 탭 - 조준
-            let lastTapTime = 0;
-            touchLeft.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                const now = Date.now();
-                if (now - lastTapTime < 300) {
-                    isAiming = !isAiming;
-                }
-                lastTapTime = now;
-            }, { passive: false });
         }
 
         function switchWeaponTo(idx) {
