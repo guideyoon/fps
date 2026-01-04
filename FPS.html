@@ -2309,13 +2309,12 @@
             if(isDead) return;
             
             // Spawn - 타이머는 항상 증가, 적 생성만 일시정지 상태가 아닐 때
+            // 리젠 수 제한 없음 - 게임이 끝날 때까지 계속 스폰
             if (!isPaused) {
                 spawnTimer += dt;
                 if (spawnTimer >= SPAWN_INTERVAL) {
                     spawnTimer = 0; // 타이머 리셋 (생성 여부와 무관)
-                    if (enemies.length < MAX_ENEMIES) {
-                        createEnemyAI();
-                    }
+                    createEnemyAI();
                 }
             }
             
