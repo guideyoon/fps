@@ -2707,24 +2707,26 @@
                 
                 if (e.touches.length > 0) {
                     const touch = e.touches[0];
-                    touchStartX = touch.clientX;
-                    touchStartY = touch.clientY;
-                    lastTouchX = touch.clientX;
-                    lastTouchY = touch.clientY;
                     
-                    // 첫 번째 터치 - 이동 제어
+                    // 두 번째 터치가 발생하면 첫 번째 터치를 취소하고 새로운 터치를 첫 번째로 처리
+                    if (e.touches.length > 1 && touchMoveId !== null) {
+                        // 기존 터치 취소
+                        touchMoveActive = false;
+                        touchMoveId = null;
+                        keys.w = 0;
+                        keys.s = 0;
+                        keys.a = 0;
+                        keys.d = 0;
+                    }
+                    
+                    // 첫 번째 터치만 이동 제어로 사용 (두 번째 터치 사용 안 함)
                     if (touchMoveId === null) {
                         touchMoveId = touch.identifier;
                         touchMoveActive = true;
-                    }
-                    
-                    // 두 번째 터치 - 시점 제어
-                    if (e.touches.length > 1 && touchLookId === null) {
-                        const secondTouch = e.touches[1];
-                        touchLookId = secondTouch.identifier;
-                        touchLookActive = true;
-                        lastTouchX = secondTouch.clientX;
-                        lastTouchY = secondTouch.clientY;
+                        touchStartX = touch.clientX;
+                        touchStartY = touch.clientY;
+                        lastTouchX = touch.clientX;
+                        lastTouchY = touch.clientY;
                     }
                 }
             }, { passive: false });
@@ -2764,32 +2766,13 @@
                             keys.d = 0;
                         }
                         
-                        // 시점 변경도 함께 (이동과 동시에)
-                        if (touchLookId === null) {
-                            const moveDx = touch.clientX - lastTouchX;
-                            const moveDy = touch.clientY - lastTouchY;
-                            const sens = isAiming ? SENSITIVITY_ADS * 1.5 : SENSITIVITY_MOUSE * 1.5;
-                            
-                            rotation.y -= moveDx * sens;
-                            rotation.x -= moveDy * sens;
-                            rotation.x = Math.max(-1.5, Math.min(1.5, rotation.x));
-                        }
+                        // 시점 변경도 함께 (이동과 동시에) - 두 번째 터치 없이
+                        const moveDx = touch.clientX - lastTouchX;
+                        const moveDy = touch.clientY - lastTouchY;
+                        const sens = isAiming ? SENSITIVITY_ADS * 1.5 : SENSITIVITY_MOUSE * 1.5;
                         
-                        lastTouchX = touch.clientX;
-                        lastTouchY = touch.clientY;
-                    }
-                }
-                
-                // 시점 제어 (두 번째 터치)
-                if (touchLookActive && touchLookId !== null) {
-                    const touch = Array.from(e.touches).find(t => t.identifier === touchLookId);
-                    if (touch) {
-                        const dx = touch.clientX - lastTouchX;
-                        const dy = touch.clientY - lastTouchY;
-                        const sens = isAiming ? SENSITIVITY_ADS * 2 : SENSITIVITY_MOUSE * 2;
-                        
-                        rotation.y -= dx * sens;
-                        rotation.x -= dy * sens;
+                        rotation.y -= moveDx * sens;
+                        rotation.x -= moveDy * sens;
                         rotation.x = Math.max(-1.5, Math.min(1.5, rotation.x));
                         
                         lastTouchX = touch.clientX;
@@ -2812,12 +2795,6 @@
                     keys.d = 0;
                 }
                 
-                // 시점 제어 종료
-                const lookTouch = endedTouches.find(t => t.identifier === touchLookId);
-                if (lookTouch) {
-                    touchLookActive = false;
-                    touchLookId = null;
-                }
             }, { passive: false });
             
             document.body.addEventListener('touchcancel', (e) => {
