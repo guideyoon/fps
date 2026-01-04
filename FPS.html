@@ -2410,7 +2410,14 @@
             const w = WEAPONS[curWeaponIdx];
             if(w.type === 'KNIFE') return;
             isReloading = true;
-            SoundGen.playReload();
+            
+            // 저격총은 c-rifle.mp3 사용, 다른 무기는 기존 재장전 소리
+            if(w.type === 'SNIPER' && SoundGen.audioBuffers['c-rifle']) {
+                SoundGen.playAudioFile('c-rifle', 0.8);
+            } else {
+                SoundGen.playReload();
+            }
+            
             elWeaponLabel.innerText = "RELOADING...";
             weaponModel.rotation.z = 0.5; 
             weaponModel.position.y = -0.1;
