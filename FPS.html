@@ -138,11 +138,142 @@
         }
         .key { color: #fbbc05; font-weight: bold; }
 
-        #controls { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 20; display: flex; }
-        #touch-left, #touch-right { width: 50%; height: 100%; }
+        /* 모바일 컨트롤 */
+        #controls { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            z-index: 20; display: flex; pointer-events: none;
+        }
+        #touch-left, #touch-right { 
+            width: 50%; height: 100%; 
+            pointer-events: auto;
+        }
+        
+        /* 가상 조이스틱 */
+        #joystick {
+            position: absolute; bottom: 20px; left: 20px;
+            width: 120px; height: 120px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            border: 3px solid rgba(255, 255, 255, 0.4);
+            display: none;
+            pointer-events: auto;
+            z-index: 30;
+        }
+        #joystick-handle {
+            position: absolute; top: 50%; left: 50%;
+            width: 50px; height: 50px;
+            margin: -25px 0 0 -25px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.6);
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            transform: translate(0, 0);
+            transition: transform 0.1s;
+        }
+        
+        /* 모바일 버튼 */
+        .mobile-btn {
+            position: absolute;
+            width: 60px; height: 60px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            pointer-events: auto;
+            z-index: 30;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .mobile-btn:active {
+            background: rgba(255, 255, 255, 0.5);
+            transform: scale(0.95);
+        }
+        
+        #btn-jump { bottom: 20px; right: 20px; }
+        #btn-reload { bottom: 90px; right: 20px; }
+        #btn-weapon1 { bottom: 20px; right: 90px; }
+        #btn-weapon2 { bottom: 20px; right: 160px; }
+        #btn-weapon3 { bottom: 20px; right: 230px; }
+        #btn-weapon4 { bottom: 20px; right: 300px; }
+        #btn-aim { bottom: 160px; right: 20px; }
+        
+        /* 모바일 UI 조정 */
+        @media (max-width: 768px) {
+            #ammo-info {
+                bottom: 20px; right: 20px;
+                font-size: 24px;
+            }
+            #weapon-label { font-size: 14px; }
+            #hp-container {
+                width: 200px; height: 15px;
+                bottom: 20px;
+            }
+            #hp-text {
+                bottom: 40px;
+                font-size: 14px;
+            }
+            #controls-guide {
+                font-size: 11px;
+                top: 10px; left: 10px;
+                padding: 8px;
+            }
+            #joystick, .mobile-btn {
+                display: flex;
+            }
+        }
+        
+        /* 가로 모드 */
+        @media (orientation: landscape) and (max-width: 1024px) {
+            #joystick {
+                width: 100px; height: 100px;
+                bottom: 15px; left: 15px;
+            }
+            #joystick-handle {
+                width: 40px; height: 40px;
+                margin: -20px 0 0 -20px;
+            }
+            .mobile-btn {
+                width: 50px; height: 50px;
+                font-size: 16px;
+            }
+            #btn-jump { bottom: 15px; right: 15px; }
+            #btn-reload { bottom: 75px; right: 15px; }
+            #btn-weapon1 { bottom: 15px; right: 75px; }
+            #btn-weapon2 { bottom: 15px; right: 135px; }
+            #btn-weapon3 { bottom: 15px; right: 195px; }
+            #btn-weapon4 { bottom: 15px; right: 255px; }
+            #btn-aim { bottom: 135px; right: 15px; }
+            #ammo-info {
+                bottom: 15px; right: 15px;
+                font-size: 20px;
+            }
+            #hp-container {
+                width: 180px; height: 12px;
+                bottom: 15px;
+            }
+        }
+        
+        /* 세로 모드 */
+        @media (orientation: portrait) and (max-width: 768px) {
+            #joystick {
+                width: 110px; height: 110px;
+                bottom: 15px; left: 15px;
+            }
+            #btn-jump { bottom: 15px; right: 15px; }
+            #btn-reload { bottom: 85px; right: 15px; }
+            #btn-weapon1 { bottom: 15px; right: 85px; }
+            #btn-weapon2 { bottom: 15px; right: 155px; }
+            #btn-weapon3 { bottom: 15px; right: 225px; }
+            #btn-weapon4 { bottom: 15px; right: 295px; }
+            #btn-aim { bottom: 155px; right: 15px; }
+        }
         
         @media (hover: hover) and (pointer: fine) {
-            #controls { display: none !important; }
+            #controls, #joystick, .mobile-btn { display: none !important; }
         }
     </style>
 </head>
@@ -192,6 +323,19 @@
         <div id="touch-left"></div>
         <div id="touch-right"></div>
     </div>
+    
+    <!-- 모바일 컨트롤 -->
+    <div id="joystick">
+        <div id="joystick-handle"></div>
+    </div>
+    
+    <button class="mobile-btn" id="btn-jump">↑</button>
+    <button class="mobile-btn" id="btn-reload">R</button>
+    <button class="mobile-btn" id="btn-weapon1">1</button>
+    <button class="mobile-btn" id="btn-weapon2">2</button>
+    <button class="mobile-btn" id="btn-weapon3">3</button>
+    <button class="mobile-btn" id="btn-weapon4">4</button>
+    <button class="mobile-btn" id="btn-aim">👁</button>
 
     <!-- Three.js - 더 빠른 CDN 사용 -->
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
@@ -849,7 +993,9 @@
                 powerPreference: "high-performance" // 고성능 모드
             });
             renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // 최대 2배로 제한
+            // 모바일 성능 최적화: 픽셀 비율 조정
+            const pixelRatio = isMobile ? Math.min(window.devicePixelRatio, 1.5) : Math.min(window.devicePixelRatio, 2);
+            renderer.setPixelRatio(pixelRatio);
             renderer.shadowMap.enabled = true;
             renderer.shadowMap.type = THREE.PCFSoftShadowMap;
             renderer.shadowMap.autoUpdate = false; // 성능 향상
