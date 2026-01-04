@@ -2816,23 +2816,12 @@
                                 hasFiredSemi = false;
                             }
                         } else if (isAimingHeld) {
-                            // 조준 모드일 때는 왼쪽 터치도 시점 변경으로 처리
-                            // 일반 대기 상태 오른쪽 터치와 동일한 감도 적용
-                            // lastTouchX/Y가 초기화되지 않았으면 현재 위치로 설정
-                            if (lastTouchX === 0 && lastTouchY === 0) {
-                                lastTouchX = touch.clientX;
-                                lastTouchY = touch.clientY;
-                            }
-                            const moveDx = touch.clientX - lastTouchX;
-                            const moveDy = touch.clientY - lastTouchY;
-                            const sens = SENSITIVITY_MOUSE * 1.2; // 모바일 감도 (더 낮게)
-                            
-                            rotation.y -= moveDx * sens;
-                            rotation.x -= moveDy * sens;
-                            rotation.x = Math.max(-1.5, Math.min(1.5, rotation.x));
-                            
-                            lastTouchX = touch.clientX;
-                            lastTouchY = touch.clientY;
+                            // 조준 모드일 때는 왼쪽 터치로 시점 변경하지 않음 (이동도 안 함)
+                            // 조준 모드는 오른쪽 터치로만 시점 변경
+                            keys.w = 0;
+                            keys.s = 0;
+                            keys.a = 0;
+                            keys.d = 0;
                         } else {
                             // 일반 이동 모드
                             const dx = touch.clientX - touchStartX;
