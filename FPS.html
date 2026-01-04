@@ -470,21 +470,10 @@
 
         let colliders = [];
 
-        // UI
-        const elAmmoVal = document.getElementById('ammo-val');
-        const elWeaponLabel = document.getElementById('weapon-label');
-        const elCrosshair = document.getElementById('crosshair');
-        const elVignette = document.getElementById('vignette');
-        const elScope = document.getElementById('scope-overlay');
-        const elHpBar = document.getElementById('hp-bar');
-        const elHpText = document.getElementById('hp-text');
-        const elDamage = document.getElementById('damage-overlay');
-        const elPlayTime = document.getElementById('play-time');
-        const elKillCount = document.getElementById('kill-count');
-        const elGameOver = document.getElementById('game-over');
-        const elPauseOverlay = document.getElementById('pause-overlay');
-        const elHeadshot = document.getElementById('headshot-msg');
-        const elHitMarker = document.getElementById('hit-marker');
+        // UI - init() 함수 내부에서 초기화
+        let elAmmoVal, elWeaponLabel, elCrosshair, elVignette, elScope;
+        let elHpBar, elHpText, elDamage, elPlayTime, elKillCount;
+        let elGameOver, elPauseOverlay, elHeadshot, elHitMarker;
 
         // Materials
         const matBody = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.4, metalness: 0.6 });
@@ -971,6 +960,22 @@
         }
 
         function init() {
+            // UI 요소 초기화 (DOM이 로드된 후)
+            elAmmoVal = document.getElementById('ammo-val');
+            elWeaponLabel = document.getElementById('weapon-label');
+            elCrosshair = document.getElementById('crosshair');
+            elVignette = document.getElementById('vignette');
+            elScope = document.getElementById('scope-overlay');
+            elHpBar = document.getElementById('hp-bar');
+            elHpText = document.getElementById('hp-text');
+            elDamage = document.getElementById('damage-overlay');
+            elPlayTime = document.getElementById('play-time');
+            elKillCount = document.getElementById('kill-count');
+            elGameOver = document.getElementById('game-over');
+            elPauseOverlay = document.getElementById('pause-overlay');
+            elHeadshot = document.getElementById('headshot-msg');
+            elHitMarker = document.getElementById('hit-marker');
+            
             scene = new THREE.Scene();
             const fogColor = 0x10151a;
             scene.background = new THREE.Color(fogColor);
