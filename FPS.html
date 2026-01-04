@@ -718,6 +718,13 @@
         const SPAWN_INTERVAL = 2.0;
         let spawnTimer = 0;
         
+        // 멀티플레이어 플레이어 배열
+        let otherPlayers = [];
+        
+        // 플레이어 모델용 재질 (다른 색상으로 구분)
+        const matPlayerBody = new THREE.MeshStandardMaterial({ color: 0x4a90e2, roughness: 0.4, metalness: 0.6 });
+        const matPlayerSkin = new THREE.MeshStandardMaterial({ color: 0xf4a460, roughness: 0.7 });
+        
         // 게임 통계
         let gameStartTime = 0;
         let killCount = 0;
@@ -3789,21 +3796,67 @@
                 if(h.distance > range) continue;
                 
                 let isEnemy = false;
+                let isOtherPlayer = false;
                 let p = h.object;
                 
                 // Fix: Find parent with userData.hp
                 while(p) {
                     if(p.userData && p.userData.hp !== undefined) {
-                        isEnemy = true;
+                        // 다른 플레이어인지 확인 (playerId가 있으면 다른 플레이어)
+                        if (gameMode === 'multi' && p.userData.playerId !== undefined) {
+                            isOtherPlayer = true;
+                        } else {
+                            isEnemy = true;
+                        }
                         break;
                     }
                     if(p.parent === scene || !p.parent) break;
                     p = p.parent;
                 }
                 
-                if(!isEnemy) {
+                if(!isEnemy && !isOtherPlayer) {
                     // Check if it's a map collider before placing decal
                     if(w.type !== 'KNIFE' && h.object.geometry && h.face) createDecal(h.point, h.face.normal);
+                }
+                
+                // 다른 플레이어에게 데미지
+                if(isOtherPlayer && p.userData.hp > 0 && p.userData.playerId !== 1) {
+                    let dmg = w.damage;
+                    if(h.object.name === 'head') {
+                        dmg *= 3;
+                        elHeadshot.classList.add('active');
+                        setTimeout(() => elHeadshot.classList.remove('active'), 500);
+                        SoundGen.playHeadshot();
+                    } else if(h.object.name === 'limb') {
+                        dmg *= 0.7;
+                    }
+                    
+                    // Flash Red
+                    p.children.forEach(c => {
+                        if(c.isMesh && c.material && c.material.emissive) {
+                            c.material.emissive.setHex(0xff0000);
+                            c.material.emissiveIntensity = 1.5;
+                        }
+                    });
+                    p.userData.flashTimer = 0.15;
+                    
+                    p.userData.hp -= dmg;
+                    const hpPercent = Math.max(0, p.userData.hp / p.userData.maxHp);
+                    p.userData.hpBar.scale.x = hpPercent;
+                    
+                    if(p.userData.hp <= 0) {
+                        p.userData.isDead = true;
+                        scene.remove(p);
+                        const index = otherPlayers.indexOf(p);
+                        if (index > -1) otherPlayers.splice(index, 1);
+                        
+                        // Kill 카운트 증가
+                        killCount++;
+                        if (elKillCount) {
+                            elKillCount.innerText = `Kills: ${killCount}`;
+                        }
+                    }
+                    break;
                 }
                 
                 if(isEnemy && p.userData.hp > 0) {
@@ -4084,7 +4137,12 @@
             if(!isPaused) {
                 updateHealthPills(dt);
             }
-            updateEnemies(dt);
+            // 모드별 업데이트
+            if (gameMode === 'single') {
+                updateEnemies(dt);
+            } else if (gameMode === 'multi') {
+                updateOtherPlayers(dt);
+            }
             
             // 물리 엔진 업데이트
             if (usePhysics && physicsWorld) {
