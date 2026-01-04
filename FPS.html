@@ -3706,7 +3706,9 @@ weaponContainer.visible = false; elScope.style.display = 'block'; elCrosshair.st
                 // Hide/Show front sight based on aiming
                 weaponModel.traverse((child) => {
                     if(child.userData && child.userData.isSight) {
-                        child.visible = isAiming;
+                        // 모바일에서 권총은 항상 조준 모드
+                        const shouldAim = isAiming || (isMobile && w.type === 'PISTOL');
+                        child.visible = shouldAim;
                     }
                 });
 
