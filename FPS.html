@@ -39,6 +39,11 @@
             position: absolute; top: 50%; left: 50%; width: 0; height: 0;
             transition: opacity 0.1s;
         }
+        @media (max-width: 768px) {
+            #crosshair {
+                display: none !important;
+            }
+        }
         #crosshair::before, #crosshair::after {
             content: ''; position: absolute; background: rgba(255, 255, 255, 0.8); 
             transform: translate(-50%, -50%); box-shadow: 0 0 2px black;
@@ -2396,7 +2401,9 @@
             if(playerHP <= 0) {
                 isDead = true;
                 elGameOver.style.display = 'flex';
-                document.exitPointerLock();
+                if (!isMobile && document.pointerLockElement === document.body) {
+                    document.exitPointerLock();
+                }
             }
         }
 
@@ -2418,7 +2425,7 @@
             for(let i=0; i<6; i++) createEnemyAI();
             
             // 재시작 후에는 포인터 잠금을 요청하지 않음 (사용자가 클릭해야 함)
-            if(document.pointerLockElement === document.body) {
+            if (!isMobile && document.pointerLockElement === document.body) {
                 document.exitPointerLock();
             }
         }
@@ -2437,32 +2444,34 @@
             // 모바일 터치 컨트롤 설정
             if (isMobile || 'ontouchstart' in window) {
                 setupMobileControls();
-            }
-            
-            // 포인터 잠금 변경 감지
-            document.addEventListener('pointerlockchange', () => {
-                if(document.pointerLockElement !== document.body && isPaused) {
-                    // 포인터 잠금이 해제되고 일시정지 상태면 오버레이 유지
-                    elPauseOverlay.style.display = 'flex';
-                }
-            });
-            
-            document.body.addEventListener('mousedown', (e) => {
-                if(document.pointerLockElement !== document.body && !isDead && !isPaused) {
-                    const promise = document.body.requestPointerLock();
-                    if (promise) promise.catch(err => {});
-                    return;
-                }
-                if(isDead || isPaused) return;
-                if(e.button === 0) isFiring = true;
-                if(e.button === 2) isAiming = true;
-            });
-            document.body.addEventListener('mouseup', (e) => {
-                if(e.button === 0) { isFiring = false; hasFiredSemi = false; hasClickedEmpty = false; }
-                if(e.button === 2) isAiming = false;
-            });
-            document.body.addEventListener('mousemove', (e) => {
-                if(document.pointerLockElement === document.body && !isDead && !isPaused) {
+                // 모바일에서는 포인터 락 사용 안 함
+            } else {
+                // 데스크톱에서만 포인터 락 사용
+                // 포인터 잠금 변경 감지
+                document.addEventListener('pointerlockchange', () => {
+                    if(document.pointerLockElement !== document.body && isPaused) {
+                        // 포인터 잠금이 해제되고 일시정지 상태면 오버레이 유지
+                        elPauseOverlay.style.display = 'flex';
+                    }
+                });
+                
+                document.body.addEventListener('mousedown', (e) => {
+                    if(document.pointerLockElement !== document.body && !isDead && !isPaused) {
+                        const promise = document.body.requestPointerLock();
+                        if (promise) promise.catch(err => {});
+                        return;
+                    }
+                    if(isDead || isPaused) return;
+                    if(e.button === 0) isFiring = true;
+                    if(e.button === 2) isAiming = true;
+                });
+                
+                document.body.addEventListener('mouseup', (e) => {
+                    if(e.button === 0) { isFiring = false; hasFiredSemi = false; hasClickedEmpty = false; }
+                    if(e.button === 2) isAiming = false;
+                });
+                document.body.addEventListener('mousemove', (e) => {
+                    if(document.pointerLockElement === document.body && !isDead && !isPaused) {
                     const sens = isAiming ? SENSITIVITY_ADS : SENSITIVITY_MOUSE;
                     rotation.y -= e.movementX * sens;
                     rotation.x -= e.movementY * sens;
@@ -2555,7 +2564,12 @@
                 return;
             }
             
-            // 화면 전체 터치 이벤트 - 드래그로 이동 및 시점 변경
+            // 화면을 왼쪽/오른쪽으로 나누어 처리
+            const screenWidth = window.innerWidth;
+            const screenHeight = window.innerHeight;
+            const leftHalf = screenWidth * 0.5; // 왼쪽 절반
+            
+            // 화면 전체 터치 이벤트 - 왼쪽은 이동, 오른쪽은 시점 변경
             gameContainer.addEventListener('touchstart', (e) => {
                 // 버튼 영역 체크 (버튼 클릭은 무시)
                 const target = e.target;
@@ -2565,23 +2579,45 @@
                 
                 if (e.touches.length > 0) {
                     const touch = e.touches[0];
-                    touchStartX = touch.clientX;
-                    touchStartY = touch.clientY;
-                    lastTouchX = touch.clientX;
-                    lastTouchY = touch.clientY;
+                    const touchX = touch.clientX;
+                    const touchY = touch.clientY;
                     
-                    // 첫 번째 터치 - 이동 제어
-                    if (touchMoveId === null) {
-                        touchMoveId = touch.identifier;
-                        touchMoveActive = true;
+                    touchStartX = touchX;
+                    touchStartY = touchY;
+                    lastTouchX = touchX;
+                    lastTouchY = touchY;
+                    
+                    // 왼쪽 화면 - 이동 제어
+                    if (touchX < leftHalf) {
+                        if (touchMoveId === null) {
+                            touchMoveId = touch.identifier;
+                            touchMoveActive = true;
+                        }
                     }
-                    // 두 번째 터치 - 시점 제어
-                    else if (touchLookId === null && e.touches.length > 1) {
+                    // 오른쪽 화면 - 시점 제어
+                    else {
+                        if (touchLookId === null) {
+                            touchLookId = touch.identifier;
+                            touchLookActive = true;
+                        }
+                    }
+                    
+                    // 두 번째 터치 처리
+                    if (e.touches.length > 1) {
                         const secondTouch = e.touches[1];
-                        touchLookId = secondTouch.identifier;
-                        touchLookActive = true;
-                        lastTouchX = secondTouch.clientX;
-                        lastTouchY = secondTouch.clientY;
+                        const secondX = secondTouch.clientX;
+                        
+                        if (secondX < leftHalf && touchMoveId === null) {
+                            touchMoveId = secondTouch.identifier;
+                            touchMoveActive = true;
+                            touchStartX = secondTouch.clientX;
+                            touchStartY = secondTouch.clientY;
+                        } else if (secondX >= leftHalf && touchLookId === null) {
+                            touchLookId = secondTouch.identifier;
+                            touchLookActive = true;
+                            lastTouchX = secondTouch.clientX;
+                            lastTouchY = secondTouch.clientY;
+                        }
                     }
                 }
             }, { passive: false });
@@ -2589,7 +2625,7 @@
             gameContainer.addEventListener('touchmove', (e) => {
                 e.preventDefault();
                 
-                // 이동 제어 (첫 번째 터치)
+                // 이동 제어 (왼쪽 화면)
                 if (touchMoveActive && touchMoveId !== null) {
                     const touch = Array.from(e.touches).find(t => t.identifier === touchMoveId);
                     if (touch) {
@@ -2597,20 +2633,34 @@
                         const dy = touch.clientY - touchStartY;
                         const distance = Math.sqrt(dx * dx + dy * dy);
                         
-                        // 이동 감지 (최소 거리 필요)
-                        if (distance > 10) {
-                            const moveX = dx / 100; // 이동 감도
-                            const moveY = -dy / 100;
+                        // 이동 감지 및 적용
+                        if (distance > 5) {
+                            const moveX = dx / 50; // 이동 감도 증가
+                            const moveY = -dy / 50;
                             
-                            keys.w = Math.max(0, moveY);
-                            keys.s = Math.max(0, -moveY);
-                            keys.a = Math.max(0, -moveX);
-                            keys.d = Math.max(0, moveX);
+                            // 정규화하여 최대값 제한
+                            const maxMove = 1.0;
+                            const moveMagnitude = Math.sqrt(moveX * moveX + moveY * moveY);
+                            if (moveMagnitude > maxMove) {
+                                const scale = maxMove / moveMagnitude;
+                                const normalizedX = moveX * scale;
+                                const normalizedY = moveY * scale;
+                                
+                                keys.w = Math.max(0, normalizedY);
+                                keys.s = Math.max(0, -normalizedY);
+                                keys.a = Math.max(0, -normalizedX);
+                                keys.d = Math.max(0, normalizedX);
+                            } else {
+                                keys.w = Math.max(0, moveY);
+                                keys.s = Math.max(0, -moveY);
+                                keys.a = Math.max(0, -moveX);
+                                keys.d = Math.max(0, moveX);
+                            }
                         }
                     }
                 }
                 
-                // 시점 제어 (두 번째 터치 또는 첫 번째 터치가 이동 영역 밖)
+                // 시점 제어 (오른쪽 화면)
                 if (touchLookActive && touchLookId !== null) {
                     const touch = Array.from(e.touches).find(t => t.identifier === touchLookId);
                     if (touch) {
@@ -2621,25 +2671,6 @@
                         rotation.y -= dx * sens;
                         rotation.x -= dy * sens;
                         rotation.x = Math.max(-1.5, Math.min(1.5, rotation.x));
-                        
-                        lastTouchX = touch.clientX;
-                        lastTouchY = touch.clientY;
-                    }
-                } else if (touchMoveActive && touchMoveId !== null) {
-                    // 첫 번째 터치로도 시점 변경 가능 (이동과 동시에)
-                    const touch = Array.from(e.touches).find(t => t.identifier === touchMoveId);
-                    if (touch) {
-                        const dx = touch.clientX - lastTouchX;
-                        const dy = touch.clientY - lastTouchY;
-                        const distance = Math.sqrt(dx * dx + dy * dy);
-                        
-                        // 시점 변경 (이동보다 우선)
-                        if (distance > 5) {
-                            const sens = isAiming ? SENSITIVITY_ADS * 1.5 : SENSITIVITY_MOUSE * 1.5;
-                            rotation.y -= dx * sens;
-                            rotation.x -= dy * sens;
-                            rotation.x = Math.max(-1.5, Math.min(1.5, rotation.x));
-                        }
                         
                         lastTouchX = touch.clientX;
                         lastTouchY = touch.clientY;
@@ -2659,19 +2690,6 @@
                     keys.s = 0;
                     keys.a = 0;
                     keys.d = 0;
-                    
-                    // 첫 번째 터치가 끝나면 두 번째 터치를 첫 번째로 승격
-                    if (touchLookId !== null && e.touches.length > 0) {
-                        touchMoveId = touchLookId;
-                        touchMoveActive = true;
-                        touchLookId = null;
-                        touchLookActive = false;
-                        const remainingTouch = e.touches[0];
-                        touchStartX = remainingTouch.clientX;
-                        touchStartY = remainingTouch.clientY;
-                        lastTouchX = remainingTouch.clientX;
-                        lastTouchY = remainingTouch.clientY;
-                    }
                 }
                 
                 // 시점 제어 종료
@@ -3344,7 +3362,13 @@
                     weaponContainer.visible = false; elScope.style.display = 'block'; elCrosshair.style.display = 'none';
                 } else {
                     weaponContainer.visible = true; elScope.style.display = 'none';
-                    elCrosshair.style.display = 'block'; elCrosshair.style.opacity = (isAiming && w.type !== 'KNIFE') ? 0 : 1;
+                    // 모바일에서는 십자가 표시 안 함
+                    if (!isMobile) {
+                        elCrosshair.style.display = 'block'; 
+                        elCrosshair.style.opacity = (isAiming && w.type !== 'KNIFE') ? 0 : 1;
+                    } else {
+                        elCrosshair.style.display = 'none';
+                    }
                 }
 
                 // Hide/Show front sight based on aiming
