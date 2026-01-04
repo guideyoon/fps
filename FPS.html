@@ -193,7 +193,8 @@
         <div id="touch-right"></div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Three.js - 더 빠른 CDN 사용 -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
     <!-- 추가 라이브러리 (선택적 - 필요시 주석 해제) -->
     <!-- 
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
@@ -785,7 +786,12 @@
         //     SoundGen.playAudioFile('shootSound', 1.0);
         // }
 
-        window.onload = init;
+        // 성능 최적화: 리소스 로딩 완료 후 초기화
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            window.addEventListener('load', init);
+        }
 
         function init() {
             scene = new THREE.Scene();
@@ -830,11 +836,17 @@
 
             for(let i=0; i<6; i++) createEnemyAI();
 
-            renderer = new THREE.WebGLRenderer({ antialias: true });
+            // 성능 최적화: 렌더러 설정
+            renderer = new THREE.WebGLRenderer({ 
+                antialias: true,
+                powerPreference: "high-performance" // 고성능 모드
+            });
             renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // 최대 2배로 제한
             renderer.shadowMap.enabled = true;
             renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.shadowMap.autoUpdate = false; // 성능 향상
+            renderer.shadowMap.needsUpdate = true;
             document.getElementById('game-container').appendChild(renderer.domElement);
             
             // 후처리 효과 초기화 (활성화)
