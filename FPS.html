@@ -2749,7 +2749,7 @@
                 const currentScreenWidth = window.innerWidth;
                 const currentLeftHalf = currentScreenWidth / 2;
                 
-                // 왼쪽 터치 - 앞/뒤/좌/우 이동 (대각선 이동 가능)
+                // 왼쪽 터치 - 앞/뒤/좌/우 이동 (대각선 이동 가능) 또는 조준 모드 시점 변경
                 const w = WEAPONS[curWeaponIdx];
                 const isSniperAiming = w.type === 'SNIPER' && isAimingHeld;
                 
@@ -2763,6 +2763,18 @@
                                 isFiring = true;
                                 hasFiredSemi = false;
                             }
+                        } else if (isAimingHeld) {
+                            // 조준 모드일 때는 왼쪽 터치도 시점 변경으로 처리
+                            const moveDx = touch.clientX - lastTouchX;
+                            const moveDy = touch.clientY - lastTouchY;
+                            const sens = SENSITIVITY_ADS * 2; // 조준 모드 감도
+                            
+                            rotation.y -= moveDx * sens;
+                            rotation.x -= moveDy * sens;
+                            rotation.x = Math.max(-1.5, Math.min(1.5, rotation.x));
+                            
+                            lastTouchX = touch.clientX;
+                            lastTouchY = touch.clientY;
                         } else {
                             // 일반 이동 모드
                             const dx = touch.clientX - touchStartX;
