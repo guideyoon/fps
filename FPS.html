@@ -2681,29 +2681,22 @@
                         const dy = touch.clientY - touchStartY;
                         const distance = Math.sqrt(dx * dx + dy * dy);
                         
-                        // 이동 감지 및 적용
-                        if (distance > 5) {
-                            const moveX = dx / 50; // 이동 감도 증가
-                            const moveY = -dy / 50;
+                        // 이동 감지 및 적용 (더 민감하게)
+                        if (distance > 3) {
+                            // 드래그 방향으로 이동 (더 직접적)
+                            const moveX = Math.max(-1, Math.min(1, dx / 30)); // 감도 조정
+                            const moveY = Math.max(-1, Math.min(1, -dy / 30)); // 위로 드래그 = 앞으로
                             
-                            // 정규화하여 최대값 제한
-                            const maxMove = 1.0;
-                            const moveMagnitude = Math.sqrt(moveX * moveX + moveY * moveY);
-                            if (moveMagnitude > maxMove) {
-                                const scale = maxMove / moveMagnitude;
-                                const normalizedX = moveX * scale;
-                                const normalizedY = moveY * scale;
-                                
-                                keys.w = Math.max(0, normalizedY);
-                                keys.s = Math.max(0, -normalizedY);
-                                keys.a = Math.max(0, -normalizedX);
-                                keys.d = Math.max(0, normalizedX);
-                            } else {
-                                keys.w = Math.max(0, moveY);
-                                keys.s = Math.max(0, -moveY);
-                                keys.a = Math.max(0, -moveX);
-                                keys.d = Math.max(0, moveX);
-                            }
+                            keys.w = Math.max(0, moveY);
+                            keys.s = Math.max(0, -moveY);
+                            keys.a = Math.max(0, -moveX);
+                            keys.d = Math.max(0, moveX);
+                        } else {
+                            // 작은 움직임도 처리
+                            keys.w = 0;
+                            keys.s = 0;
+                            keys.a = 0;
+                            keys.d = 0;
                         }
                     }
                 }
