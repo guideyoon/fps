@@ -340,6 +340,9 @@
             <span class="key">Click</span> 발사/조준
         </div>
     </div>
+    
+    <!-- 조명 토글 버튼 -->
+    <button id="light-toggle-btn" class="light-toggle-btn" title="조명 켜기/끄기">💡</button>
 
     <div id="controls">
         <div id="touch-left"></div>
@@ -2612,60 +2615,34 @@
                 return;
             }
             
-            // 화면을 왼쪽/오른쪽으로 나누어 처리
-            const screenWidth = window.innerWidth;
-            const screenHeight = window.innerHeight;
-            const leftHalf = screenWidth * 0.5; // 왼쪽 절반
-            
-            // 화면 전체 터치 이벤트 - 왼쪽은 이동, 오른쪽은 시점 변경
+            // 화면 전체 터치 이벤트 - 화면 어디에서든 드래그로 이동 및 시점 변경
             gameContainer.addEventListener('touchstart', (e) => {
                 // 버튼 영역 체크 (버튼 클릭은 무시)
                 const target = e.target;
-                if (target.classList.contains('mobile-btn')) {
+                if (target.classList.contains('mobile-btn') || target.classList.contains('light-toggle-btn')) {
                     return; // 버튼 클릭은 처리하지 않음
                 }
                 
                 if (e.touches.length > 0) {
                     const touch = e.touches[0];
-                    const touchX = touch.clientX;
-                    const touchY = touch.clientY;
+                    touchStartX = touch.clientX;
+                    touchStartY = touch.clientY;
+                    lastTouchX = touch.clientX;
+                    lastTouchY = touch.clientY;
                     
-                    touchStartX = touchX;
-                    touchStartY = touchY;
-                    lastTouchX = touchX;
-                    lastTouchY = touchY;
-                    
-                    // 왼쪽 화면 - 이동 제어
-                    if (touchX < leftHalf) {
-                        if (touchMoveId === null) {
-                            touchMoveId = touch.identifier;
-                            touchMoveActive = true;
-                        }
-                    }
-                    // 오른쪽 화면 - 시점 제어
-                    else {
-                        if (touchLookId === null) {
-                            touchLookId = touch.identifier;
-                            touchLookActive = true;
-                        }
+                    // 첫 번째 터치 - 이동 제어
+                    if (touchMoveId === null) {
+                        touchMoveId = touch.identifier;
+                        touchMoveActive = true;
                     }
                     
-                    // 두 번째 터치 처리
-                    if (e.touches.length > 1) {
+                    // 두 번째 터치 - 시점 제어
+                    if (e.touches.length > 1 && touchLookId === null) {
                         const secondTouch = e.touches[1];
-                        const secondX = secondTouch.clientX;
-                        
-                        if (secondX < leftHalf && touchMoveId === null) {
-                            touchMoveId = secondTouch.identifier;
-                            touchMoveActive = true;
-                            touchStartX = secondTouch.clientX;
-                            touchStartY = secondTouch.clientY;
-                        } else if (secondX >= leftHalf && touchLookId === null) {
-                            touchLookId = secondTouch.identifier;
-                            touchLookActive = true;
-                            lastTouchX = secondTouch.clientX;
-                            lastTouchY = secondTouch.clientY;
-                        }
+                        touchLookId = secondTouch.identifier;
+                        touchLookActive = true;
+                        lastTouchX = secondTouch.clientX;
+                        lastTouchY = secondTouch.clientY;
                     }
                 }
             }, { passive: false });
@@ -2673,7 +2650,7 @@
             gameContainer.addEventListener('touchmove', (e) => {
                 e.preventDefault();
                 
-                // 이동 제어 (왼쪽 화면)
+                // 이동 제어 (첫 번째 터치)
                 if (touchMoveActive && touchMoveId !== null) {
                     const touch = Array.from(e.touches).find(t => t.identifier === touchMoveId);
                     if (touch) {
@@ -2681,10 +2658,10 @@
                         const dy = touch.clientY - touchStartY;
                         const distance = Math.sqrt(dx * dx + dy * dy);
                         
-                        // 이동 감지 및 적용 (더 민감하게)
+                        // 이동 감지 및 적용
                         if (distance > 3) {
-                            // 드래그 방향으로 이동 (더 직접적)
-                            const moveX = Math.max(-1, Math.min(1, dx / 30)); // 감도 조정
+                            // 드래그 방향으로 이동
+                            const moveX = Math.max(-1, Math.min(1, dx / 30));
                             const moveY = Math.max(-1, Math.min(1, -dy / 30)); // 위로 드래그 = 앞으로
                             
                             keys.w = Math.max(0, moveY);
@@ -2692,16 +2669,29 @@
                             keys.a = Math.max(0, -moveX);
                             keys.d = Math.max(0, moveX);
                         } else {
-                            // 작은 움직임도 처리
                             keys.w = 0;
                             keys.s = 0;
                             keys.a = 0;
                             keys.d = 0;
                         }
+                        
+                        // 시점 변경도 함께 (이동과 동시에)
+                        if (touchLookId === null) {
+                            const moveDx = touch.clientX - lastTouchX;
+                            const moveDy = touch.clientY - lastTouchY;
+                            const sens = isAiming ? SENSITIVITY_ADS * 1.5 : SENSITIVITY_MOUSE * 1.5;
+                            
+                            rotation.y -= moveDx * sens;
+                            rotation.x -= moveDy * sens;
+                            rotation.x = Math.max(-1.5, Math.min(1.5, rotation.x));
+                        }
+                        
+                        lastTouchX = touch.clientX;
+                        lastTouchY = touch.clientY;
                     }
                 }
                 
-                // 시점 제어 (오른쪽 화면)
+                // 시점 제어 (두 번째 터치)
                 if (touchLookActive && touchLookId !== null) {
                     const touch = Array.from(e.touches).find(t => t.identifier === touchLookId);
                     if (touch) {
