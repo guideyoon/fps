@@ -26,15 +26,27 @@ io.on('connection', (socket) => {
 
     // New player joined
     socket.on('join', (data) => {
+        // 랜덤 스폰 위치 생성
+        const spawnX = (Math.random() - 0.5) * 30; // -15 ~ 15
+        const spawnZ = (Math.random() - 0.5) * 30; // -15 ~ 15
+
         players[socket.id] = {
             id: socket.id,
             name: data.name || `Player ${socket.id.substr(0, 4)}`,
-            position: { x: 0, y: 1.7, z: 5 },
+            position: { x: spawnX, y: 1.7, z: spawnZ },
             rotation: { x: 0, y: 0 },
             hp: 100,
             weaponIdx: 0,
-            isDead: false
+            isDead: false,
+            isInvincible: true // 초기 스폰 시 무적
         };
+
+        // 2초 후 무적 해제
+        setTimeout(() => {
+            if (players[socket.id]) {
+                players[socket.id].isInvincible = false;
+            }
+        }, 2000);
 
         // Send current players to the new player
         socket.emit('currentPlayers', players);
@@ -66,7 +78,7 @@ io.on('connection', (socket) => {
     // Handle damage
     socket.on('damagePlayer', (data) => {
         const targetId = data.targetId;
-        if (players[targetId]) {
+        if (players[targetId] && !players[targetId].isInvincible) { // 무적 체크
             players[targetId].hp -= data.damage;
             if (players[targetId].hp <= 0) {
                 players[targetId].hp = 0;
@@ -90,14 +102,22 @@ io.on('connection', (socket) => {
     // Handle respawn request
     socket.on('requestRespawn', () => {
         if (players[socket.id] && players[socket.id].isDead) {
-            // 랜덤 스폰 위치 (맵 크기에 맞게 조정)
-            const spawnX = (Math.random() - 0.5) * 20;
-            const spawnZ = (Math.random() - 0.5) * 20;
+            // 랜덤 스폰 위치 (초기 스폰과 동일한 범위)
+            const spawnX = (Math.random() - 0.5) * 30; // -15 ~ 15
+            const spawnZ = (Math.random() - 0.5) * 30; // -15 ~ 15
 
             players[socket.id].hp = 100;
             players[socket.id].isDead = false;
+            players[socket.id].isInvincible = true; // 리스폰 시 무적
             players[socket.id].position = { x: spawnX, y: 1.7, z: spawnZ };
             players[socket.id].rotation = { x: 0, y: 0 };
+
+            // 2초 후 무적 해제
+            setTimeout(() => {
+                if (players[socket.id]) {
+                    players[socket.id].isInvincible = false;
+                }
+            }, 2000);
 
             // 모든 플레이어에게 리스폰 알림
             io.emit('playerRespawned', {
@@ -107,7 +127,7 @@ io.on('connection', (socket) => {
                 rotation: players[socket.id].rotation
             });
 
-            console.log(`Player ${socket.id} respawned at (${spawnX.toFixed(1)}, ${spawnZ.toFixed(1)})`);
+            console.log(`Player ${socket.id} respawned at (${spawnX.toFixed(1)}, ${spawnZ.toFixed(1)}) with invincibility`);
         }
     });
 
