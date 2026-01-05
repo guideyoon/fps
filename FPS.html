@@ -1780,13 +1780,16 @@
                     });
 
                     socket.on('playerRespawned', (data) => {
+                        console.log('playerRespawned event received:', data);
                         if (data.id === myId) {
+                            console.log('MY RESPAWN - moving to:', data.position);
                             // 자신의 리스폰
                             playerHP = 100;
                             isDead = false;
 
                             // 위치 초기화
                             camera.position.set(data.position.x, data.position.y, data.position.z);
+                            console.log('Camera position updated to:', camera.position);
                             yaw = 0;
                             pitch = 0;
 
