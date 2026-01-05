@@ -4,6 +4,12 @@ const { Server } = require('socket.io');
 
 const app = express();
 const server = http.createServer(app);
+
+// Health check endpoint
+app.get('/', (req, res) => {
+    res.send('<h1>FPS Game Server is Running!</h1><p>Socket.io is waiting for connections.</p>');
+});
+
 const io = new Server(server, {
     cors: {
         origin: "*",
@@ -27,10 +33,10 @@ io.on('connection', (socket) => {
             weaponIdx: 0,
             isDead: false
         };
-        
+
         // Send current players to the new player
         socket.emit('currentPlayers', players);
-        
+
         // Broadcast new player to others
         socket.broadcast.emit('newPlayer', players[socket.id]);
     });

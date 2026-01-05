@@ -1636,380 +1636,378 @@
                 initMultiplayer(serverAddr, playerName);
             });
 
-            function initMultiplayer(addr, name) {
-                try {
-                    // http:// 프로토콜 강제 및 전송 방식 설정
-                    const connectionUrl = addr.startsWith('http') ? addr : `http://${addr}`;
-                    socket = io(connectionUrl, {
-                        transports: ['websocket', 'polling'], // 웹소켓 우선
-                        reconnectionAttempts: 5,
-                        timeout: 10000
+            try {
+                // http:// 프로토콜 강제
+                const connectionUrl = addr.startsWith('http') ? addr : `http://${addr}`;
+                socket = io(connectionUrl, {
+                    reconnectionAttempts: 5,
+                    timeout: 10000
+                });
+
+                socket.on('connect', () => {
+                    console.log('Connected to server');
+                    socket.emit('join', { name: name });
+                    document.getElementById('room-waiting').querySelector('h2').innerText = '대기실';
+                });
+
+                socket.on('connect_error', (error) => {
+                    console.error('Connection Error:', error);
+                    document.getElementById('room-waiting').querySelector('h2').innerText = '연결 실패: ' + error.message;
+                    // 5초 후 다시 시도 버튼 활성화 등 가능
+                });
+
+                socket.on('connect_timeout', () => {
+                    console.error('Connection Timeout');
+                    document.getElementById('room-waiting').querySelector('h2').innerText = '연결 시간 초과';
+                });
+
+                socket.on('currentPlayers', (players) => {
+                    playersList = Object.values(players);
+                    currentPlayers = playersList.length;
+                    myId = socket.id;
+                    updatePlayersList();
+
+                    // 기존 플레이어 모델 생성
+                    playersList.forEach(p => {
+                        if (p.id !== myId) createRemotePlayer(p);
                     });
 
-                    socket.on('connect', () => {
-                        console.log('Connected to server');
-                        socket.emit('join', { name: name });
-                        document.getElementById('room-waiting').querySelector('h2').innerText = '대기실';
-                    });
+                    // 멀티플레이어는 인원 상관없이 시작 가능하도록 함 (또는 서버에서 시작 이벤트 줄 수 있음)
+                    // 여기서는 일단 접속되면 카운트다운 없이 바로 시작 가능하도록 버튼 UI를 바꿀 수도 있지만
+                    // 기존 startCountdown()을 활용하거나 즉시 시작
+                    if (currentPlayers >= 1) { // 최소 1명(본인) 이상이면 바로 시작 버튼 노출 등 가능
+                        // 일단 3초 뒤 자동 시작
+                        setTimeout(startCountdown, 2000);
+                    }
+                });
 
-                    socket.on('connect_error', (error) => {
-                        console.error('Connection Error:', error);
-                        document.getElementById('room-waiting').querySelector('h2').innerText = '연결 실패: ' + error.message;
-                        // 5초 후 다시 시도 버튼 활성화 등 가능
-                    });
+                socket.on('newPlayer', (p) => {
+                    playersList.push(p);
+                    currentPlayers = playersList.length;
+                    updatePlayersList();
+                    createRemotePlayer(p);
+                });
 
-                    socket.on('connect_timeout', () => {
-                        console.error('Connection Timeout');
-                        document.getElementById('room-waiting').querySelector('h2').innerText = '연결 시간 초과';
-                    });
-
-                    socket.on('currentPlayers', (players) => {
-                        playersList = Object.values(players);
-                        currentPlayers = playersList.length;
-                        myId = socket.id;
-                        updatePlayersList();
-
-                        // 기존 플레이어 모델 생성
-                        playersList.forEach(p => {
-                            if (p.id !== myId) createRemotePlayer(p);
-                        });
-
-                        // 멀티플레이어는 인원 상관없이 시작 가능하도록 함 (또는 서버에서 시작 이벤트 줄 수 있음)
-                        // 여기서는 일단 접속되면 카운트다운 없이 바로 시작 가능하도록 버튼 UI를 바꿀 수도 있지만
-                        // 기존 startCountdown()을 활용하거나 즉시 시작
-                        if (currentPlayers >= 1) { // 최소 1명(본인) 이상이면 바로 시작 버튼 노출 등 가능
-                            // 일단 3초 뒤 자동 시작
-                            setTimeout(startCountdown, 2000);
+                socket.on('playerMoved', (p) => {
+                    const mesh = otherPlayersMap[p.id];
+                    if (mesh) {
+                        mesh.position.copy(p.position);
+                        mesh.rotation.y = p.rotation.y;
+                        // 머리 회전 등 추가 가능
+                        if (mesh.userData.head) {
+                            mesh.userData.head.rotation.x = p.rotation.x;
                         }
-                    });
+                    }
+                });
 
-                    socket.on('newPlayer', (p) => {
-                        playersList.push(p);
-                        currentPlayers = playersList.length;
-                        updatePlayersList();
-                        createRemotePlayer(p);
-                    });
-
-                    socket.on('playerMoved', (p) => {
-                        const mesh = otherPlayersMap[p.id];
-                        if (mesh) {
-                            mesh.position.copy(p.position);
-                            mesh.rotation.y = p.rotation.y;
-                            // 머리 회전 등 추가 가능
-                            if (mesh.userData.head) {
-                                mesh.userData.head.rotation.x = p.rotation.x;
-                            }
+                socket.on('playerActioned', (data) => {
+                    const mesh = otherPlayersMap[data.id];
+                    if (mesh) {
+                        // 발사 효과음 등 원격 재생
+                        if (data.action === 'shoot') {
+                            // THREE.PositionalAudio 등을 쓰면 좋지만 여기선 단순 재생
+                            SoundGen.playShoot(WEAPONS[data.weaponIdx].type);
+                            // 머즐 플래시 효과 원격 재현 가능
                         }
-                    });
+                    }
+                });
 
-                    socket.on('playerActioned', (data) => {
+                socket.on('playerDamaged', (data) => {
+                    if (data.id === myId) {
+                        damagePlayer(0); // 피격 효과만 (실제 체력은 서버 권위로 하거나 클라에서 깎음)
+                        // 서버에서 준 hp로 동기화
+                        playerHP = data.hp;
+                        updateHPUI();
+                    } else {
                         const mesh = otherPlayersMap[data.id];
                         if (mesh) {
-                            // 발사 효과음 등 원격 재생
-                            if (data.action === 'shoot') {
-                                // THREE.PositionalAudio 등을 쓰면 좋지만 여기선 단순 재생
-                                SoundGen.playShoot(WEAPONS[data.weaponIdx].type);
-                                // 머즐 플래시 효과 원격 재현 가능
-                            }
+                            mesh.userData.hp = data.hp;
+                            const hpPercent = Math.max(0, mesh.userData.hp / 100);
+                            mesh.userData.hpBar.scale.x = hpPercent;
                         }
-                    });
+                    }
+                });
 
-                    socket.on('playerDamaged', (data) => {
-                        if (data.id === myId) {
-                            damagePlayer(0); // 피격 효과만 (실제 체력은 서버 권위로 하거나 클라에서 깎음)
-                            // 서버에서 준 hp로 동기화
-                            playerHP = data.hp;
-                            updateHPUI();
-                        } else {
-                            const mesh = otherPlayersMap[data.id];
-                            if (mesh) {
-                                mesh.userData.hp = data.hp;
-                                const hpPercent = Math.max(0, mesh.userData.hp / 100);
-                                mesh.userData.hpBar.scale.x = hpPercent;
-                            }
-                        }
-                    });
-
-                    socket.on('playerDied', (data) => {
-                        if (data.id === myId) {
-                            playerHP = 0;
-                            updateHPUI();
-                            isDead = true;
-                            elGameOver.style.display = 'flex';
-                        } else {
-                            const mesh = otherPlayersMap[data.id];
-                            if (mesh) {
-                                scene.remove(mesh);
-                                delete otherPlayersMap[data.id];
-                            }
-                        }
-                    });
-
-                    socket.on('playerDisconnected', (id) => {
-                        const mesh = otherPlayersMap[id];
+                socket.on('playerDied', (data) => {
+                    if (data.id === myId) {
+                        playerHP = 0;
+                        updateHPUI();
+                        isDead = true;
+                        elGameOver.style.display = 'flex';
+                    } else {
+                        const mesh = otherPlayersMap[data.id];
                         if (mesh) {
                             scene.remove(mesh);
-                            delete otherPlayersMap[id];
+                            delete otherPlayersMap[data.id];
                         }
-                        playersList = playersList.filter(p => p.id !== id);
-                        currentPlayers = playersList.length;
-                        updatePlayersList();
-                    });
+                    }
+                });
 
-                } catch (e) {
-                    alert('서버 연결 실패: ' + e.message);
-                    roomWaiting.style.display = 'none';
-                    modeSelection.style.display = 'flex';
-                }
-            }
+                socket.on('playerDisconnected', (id) => {
+                    const mesh = otherPlayersMap[id];
+                    if (mesh) {
+                        scene.remove(mesh);
+                        delete otherPlayersMap[id];
+                    }
+                    playersList = playersList.filter(p => p.id !== id);
+                    currentPlayers = playersList.length;
+                    updatePlayersList();
+                });
 
-            function createRemotePlayer(p) {
-                const group = new THREE.Group();
-
-                // 간단한 플레이어 모델 (기본 적 모델 재사용)
-                const body = new THREE.Mesh(new THREE.BoxGeometry(0.6, 1.2, 0.4), matPlayerBody);
-                body.position.y = 0.6;
-                group.add(body);
-
-                const head = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 0.4), matPlayerSkin);
-                head.position.y = 1.4;
-                head.name = 'head';
-                group.add(head);
-                group.userData.head = head;
-
-                // HP Bar
-                const hpBg = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.1), matHpBg);
-                hpBg.position.y = 1.8;
-                group.add(hpBg);
-                const hpFg = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.1), matHpFg);
-                hpFg.position.y = 1.8;
-                hpFg.position.z = 0.01;
-                group.add(hpFg);
-
-                group.userData.hp = p.hp;
-                group.userData.hpBar = hpFg;
-                group.userData.playerId = p.id;
-
-                group.position.copy(p.position);
-                scene.add(group);
-                otherPlayersMap[p.id] = group;
-                otherPlayers.push(group);
-            }
-
-            // 방 나가기
-            document.getElementById('btn-leave-room').addEventListener('click', () => {
-                if (countdownTimer) {
-                    clearInterval(countdownTimer);
-                    countdownTimer = null;
-                }
+            } catch (e) {
+                alert('서버 연결 실패: ' + e.message);
                 roomWaiting.style.display = 'none';
                 modeSelection.style.display = 'flex';
-                gameMode = null;
-                isRoomHost = false;
-                currentPlayers = 1;
-                playersList = [];
-                document.getElementById('countdown').style.display = 'none';
-            });
-
-            // UI 요소 초기화 (DOM이 로드된 후)
-            elAmmoVal = document.getElementById('ammo-val');
-            elWeaponLabel = document.getElementById('weapon-label');
-            elCrosshair = document.getElementById('crosshair');
-            elVignette = document.getElementById('vignette');
-            elScope = document.getElementById('scope-overlay');
-            elHpBar = document.getElementById('hp-bar');
-            elHpText = document.getElementById('hp-text');
-            elDamage = document.getElementById('damage-overlay');
-            elPlayTime = document.getElementById('play-time');
-            elKillCount = document.getElementById('kill-count');
-            elGameOver = document.getElementById('game-over');
-            elPauseOverlay = document.getElementById('pause-overlay');
-            elHeadshot = document.getElementById('headshot-msg');
-            elHitMarker = document.getElementById('hit-marker');
-
-            scene = new THREE.Scene();
-            const fogColor = 0x10151a;
-            scene.background = new THREE.Color(fogColor);
-            scene.fog = new THREE.FogExp2(fogColor, 0.025);
-
-            // 초기 카메라 설정 (모바일 가로 모드 대응)
-            let initAspect = window.innerWidth / window.innerHeight;
-            if (window.visualViewport) {
-                initAspect = window.visualViewport.width / window.visualViewport.height;
             }
-            camera = new THREE.PerspectiveCamera(70, initAspect, 0.005, 1000);
+        }
 
-            ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
-            scene.add(ambientLight);
-            ceilingLight = new THREE.PointLight(0xffaa00, 2.0, 50);
-            ceilingLight.position.set(0, 10, 0);
-            ceilingLight.castShadow = true;
-            ceilingLight.visible = false; // 초기에는 꺼져있음
-            scene.add(ceilingLight);
-            const blueLight = new THREE.DirectionalLight(0x4455ff, 0.5);
-            blueLight.position.set(-10, 5, -10);
-            scene.add(blueLight);
+        function createRemotePlayer(p) {
+            const group = new THREE.Group();
 
-            // 확장 기능 초기화 (맵 생성 전에 텍스처 시스템을 먼저 초기화)
-            try {
-                initTextureSystem();
-                initModelLoader();
-                initPhysics();
-            } catch (error) {
-                console.warn('Some extension features failed to initialize:', error);
+            // 간단한 플레이어 모델 (기본 적 모델 재사용)
+            const body = new THREE.Mesh(new THREE.BoxGeometry(0.6, 1.2, 0.4), matPlayerBody);
+            body.position.y = 0.6;
+            group.add(body);
+
+            const head = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 0.4), matPlayerSkin);
+            head.position.y = 1.4;
+            head.name = 'head';
+            group.add(head);
+            group.userData.head = head;
+
+            // HP Bar
+            const hpBg = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.1), matHpBg);
+            hpBg.position.y = 1.8;
+            group.add(hpBg);
+            const hpFg = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.1), matHpFg);
+            hpFg.position.y = 1.8;
+            hpFg.position.z = 0.01;
+            group.add(hpFg);
+
+            group.userData.hp = p.hp;
+            group.userData.hpBar = hpFg;
+            group.userData.playerId = p.id;
+
+            group.position.copy(p.position);
+            scene.add(group);
+            otherPlayersMap[p.id] = group;
+            otherPlayers.push(group);
+        }
+
+        // 방 나가기
+        document.getElementById('btn-leave-room').addEventListener('click', () => {
+            if (countdownTimer) {
+                clearInterval(countdownTimer);
+                countdownTimer = null;
             }
+            roomWaiting.style.display = 'none';
+            modeSelection.style.display = 'flex';
+            gameMode = null;
+            isRoomHost = false;
+            currentPlayers = 1;
+            playersList = [];
+            document.getElementById('countdown').style.display = 'none';
+        });
 
-            createFactoryMap();
+        // UI 요소 초기화 (DOM이 로드된 후)
+        elAmmoVal = document.getElementById('ammo-val');
+        elWeaponLabel = document.getElementById('weapon-label');
+        elCrosshair = document.getElementById('crosshair');
+        elVignette = document.getElementById('vignette');
+        elScope = document.getElementById('scope-overlay');
+        elHpBar = document.getElementById('hp-bar');
+        elHpText = document.getElementById('hp-text');
+        elDamage = document.getElementById('damage-overlay');
+        elPlayTime = document.getElementById('play-time');
+        elKillCount = document.getElementById('kill-count');
+        elGameOver = document.getElementById('game-over');
+        elPauseOverlay = document.getElementById('pause-overlay');
+        elHeadshot = document.getElementById('headshot-msg');
+        elHitMarker = document.getElementById('hit-marker');
 
-            weaponContainer = new THREE.Group();
-            scene.add(weaponContainer);
-            weaponModel = new THREE.Group();
-            weaponContainer.add(weaponModel);
+        scene = new THREE.Scene();
+        const fogColor = 0x10151a;
+        scene.background = new THREE.Color(fogColor);
+        scene.fog = new THREE.FogExp2(fogColor, 0.025);
 
-            shellGeo = new THREE.CylinderGeometry(0.005, 0.005, 0.025, 6);
-            shellGeo.rotateX(Math.PI / 2);
-            shellMat = new THREE.MeshStandardMaterial({ color: 0xFFD700, metalness: 1.0, roughness: 0.3 });
+        // 초기 카메라 설정 (모바일 가로 모드 대응)
+        let initAspect = window.innerWidth / window.innerHeight;
+        if (window.visualViewport) {
+            initAspect = window.visualViewport.width / window.visualViewport.height;
+        }
+        camera = new THREE.PerspectiveCamera(70, initAspect, 0.005, 1000);
 
-            buildWeapon(0);
-            updateUI();
+        ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+        scene.add(ambientLight);
+        ceilingLight = new THREE.PointLight(0xffaa00, 2.0, 50);
+        ceilingLight.position.set(0, 10, 0);
+        ceilingLight.castShadow = true;
+        ceilingLight.visible = false; // 초기에는 꺼져있음
+        scene.add(ceilingLight);
+        const blueLight = new THREE.DirectionalLight(0x4455ff, 0.5);
+        blueLight.position.set(-10, 5, -10);
+        scene.add(blueLight);
 
-            // 게임 시작 시간 설정
-            gameStartTime = performance.now();
-            killCount = 0;
-            playTime = 0;
-            if (elPlayTime) elPlayTime.innerText = "Time: 00:00";
-            if (elKillCount) elKillCount.innerText = "Kills: 0";
+        // 확장 기능 초기화 (맵 생성 전에 텍스처 시스템을 먼저 초기화)
+        try {
+            initTextureSystem();
+            initModelLoader();
+            initPhysics();
+        } catch (error) {
+            console.warn('Some extension features failed to initialize:', error);
+        }
 
-            // 적 생성은 startGame()에서 처리
+        createFactoryMap();
 
-            // 성능 최적화: 렌더러 설정
-            renderer = new THREE.WebGLRenderer({
-                antialias: true,
-                powerPreference: "high-performance" // 고성능 모드
-            });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            // 모바일 성능 최적화: 픽셀 비율 조정
-            const pixelRatio = isMobile ? Math.min(window.devicePixelRatio, 1.5) : Math.min(window.devicePixelRatio, 2);
-            renderer.setPixelRatio(pixelRatio);
-            renderer.shadowMap.enabled = true;
-            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-            renderer.shadowMap.autoUpdate = false; // 성능 향상
-            renderer.shadowMap.needsUpdate = true;
-            document.getElementById('game-container').appendChild(renderer.domElement);
+        weaponContainer = new THREE.Group();
+        scene.add(weaponContainer);
+        weaponModel = new THREE.Group();
+        weaponContainer.add(weaponModel);
 
-            // 후처리 효과 초기화 (활성화)
-            try {
-                initPostProcessing();
-            } catch (error) {
-                console.warn('Post-processing initialization failed:', error);
-                usePostProcessing = false;
-            }
+        shellGeo = new THREE.CylinderGeometry(0.005, 0.005, 0.025, 6);
+        shellGeo.rotateX(Math.PI / 2);
+        shellMat = new THREE.MeshStandardMaterial({ color: 0xFFD700, metalness: 1.0, roughness: 0.3 });
 
-            // 리사이즈 이벤트는 init() 끝부분에서 별도로 처리 (중복 방지)
-            document.addEventListener('contextmenu', e => e.preventDefault());
+        buildWeapon(0);
+        updateUI();
 
-            const loadAudioFiles = () => {
-                if (!SoundGen.ctx) SoundGen.init();
-                if (SoundGen.ctx.state === 'suspended') SoundGen.ctx.resume();
+        // 게임 시작 시간 설정
+        gameStartTime = performance.now();
+        killCount = 0;
+        playTime = 0;
+        if (elPlayTime) elPlayTime.innerText = "Time: 00:00";
+        if (elKillCount) elKillCount.innerText = "Kills: 0";
 
-                // 재장전 오디오 파일 로드
-                SoundGen.loadAudioFile('reload1.mp3', 'reload')
-                    .catch(err => console.warn('Failed to load reload sound:', err));
+        // 적 생성은 startGame()에서 처리
 
-                // 저격총 발사 오디오 파일 로드
-                SoundGen.loadAudioFile('rifle.mp3', 'rifle')
-                    .catch(err => console.warn('Failed to load rifle sound:', err));
+        // 성능 최적화: 렌더러 설정
+        renderer = new THREE.WebGLRenderer({
+            antialias: true,
+            powerPreference: "high-performance" // 고성능 모드
+        });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        // 모바일 성능 최적화: 픽셀 비율 조정
+        const pixelRatio = isMobile ? Math.min(window.devicePixelRatio, 1.5) : Math.min(window.devicePixelRatio, 2);
+        renderer.setPixelRatio(pixelRatio);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.shadowMap.autoUpdate = false; // 성능 향상
+        renderer.shadowMap.needsUpdate = true;
+        document.getElementById('game-container').appendChild(renderer.domElement);
 
-                // 나이프 휘두르기 오디오 파일 로드
-                SoundGen.loadAudioFile('sword.mp3', 'sword')
-                    .catch(err => console.warn('Failed to load sword sound:', err));
+        // 후처리 효과 초기화 (활성화)
+        try {
+            initPostProcessing();
+        } catch (error) {
+            console.warn('Post-processing initialization failed:', error);
+            usePostProcessing = false;
+        }
 
-                // 나이프 교체 오디오 파일 로드
-                SoundGen.loadAudioFile('c-sword.mp3', 'c-sword')
-                    .catch(err => console.warn('Failed to load c-sword sound:', err));
+        // 리사이즈 이벤트는 init() 끝부분에서 별도로 처리 (중복 방지)
+        document.addEventListener('contextmenu', e => e.preventDefault());
 
-                // 소총 교체 오디오 파일 로드
-                SoundGen.loadAudioFile('c-sochong.mp3', 'c-sochong')
-                    .catch(err => console.warn('Failed to load c-sochong sound:', err));
+        const loadAudioFiles = () => {
+            if (!SoundGen.ctx) SoundGen.init();
+            if (SoundGen.ctx.state === 'suspended') SoundGen.ctx.resume();
 
-                // 권총 교체 오디오 파일 로드
-                SoundGen.loadAudioFile('c-gun.mp3', 'c-gun')
-                    .catch(err => console.warn('Failed to load c-gun sound:', err));
+            // 재장전 오디오 파일 로드
+            SoundGen.loadAudioFile('reload1.mp3', 'reload')
+                .catch(err => console.warn('Failed to load reload sound:', err));
 
-                // 저격총 교체 오디오 파일 로드
-                SoundGen.loadAudioFile('c-rifle.mp3', 'c-rifle')
-                    .catch(err => console.warn('Failed to load c-rifle sound:', err));
+            // 저격총 발사 오디오 파일 로드
+            SoundGen.loadAudioFile('rifle.mp3', 'rifle')
+                .catch(err => console.warn('Failed to load rifle sound:', err));
 
-                // 빈 격발 오디오 파일 로드
-                SoundGen.loadAudioFile('empty.mp3', 'empty')
-                    .catch(err => console.warn('Failed to load empty sound:', err));
+            // 나이프 휘두르기 오디오 파일 로드
+            SoundGen.loadAudioFile('sword.mp3', 'sword')
+                .catch(err => console.warn('Failed to load sword sound:', err));
 
-                // 권총 발사 오디오 파일 로드
-                SoundGen.loadAudioFile('gunshot.mp3', 'gunshot')
-                    .catch(err => console.warn('Failed to load gunshot sound:', err));
-            };
+            // 나이프 교체 오디오 파일 로드
+            SoundGen.loadAudioFile('c-sword.mp3', 'c-sword')
+                .catch(err => console.warn('Failed to load c-sword sound:', err));
 
-            // 데스크톱과 모바일 모두에서 오디오 파일 로드
-            document.body.addEventListener('mousedown', loadAudioFiles, { once: true });
-            document.body.addEventListener('touchstart', loadAudioFiles, { once: true });
+            // 소총 교체 오디오 파일 로드
+            SoundGen.loadAudioFile('c-sochong.mp3', 'c-sochong')
+                .catch(err => console.warn('Failed to load c-sochong sound:', err));
 
-            document.getElementById('restart-btn').addEventListener('click', restartGame);
+            // 권총 교체 오디오 파일 로드
+            SoundGen.loadAudioFile('c-gun.mp3', 'c-gun')
+                .catch(err => console.warn('Failed to load c-gun sound:', err));
 
-            // 조명 토글 버튼 이벤트
-            const lightToggleBtn = document.getElementById('light-toggle-btn');
-            if (lightToggleBtn) {
-                const toggleLight = () => {
-                    if (ceilingLight && ambientLight) {
-                        ceilingLight.visible = !ceilingLight.visible;
-                        if (ceilingLight.visible) {
-                            // 조명 켤 때 더 밝게
-                            ceilingLight.intensity = 2.5;
-                            ambientLight.intensity = 0.7;
-                        } else {
-                            // 조명 끌 때 원래대로
-                            ceilingLight.intensity = 2.0;
-                            ambientLight.intensity = 0.4;
-                        }
-                        lightToggleBtn.classList.toggle('active', ceilingLight.visible);
+            // 저격총 교체 오디오 파일 로드
+            SoundGen.loadAudioFile('c-rifle.mp3', 'c-rifle')
+                .catch(err => console.warn('Failed to load c-rifle sound:', err));
+
+            // 빈 격발 오디오 파일 로드
+            SoundGen.loadAudioFile('empty.mp3', 'empty')
+                .catch(err => console.warn('Failed to load empty sound:', err));
+
+            // 권총 발사 오디오 파일 로드
+            SoundGen.loadAudioFile('gunshot.mp3', 'gunshot')
+                .catch(err => console.warn('Failed to load gunshot sound:', err));
+        };
+
+        // 데스크톱과 모바일 모두에서 오디오 파일 로드
+        document.body.addEventListener('mousedown', loadAudioFiles, { once: true });
+        document.body.addEventListener('touchstart', loadAudioFiles, { once: true });
+
+        document.getElementById('restart-btn').addEventListener('click', restartGame);
+
+        // 조명 토글 버튼 이벤트
+        const lightToggleBtn = document.getElementById('light-toggle-btn');
+        if (lightToggleBtn) {
+            const toggleLight = () => {
+                if (ceilingLight && ambientLight) {
+                    ceilingLight.visible = !ceilingLight.visible;
+                    if (ceilingLight.visible) {
+                        // 조명 켤 때 더 밝게
+                        ceilingLight.intensity = 2.5;
+                        ambientLight.intensity = 0.7;
+                    } else {
+                        // 조명 끌 때 원래대로
+                        ceilingLight.intensity = 2.0;
+                        ambientLight.intensity = 0.4;
                     }
-                };
-                lightToggleBtn.addEventListener('click', toggleLight);
-                lightToggleBtn.addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    toggleLight();
-                }, { passive: false });
-            }
+                    lightToggleBtn.classList.toggle('active', ceilingLight.visible);
+                }
+            };
+            lightToggleBtn.addEventListener('click', toggleLight);
+            lightToggleBtn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleLight();
+            }, { passive: false });
+        }
 
-            // setupControls와 animate는 startGame()에서 호출됨
+        // setupControls와 animate는 startGame()에서 호출됨
 
-            // 화면 회전 감지 및 레이아웃 조정
-            window.addEventListener('orientationchange', () => {
-                setTimeout(() => {
-                    onResize();
-                    // 모바일 컨트롤 위치 재조정 (필요시 추가)
-                }, 300); // 모바일 브라우저 주소창 애니메이션 대기
+        // 화면 회전 감지 및 레이아웃 조정
+        window.addEventListener('orientationchange', () => {
+            setTimeout(() => {
+                onResize();
+                // 모바일 컨트롤 위치 재조정 (필요시 추가)
+            }, 300); // 모바일 브라우저 주소창 애니메이션 대기
+        });
+
+        // visualViewport 변경 감지 (모바일 브라우저 주소창 표시/숨김)
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', () => {
+                onResize();
             });
-
-            // visualViewport 변경 감지 (모바일 브라우저 주소창 표시/숨김)
-            if (window.visualViewport) {
-                window.visualViewport.addEventListener('resize', () => {
-                    onResize();
-                });
-                window.visualViewport.addEventListener('scroll', () => {
-                    // 스크롤 방지
-                    window.scrollTo(0, 0);
-                });
-            }
-
-            // 추가 리사이즈 이벤트 (모바일 브라우저 주소창 대응)
-            let resizeTimeout;
-            window.addEventListener('resize', () => {
-                clearTimeout(resizeTimeout);
-                resizeTimeout = setTimeout(() => {
-                    onResize();
-                }, 100);
+            window.visualViewport.addEventListener('scroll', () => {
+                // 스크롤 방지
+                window.scrollTo(0, 0);
             });
+        }
+
+        // 추가 리사이즈 이벤트 (모바일 브라우저 주소창 대응)
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                onResize();
+            }, 100);
+        });
         }
 
         // --- 텍스처 시스템 초기화 ---
