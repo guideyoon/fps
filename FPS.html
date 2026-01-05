@@ -899,8 +899,8 @@
     <div id="room-creation">
         <h2>멀티플레이 설정</h2>
         <div class="input-group">
-            <label>서버 IP:</label>
-            <input type="text" id="server-ip" placeholder="예: 192.168.0.10" style="width: 200px;">
+            <label>서버 주소:</label>
+            <input type="text" id="server-ip" placeholder="예: 192.168.0.10:3001" style="width: 250px;">
         </div>
         <div class="input-group">
             <label>플레이어 이름:</label>
@@ -1624,7 +1624,9 @@
 
             // 방 생성 (실제로는 서버 접속)
             document.getElementById('btn-create-room').addEventListener('click', () => {
-                const serverIp = document.getElementById('server-ip').value || 'localhost';
+                let serverAddr = document.getElementById('server-ip').value || 'localhost:3001';
+                // 포트가 없으면 기본값 :3001 추가
+                if (!serverAddr.includes(':')) serverAddr += ':3001';
                 const playerName = document.getElementById('player-name').value || 'User';
 
                 gameMode = 'multi';
@@ -1632,12 +1634,12 @@
                 roomWaiting.style.display = 'flex';
                 document.getElementById('room-waiting').querySelector('h2').innerText = '서버 연결 중...';
 
-                initMultiplayer(serverIp, playerName);
+                initMultiplayer(serverAddr, playerName);
             });
 
-            function initMultiplayer(ip, name) {
+            function initMultiplayer(addr, name) {
                 try {
-                    socket = io(`http://${ip}:3000`);
+                    socket = io(`http://${addr}`);
 
                     socket.on('connect', () => {
                         console.log('Connected to server');
