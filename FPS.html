@@ -2065,17 +2065,22 @@
                 // --- Game Events ---
 
                 socket.on('playerMoved', (p) => {
+                    // Game hasn't started yet
+                    if (!window.scene) return;
+
                     const mesh = otherPlayersMap[p.id];
                     if (mesh) {
                         mesh.position.copy(p.position);
                         mesh.rotation.y = p.rotation.y;
                     } else {
-                        // If player exists but no mesh (e.g. joined mid-game), create it?
+                        // If player exists but no mesh (e.g. joined mid-game), create it
                         if (p.id !== myId) createRemotePlayer(p);
                     }
                 });
 
                 socket.on('playerActioned', (data) => {
+                    if (!window.scene) return;
+
                     const mesh = otherPlayersMap[data.id];
                     if (mesh) {
                         if (data.action === 'shoot') {
