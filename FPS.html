@@ -899,12 +899,8 @@
     <div id="room-creation">
         <h2>멀티플레이 설정</h2>
         <div class="input-group">
-            <label>서버 주소:</label>
-            <input type="text" id="server-ip" placeholder="예: 192.168.0.10:3000" style="width: 250px;">
-        </div>
-        <div class="input-group">
             <label>플레이어 이름:</label>
-            <input type="text" id="player-name" placeholder="이름 입력" style="width: 200px;">
+            <input type="text" id="player-name" placeholder="이름을 입력하세요" style="width: 250px;" autofocus>
         </div>
         <button id="btn-create-room">서버 접속</button>
         <button class="cancel" id="btn-cancel-create">취소</button>
@@ -915,6 +911,9 @@
         <h2>대기 중...</h2>
         <div id="players-list"></div>
         <div id="countdown" style="display: none;"></div>
+        <button id="btn-force-start"
+            style="display: none; margin-top: 20px; padding: 15px 30px; font-size: 18px; background: #4CAF50; color: white; border: none; border-radius: 8px; cursor: pointer;">바로
+            시작하기</button>
         <button class="cancel" id="btn-leave-room">나가기</button>
     </div>
 
@@ -1687,6 +1686,8 @@
                         currentPlayers = playersList.length;
                         updatePlayersList();
                         createRemotePlayer(p);
+
+                        // 방이 꽉 찼는지 확인 (서버에서 maxPlayers 정보가 필요하지만, 일단 생략)
                     });
 
                     socket.on('playerMoved', (p) => {

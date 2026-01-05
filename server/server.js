@@ -18,6 +18,8 @@ const io = new Server(server, {
 });
 
 const players = {};
+const MAX_PLAYERS = 4; // 최대 인원
+let gameStarted = false;
 
 io.on('connection', (socket) => {
     console.log(`Player connected: ${socket.id}`);
@@ -76,11 +78,25 @@ io.on('connection', (socket) => {
         }
     });
 
+    // Force start game
+    socket.on('requestStart', () => {
+        if (!gameStarted) {
+            gameStarted = true;
+            io.emit('gameStart');
+            console.log('Game force-started by host');
+        }
+    });
+
     // Player disconnected
     socket.on('disconnect', () => {
         console.log(`Player disconnected: ${socket.id}`);
         delete players[socket.id];
         io.emit('playerDisconnected', socket.id);
+
+        // Reset game started flag if all players leave
+        if (Object.keys(players).length === 0) {
+            gameStarted = false;
+        }
     });
 });
 
