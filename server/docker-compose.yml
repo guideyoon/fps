@@ -4,7 +4,7 @@ services:
   fps-server:
     build: .
     ports:
-      - "3005:3000"
+      - "8080:3000"
     restart: always
     environment:
       - NODE_ENV=production
