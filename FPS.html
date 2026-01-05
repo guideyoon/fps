@@ -1638,7 +1638,13 @@
 
             function initMultiplayer(addr, name) {
                 try {
-                    socket = io(`http://${addr}`);
+                    // http:// 프로토콜 강제 및 전송 방식 설정
+                    const connectionUrl = addr.startsWith('http') ? addr : `http://${addr}`;
+                    socket = io(connectionUrl, {
+                        transports: ['websocket', 'polling'], // 웹소켓 우선
+                        reconnectionAttempts: 5,
+                        timeout: 10000
+                    });
 
                     socket.on('connect', () => {
                         console.log('Connected to server');
