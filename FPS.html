@@ -1646,6 +1646,17 @@
                         document.getElementById('room-waiting').querySelector('h2').innerText = '대기실';
                     });
 
+                    socket.on('connect_error', (error) => {
+                        console.error('Connection Error:', error);
+                        document.getElementById('room-waiting').querySelector('h2').innerText = '연결 실패: ' + error.message;
+                        // 5초 후 다시 시도 버튼 활성화 등 가능
+                    });
+
+                    socket.on('connect_timeout', () => {
+                        console.error('Connection Timeout');
+                        document.getElementById('room-waiting').querySelector('h2').innerText = '연결 시간 초과';
+                    });
+
                     socket.on('currentPlayers', (players) => {
                         playersList = Object.values(players);
                         currentPlayers = playersList.length;
