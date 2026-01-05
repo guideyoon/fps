@@ -2035,18 +2035,23 @@
                 });
 
                 socket.on('gameStart', () => {
+                    console.log('Game Start Event Received!'); // DEBUG
                     document.getElementById('room-waiting').style.display = 'none';
                     document.getElementById('chat-container').style.bottom = '20px';
 
                     // Create meshes for all players in room
+                    console.log('Current Room Players:', roomPlayersState); // DEBUG
                     Object.values(roomPlayersState).forEach(p => {
                         if (p.id !== myId && !otherPlayersMap[p.id]) {
+                            console.log('Creating mesh for:', p.id, p.name); // DEBUG
                             createRemotePlayer(p);
                         }
                     });
 
                     startCountdown();
                 });
+
+
 
                 socket.on('hostChanged', (hostId) => {
                     const startBtn = document.getElementById('btn-start-game');
@@ -2185,6 +2190,7 @@
         }
 
         function createRemotePlayer(p) {
+            console.log('createRemotePlayer called for:', p); // DEBUG
             const group = new THREE.Group();
 
             // 간단한 플레이어 모델 (기본 적 모델 재사용)
@@ -2213,10 +2219,13 @@
 
             // Ensure scene exists before adding
             if (window.scene) {
+                console.log('Adding player mesh to scene:', p.id); // DEBUG
                 group.position.copy(p.position);
                 scene.add(group);
                 otherPlayersMap[p.id] = group;
                 if (typeof otherPlayers !== 'undefined') otherPlayers.push(group);
+            } else {
+                console.error('Window.scene is missing in createRemotePlayer!'); // DEBUG
             }
         }
 
