@@ -900,7 +900,7 @@
         <h2>멀티플레이 설정</h2>
         <div class="input-group">
             <label>서버 주소:</label>
-            <input type="text" id="server-ip" placeholder="예: 192.168.0.10:33001" style="width: 250px;">
+            <input type="text" id="server-ip" placeholder="예: 192.168.0.10:3005" style="width: 250px;">
         </div>
         <div class="input-group">
             <label>플레이어 이름:</label>
@@ -1623,9 +1623,9 @@
 
             // 방 생성 (실제로는 서버 접속)
             document.getElementById('btn-create-room').addEventListener('click', () => {
-                let serverAddr = document.getElementById('server-ip').value || 'localhost:33001';
-                // 포트가 없으면 기본값 :33001 추가
-                if (!serverAddr.includes(':')) serverAddr += ':33001';
+                let serverAddr = document.getElementById('server-ip').value || 'localhost:3005';
+                // 포트가 없으면 기본값 :3005 추가
+                if (!serverAddr.includes(':')) serverAddr += ':3005';
                 const playerName = document.getElementById('player-name').value || 'User';
 
                 gameMode = 'multi';
