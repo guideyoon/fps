@@ -27,8 +27,8 @@ io.on('connection', (socket) => {
     // New player joined
     socket.on('join', (data) => {
         // 랜덤 스폰 위치 생성
-        const spawnX = (Math.random() - 0.5) * 30; // -15 ~ 15
-        const spawnZ = (Math.random() - 0.5) * 30; // -15 ~ 15
+        const spawnX = (Math.random() - 0.5) * 60; // -30 ~ 30
+        const spawnZ = (Math.random() - 0.5) * 60; // -30 ~ 30
 
         players[socket.id] = {
             id: socket.id,
@@ -103,8 +103,8 @@ io.on('connection', (socket) => {
     socket.on('requestRespawn', () => {
         if (players[socket.id] && players[socket.id].isDead) {
             // 랜덤 스폰 위치 (초기 스폰과 동일한 범위)
-            const spawnX = (Math.random() - 0.5) * 30; // -15 ~ 15
-            const spawnZ = (Math.random() - 0.5) * 30; // -15 ~ 15
+            const spawnX = (Math.random() - 0.5) * 60; // -30 ~ 30
+            const spawnZ = (Math.random() - 0.5) * 60; // -30 ~ 30
 
             players[socket.id].hp = 100;
             players[socket.id].isDead = false;
