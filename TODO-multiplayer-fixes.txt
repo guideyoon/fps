@@ -1,0 +1,17 @@
+// 서버 주소를 하드코딩하고 플레이어 이름만 입력받도록 수정 필요
+const MULTIPLAYER_SERVER = 'murphy-highs-cradle-acting.trycloudflare.com';
+
+// btn-create-room 이벤트 리스너 수정 필요:
+// - server-ip 입력란 제거됨
+// - MULTIPLAYER_SERVER 사용
+// - playerName만 trim() 처리
+
+// btn-force-start 이벤트 리스너 추가 필요:
+// - socket.emit('requestStart') 호출
+
+// socket.on('currentPlayers') 수정 필요:
+// - 기존 자동 시작 코드 제거
+// - btn-force-start 버튼을 display: block으로 변경
+
+// socket.on('gameStart') 추가 필요:
+// - startCountdown() 호출

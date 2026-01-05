@@ -1622,10 +1622,8 @@
 
             // 방 생성 (실제로는 서버 접속)
             document.getElementById('btn-create-room').addEventListener('click', () => {
-                let serverAddr = document.getElementById('server-ip').value || 'localhost:3000';
-                // 포트가 없으면 기본값 :3000 추가
-                if (!serverAddr.includes(':')) serverAddr += ':3000';
-                const playerName = document.getElementById('player-name').value || 'User';
+                const serverAddr = 'murphy-highs-cradle-acting.trycloudflare.com';
+                const playerName = document.getElementById('player-name').value.trim() || 'Player';
 
                 gameMode = 'multi';
                 roomCreation.style.display = 'none';
@@ -1795,6 +1793,13 @@
                 otherPlayersMap[p.id] = group;
                 otherPlayers.push(group);
             }
+
+            // 바로 시작하기
+            document.getElementById('btn-force-start').addEventListener('click', () => {
+                if (socket && socket.connected) {
+                    socket.emit('requestStart');
+                }
+            });
 
             // 방 나가기
             document.getElementById('btn-leave-room').addEventListener('click', () => {
