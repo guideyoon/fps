@@ -1996,8 +1996,10 @@
 
                     document.getElementById('room-title').innerText = data.roomName;
 
-                    // Clear existing
-                    Object.values(otherPlayersMap).forEach(mesh => scene.remove(mesh));
+                    // Clear existing if scene exists
+                    if (window.scene) {
+                        Object.values(otherPlayersMap).forEach(mesh => scene.remove(mesh));
+                    }
                     otherPlayersMap = {};
                     roomPlayersState = data.players; // Cache players
 
@@ -2022,7 +2024,7 @@
 
                     const mesh = otherPlayersMap[playerId];
                     if (mesh) {
-                        scene.remove(mesh);
+                        if (window.scene) scene.remove(mesh);
                         delete otherPlayersMap[playerId];
                     }
                 });
@@ -2204,18 +2206,24 @@
             group.userData.hpBar = hpFg;
             group.userData.playerId = p.id;
 
-            group.position.copy(p.position);
-            scene.add(group);
-            otherPlayersMap[p.id] = group;
-            otherPlayers.push(group);
+            // Ensure scene exists before adding
+            if (window.scene) {
+                group.position.copy(p.position);
+                scene.add(group);
+                otherPlayersMap[p.id] = group;
+                if (typeof otherPlayers !== 'undefined') otherPlayers.push(group);
+            }
         }
 
-        // 바로 시작하기
-        document.getElementById('btn-force-start').addEventListener('click', () => {
-            if (socket && socket.connected) {
-                socket.emit('requestStart');
-            }
-        });
+        // 바로 시작하기 (Legacy code - Force Start handled by Host Controls now)
+        const btnForceStart = document.getElementById('btn-force-start');
+        if (btnForceStart) {
+            btnForceStart.addEventListener('click', () => {
+                if (socket && socket.connected) {
+                    socket.emit('requestStart');
+                }
+            });
+        }
 
         // 방 나가기
         document.getElementById('btn-leave-room').addEventListener('click', () => {
