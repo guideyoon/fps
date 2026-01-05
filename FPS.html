@@ -1740,7 +1740,10 @@
                     });
 
                     socket.on('playerDied', (data) => {
+                        console.log('playerDied event received:', data);
+                        console.log('myId:', myId);
                         if (data.id === myId) {
+                            console.log('YOU DIED - starting death sequence');
                             playerHP = 0;
                             updateHPUI();
                             isDead = true;
