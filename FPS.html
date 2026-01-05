@@ -2039,14 +2039,8 @@
                     document.getElementById('room-waiting').style.display = 'none';
                     document.getElementById('chat-container').style.bottom = '20px';
 
-                    // Create meshes for all players in room
-                    console.log('Current Room Players:', roomPlayersState); // DEBUG
-                    Object.values(roomPlayersState).forEach(p => {
-                        if (p.id !== myId && !otherPlayersMap[p.id]) {
-                            console.log('Creating mesh for:', p.id, p.name); // DEBUG
-                            createRemotePlayer(p);
-                        }
-                    });
+                    // Actual mesh creation is handled in startGame() -> createRemotePlayer
+                    // This ensures scene is initialized first.
 
                     startCountdown();
                 });
@@ -2478,11 +2472,24 @@
 
         // --- 게임 시작 함수 ---
         function startGame() {
-            // 엔진 초기화
+            // 1. 엔진 초기화
             initGame();
 
+            // 2. 룸에 있는 다른 플레이어 메시 생성
+            // (게임 시작 시점에 로비에 있던 플레이어들을 3D 씬에 추가)
+            console.log('startGame: Creating meshes for remote players...', roomPlayersState);
+            if (roomPlayersState && window.scene) {
+                Object.values(roomPlayersState).forEach(p => {
+                    if (p.id !== myId && !otherPlayersMap[p.id]) {
+                        createRemotePlayer(p);
+                    }
+                });
+            }
+
+            // 3. 컨트롤 설정
             setupControls();
 
+            // 4. 애니메이션 루프 시작
             if (typeof animate === 'function') {
                 animate();
             } else {
