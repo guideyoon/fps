@@ -1670,13 +1670,13 @@
                             if (p.id !== myId) createRemotePlayer(p);
                         });
 
-                        // 멀티플레이어는 인원 상관없이 시작 가능하도록 함 (또는 서버에서 시작 이벤트 줄 수 있음)
-                        // 여기서는 일단 접속되면 카운트다운 없이 바로 시작 가능하도록 버튼 UI를 바꿀 수도 있지만
-                        // 기존 startCountdown()을 활용하거나 즉시 시작
-                        if (currentPlayers >= 1) { // 최소 1명(본인) 이상이면 바로 시작 버튼 노출 등 가능
-                            // 일단 3초 뒤 자동 시작
-                            setTimeout(startCountdown, 2000);
-                        }
+                        // 바로 시작 버튼 표시
+                        document.getElementById('btn-force-start').style.display = 'block';
+                    });
+
+                    socket.on('gameStart', () => {
+                        // 서버에서 게임 시작 신호
+                        startCountdown();
                     });
 
                     socket.on('newPlayer', (p) => {
