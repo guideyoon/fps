@@ -4352,7 +4352,7 @@
 
                     // 서버에 데미지 이벤트 전송
                     if (socket && socket.connected) {
-                        socket.emit('playerHit', {
+                        socket.emit('damagePlayer', {
                             targetId: p.userData.playerId,
                             damage: dmg
                         });
