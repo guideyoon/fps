@@ -1714,10 +1714,21 @@
 
                     socket.on('playerDamaged', (data) => {
                         if (data.id === myId) {
-                            damagePlayer(0); // 피격 효과만 (실제 체력은 서버 권위로 하거나 클라에서 깎음)
-                            // 서버에서 준 hp로 동기화
+                            // 서버에서 준 HP로 동기화
                             playerHP = data.hp;
                             updateHPUI();
+
+                            // 화면 빨갛게 플래시
+                            elDamage.style.opacity = 0.5;
+                            setTimeout(() => elDamage.style.opacity = 0, 200);
+
+                            // 화면 흔들림
+                            hitShake.intensity = 0.1;
+                            hitShake.x = (Math.random() - 0.5) * 0.1;
+                            hitShake.y = (Math.random() - 0.5) * 0.1;
+
+                            // 피격 사운드
+                            SoundGen.playHit();
                         } else {
                             const mesh = otherPlayersMap[data.id];
                             if (mesh) {
@@ -1733,13 +1744,72 @@
                             playerHP = 0;
                             updateHPUI();
                             isDead = true;
+
+                            // 죽음 효과
+                            elDamage.style.opacity = 0.8;
+                            elDamage.style.background = 'radial-gradient(circle, rgba(0,0,0,0.9) 30%, rgba(255,0,0,0.6) 100%)';
+
+                            // "YOU DIED" 메시지 표시
+                            elGameOver.innerHTML = '<h1 style="color: red; font-size: 60px; text-shadow: 0 0 20px rgba(255,0,0,0.8);">YOU DIED</h1><p style="font-size: 24px;">Respawning in <span id="respawn-timer">3</span> seconds...</p>';
                             elGameOver.style.display = 'flex';
+
+                            // 카운트다운
+                            let countdown = 3;
+                            const timerEl = document.getElementById('respawn-timer');
+                            const countdownInterval = setInterval(() => {
+                                countdown--;
+                                if (timerEl) timerEl.innerText = countdown;
+                                if (countdown <= 0) {
+                                    clearInterval(countdownInterval);
+                                }
+                            }, 1000);
+
+                            // 3초 후 리스폰 요청
+                            setTimeout(() => {
+                                if (socket && socket.connected) {
+                                    socket.emit('requestRespawn');
+                                }
+                            }, 3000);
                         } else {
                             const mesh = otherPlayersMap[data.id];
                             if (mesh) {
                                 scene.remove(mesh);
                                 delete otherPlayersMap[data.id];
                             }
+                        }
+                    });
+
+                    socket.on('playerRespawned', (data) => {
+                        if (data.id === myId) {
+                            // 자신의 리스폰
+                            playerHP = 100;
+                            updateHPUI();
+                            isDead = false;
+
+                            // 위치 초기화
+                            camera.position.set(data.position.x, data.position.y, data.position.z);
+                            yaw = 0;
+                            pitch = 0;
+
+                            // UI 복구
+                            elGameOver.style.display = 'none';
+                            elDamage.style.opacity = 0;
+                            elDamage.style.background = 'radial-gradient(circle, transparent 50%, rgba(255, 51, 51, 0.4) 100%)';
+
+                            // 무기 리셋
+                            currentWeaponIndex = 0;
+                            switchWeaponTo(0);
+                        } else {
+                            // 다른 플레이어의 리스폰 - 새 모델 생성
+                            const player = {
+                                id: data.id,
+                                name: data.name,
+                                position: data.position,
+                                rotation: data.rotation,
+                                hp: 100
+                            };
+                            player.playerId = data.id; // userData에 playerId 추가
+                            createRemotePlayer(player);
                         }
                     });
 

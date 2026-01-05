@@ -87,6 +87,30 @@ io.on('connection', (socket) => {
         }
     });
 
+    // Handle respawn request
+    socket.on('requestRespawn', () => {
+        if (players[socket.id] && players[socket.id].isDead) {
+            // 랜덤 스폰 위치 (맵 크기에 맞게 조정)
+            const spawnX = (Math.random() - 0.5) * 20;
+            const spawnZ = (Math.random() - 0.5) * 20;
+
+            players[socket.id].hp = 100;
+            players[socket.id].isDead = false;
+            players[socket.id].position = { x: spawnX, y: 1.7, z: spawnZ };
+            players[socket.id].rotation = { x: 0, y: 0 };
+
+            // 모든 플레이어에게 리스폰 알림
+            io.emit('playerRespawned', {
+                id: socket.id,
+                name: players[socket.id].name,
+                position: players[socket.id].position,
+                rotation: players[socket.id].rotation
+            });
+
+            console.log(`Player ${socket.id} respawned at (${spawnX.toFixed(1)}, ${spawnZ.toFixed(1)})`);
+        }
+    });
+
     // Player disconnected
     socket.on('disconnect', () => {
         console.log(`Player disconnected: ${socket.id}`);
