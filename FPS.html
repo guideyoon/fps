@@ -1663,6 +1663,14 @@
                         playersList = Object.values(players);
                         currentPlayers = playersList.length;
                         myId = socket.id;
+
+                        // 자신의 초기 스폰 위치를 서버에서 받은 위치로 설정
+                        const myPlayer = players[myId];
+                        if (myPlayer && myPlayer.position) {
+                            camera.position.set(myPlayer.position.x, myPlayer.position.y, myPlayer.position.z);
+                            console.log('Initial spawn position set to:', myPlayer.position);
+                        }
+
                         updatePlayersList();
 
                         // 기존 플레이어 모델 생성
