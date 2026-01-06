@@ -2048,7 +2048,13 @@
                     // Actual mesh creation is handled in startGame() -> createRemotePlayer
                     // This ensures scene is initialized first.
 
-                    startCountdown();
+                    try {
+                        console.log('About to call startCountdown...'); // DEBUG
+                        startCountdown();
+                        console.log('startCountdown finished (or started async)'); // DEBUG
+                    } catch (e) {
+                        console.error('ERROR in startCountdown:', e);
+                    }
                 });
 
 
