@@ -1197,7 +1197,7 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script>
-        console.log('=== FPS.html VERSION: 2026-01-06-2021 ==='); // VERSION CHECK
+        console.log('=== FPS.html VERSION: 2026-01-06-2217 ==='); // VERSION CHECK
         let camera, scene, renderer;
         let postProcessingCanvas, postProcessingCtx; // Global declaration
         let postProcessingEnabled = false;
@@ -2281,39 +2281,42 @@
             const group = new THREE.Group();
 
             // More realistic player model with rounded shapes
-            // Body - Using Capsule-like shape (cylinder + spheres)
-            const bodyGeo = new THREE.CylinderGeometry(0.25, 0.25, 1.0, 12);
-            const body = new THREE.Mesh(bodyGeo, matPlayerBody);
-            body.position.y = 0.9; // Adjusted to be on ground
-            group.add(body);
+            // IMPORTANT: All Y positions are relative to group, which is placed at y=0 (ground level)
+            // Legs start at y=0 (feet on ground), body/head/arms positioned accordingly
 
-            // Shoulders (rounded)
-            const shoulderGeo = new THREE.SphereGeometry(0.15, 8, 8);
-            const leftShoulder = new THREE.Mesh(shoulderGeo, matPlayerBody);
-            leftShoulder.position.set(-0.3, 1.3, 0);
-            group.add(leftShoulder);
-
-            const rightShoulder = new THREE.Mesh(shoulderGeo, matPlayerBody);
-            rightShoulder.position.set(0.3, 1.3, 0);
-            group.add(rightShoulder);
-
-            // Head - Sphere for more realistic look
-            const headGeo = new THREE.SphereGeometry(0.22, 12, 12);
-            const head = new THREE.Mesh(headGeo, matPlayerSkin);
-            head.position.y = 1.65; // Adjusted height
-            head.name = 'head';
-            group.add(head);
-            group.userData.head = head;
-
-            // Legs (rounded cylinders)
+            // Legs (feet at y=0, extending upward)
             const legGeo = new THREE.CylinderGeometry(0.12, 0.1, 0.7, 8);
             const leftLeg = new THREE.Mesh(legGeo, matPlayerBody);
-            leftLeg.position.set(-0.15, 0.35, 0);
+            leftLeg.position.set(-0.15, 0.35, 0); // Center at 0.35 so bottom is at 0
             group.add(leftLeg);
 
             const rightLeg = new THREE.Mesh(legGeo, matPlayerBody);
             rightLeg.position.set(0.15, 0.35, 0);
             group.add(rightLeg);
+
+            // Body - starts at top of legs
+            const bodyGeo = new THREE.CylinderGeometry(0.25, 0.25, 1.0, 12);
+            const body = new THREE.Mesh(bodyGeo, matPlayerBody);
+            body.position.y = 1.2; // Legs end at 0.7, body center at 1.2
+            group.add(body);
+
+            // Shoulders (rounded)
+            const shoulderGeo = new THREE.SphereGeometry(0.15, 8, 8);
+            const leftShoulder = new THREE.Mesh(shoulderGeo, matPlayerBody);
+            leftShoulder.position.set(-0.3, 1.6, 0);
+            group.add(leftShoulder);
+
+            const rightShoulder = new THREE.Mesh(shoulderGeo, matPlayerBody);
+            rightShoulder.position.set(0.3, 1.6, 0);
+            group.add(rightShoulder);
+
+            // Head - Sphere for more realistic look
+            const headGeo = new THREE.SphereGeometry(0.22, 12, 12);
+            const head = new THREE.Mesh(headGeo, matPlayerSkin);
+            head.position.y = 2.0; // Eye level ~2.0 from ground
+            head.name = 'head';
+            group.add(head);
+            group.userData.head = head;
 
             // Arms with weapon
             const armGeo = new THREE.CylinderGeometry(0.08, 0.08, 0.6, 8);
