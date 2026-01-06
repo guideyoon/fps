@@ -136,15 +136,13 @@ io.on('connection', (socket) => {
         const room = rooms[roomId];
 
         if (room && room.players[socket.id] && room.players[socket.id].isDead) {
-            // Spawn within map bounds (map is 100x100, so use ±40 for safety)
-            const spawnX = (Math.random() - 0.5) * 80;
-            const spawnZ = (Math.random() - 0.5) * 80;
+            const spawnPos = getSafeSpawnPosition();
 
             const p = room.players[socket.id];
             p.hp = 100;
             p.isDead = false;
             p.isInvincible = true;
-            p.position = { x: spawnX, y: 1.7, z: spawnZ };
+            p.position = spawnPos;
             p.rotation = { x: 0, y: 0 };
 
             setTimeout(() => {
@@ -186,6 +184,24 @@ io.on('connection', (socket) => {
 });
 
 // Helper Functions
+function getSafeSpawnPosition() {
+    // Pillars are at x,z = -20,-10,0,10,20 (every 10 units)
+    // Generate position away from pillar grid
+    let spawnX, spawnZ;
+    do {
+        spawnX = (Math.random() - 0.5) * 70; // Reduced range for safety
+        spawnZ = (Math.random() - 0.5) * 70;
+        // Check if too close to any pillar position (avoid ±2 units from pillar centers)
+        const nearPillar = [-20, -10, 0, 10, 20].some(px =>
+            [-20, -10, 0, 10, 20].some(pz =>
+                Math.abs(spawnX - px) < 3 && Math.abs(spawnZ - pz) < 3
+            )
+        );
+        if (!nearPillar) break;
+    } while (true);
+    return { x: spawnX, y: 1.7, z: spawnZ };
+}
+
 function joinRoom(socket, roomId) {
     // Leave previous room if any
     if (playerRoomMap[socket.id]) {
@@ -196,16 +212,14 @@ function joinRoom(socket, roomId) {
     if (!room) return;
 
     // Initialize Player State for Game
-    // Spawn within map bounds (map is 100x100, so use ±40 for safety)
-    const spawnX = (Math.random() - 0.5) * 80;
-    const spawnZ = (Math.random() - 0.5) * 80;
+    const spawnPos = getSafeSpawnPosition();
 
     socket.join(roomId);
     playerRoomMap[socket.id] = roomId;
 
     const newPlayer = {
         ...socket.userData,
-        position: { x: spawnX, y: 1.7, z: spawnZ },
+        position: spawnPos,
         rotation: { x: 0, y: 0 },
         weaponIdx: 0,
         isInvincible: true
