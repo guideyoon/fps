@@ -2494,6 +2494,14 @@
         // --- 게임 시작 함수 ---
         function startGame() {
             console.log('startGame() CALLED'); // DEBUG
+
+            // 0. 게임 통계 초기화
+            gameStartTime = performance.now();
+            killCount = 0;
+            playTime = 0;
+            if (elPlayTime) elPlayTime.innerText = "Time: 00:00";
+            if (elKillCount) elKillCount.innerText = "Kills: 0";
+
             // 1. 엔진 초기화
             initGame();
 
@@ -2508,8 +2516,14 @@
                 });
             }
 
+            // 2.5. 혼자하기 모드일 때 적 생성
+            if (gameMode === 'single') {
+                for (let i = 0; i < 6; i++) createEnemyAI();
+            }
+
             // 3. 컨트롤 설정
             setupControls();
+            setupSensitivityControl();
 
             // 4. 애니메이션 루프 시작
             if (typeof animate === 'function') {
@@ -3959,42 +3973,13 @@
             // 더 이상 사용하지 않음
         }
 
-        function startCountdown() {
-            const countdownEl = document.getElementById('countdown');
-            countdownEl.style.display = 'block';
-            let count = 5;
-            countdownEl.textContent = count;
 
-            countdownTimer = setInterval(() => {
-                count--;
-                countdownEl.textContent = count;
-                if (count <= 0) {
-                    clearInterval(countdownTimer);
-                    countdownTimer = null;
-                    countdownEl.style.display = 'none';
-                    document.getElementById('room-waiting').style.display = 'none';
-                    startGame();
-                }
-            }, 1000);
-        }
+        // OLD DUPLICATE startCountdown - REMOVED (was shadowing the correct one at line 2470)
+        // function startCountdown() { ... }
 
-        function startGame() {
-            // 게임 시작 시간 설정
-            gameStartTime = performance.now();
-            killCount = 0;
-            playTime = 0;
-            if (elPlayTime) elPlayTime.innerText = "Time: 00:00";
-            if (elKillCount) elKillCount.innerText = "Kills: 0";
+        // OLD DUPLICATE startGame - REMOVED (was shadowing the correct one at line 2493)
+        // function startGame() { ... }
 
-            // 혼자하기 모드일 때만 적 생성
-            if (gameMode === 'single') {
-                for (let i = 0; i < 6; i++) createEnemyAI();
-            }
-
-            setupControls();
-            setupSensitivityControl();
-            animate();
-        }
 
         function restartGame() {
             playerHP = 100;
