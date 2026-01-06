@@ -184,22 +184,30 @@ io.on('connection', (socket) => {
 });
 
 // Helper Functions
+// Predefined safe spawn points (tested and clear of pillars/walls)
+const SAFE_SPAWN_POINTS = [
+    { x: -15, y: 1.7, z: -15 },
+    { x: -15, y: 1.7, z: 15 },
+    { x: 15, y: 1.7, z: -15 },
+    { x: 15, y: 1.7, z: 15 },
+    { x: -25, y: 1.7, z: 0 },
+    { x: 25, y: 1.7, z: 0 },
+    { x: 0, y: 1.7, z: -25 },
+    { x: 0, y: 1.7, z: 25 },
+    { x: -5, y: 1.7, z: -5 },
+    { x: -5, y: 1.7, z: 5 },
+    { x: 5, y: 1.7, z: -5 },
+    { x: 5, y: 1.7, z: 5 },
+    { x: -15, y: 1.7, z: 0 },
+    { x: 15, y: 1.7, z: 0 },
+    { x: 0, y: 1.7, z: -15 },
+    { x: 0, y: 1.7, z: 15 }
+];
+
 function getSafeSpawnPosition() {
-    // Pillars are at x,z = -20,-10,0,10,20 (every 10 units)
-    // Generate position away from pillar grid
-    let spawnX, spawnZ;
-    do {
-        spawnX = (Math.random() - 0.5) * 70; // Reduced range for safety
-        spawnZ = (Math.random() - 0.5) * 70;
-        // Check if too close to any pillar position (avoid ±2 units from pillar centers)
-        const nearPillar = [-20, -10, 0, 10, 20].some(px =>
-            [-20, -10, 0, 10, 20].some(pz =>
-                Math.abs(spawnX - px) < 3 && Math.abs(spawnZ - pz) < 3
-            )
-        );
-        if (!nearPillar) break;
-    } while (true);
-    return { x: spawnX, y: 1.7, z: spawnZ };
+    // Pick a random safe spawn point from the predefined list
+    const randomIndex = Math.floor(Math.random() * SAFE_SPAWN_POINTS.length);
+    return { ...SAFE_SPAWN_POINTS[randomIndex] }; // Clone to avoid mutation
 }
 
 function joinRoom(socket, roomId) {
