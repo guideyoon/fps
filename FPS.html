@@ -2049,6 +2049,13 @@
                     document.getElementById('room-waiting').style.display = 'none';
                     document.getElementById('chat-container').style.bottom = '20px';
 
+                    // Initialize camera position to eye level if not already set
+                    if (!position || (position.x === 0 && position.y === 0 && position.z === 0)) {
+                        position = new THREE.Vector3(0, 1.7, 0);
+                        camera.position.copy(position);
+                        console.log('Initialized camera position to eye level:', camera.position);
+                    }
+
                     // Actual mesh creation is handled in startGame() -> createRemotePlayer
                     // This ensures scene is initialized first.
 
