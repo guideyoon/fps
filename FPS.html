@@ -2536,7 +2536,12 @@
         // --- 주요 초기화 (3D/엔진 등) ---
         function initGame() {
             // 이미 초기화되었으면 중복 실행 방지
-            if (scene) return;
+            if (scene) {
+                // Ensure window.scene is set even if scene already exists
+                if (!window.scene) window.scene = scene;
+                console.log("Game engine already initialized, skipping re-init");
+                return;
+            }
 
             console.log("Initializing Game Engine...");
 
