@@ -204,10 +204,10 @@ const SAFE_SPAWN_POINTS = [
     { x: 0, y: 1.7, z: 15 }
 ];
 
-function getSafeSpawnPosition() {
-    // Pick a random safe spawn point from the predefined list
-    const randomIndex = Math.floor(Math.random() * SAFE_SPAWN_POINTS.length);
-    return { ...SAFE_SPAWN_POINTS[randomIndex] }; // Clone to avoid mutation
+function getSafeSpawnPosition(playerIndex = 0) {
+    // Pick spawn point based on player index to avoid overlapping
+    const index = playerIndex % SAFE_SPAWN_POINTS.length;
+    return { ...SAFE_SPAWN_POINTS[index] }; // Clone to avoid mutation
 }
 
 function joinRoom(socket, roomId) {
@@ -220,7 +220,9 @@ function joinRoom(socket, roomId) {
     if (!room) return;
 
     // Initialize Player State for Game
-    const spawnPos = getSafeSpawnPosition();
+    // Use current player count as index for unique spawn position
+    const playerIndex = Object.keys(room.players).length;
+    const spawnPos = getSafeSpawnPosition(playerIndex);
 
     socket.join(roomId);
     playerRoomMap[socket.id] = roomId;
