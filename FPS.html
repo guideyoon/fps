@@ -1196,6 +1196,7 @@
     <script>
         let camera, scene, renderer;
         let postProcessingCanvas, postProcessingCtx; // Global declaration
+        let postProcessingEnabled = false;
 
         let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
             ('ontouchstart' in window) ||
@@ -2787,7 +2788,7 @@
         // --- 간단한 후처리 효과 구현 (WebGL 쉐이더 사용) ---
         // let postProcessingCanvas, postProcessingCtx; // Moved to global
 
-        let postProcessingEnabled = false;
+        // let postProcessingEnabled = false; // Moved to global
 
         function initPostProcessing() {
             try {
