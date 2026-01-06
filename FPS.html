@@ -2150,7 +2150,9 @@
                     if (data.id === myId) {
                         playerHP = 100;
                         isDead = false;
-                        camera.position.set(data.position.x, data.position.y, data.position.z);
+                        // Update BOTH position variable and camera
+                        position.set(data.position.x, data.position.y, data.position.z);
+                        camera.position.copy(position);
                         elGameOver.style.display = 'none';
                         elDamage.style.opacity = 0;
                     } else {
