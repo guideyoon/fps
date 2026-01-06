@@ -2230,15 +2230,14 @@
                         elGameOver.style.display = 'none';
                         elDamage.style.opacity = 0;
                     } else {
-                        // Ensure remote player exists
-                        if (!otherPlayersMap[data.id]) {
-                            createRemotePlayer(data);
-                        } else {
-                            const mesh = otherPlayersMap[data.id];
-                            mesh.position.copy(data.position);
-                            mesh.userData.hp = 100;
-                            if (mesh.userData.hpBar) mesh.userData.hpBar.scale.x = 1;
+                        // Remote player respawned - completely recreate to avoid transparent material bug
+                        if (otherPlayersMap[data.id]) {
+                            // Remove old mesh (might be transparent from death animation)
+                            scene.remove(otherPlayersMap[data.id]);
+                            delete otherPlayersMap[data.id];
                         }
+                        // Create fresh player mesh
+                        createRemotePlayer(data);
                     }
                 });
 
