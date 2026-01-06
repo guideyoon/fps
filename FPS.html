@@ -2925,25 +2925,7 @@
                 colliders.push(box);
             }
 
-            const pillarGeo = new THREE.BoxGeometry(1, 10, 1);
-            for (let x = -20; x <= 20; x += 10) {
-                for (let z = -20; z <= 20; z += 10) {
-                    if (x === 0 && z === 0) continue;
-                    const pillar = new THREE.Mesh(pillarGeo, matMetal);
-                    pillar.position.set(x, 5, z);
-                    pillar.castShadow = true;
-                    pillar.receiveShadow = true;
-                    scene.add(pillar);
-                    addBoxCollider(pillar);
-                }
-            }
 
-            const beamGeo = new THREE.BoxGeometry(200, 0.5, 0.5);
-            for (let z = -20; z <= 20; z += 5) {
-                const beam = new THREE.Mesh(beamGeo, matMetal);
-                beam.position.set(0, 9, z);
-                scene.add(beam);
-            }
 
             const wallGeo = new THREE.BoxGeometry(200, 20, 1);
             const createWall = (x, y, z, rotY) => {
