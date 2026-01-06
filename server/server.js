@@ -156,6 +156,7 @@ io.on('connection', (socket) => {
             io.to(roomId).emit('playerRespawned', {
                 id: socket.id,
                 name: p.name,
+                hp: p.hp,
                 position: p.position,
                 rotation: p.rotation
             });

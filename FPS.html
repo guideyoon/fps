@@ -2031,14 +2031,18 @@
 
                     updateRoomPlayers(roomPlayersState);
 
-                    const startBtn = document.getElementById('btn-start-game');
-                    startBtn.parentElement.style.display = data.isHost ? 'block' : 'none';
+                    // Update start button based on player count
+                    updateStartButtonState(data.isHost);
                 });
 
                 socket.on('playerJoined', (player) => {
                     roomPlayersState[player.id] = player;
                     updateRoomPlayers(roomPlayersState);
                     addChatMessage('System', `${player.name}님이 입장했습니다.`, true);
+
+                    // Update start button when player joins
+                    const isHost = myId && roomPlayersState[myId];
+                    if (isHost) updateStartButtonState(true);
                 });
 
                 socket.on('playerLeft', (playerId) => {
@@ -2047,6 +2051,10 @@
                         delete roomPlayersState[playerId];
                     }
                     updateRoomPlayers(roomPlayersState); // Refresh UI
+
+                    // Update start button when player leaves
+                    const isHost = myId && roomPlayersState[myId];
+                    if (isHost) updateStartButtonState(true);
 
                     const mesh = otherPlayersMap[playerId];
                     if (mesh) {
@@ -2292,6 +2300,30 @@
                     chatMessages.scrollTop = chatMessages.scrollHeight;
                 }
 
+                function updateStartButtonState(isHost) {
+                    const startBtn = document.getElementById('btn-start-game');
+                    if (!startBtn || !startBtn.parentElement) return;
+
+                    const playerCount = Object.keys(roomPlayersState).length;
+
+                    if (isHost) {
+                        startBtn.parentElement.style.display = 'block';
+                        if (playerCount >= 2) {
+                            startBtn.disabled = false;
+                            startBtn.style.opacity = '1';
+                            startBtn.style.cursor = 'pointer';
+                            startBtn.title = '';
+                        } else {
+                            startBtn.disabled = true;
+                            startBtn.style.opacity = '0.5';
+                            startBtn.style.cursor = 'not-allowed';
+                            startBtn.title = '최소 2명의 플레이어가 필요합니다';
+                        }
+                    } else {
+                        startBtn.parentElement.style.display = 'none';
+                    }
+                }
+
             } catch (e) {
                 console.error('Socket init error:', e);
             }
@@ -2405,7 +2437,8 @@
             hpFg.position.z = 0.01;
             group.add(hpFg);
 
-            group.userData.hp = p.hp;
+            group.userData.hp = p.hp || 100;
+            group.userData.maxHp = 100;
             group.userData.hpBar = hpFg;
             group.userData.playerId = p.id;
 
