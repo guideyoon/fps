@@ -2102,6 +2102,34 @@
                     if (mesh) {
                         if (data.action === 'shoot') {
                             SoundGen.playShoot(WEAPONS[data.weaponIdx].type);
+
+                            // Visual shoot effect - Muzzle flash
+                            const muzzleFlash = new THREE.Mesh(
+                                new THREE.SphereGeometry(0.15, 8, 8),
+                                new THREE.MeshBasicMaterial({ color: 0xffff00, transparent: true, opacity: 0.9 })
+                            );
+                            // Position flash at weapon tip (front of player)
+                            muzzleFlash.position.set(
+                                mesh.position.x + Math.sin(mesh.rotation.y) * 0.5,
+                                1.0,
+                                mesh.position.z + Math.cos(mesh.rotation.y) * 0.5
+                            );
+                            scene.add(muzzleFlash);
+
+                            // Remove flash after brief moment
+                            setTimeout(() => {
+                                scene.remove(muzzleFlash);
+                            }, 100);
+
+                            // Weapon recoil animation (find weapon child and animate)
+                            const weapon = mesh.children.find(child => child.geometry && child.geometry.type === 'BoxGeometry' && child.material.color.getHex() === 0x222222);
+                            if (weapon) {
+                                const originalZ = weapon.position.z;
+                                weapon.position.z -= 0.1; // Move back
+                                setTimeout(() => {
+                                    weapon.position.z = originalZ; // Return to original
+                                }, 100);
+                            }
                         }
                     }
                 });
@@ -2268,6 +2296,19 @@
             weapon.rotation.x = -0.3;
             group.add(weapon); // Add weapon to group
 
+            // Directional indicator - Helmet/Visor on front of head
+            const visorGeo = new THREE.BoxGeometry(0.18, 0.08, 0.05);
+            const matVisor = new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 0.9, roughness: 0.2 });
+            const visor = new THREE.Mesh(visorGeo, matVisor);
+            visor.position.set(0, 1.68, 0.15); // Front of head
+            group.add(visor);
+
+            // Face marker - small colored cube to show front clearly
+            const faceMarkerGeo = new THREE.BoxGeometry(0.1, 0.1, 0.05);
+            const matFaceMarker = new THREE.MeshStandardMaterial({ color: 0x00ff00, emissive: 0x00ff00, emissiveIntensity: 0.5 });
+            const faceMarker = new THREE.Mesh(faceMarkerGeo, matFaceMarker);
+            faceMarker.position.set(0, 1.55, 0.2); // Lower front of head (like eyes)
+            group.add(faceMarker);
 
             // HP Bar (slightly higher to account for new model)
             const hpBg = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.1), matHpBg);
