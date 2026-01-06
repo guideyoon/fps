@@ -2513,6 +2513,7 @@
 
             // 1) 씬 생성
             scene = new THREE.Scene();
+            window.scene = scene; // Expose globally for checks
             scene.background = new THREE.Color(0x87CEEB);
             scene.fog = new THREE.Fog(0x87CEEB, 10, 50);
 
