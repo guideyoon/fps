@@ -3254,12 +3254,8 @@
                 scene.add(wall);
                 addBoxCollider(wall);
             });
-            // 물리 바디 추가
-            if (usePhysics) {
-                createPhysicsBody(barrel, 0, false);
-            }
-        });
         }
+
 
         // --- Weapon Building ---
         function buildWeapon(idx) {
