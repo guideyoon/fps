@@ -136,7 +136,9 @@ io.on('connection', (socket) => {
         const room = rooms[roomId];
 
         if (room && room.players[socket.id] && room.players[socket.id].isDead) {
-            const spawnPos = getSafeSpawnPosition();
+            // Track respawn count for this room to cycle through spawn points
+            if (!room.respawnCounter) room.respawnCounter = 0;
+            const spawnPos = getSafeSpawnPosition(room.respawnCounter++);
 
             const p = room.players[socket.id];
             p.hp = 100;

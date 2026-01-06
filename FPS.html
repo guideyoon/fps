@@ -2959,45 +2959,167 @@
             createWall(-100, 10, 0, Math.PI / 2);
             createWall(100, 10, 0, Math.PI / 2);
 
-            // 기존 박스들
-            const boxGeo = new THREE.BoxGeometry(2, 2, 2);
-            const boxPos = [{ x: -5, z: -5 }, { x: 5, z: 5 }, { x: -8, z: 8 }, { x: 8, z: -8 }, { x: -2, z: 12 }, { x: 12, z: -2 }];
-            boxPos.forEach(p => {
-                const box = new THREE.Mesh(boxGeo, matRust);
-                box.position.set(p.x, 1, p.z);
-                box.castShadow = true;
-                box.receiveShadow = true;
-                scene.add(box);
-                addBoxCollider(box);
+            // === DETAILED MAP STRUCTURES FOR 200x200 MAP ===
+
+            // Cover Walls - Low walls for tactical cover
+            const coverWallGeo = new THREE.BoxGeometry(6, 1.5, 0.3);
+            const coverPositions = [
+                { x: -30, z: -30 }, { x: 30, z: 30 }, { x: -30, z: 30 }, { x: 30, z: -30 },
+                { x: -50, z: 0 }, { x: 50, z: 0 }, { x: 0, z: -50 }, { x: 0, z: 50 },
+                { x: -40, z: -20 }, { x: 40, z: 20 }, { x: -20, z: 40 }, { x: 20, z: -40 }
+            ];
+            coverPositions.forEach((p, i) => {
+                const wall = new THREE.Mesh(coverWallGeo, matConcrete);
+                wall.position.set(p.x, 0.75, p.z);
+                wall.rotation.y = (i % 2) * Math.PI / 2; // Alternate orientation
+                wall.castShadow = true;
+                wall.receiveShadow = true;
+                scene.add(wall);
+                addBoxCollider(wall);
             });
 
-            // 절차적 모델 추가 (crate, barrel) - 게임 퀄리티 향상
+            // Elevated Platforms - For height advantage
+            const platformGeo = new THREE.BoxGeometry(8, 0.5, 8);
+            const platformSupport = new THREE.BoxGeometry(0.5, 3, 0.5);
+            const platforms = [
+                { x: -60, z: -60, height: 3 },
+                { x: 60, z: 60, height: 3 },
+                { x: -60, z: 60, height: 4 },
+                { x: 60, z: -60, height: 4 }
+            ];
+            platforms.forEach(p => {
+                const platform = new THREE.Mesh(platformGeo, matMetal);
+                platform.position.set(p.x, p.height, p.z);
+                platform.castShadow = true;
+                platform.receiveShadow = true;
+                scene.add(platform);
+                addBoxCollider(platform);
+
+                // Support pillars
+                for (let dx = -3; dx <= 3; dx += 6) {
+                    for (let dz = -3; dz <= 3; dz += 6) {
+                        const support = new THREE.Mesh(platformSupport, matMetal);
+                        support.position.set(p.x + dx, p.height / 2, p.z + dz);
+                        support.castShadow = true;
+                        scene.add(support);
+                    }
+                }
+            });
+
+            // Large Crates - Scattered cover
+            const largeCrateGeo = new THREE.BoxGeometry(3, 3, 3);
             const cratePositions = [
-                { x: -10, z: -10 }, { x: 10, z: 10 }, { x: -15, z: 5 },
-                { x: 15, z: -5 }, { x: -3, z: 15 }, { x: 3, z: -15 }
+                { x: -45, z: -15 }, { x: 45, z: 15 }, { x: -15, z: 45 }, { x: 15, z: -45 },
+                { x: -70, z: -30 }, { x: 70, z: 30 }, { x: -30, z: 70 }, { x: 30, z: -70 },
+                { x: -55, z: 25 }, { x: 55, z: -25 }, { x: 25, z: 55 }, { x: -25, z: -55 }
             ];
             cratePositions.forEach(p => {
-                const crate = createProceduralModel('crate', { size: 1.5, color: 0x8B4513 });
-                crate.position.set(p.x, 0.75, p.z);
+                const crate = new THREE.Mesh(largeCrateGeo, matRust);
+                crate.position.set(p.x, 1.5, p.z);
                 crate.castShadow = true;
                 crate.receiveShadow = true;
                 scene.add(crate);
                 addBoxCollider(crate);
+            });
 
-                // 물리 바디 추가 (선택적)
-                if (usePhysics) {
-                    createPhysicsBody(crate, 0, false); // 정적 객체
+            // Small Crates Clusters - Additional cover
+            const smallCrateGeo = new THREE.BoxGeometry(1.5, 1.5, 1.5);
+            const smallCrateClusters = [
+                { x: -35, z: -5 }, { x: 35, z: 5 }, { x: -5, z: 35 }, { x: 5, z: -35 },
+                { x: -80, z: -50 }, { x: 80, z: 50 }, { x: -50, z: 80 }, { x: 50, z: -80 }
+            ];
+            smallCrateClusters.forEach(p => {
+                for (let i = 0; i < 3; i++) {
+                    const crate = new THREE.Mesh(smallCrateGeo, matRust);
+                    const offsetX = (Math.random() - 0.5) * 4;
+                    const offsetZ = (Math.random() - 0.5) * 4;
+                    crate.position.set(p.x + offsetX, 0.75, p.z + offsetZ);
+                    crate.rotation.y = Math.random() * Math.PI;
+                    crate.castShadow = true;
+                    crate.receiveShadow = true;
+                    scene.add(crate);
+                    addBoxCollider(crate);
                 }
             });
 
+            // Corridors - Narrow pathways
+            const corridorWallGeo = new THREE.BoxGeometry(20, 3, 0.5);
+            const corridors = [
+                { x: -75, z: 0, vertical: false },
+                { x: 75, z: 0, vertical: false },
+                { x: 0, z: -75, vertical: true },
+                { x: 0, z: 75, vertical: true }
+            ];
+            corridors.forEach(c => {
+                const wall1 = new THREE.Mesh(corridorWallGeo, matWall);
+                const wall2 = new THREE.Mesh(corridorWallGeo, matWall);
+                if (c.vertical) {
+                    wall1.position.set(c.x - 2, 1.5, c.z);
+                    wall2.position.set(c.x + 2, 1.5, c.z);
+                } else {
+                    wall1.position.set(c.x, 1.5, c.z - 2);
+                    wall2.position.set(c.x, 1.5, c.z + 2);
+                    wall1.rotation.y = Math.PI / 2;
+                    wall2.rotation.y = Math.PI / 2;
+                }
+                wall1.castShadow = true;
+                wall2.castShadow = true;
+                scene.add(wall1);
+                scene.add(wall2);
+                addBoxCollider(wall1);
+                addBoxCollider(wall2);
+            });
+
+            // Central Structure - Multi-level focal point
+            const centralBase = new THREE.Mesh(new THREE.BoxGeometry(15, 1, 15), matConcrete);
+            centralBase.position.set(0, 0.5, 0);
+            centralBase.receiveShadow = true;
+            scene.add(centralBase);
+            addBoxCollider(centralBase);
+
+            // Ramps for central structure
+            const rampGeo = new THREE.BoxGeometry(4, 0.2, 8);
+            [-6, 6].forEach(offset => {
+                const ramp = new THREE.Mesh(rampGeo, matMetal);
+                ramp.position.set(offset, 1, 0);
+                ramp.rotation.x = Math.PI / 12;
+                scene.add(ramp);
+            });
+
+            // Keep existing pillars for vertical gameplay
+            const pillarGeo = new THREE.BoxGeometry(1, 10, 1);
+            for (let x = -20; x <= 20; x += 10) {
+                for (let z = -20; z <= 20; z += 10) {
+                    if (x === 0 && z === 0) continue;
+                    const pillar = new THREE.Mesh(pillarGeo, matMetal);
+                    pillar.position.set(x, 5, z);
+                    pillar.castShadow = true;
+                    pillar.receiveShadow = true;
+                    scene.add(pillar);
+                    addBoxCollider(pillar);
+                }
+            }
+
+            const beamGeo = new THREE.BoxGeometry(200, 0.5, 0.5);
+            for (let z = -20; z <= 20; z += 5) {
+                const beam = new THREE.Mesh(beamGeo, matMetal);
+                beam.position.set(0, 9, z);
+                scene.add(beam);
+            }
+
+            // Old barrels for decoration (non-collidable)
+            const barrelGeo = new THREE.CylinderGeometry(0.6, 0.6, 1.2, 8);
             const barrelPositions = [
-                { x: -12, z: 8 }, { x: 12, z: -8 }, { x: -7, z: -12 },
-                { x: 7, z: 12 }, { x: 0, z: 18 }
+                { x: -65, z: -45 }, { x: 65, z: 45 }, { x: -45, z: 65 }, { x: 45, z: -65 },
+                { x: -85, z: -20 }, { x: 85, z: 20 }
             ];
             barrelPositions.forEach(p => {
-                const barrel = createProceduralModel('barrel', { radius: 0.6, height: 1.2, color: 0x654321 });
+                const barrel = new THREE.Mesh(barrelGeo, matRust);
                 barrel.position.set(p.x, 0.6, p.z);
                 barrel.castShadow = true;
+                barrel.receiveShadow = true;
+                scene.add(barrel);
+
                 barrel.receiveShadow = true;
                 scene.add(barrel);
 
