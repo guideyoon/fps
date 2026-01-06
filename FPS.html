@@ -2462,6 +2462,7 @@
 
         // --- 게임 시작 카운트다운 ---
         function startCountdown() {
+            console.log('startCountdown() called'); // DEBUG
             const countdownEl = document.getElementById('countdown');
             countdownEl.style.display = 'block';
             let count = 5;
@@ -2469,6 +2470,7 @@
 
             const interval = setInterval(() => {
                 count--;
+                console.log('Countdown:', count); // DEBUG
                 if (count > 0) {
                     countdownEl.innerText = count;
                 } else if (count === 0) {
@@ -2476,6 +2478,7 @@
                 } else {
                     clearInterval(interval);
                     countdownEl.style.display = 'none';
+                    console.log('Calling startGame()...'); // DEBUG
                     startGame();
                 }
             }, 1000);
@@ -2483,6 +2486,7 @@
 
         // --- 게임 시작 함수 ---
         function startGame() {
+            console.log('startGame() CALLED'); // DEBUG
             // 1. 엔진 초기화
             initGame();
 
