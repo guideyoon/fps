@@ -1331,8 +1331,8 @@
         let otherPlayers = [];
 
         // 플레이어 모델용 재질 (다른 색상으로 구분)
-        const matPlayerBody = new THREE.MeshStandardMaterial({ color: 0x4a90e2, roughness: 0.4, metalness: 0.6, emissive: 0x1a3052, emissiveIntensity: 0.6 });
-        const matPlayerSkin = new THREE.MeshStandardMaterial({ color: 0xf4a460, roughness: 0.7, emissive: 0x543410, emissiveIntensity: 0.4 });
+        let matPlayerBody = new THREE.MeshStandardMaterial({ color: 0x4a90e2, roughness: 0.4, metalness: 0.6, emissive: 0x1a3052, emissiveIntensity: 0.6 });
+        let matPlayerSkin = new THREE.MeshStandardMaterial({ color: 0xf4a460, roughness: 0.7, emissive: 0x543410, emissiveIntensity: 0.4 });
 
         // 게임 통계
         let gameStartTime = 0;
@@ -1361,8 +1361,8 @@
 
         const matZombieSkin = new THREE.MeshStandardMaterial({ color: 0x5e7052, roughness: 0.8 });
         const matZombieClothes = new THREE.MeshStandardMaterial({ color: 0x4a3b2a, roughness: 0.9 });
-        const matHpBg = new THREE.MeshBasicMaterial({ color: 0x000000 });
-        const matHpFg = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        let matHpBg = new THREE.MeshBasicMaterial({ color: 0x000000 });
+        let matHpFg = new THREE.MeshBasicMaterial({ color: 0xff0000 });
 
         const SoundGen = {
             ctx: null,
@@ -2011,6 +2011,17 @@
 
                     document.getElementById('room-title').innerText = data.roomName;
 
+                    // Save own spawn position from server
+                    const myData = data.players[myId];
+                    if (myData && myData.position) {
+                        position = new THREE.Vector3(
+                            myData.position.x,
+                            myData.position.y,
+                            myData.position.z
+                        );
+                        console.log('Spawn position set from server:', position);
+                    }
+
                     // Clear existing if scene exists
                     if (window.scene) {
                         Object.values(otherPlayersMap).forEach(mesh => scene.remove(mesh));
@@ -2049,12 +2060,15 @@
                     document.getElementById('room-waiting').style.display = 'none';
                     document.getElementById('chat-container').style.bottom = '20px';
 
-                    // Initialize camera position to eye level if not already set
-                    if (!position || (position.x === 0 && position.y === 0 && position.z === 0)) {
+                    // Use spawn position from server (already set in roomJoined event)
+                    // Only initialize if position is completely unset
+                    if (!position) {
+                        console.warn('Position not set! Using fallback (0, 1.7, 0)');
                         position = new THREE.Vector3(0, 1.7, 0);
-                        camera.position.copy(position);
-                        console.log('Initialized camera position to eye level:', camera.position);
                     }
+
+                    camera.position.copy(position);
+                    console.log('Game started at position:', position);
 
                     // Actual mesh creation is handled in startGame() -> createRemotePlayer
                     // This ensures scene is initialized first.
@@ -5338,21 +5352,6 @@
                         elHitMarker.style.transform = "translate(-50%, -50%) rotate(45deg) scale(1)";
                         elHitMarker.style.filter = "brightness(1) drop-shadow(0 0 4px red)";
                     }, 150);
-
-                    // 화면 흔들림 효과 (피격 감각)
-                    const shakeIntensity = h.object.name === 'head' ? 0.15 : 0.08;
-                    hitShake.intensity = shakeIntensity;
-                    hitShake.x = (Math.random() - 0.5) * shakeIntensity;
-                    hitShake.y = (Math.random() - 0.5) * shakeIntensity;
-
-                    // 화면 빨간색 플래시 (피격 감각)
-                    elDamage.style.opacity = h.object.name === 'head' ? 0.6 : 0.4;
-                    elDamage.style.background = h.object.name === 'head'
-                        ? 'radial-gradient(circle, transparent 40%, rgba(255, 0, 0, 0.7) 100%)'
-                        : 'radial-gradient(circle, transparent 50%, rgba(255, 0, 0, 0.5) 100%)';
-                    setTimeout(() => {
-                        elDamage.style.opacity = 0;
-                    }, 80);
 
                     // 피격 사운드 효과
                     SoundGen.playHit();
