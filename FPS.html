@@ -2173,7 +2173,49 @@
                         }, 3000);
                     } else {
                         const mesh = otherPlayersMap[data.id];
-                        // Optional: Death animation or hide mesh
+                        if (mesh) {
+                            // Death animation - Falling and fading out
+                            let fallProgress = 0;
+                            const fallDuration = 1000; // 1 second
+                            const fallInterval = 16; // ~60fps
+                            const fallSteps = fallDuration / fallInterval;
+
+                            const originalRotation = { x: mesh.rotation.x, y: mesh.rotation.y, z: mesh.rotation.z };
+                            const originalScale = { x: mesh.scale.x, y: mesh.scale.y, z: mesh.scale.z };
+
+                            const deathAnimation = setInterval(() => {
+                                fallProgress++;
+                                const progress = fallProgress / fallSteps;
+
+                                // Rotate forward (falling motion)
+                                mesh.rotation.x = originalRotation.x + (Math.PI / 2) * progress;
+
+                                // Move down slightly
+                                mesh.position.y = -0.5 * progress;
+
+                                // Fade out all children (make transparent)
+                                mesh.traverse((child) => {
+                                    if (child.material) {
+                                        if (!child.userData.originalOpacity) {
+                                            child.userData.originalOpacity = child.material.opacity !== undefined ? child.material.opacity : 1;
+                                        }
+                                        child.material.transparent = true;
+                                        child.material.opacity = child.userData.originalOpacity * (1 - progress);
+                                    }
+                                });
+
+                                // Shrink slightly
+                                const scale = 1 - (0.3 * progress);
+                                mesh.scale.set(originalScale.x * scale, originalScale.y * scale, originalScale.z * scale);
+
+                                if (fallProgress >= fallSteps) {
+                                    clearInterval(deathAnimation);
+                                    // Remove from scene after animation
+                                    scene.remove(mesh);
+                                    delete otherPlayersMap[data.id];
+                                }
+                            }, fallInterval);
+                        }
                     }
                 });
 
