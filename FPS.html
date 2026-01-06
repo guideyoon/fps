@@ -1245,6 +1245,7 @@
         let socket = null;
         let myId = null;
         let otherPlayersMap = {}; // id -> mesh
+        let roomPlayersState = {}; // Global player data
         const PLAYER_RADIUS = 0.4;
 
         // Footsteps
@@ -1952,6 +1953,8 @@
 
                 socket.on('connect', () => {
                     console.log('Connected to server');
+                    myId = socket.id; // Assign myId on connection
+                    console.log('myId set to:', myId);
                     // Send Identity
                     socket.emit('setIdentity', { name: name });
                     document.getElementById('room-waiting').querySelector('h2').innerText = '연결됨';
@@ -1993,7 +1996,7 @@
                     });
                 });
 
-                let roomPlayersState = {};
+
 
                 socket.on('roomJoined', (data) => {
                     // Update UI to Waiting Room
