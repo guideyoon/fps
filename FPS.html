@@ -2210,23 +2210,47 @@
             console.log('createRemotePlayer called for:', p); // DEBUG
             const group = new THREE.Group();
 
-            // 간단한 플레이어 모델 (기본 적 모델 재사용)
-            const body = new THREE.Mesh(new THREE.BoxGeometry(0.6, 1.2, 0.4), matPlayerBody);
-            body.position.y = 0.6;
+            // More realistic player model with rounded shapes
+            // Body - Using Capsule-like shape (cylinder + spheres)
+            const bodyGeo = new THREE.CylinderGeometry(0.25, 0.25, 1.0, 12);
+            const body = new THREE.Mesh(bodyGeo, matPlayerBody);
+            body.position.y = 0.9; // Adjusted to be on ground
             group.add(body);
 
-            const head = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 0.4), matPlayerSkin);
-            head.position.y = 1.4;
+            // Shoulders (rounded)
+            const shoulderGeo = new THREE.SphereGeometry(0.15, 8, 8);
+            const leftShoulder = new THREE.Mesh(shoulderGeo, matPlayerBody);
+            leftShoulder.position.set(-0.3, 1.3, 0);
+            group.add(leftShoulder);
+
+            const rightShoulder = new THREE.Mesh(shoulderGeo, matPlayerBody);
+            rightShoulder.position.set(0.3, 1.3, 0);
+            group.add(rightShoulder);
+
+            // Head - Sphere for more realistic look
+            const headGeo = new THREE.SphereGeometry(0.22, 12, 12);
+            const head = new THREE.Mesh(headGeo, matPlayerSkin);
+            head.position.y = 1.65; // Adjusted height
             head.name = 'head';
             group.add(head);
             group.userData.head = head;
 
-            // HP Bar
+            // Legs (rounded cylinders)
+            const legGeo = new THREE.CylinderGeometry(0.12, 0.1, 0.7, 8);
+            const leftLeg = new THREE.Mesh(legGeo, matPlayerBody);
+            leftLeg.position.set(-0.15, 0.35, 0);
+            group.add(leftLeg);
+
+            const rightLeg = new THREE.Mesh(legGeo, matPlayerBody);
+            rightLeg.position.set(0.15, 0.35, 0);
+            group.add(rightLeg);
+
+            // HP Bar (slightly higher to account for new model)
             const hpBg = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.1), matHpBg);
-            hpBg.position.y = 1.8;
+            hpBg.position.y = 2.0;
             group.add(hpBg);
             const hpFg = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.1), matHpFg);
-            hpFg.position.y = 1.8;
+            hpFg.position.y = 2.0;
             hpFg.position.z = 0.01;
             group.add(hpFg);
 
@@ -2237,7 +2261,8 @@
             // Ensure scene exists before adding
             if (window.scene) {
                 console.log('Adding player mesh to scene:', p.id); // DEBUG
-                group.position.copy(p.position);
+                // Position on ground (y = 0 is floor level)
+                group.position.set(p.position.x, 0, p.position.z);
                 scene.add(group);
                 otherPlayersMap[p.id] = group;
                 if (typeof otherPlayers !== 'undefined') otherPlayers.push(group);
@@ -3111,12 +3136,129 @@
                     new THREE.Vector3(1.2, 1.2, 1.2)
                 );
                 colliders.push(barrelCollider);
+            });
 
-                // 물리 바디 추가
-                if (usePhysics) {
-                    createPhysicsBody(barrel, 0, false);
+            // === SHIPPING CONTAINERS - MAJOR COVER OBJECTS ===
+            const containerGeo = new THREE.BoxGeometry(12, 2.6, 2.6); // Standard 40ft container proportions
+            const matContainer1 = new THREE.MeshStandardMaterial({ color: 0x8B4513, roughness: 0.8, metalness: 0.3 });
+            const matContainer2 = new THREE.MeshStandardMaterial({ color: 0x2F4F4F, roughness: 0.8, metalness: 0.3 });
+            const matContainer3 = new THREE.MeshStandardMaterial({ color: 0x8B0000, roughness: 0.8, metalness: 0.3 });
+
+            const containerPlacements = [
+                { x: -70, z: -70, rotation: 0, material: matContainer1 },
+                { x: 70, z: 70, rotation: 0, material: matContainer2 },
+                { x: -70, z: 70, rotation: Math.PI / 2, material: matContainer3 },
+                { x: 70, z: -70, rotation: Math.PI / 2, material: matContainer1 },
+                { x: -85, z: 0, rotation: 0, material: matContainer2 },
+                { x: 85, z: 0, rotation: 0, material: matContainer3 },
+                { x: 0, z: -85, rotation: Math.PI / 2, material: matContainer1 },
+                { x: 0, z: 85, rotation: Math.PI / 2, material: matContainer2 },
+                // Stacked containers
+                { x: -40, z: -60, rotation: 0, material: matContainer3, height: 2.6 },
+                { x: 40, z: 60, rotation: Math.PI / 2, material: matContainer1, height: 2.6 }
+            ];
+
+            containerPlacements.forEach(c => {
+                const container = new THREE.Mesh(containerGeo, c.material);
+                container.position.set(c.x, c.height || 1.3, c.z);
+                container.rotation.y = c.rotation;
+                container.castShadow = true;
+                container.receiveShadow = true;
+                scene.add(container);
+                addBoxCollider(container);
+
+                // Add container details (corrugated pattern simulation)
+                const stripGeo = new THREE.BoxGeometry(12.1, 0.1, 0.1);
+                for (let i = -1; i <= 1; i += 0.5) {
+                    const strip = new THREE.Mesh(stripGeo, c.material);
+                    strip.position.set(c.x, (c.height || 1.3) + i, c.z);
+                    strip.rotation.y = c.rotation;
+                    scene.add(strip);
                 }
             });
+
+            // === CONCRETE BARRIERS - WAIST-HIGH COVER ===
+            const barrierGeo = new THREE.BoxGeometry(4, 1.2, 0.5);
+            const matBarrier = new THREE.MeshStandardMaterial({ color: 0x808080, roughness: 0.9 });
+            const barrierPositions = [
+                { x: -55, z: -35 }, { x: 55, z: 35 }, { x: -35, z: 55 }, { x: 35, z: -55 },
+                { x: -75, z: -15 }, { x: 75, z: 15 }, { x: -15, z: 75 }, { x: 15, z: -75 },
+                { x: -45, z: -45 }, { x: 45, z: 45 }
+            ];
+
+            barrierPositions.forEach((p, i) => {
+                const barrier = new THREE.Mesh(barrierGeo, matBarrier);
+                barrier.position.set(p.x, 0.6, p.z);
+                barrier.rotation.y = (i % 3) * Math.PI / 3; // Varied angles
+                barrier.castShadow = true;
+                barrier.receiveShadow = true;
+                scene.add(barrier);
+                addBoxCollider(barrier);
+            });
+
+            // === METAL FENCES - SECTIONAL BARRIERS ===
+            const fenceGeo = new THREE.BoxGeometry(8, 2, 0.1);
+            const matFence = new THREE.MeshStandardMaterial({ color: 0x404040, roughness: 0.6, metalness: 0.7 });
+            const fenceSections = [
+                { x: -90, z: -40, rotation: 0 },
+                { x: 90, z: 40, rotation: 0 },
+                { x: -40, z: -90, rotation: Math.PI / 2 },
+                { x: 40, z: 90, rotation: Math.PI / 2 }
+            ];
+
+            fenceSections.forEach(f => {
+                const fence = new THREE.Mesh(fenceGeo, matFence);
+                fence.position.set(f.x, 1, f.z);
+                fence.rotation.y = f.rotation;
+                fence.castShadow = true;
+                scene.add(fence);
+                addBoxCollider(fence);
+            });
+
+            // === STORAGE TANKS - CYLINDRICAL COVER ===
+            const tankGeo = new THREE.CylinderGeometry(2, 2, 4, 16);
+            const matTank = new THREE.MeshStandardMaterial({ color: 0x4682B4, roughness: 0.5, metalness: 0.6 });
+            const tankPositions = [
+                { x: -50, z: -70 }, { x: 50, z: 70 }, { x: -70, z: 50 }, { x: 70, z: -50 }
+            ];
+
+            tankPositions.forEach(p => {
+                const tank = new THREE.Mesh(tankGeo, matTank);
+                tank.position.set(p.x, 2, p.z);
+                tank.castShadow = true;
+                tank.receiveShadow = true;
+                scene.add(tank);
+                addBoxCollider(tank);
+
+                // Tank top/cap
+                const capGeo = new THREE.CylinderGeometry(2.2, 2.2, 0.2, 16);
+                const cap = new THREE.Mesh(capGeo, matMetal);
+                cap.position.set(p.x, 4.1, p.z);
+                scene.add(cap);
+            });
+
+            // === SANDBAG WALLS - LOW TACTICAL COVER ===
+            const sandbagGeo = new THREE.BoxGeometry(5, 1, 1.5);
+            const matSandbag = new THREE.MeshStandardMaterial({ color: 0xD2B48C, roughness: 1.0 });
+            const sandbagWalls = [
+                { x: -25, z: -65 }, { x: 25, z: 65 }, { x: -65, z: 25 }, { x: 65, z: -25 },
+                { x: -35, z: -40 }, { x: 35, z: 40 }
+            ];
+
+            sandbagWalls.forEach((p, i) => {
+                const wall = new THREE.Mesh(sandbagGeo, matSandbag);
+                wall.position.set(p.x, 0.5, p.z);
+                wall.rotation.y = (i % 2) * Math.PI / 2;
+                wall.castShadow = true;
+                wall.receiveShadow = true;
+                scene.add(wall);
+                addBoxCollider(wall);
+            });
+            // 물리 바디 추가
+            if (usePhysics) {
+                createPhysicsBody(barrel, 0, false);
+            }
+        });
         }
 
         // --- Weapon Building ---
