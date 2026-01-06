@@ -2086,7 +2086,8 @@
 
                     const mesh = otherPlayersMap[p.id];
                     if (mesh) {
-                        mesh.position.copy(p.position);
+                        // Keep player on ground (y=0), only use x and z from server
+                        mesh.position.set(p.position.x, 0, p.position.z);
                         mesh.rotation.y = p.rotation.y;
                     } else {
                         // If player exists but no mesh (e.g. joined mid-game), create it
@@ -2243,6 +2244,28 @@
 
             const rightLeg = new THREE.Mesh(legGeo, matPlayerBody);
             rightLeg.position.set(0.15, 0.35, 0);
+            group.add(rightLeg);
+
+            // Arms with weapon
+            const armGeo = new THREE.CylinderGeometry(0.08, 0.08, 0.6, 8);
+            const leftArm = new THREE.Mesh(armGeo, matPlayerSkin);
+            leftArm.position.set(-0.35, 1.0, 0.2);
+            leftArm.rotation.z = 0.3; // Angled to hold weapon
+            leftArm.rotation.x = -0.5;
+            group.add(leftArm);
+
+            const rightArm = new THREE.Mesh(armGeo, matPlayerSkin);
+            rightArm.position.set(0.35, 1.0, 0.2);
+            rightArm.rotation.z = -0.3; // Angled to hold weapon
+            rightArm.rotation.x = -0.5;
+            group.add(rightArm);
+
+            // Simple weapon model (rifle-like)
+            const weaponGeo = new THREE.BoxGeometry(0.1, 0.1, 0.8);
+            const matWeapon = new THREE.MeshStandardMaterial({ color: 0x222222, metalness: 0.8, roughness: 0.3 });
+            const weapon = new THREE.Mesh(weaponGeo, matWeapon);
+            weapon.position.set(0.15, 0.9, 0.4); // In front of body
+            weapon.rotation.x = -0.3;
             group.add(rightLeg);
 
             // HP Bar (slightly higher to account for new model)
