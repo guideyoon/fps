@@ -1331,8 +1331,8 @@
         let otherPlayers = [];
 
         // 플레이어 모델용 재질 (다른 색상으로 구분)
-        const matPlayerBody = new THREE.MeshStandardMaterial({ color: 0x4a90e2, roughness: 0.4, metalness: 0.6 });
-        const matPlayerSkin = new THREE.MeshStandardMaterial({ color: 0xf4a460, roughness: 0.7 });
+        const matPlayerBody = new THREE.MeshStandardMaterial({ color: 0x4a90e2, roughness: 0.4, metalness: 0.6, emissive: 0x1a3052, emissiveIntensity: 0.6 });
+        const matPlayerSkin = new THREE.MeshStandardMaterial({ color: 0xf4a460, roughness: 0.7, emissive: 0x543410, emissiveIntensity: 0.4 });
 
         // 게임 통계
         let gameStartTime = 0;
