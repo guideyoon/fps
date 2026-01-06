@@ -2321,13 +2321,13 @@
             // Arms with weapon
             const armGeo = new THREE.CylinderGeometry(0.08, 0.08, 0.6, 8);
             const leftArm = new THREE.Mesh(armGeo, matPlayerSkin);
-            leftArm.position.set(-0.35, 1.0, 0.2);
+            leftArm.position.set(-0.35, 1.4, 0.2); // Adjusted for new body height
             leftArm.rotation.z = 0.3; // Angled to hold weapon
             leftArm.rotation.x = -0.5;
             group.add(leftArm);
 
             const rightArm = new THREE.Mesh(armGeo, matPlayerSkin);
-            rightArm.position.set(0.35, 1.0, 0.2);
+            rightArm.position.set(0.35, 1.4, 0.2); // Adjusted for new body height
             rightArm.rotation.z = -0.3; // Angled to hold weapon
             rightArm.rotation.x = -0.5;
             group.add(rightArm);
@@ -2336,7 +2336,7 @@
             const weaponGeo = new THREE.BoxGeometry(0.1, 0.1, 0.8);
             const matWeapon = new THREE.MeshStandardMaterial({ color: 0x222222, metalness: 0.8, roughness: 0.3 });
             const weapon = new THREE.Mesh(weaponGeo, matWeapon);
-            weapon.position.set(0.15, 0.9, 0.4); // In front of body
+            weapon.position.set(0.15, 1.3, 0.4); // Adjusted for new body height
             weapon.rotation.x = -0.3;
             group.add(weapon); // Add weapon to group
 
@@ -2344,22 +2344,23 @@
             const visorGeo = new THREE.BoxGeometry(0.18, 0.08, 0.05);
             const matVisor = new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 0.9, roughness: 0.2 });
             const visor = new THREE.Mesh(visorGeo, matVisor);
-            visor.position.set(0, 1.68, 0.15); // Front of head
+            visor.position.set(0, 2.05, 0.15); // Front of head (adjusted for new height)
             group.add(visor);
 
             // Face marker - small colored cube to show front clearly
             const faceMarkerGeo = new THREE.BoxGeometry(0.1, 0.1, 0.05);
             const matFaceMarker = new THREE.MeshStandardMaterial({ color: 0x00ff00, emissive: 0x00ff00, emissiveIntensity: 0.5 });
             const faceMarker = new THREE.Mesh(faceMarkerGeo, matFaceMarker);
-            faceMarker.position.set(0, 1.55, 0.2); // Lower front of head (like eyes)
+            faceMarker.position.set(0, 1.9, 0.2); // Lower front of head (adjusted for new height)
             group.add(faceMarker);
+
 
             // HP Bar (slightly higher to account for new model)
             const hpBg = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.1), matHpBg);
-            hpBg.position.y = 2.0;
+            hpBg.position.y = 2.3; // Above head
             group.add(hpBg);
             const hpFg = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.1), matHpFg);
-            hpFg.position.y = 2.0;
+            hpFg.position.y = 2.3; // Above head
             hpFg.position.z = 0.01;
             group.add(hpFg);
 
@@ -2369,12 +2370,13 @@
 
             // Ensure scene exists before adding
             if (window.scene) {
-                console.log('Adding player mesh to scene:', p.id); // DEBUG
+                console.log('Adding player mesh to scene:', p.id, 'at position:', p.position); // DEBUG
                 // Position on ground (y = 0 is floor level)
                 group.position.set(p.position.x, 0, p.position.z);
                 scene.add(group);
                 otherPlayersMap[p.id] = group;
                 if (typeof otherPlayers !== 'undefined') otherPlayers.push(group);
+                console.log('Player mesh added successfully. Total children in group:', group.children.length); // DEBUG
             } else {
                 console.error('Window.scene is missing in createRemotePlayer!'); // DEBUG
             }
