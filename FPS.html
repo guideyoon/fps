@@ -2299,6 +2299,26 @@
 
         function createRemotePlayer(p) {
             console.log('createRemotePlayer called for:', p); // DEBUG
+
+            // Create materials inside function to avoid scope issues
+            const matPlayerBody = new THREE.MeshStandardMaterial({
+                color: 0x4a90e2,
+                roughness: 0.4,
+                metalness: 0.6,
+                emissive: 0x1a3052,
+                emissiveIntensity: 0.6
+            });
+
+            const matPlayerSkin = new THREE.MeshStandardMaterial({
+                color: 0xf4a460,
+                roughness: 0.7,
+                emissive: 0x543410,
+                emissiveIntensity: 0.4
+            });
+
+            const matHpBg = new THREE.MeshBasicMaterial({ color: 0x000000 });
+            const matHpFg = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+
             const group = new THREE.Group();
 
             // More realistic player model with rounded shapes
