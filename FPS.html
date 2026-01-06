@@ -2266,7 +2266,8 @@
             const weapon = new THREE.Mesh(weaponGeo, matWeapon);
             weapon.position.set(0.15, 0.9, 0.4); // In front of body
             weapon.rotation.x = -0.3;
-            group.add(rightLeg);
+            group.add(weapon); // Add weapon to group
+
 
             // HP Bar (slightly higher to account for new model)
             const hpBg = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.1), matHpBg);
