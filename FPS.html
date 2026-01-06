@@ -2276,12 +2276,6 @@
             }
         }
 
-        // Player model materials (must be defined before createRemotePlayer)
-        const matPlayerBody = new THREE.MeshStandardMaterial({ color: 0x2a4a7c, roughness: 0.7, metalness: 0.2 });
-        const matPlayerSkin = new THREE.MeshStandardMaterial({ color: 0xd4a574, roughness: 0.8, metalness: 0.1 });
-        const matHpBg = new THREE.MeshBasicMaterial({ color: 0x333333, transparent: true, opacity: 0.6 });
-        const matHpFg = new THREE.MeshBasicMaterial({ color: 0x00ff00, transparent: true, opacity: 0.8 });
-
         function createRemotePlayer(p) {
             console.log('createRemotePlayer called for:', p); // DEBUG
             const group = new THREE.Group();
