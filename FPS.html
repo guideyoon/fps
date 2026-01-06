@@ -2431,10 +2431,12 @@
             // HP Bar (slightly higher to account for new model)
             const hpBg = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.1), matHpBg);
             hpBg.position.y = 2.3; // Above head
+            hpBg.visible = false; // Hide HP bar in multiplayer
             group.add(hpBg);
             const hpFg = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.1), matHpFg);
             hpFg.position.y = 2.3; // Above head
             hpFg.position.z = 0.01;
+            hpFg.visible = false; // Hide HP bar in multiplayer
             group.add(hpFg);
 
             group.userData.hp = p.hp || 100;
