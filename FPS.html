@@ -2373,6 +2373,8 @@
                 console.log('Adding player mesh to scene:', p.id, 'at position:', p.position); // DEBUG
                 // Position on ground (y = 0 is floor level)
                 group.position.set(p.position.x, 0, p.position.z);
+                console.log('Player actual position in scene:', group.position); // DEBUG
+                console.log('Camera position:', camera.position); // DEBUG
                 scene.add(group);
                 otherPlayersMap[p.id] = group;
                 if (typeof otherPlayers !== 'undefined') otherPlayers.push(group);
