@@ -136,8 +136,9 @@ io.on('connection', (socket) => {
         const room = rooms[roomId];
 
         if (room && room.players[socket.id] && room.players[socket.id].isDead) {
-            const spawnX = (Math.random() - 0.5) * 60;
-            const spawnZ = (Math.random() - 0.5) * 60;
+            // Spawn within map bounds (map is 100x100, so use ±40 for safety)
+            const spawnX = (Math.random() - 0.5) * 80;
+            const spawnZ = (Math.random() - 0.5) * 80;
 
             const p = room.players[socket.id];
             p.hp = 100;
@@ -195,8 +196,9 @@ function joinRoom(socket, roomId) {
     if (!room) return;
 
     // Initialize Player State for Game
-    const spawnX = (Math.random() - 0.5) * 60;
-    const spawnZ = (Math.random() - 0.5) * 60;
+    // Spawn within map bounds (map is 100x100, so use ±40 for safety)
+    const spawnX = (Math.random() - 0.5) * 80;
+    const spawnZ = (Math.random() - 0.5) * 80;
 
     socket.join(roomId);
     playerRoomMap[socket.id] = roomId;

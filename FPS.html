@@ -1114,6 +1114,11 @@
         </div>
     </div>
 
+    <!-- Game Start Countdown Overlay -->
+    <div id="countdown"
+        style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 120px; color: #fff; text-shadow: 0 0 20px rgba(255,255,255,0.8), 0 0 40px rgba(255,255,255,0.5); font-weight: bold; z-index: 9999; pointer-events: none;">
+    </div>
+
     <!-- 4. 대기실 화면 -->
     <div id="room-waiting" style="display: none;">
         <h2 id="room-title">방 이름</h2>
@@ -1121,8 +1126,6 @@
                 id="player-count">0/0</span></p>
 
         <div id="players-list"></div>
-
-        <div id="countdown" style="display: none;"></div>
 
         <div class="host-controls" style="display: none;">
             <button id="btn-start-game" class="start-btn"><i class="fas fa-play"></i> 게임 시작</button>
