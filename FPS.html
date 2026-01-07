@@ -1107,6 +1107,15 @@
                     <option value="8">8명</option>
                 </select>
             </div>
+            <div class="input-group">
+                <label>맵 선택</label>
+                <select id="new-room-map">
+                    <option value="factory" selected>창고 (Factory)</option>
+                    <!-- 향후 맵 추가 예시 -->
+                    <!-- <option value="urban">도시 (Urban)</option> -->
+                    <!-- <option value="desert">사막 (Desert)</option> -->
+                </select>
+            </div>
             <div class="modal-actions">
                 <button id="btn-create-confirm">생성</button>
                 <button class="cancel" id="btn-create-cancel">취소</button>
@@ -1240,6 +1249,7 @@
         let isDead = false;
         let isPaused = false;
         let gameMode = null; // 'single' or 'multi'
+        let currentMap = 'factory'; // 선택된 맵 (기본값: factory)
         let isRoomHost = false;
         let maxPlayers = 4;
         let currentPlayers = 1;
@@ -1899,11 +1909,16 @@
             });
 
             document.getElementById('btn-create-confirm').addEventListener('click', () => {
-                const roomName = document.getElementById('new-room-name').value.trim();
+                const roomName = document.getElementById('new-room-name').value || '새 방';
                 const maxPlayers = document.getElementById('new-room-max').value;
+                const mapName = document.getElementById('new-room-map').value; // 맵 정보 가져오기
 
                 if (socket && socket.connected) {
-                    socket.emit('createRoom', { name: roomName, maxPlayers: maxPlayers });
+                    socket.emit('createRoom', {
+                        name: roomName,
+                        maxPlayers: maxPlayers,
+                        map: mapName // 맵 정보 전송
+                    });
                     createRoomModal.style.display = 'none';
                     // Expected to receive 'roomJoined' event
                 }
@@ -2010,6 +2025,10 @@
                     document.getElementById('chat-container').style.display = 'flex';
 
                     document.getElementById('room-title').innerText = data.roomName;
+
+                    // Save map info
+                    currentMap = data.map || 'factory';
+                    console.log('Room map:', currentMap);
 
                     // Save own spawn position from server
                     const myData = data.players[myId];

@@ -45,12 +45,14 @@ io.on('connection', (socket) => {
         const roomId = generateRoomId();
         const roomName = data.name || `${socket.userData.name}'s Room`;
         const maxPlayers = parseInt(data.maxPlayers) || 4;
+        const mapName = data.map || 'factory'; // 기본값 factory
 
         rooms[roomId] = {
             id: roomId,
             name: roomName,
             host: socket.id,
             maxPlayers: maxPlayers,
+            map: mapName,
             players: {},
             gameStarted: false,
             createdAt: Date.now()
@@ -245,6 +247,7 @@ function joinRoom(socket, roomId) {
         roomId: room.id,
         roomName: room.name,
         isHost: room.host === socket.id,
+        map: room.map,
         players: room.players
     });
 
