@@ -5292,6 +5292,14 @@
         }
 
         function shoot(w) {
+            // 멀티플레이어에서 다른 플레이어에게 발사 알림
+            if (gameMode === 'multi' && socket && socket.connected) {
+                socket.emit('playerAction', {
+                    action: 'shoot',
+                    weaponIdx: curWeaponIdx
+                });
+            }
+
             if (w.type !== 'KNIFE') {
                 w.ammo--;
                 updateUI();
@@ -5349,6 +5357,7 @@
                 knifeSwing = 1.0;
                 SoundGen.playKnife();
             }
+
 
             const ray = new THREE.Raycaster();
             ray.setFromCamera(new THREE.Vector2(0, 0), camera);
