@@ -141,7 +141,7 @@ io.on('connection', (socket) => {
         if (room && room.players[socket.id] && room.players[socket.id].isDead) {
             // Track respawn count for this room to cycle through spawn points
             if (!room.respawnCounter) room.respawnCounter = 0;
-            const spawnPos = getSafeSpawnPosition(room.respawnCounter++);
+            const spawnPos = getSafeSpawnPosition(room.respawnCounter++, room.map);
 
             const p = room.players[socket.id];
             p.hp = 100;
@@ -191,7 +191,8 @@ io.on('connection', (socket) => {
 
 // Helper Functions
 // Predefined safe spawn points (tested and clear of pillars/walls)
-const SAFE_SPAWN_POINTS = [
+// Factory Map (200x200)
+const FACTORY_SPAWN_POINTS = [
     { x: -15, y: 1.7, z: -15 },
     { x: -15, y: 1.7, z: 15 },
     { x: 15, y: 1.7, z: -15 },
@@ -210,10 +211,26 @@ const SAFE_SPAWN_POINTS = [
     { x: 0, y: 1.7, z: 15 }
 ];
 
-function getSafeSpawnPosition(playerIndex = 0) {
+// Hotel Map (80x80)
+const HOTEL_SPAWN_POINTS = [
+    { x: 0, y: 1.7, z: -20 },  // 로비
+    { x: -10, y: 1.7, z: 0 },  // 왼쪽 복도
+    { x: 10, y: 1.7, z: 0 },   // 오른쪽 복도
+    { x: 0, y: 1.7, z: 10 },   // 중앙 복도
+    { x: 0, y: 1.7, z: 20 },   // 복도 끝
+    { x: -10, y: 1.7, z: -10 },
+    { x: 10, y: 1.7, z: -10 },
+    { x: -10, y: 1.7, z: 10 },
+    { x: 10, y: 1.7, z: 10 }
+];
+
+function getSafeSpawnPosition(playerIndex = 0, mapName = 'factory') {
+    // 맵에 따라 다른 스폰 포인트 사용
+    const spawnPoints = mapName === 'hotel' ? HOTEL_SPAWN_POINTS : FACTORY_SPAWN_POINTS;
+
     // Pick spawn point based on player index to avoid overlapping
-    const index = playerIndex % SAFE_SPAWN_POINTS.length;
-    return { ...SAFE_SPAWN_POINTS[index] }; // Clone to avoid mutation
+    const index = playerIndex % spawnPoints.length;
+    return { ...spawnPoints[index] }; // Clone to avoid mutation
 }
 
 function joinRoom(socket, roomId) {
@@ -228,7 +245,7 @@ function joinRoom(socket, roomId) {
     // Initialize Player State for Game
     // Use current player count as index for unique spawn position
     const playerIndex = Object.keys(room.players).length;
-    const spawnPos = getSafeSpawnPosition(playerIndex);
+    const spawnPos = getSafeSpawnPosition(playerIndex, room.map);
 
     socket.join(roomId);
     playerRoomMap[socket.id] = roomId;

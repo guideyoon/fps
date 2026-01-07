@@ -2330,6 +2330,12 @@
                     if (data.id === myId) {
                         playerHP = 100;
                         isDead = false;
+
+                        // HP UI 업데이트
+                        elHpBar.style.width = '100%';
+                        elHpText.innerText = 'HP: 100';
+                        elHpBar.style.background = '#4caf50'; // 녹색
+
                         // Update BOTH position variable and camera
                         position.set(data.position.x, data.position.y, data.position.z);
                         camera.position.copy(position);
@@ -2646,15 +2652,12 @@
             console.warn('Some extension features failed to initialize:', error);
         }
 
-        // 맵 선택에 따라 맵 생성 (싱글 플레이어만, 멀티는 startGame에서 생성)
+        // 맵 선택에 따라 맵 생성 (싱글 플레이어는 항상 factory, 멀티는 startGame에서 생성)
         if (gameMode === 'single') {
-            if (currentMap === 'hotel') {
-                createHotelMap();
-            } else {
-                createFactoryMap(); // 기본값
-            }
+            createFactoryMap(); // 싱글은 항상 factory
         }
         // 멀티플레이어는 gameStart 이벤트에서 currentMap 설정 후 startGame에서 맵 생성
+
 
 
         weaponContainer = new THREE.Group();
