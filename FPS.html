@@ -2220,6 +2220,21 @@
                 socket.on('playerDamaged', (data) => {
                     if (data.id === myId) {
                         playerHP = data.hp;
+
+                        // HP UI 업데이트
+                        elHpBar.style.width = playerHP + '%';
+                        elHpText.innerText = "HP: " + playerHP;
+
+                        // HP에 따라 색상 변경
+                        if (playerHP > 50) {
+                            elHpBar.style.background = "#4caf50"; // 녹색
+                        } else if (playerHP > 20) {
+                            elHpBar.style.background = "#ff9800"; // 주황색
+                        } else {
+                            elHpBar.style.background = "#f44336"; // 빨간색
+                        }
+
+                        // 피격 효과
                         elDamage.style.opacity = 0.5;
                         setTimeout(() => elDamage.style.opacity = 0, 200);
                         hitShake.intensity = 0.1;
