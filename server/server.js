@@ -88,7 +88,8 @@ io.on('connection', (socket) => {
 
         if (room && room.host === socket.id && !room.gameStarted) {
             room.gameStarted = true;
-            io.to(roomId).emit('gameStart');
+            // 맵 정보 포함하여 전송
+            io.to(roomId).emit('gameStart', { map: room.map });
             io.emit('roomListUpdated', getRoomList()); // Status update
         }
     });

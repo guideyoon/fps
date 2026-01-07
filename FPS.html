@@ -2083,8 +2083,15 @@
                     }
                 });
 
-                socket.on('gameStart', () => {
-                    console.log('Game Start Event Received!'); // DEBUG
+                socket.on('gameStart', (data) => {
+                    console.log('Game Start Event Received with data:', data); // DEBUG
+
+                    // 서버에서 받은 맵 정보로 설정
+                    if (data && data.map) {
+                        currentMap = data.map;
+                        console.log('Map set to:', currentMap);
+                    }
+
                     document.getElementById('room-waiting').style.display = 'none';
                     document.getElementById('chat-container').style.bottom = '20px';
 
