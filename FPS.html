@@ -1111,6 +1111,7 @@
                 <label>맵 선택</label>
                 <select id="new-room-map">
                     <option value="factory" selected>창고 (Factory)</option>
+                    <option value="hotel">호텔 (Hotel)</option>
                     <!-- 향후 맵 추가 예시 -->
                     <!-- <option value="urban">도시 (Urban)</option> -->
                     <!-- <option value="desert">사막 (Desert)</option> -->
@@ -2571,9 +2572,19 @@
         elHitMarker = document.getElementById('hit-marker');
 
         scene = new THREE.Scene();
-        const fogColor = 0x10151a;
-        scene.background = new THREE.Color(fogColor);
-        scene.fog = new THREE.FogExp2(fogColor, 0.025);
+
+        // 맵에 따라 다른 배경/안개 설정
+        if (currentMap === 'hotel') {
+            // 호텔: 밝은 배경
+            const hotelBgColor = 0xf5f5f0;
+            scene.background = new THREE.Color(hotelBgColor);
+            scene.fog = new THREE.FogExp2(hotelBgColor, 0.01); // 연한 안개
+        } else {
+            // Factory: 어두운 배경 (기본)
+            const fogColor = 0x10151a;
+            scene.background = new THREE.Color(fogColor);
+            scene.fog = new THREE.FogExp2(fogColor, 0.025);
+        }
 
         // 초기 카메라 설정 (모바일 가로 모드 대응)
         let initAspect = window.innerWidth / window.innerHeight;
@@ -2582,16 +2593,42 @@
         }
         camera = new THREE.PerspectiveCamera(70, initAspect, 0.005, 1000);
 
-        ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
-        scene.add(ambientLight);
-        ceilingLight = new THREE.PointLight(0xffaa00, 2.0, 50);
-        ceilingLight.position.set(0, 10, 0);
-        ceilingLight.castShadow = true;
-        ceilingLight.visible = false; // 초기에는 꺼져있음
-        scene.add(ceilingLight);
-        const blueLight = new THREE.DirectionalLight(0x4455ff, 0.5);
-        blueLight.position.set(-10, 5, -10);
-        scene.add(blueLight);
+        // 맵에 따라 다른 조명 설정
+        if (currentMap === 'hotel') {
+            // 호텔: 밝은 조명
+            ambientLight = new THREE.AmbientLight(0xffffff, 0.8); // 더 밝게
+            scene.add(ambientLight);
+
+            // 천장 조명 여러 개
+            const hotelLights = [
+                { x: 0, z: -25 },
+                { x: 0, z: 0 },
+                { x: 0, z: 25 },
+                { x: -20, z: 0 },
+                { x: 20, z: 0 }
+            ];
+
+            hotelLights.forEach(pos => {
+                const light = new THREE.PointLight(0xffffee, 1.5, 30);
+                light.position.set(pos.x, 8, pos.z);
+                light.castShadow = true;
+                scene.add(light);
+            });
+        } else {
+            // Factory: 어두운 조명 (기본)
+            ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+            scene.add(ambientLight);
+
+            ceilingLight = new THREE.PointLight(0xffaa00, 2.0, 50);
+            ceilingLight.position.set(0, 10, 0);
+            ceilingLight.castShadow = true;
+            ceilingLight.visible = false; // 초기에는 꺼져있음
+            scene.add(ceilingLight);
+
+            const blueLight = new THREE.DirectionalLight(0x4455ff, 0.5);
+            blueLight.position.set(-10, 5, -10);
+            scene.add(blueLight);
+        }
 
         // 확장 기능 초기화 (맵 생성 전에 텍스처 시스템을 먼저 초기화)
         try {
@@ -2602,7 +2639,13 @@
             console.warn('Some extension features failed to initialize:', error);
         }
 
-        createFactoryMap();
+        // 맵 선택에 따라 맵 생성
+        if (currentMap === 'hotel') {
+            createHotelMap();
+        } else {
+            createFactoryMap(); // 기본값
+        }
+
 
         weaponContainer = new THREE.Group();
         scene.add(weaponContainer);
@@ -3511,6 +3554,258 @@
                 wall.receiveShadow = true;
                 scene.add(wall);
                 addBoxCollider(wall);
+            });
+        }
+
+        // --- Hotel Map ---
+        function createHotelMap() {
+            colliders = []; // Init array
+
+            // === 호텔 맵 재질 정의 ===
+
+            // 밝은 대리석 바닥
+            const matFloor = new THREE.MeshStandardMaterial({
+                color: 0xddc9b4, // 크림/베이지색
+                roughness: 0.3,
+                metalness: 0.2
+            });
+
+            // 크림색 벽
+            const matWall = new THREE.MeshStandardMaterial({
+                color: 0xf5f5dc, // 베이지색
+                roughness: 0.8
+            });
+
+            // 나무 문
+            const matDoor = new THREE.MeshStandardMaterial({
+                color: 0x8b7355, // 브라운
+                roughness: 0.7
+            });
+
+            // 금색 악센트
+            const matGold = new THREE.MeshStandardMaterial({
+                color: 0xdaa520, // 골드
+                roughness: 0.2,
+                metalness: 0.9
+            });
+
+            // 빨간 소파
+            const matSofa = new THREE.MeshStandardMaterial({
+                color: 0x8b0000, // 다크 레드
+                roughness: 0.7
+            });
+
+            // 흰색 침대
+            const matBed = new THREE.MeshStandardMaterial({
+                color: 0xffffff,
+                roughness: 0.6
+            });
+
+            // 은색 엘리베이터
+            const matElevator = new THREE.MeshStandardMaterial({
+                color: 0xc0c0c0,
+                roughness: 0.3,
+                metalness: 0.8
+            });
+
+            // 녹색 식물
+            const matPlant = new THREE.MeshStandardMaterial({
+                color: 0x228b22,
+                roughness: 0.9
+            });
+
+            // === 바닥 ===
+            const floor = new THREE.Mesh(
+                new THREE.PlaneGeometry(80, 80),
+                matFloor
+            );
+            floor.rotation.x = -Math.PI / 2;
+            floor.receiveShadow = true;
+            scene.add(floor);
+
+            // === 외벽 (경계) ===
+            function addBoxCollider(mesh) {
+                const box = new THREE.Box3().setFromObject(mesh);
+                colliders.push(box);
+            }
+
+            const wallGeo = new THREE.BoxGeometry(80, 10, 1);
+            const createWall = (x, y, z, rotY) => {
+                const w = new THREE.Mesh(wallGeo, matWall);
+                w.position.set(x, y, z);
+                if (rotY) w.rotation.y = rotY;
+                w.castShadow = true;
+                w.receiveShadow = true;
+                scene.add(w);
+                addBoxCollider(w);
+            };
+
+            createWall(0, 5, -40, 0);           // 북쪽
+            createWall(0, 5, 40, 0);            // 남쪽
+            createWall(-40, 5, 0, Math.PI / 2); // 서쪽
+            createWall(40, 5, 0, Math.PI / 2);  // 동쪽
+
+            // === 로비 (입구 근처) ===
+
+            // 리셉션 데스크
+            const deskGeo = new THREE.BoxGeometry(8, 1.2, 2);
+            const desk = new THREE.Mesh(deskGeo, matGold);
+            desk.position.set(0, 0.6, -30);
+            desk.castShadow = true;
+            desk.receiveShadow = true;
+            scene.add(desk);
+            addBoxCollider(desk);
+
+            // 로비 소파들 (대기 공간)
+            const sofaGeo = new THREE.BoxGeometry(3, 0.8, 1.5);
+
+            const sofaPositions = [
+                { x: -15, z: -25 },
+                { x: -10, z: -25 },
+                { x: 10, z: -25 },
+                { x: 15, z: -25 }
+            ];
+
+            sofaPositions.forEach(pos => {
+                const sofa = new THREE.Mesh(sofaGeo, matSofa);
+                sofa.position.set(pos.x, 0.4, pos.z);
+                sofa.castShadow = true;
+                sofa.receiveShadow = true;
+                scene.add(sofa);
+                addBoxCollider(sofa);
+            });
+
+            // === 복도 ===
+
+            // 중앙 복도 벽
+            const corridorWallGeo = new THREE.BoxGeometry(1, 4, 70);
+
+            // 왼쪽 복도 벽
+            const leftWall = new THREE.Mesh(corridorWallGeo, matWall);
+            leftWall.position.set(-15, 2, 5);
+            leftWall.castShadow = true;
+            leftWall.receiveShadow = true;
+            scene.add(leftWall);
+            addBoxCollider(leftWall);
+
+            // 오른쪽 복도 벽
+            const rightWall = new THREE.Mesh(corridorWallGeo, matWall);
+            rightWall.position.set(15, 2, 5);
+            rightWall.castShadow = true;
+            rightWall.receiveShadow = true;
+            scene.add(rightWall);
+            addBoxCollider(rightWall);
+
+            // === 객실 (양쪽) ===
+
+            const roomWallGeo = new THREE.BoxGeometry(12, 4, 1);
+            const roomSpacing = 14;
+
+            // 왼쪽 객실들
+            for (let i = 0; i < 5; i++) {
+                const z = -20 + i * roomSpacing;
+
+                // 객실 앞벽
+                const frontWall = new THREE.Mesh(roomWallGeo, matWall);
+                frontWall.position.set(-25, 2, z);
+                frontWall.castShadow = true;
+                frontWall.receiveShadow = true;
+                scene.add(frontWall);
+                addBoxCollider(frontWall);
+
+                // 객실 문
+                const doorGeo = new THREE.BoxGeometry(2, 3, 0.2);
+                const door = new THREE.Mesh(doorGeo, matDoor);
+                door.position.set(-19, 1.5, z);
+                door.castShadow = true;
+                door.receiveShadow = true;
+                scene.add(door);
+                // 문은 충돌체에 추가하지 않음 (통과 가능)
+
+                // 객실 침대
+                const bedGeo = new THREE.BoxGeometry(3, 0.6, 2);
+                const bed = new THREE.Mesh(bedGeo, matBed);
+                bed.position.set(-28, 0.3, z);
+                bed.castShadow = true;
+                bed.receiveShadow = true;
+                scene.add(bed);
+                addBoxCollider(bed);
+
+                // 객실 뒷벽 (추가)
+                const backWallGeo = new THREE.BoxGeometry(12, 4, 1);
+                const backWall = new THREE.Mesh(backWallGeo, matWall);
+                backWall.position.set(-31, 2, z);
+                backWall.castShadow = true;
+                backWall.receiveShadow = true;
+                scene.add(backWall);
+                addBoxCollider(backWall);
+            }
+
+            // 오른쪽 객실들
+            for (let i = 0; i < 5; i++) {
+                const z = -20 + i * roomSpacing;
+
+                // 객실 앞벽
+                const frontWall = new THREE.Mesh(roomWallGeo, matWall);
+                frontWall.position.set(25, 2, z);
+                frontWall.castShadow = true;
+                frontWall.receiveShadow = true;
+                scene.add(frontWall);
+                addBoxCollider(frontWall);
+
+                // 객실 문
+                const doorGeo = new THREE.BoxGeometry(2, 3, 0.2);
+                const door = new THREE.Mesh(doorGeo, matDoor);
+                door.position.set(19, 1.5, z);
+                door.castShadow = true;
+                door.receiveShadow = true;
+                scene.add(door);
+
+                // 객실 침대
+                const bedGeo = new THREE.BoxGeometry(3, 0.6, 2);
+                const bed = new THREE.Mesh(bedGeo, matBed);
+                bed.position.set(28, 0.3, z);
+                bed.castShadow = true;
+                bed.receiveShadow = true;
+                scene.add(bed);
+                addBoxCollider(bed);
+
+                // 객실 뒷벽
+                const backWallGeo = new THREE.BoxGeometry(12, 4, 1);
+                const backWall = new THREE.Mesh(backWallGeo, matWall);
+                backWall.position.set(31, 2, z);
+                backWall.castShadow = true;
+                backWall.receiveShadow = true;
+                scene.add(backWall);
+                addBoxCollider(backWall);
+            }
+
+            // === 엘리베이터 (장식용) ===
+            const elevatorGeo = new THREE.BoxGeometry(3, 5, 3);
+            const elevator = new THREE.Mesh(elevatorGeo, matElevator);
+            elevator.position.set(0, 2.5, 35);
+            elevator.castShadow = true;
+            elevator.receiveShadow = true;
+            scene.add(elevator);
+            addBoxCollider(elevator);
+
+            // === 화분 (장식) ===
+            const plantGeo = new THREE.CylinderGeometry(0.5, 0.6, 1.5, 8);
+
+            const plantPositions = [
+                { x: -8, z: -15 },
+                { x: 8, z: -15 },
+                { x: -8, z: 20 },
+                { x: 8, z: 20 }
+            ];
+
+            plantPositions.forEach(pos => {
+                const plant = new THREE.Mesh(plantGeo, matPlant);
+                plant.position.set(pos.x, 0.75, pos.z);
+                plant.castShadow = true;
+                plant.receiveShadow = true;
+                scene.add(plant);
+                addBoxCollider(plant);
             });
         }
 
