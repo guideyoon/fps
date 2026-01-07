@@ -2178,6 +2178,41 @@
                                     weapon.position.z = originalZ; // Return to original
                                 }, 100);
                             }
+
+                            // Upper body and arms recoil animation
+                            mesh.children.forEach(child => {
+                                // Find arms by geometry type (CylinderGeometry with specific size)
+                                if (child.geometry && child.geometry.type === 'CylinderGeometry' &&
+                                    child.material.color && child.material.color.getHex() === 0xf4a460) {
+                                    // This is an arm
+                                    const originalRotX = child.rotation.x;
+                                    const originalPosZ = child.position.z;
+
+                                    // Pull back and lift slightly
+                                    child.rotation.x = originalRotX - 0.15;
+                                    child.position.z = originalPosZ - 0.05;
+
+                                    setTimeout(() => {
+                                        child.rotation.x = originalRotX;
+                                        child.position.z = originalPosZ;
+                                    }, 100);
+                                }
+
+                                // Find body (CylinderGeometry with blue color)
+                                if (child.geometry && child.geometry.type === 'CylinderGeometry' &&
+                                    child.material.color && child.material.color.getHex() === 0x4a90e2 &&
+                                    child.position.y > 1.0) { // Body is higher than legs
+                                    // This is the body
+                                    const originalRotX = child.rotation.x;
+
+                                    // Tilt back slightly
+                                    child.rotation.x = originalRotX - 0.08;
+
+                                    setTimeout(() => {
+                                        child.rotation.x = originalRotX;
+                                    }, 100);
+                                }
+                            });
                         }
                     }
                 });
