@@ -2646,12 +2646,15 @@
             console.warn('Some extension features failed to initialize:', error);
         }
 
-        // 맵 선택에 따라 맵 생성
-        if (currentMap === 'hotel') {
-            createHotelMap();
-        } else {
-            createFactoryMap(); // 기본값
+        // 맵 선택에 따라 맵 생성 (싱글 플레이어만, 멀티는 startGame에서 생성)
+        if (gameMode === 'single') {
+            if (currentMap === 'hotel') {
+                createHotelMap();
+            } else {
+                createFactoryMap(); // 기본값
+            }
         }
+        // 멀티플레이어는 gameStart 이벤트에서 currentMap 설정 후 startGame에서 맵 생성
 
 
         weaponContainer = new THREE.Group();
@@ -2842,6 +2845,16 @@
 
             // 1. 엔진 초기화
             initGame();
+
+            // 1.5. 멀티플레이어 맵 생성 (currentMap은 gameStart 이벤트에서 설정됨)
+            if (gameMode === 'multi') {
+                console.log('Creating map for multiplayer:', currentMap);
+                if (currentMap === 'hotel') {
+                    createHotelMap();
+                } else {
+                    createFactoryMap(); // 기본값
+                }
+            }
 
             // 2. 룸에 있는 다른 플레이어 메시 생성
             // (게임 시작 시점에 로비에 있던 플레이어들을 3D 씬에 추가)
