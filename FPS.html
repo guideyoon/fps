@@ -4626,8 +4626,8 @@
                     if (isStuck) {
                         e.userData.stuckTimer += dt;
 
-                        // 2초 이상 끼어있으면 강제 재배치
-                        if (e.userData.stuckTimer > 2.0) {
+                        // 1초 이상 끼어있으면 강제 재배치 (2초→1초로 단축)
+                        if (e.userData.stuckTimer > 1.0) {
                             // 안전한 위치로 재배치
                             let newPos = null;
                             for (let i = 0; i < 50; i++) {
@@ -4678,8 +4678,8 @@
 
                             let escaped = false;
                             for (const escapeDir of escapeDirs) {
-                                // 더 빠른 탈출 속도
-                                const escapeStep = escapeDir.multiplyScalar(e.userData.moveSpeed * dt * 5);
+                                // 더 빠른 탈출 속도 (5배→8배)
+                                const escapeStep = escapeDir.multiplyScalar(e.userData.moveSpeed * dt * 8);
                                 const escapePos = e.position.clone().add(escapeStep);
                                 const escapeBox = new THREE.Box3(
                                     new THREE.Vector3(escapePos.x - ENEMY_RADIUS * 1.2, escapePos.y, escapePos.z - ENEMY_RADIUS * 1.2),
