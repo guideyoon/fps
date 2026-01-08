@@ -2587,13 +2587,14 @@
         scene = new THREE.Scene();
 
         // 맵에 따라 다른 배경/안개 설정
-        if (currentMap === 'hotel') {
-            // 호텔: 밝은 배경
+        // 싱글 플레이어는 항상 factory 조명
+        if (gameMode === 'multi' && currentMap === 'hotel') {
+            // 호텔: 밝은 배경 (멀티 플레이어만)
             const hotelBgColor = 0xf5f5f0;
             scene.background = new THREE.Color(hotelBgColor);
             scene.fog = new THREE.FogExp2(hotelBgColor, 0.01); // 연한 안개
         } else {
-            // Factory: 어두운 배경 (기본)
+            // Factory: 어두운 배경 (싱글 + 멀티 factory)
             const fogColor = 0x10151a;
             scene.background = new THREE.Color(fogColor);
             scene.fog = new THREE.FogExp2(fogColor, 0.025);
@@ -2607,8 +2608,9 @@
         camera = new THREE.PerspectiveCamera(70, initAspect, 0.005, 1000);
 
         // 맵에 따라 다른 조명 설정
-        if (currentMap === 'hotel') {
-            // 호텔: 밝은 조명
+        // 싱글 플레이어는 항상 factory 조명
+        if (gameMode === 'multi' && currentMap === 'hotel') {
+            // 호텔: 밝은 조명 (멀티 플레이어만)
             ambientLight = new THREE.AmbientLight(0xffffff, 0.8); // 더 밝게
             scene.add(ambientLight);
 
@@ -2628,7 +2630,7 @@
                 scene.add(light);
             });
         } else {
-            // Factory: 어두운 조명 (기본)
+            // Factory: 어두운 조명 (싱글 + 멀티 factory)
             ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
             scene.add(ambientLight);
 
