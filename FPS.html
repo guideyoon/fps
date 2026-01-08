@@ -2634,8 +2634,8 @@
             ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
             scene.add(ambientLight);
 
-            ceilingLight = new THREE.PointLight(0xffaa00, 2.0, 50);
-            ceilingLight.position.set(0, 10, 0);
+            ceilingLight = new THREE.PointLight(0xffaa00, 0.8, 25);
+            ceilingLight.position.set(0, 15, 0);
             ceilingLight.castShadow = true;
             ceilingLight.visible = false; // 초기에는 꺼져있음
             scene.add(ceilingLight);
