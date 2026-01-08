@@ -2654,9 +2654,9 @@
             console.warn('Some extension features failed to initialize:', error);
         }
 
-        // 맵 선택에 따라 맵 생성 (싱글 플레이어는 항상 factory, 멀티는 startGame에서 생성)
-        if (gameMode === 'single') {
-            createFactoryMap(); // 싱글은 항상 factory
+        // 맵 선택에 따라 맵 생성 (멀티가 아니면 factory 생성)
+        if (gameMode !== 'multi') {
+            createFactoryMap(); // 싱글 플레이어 또는 초기 로드 시
         }
         // 멀티플레이어는 gameStart 이벤트에서 currentMap 설정 후 startGame에서 맵 생성
 
