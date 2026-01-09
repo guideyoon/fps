@@ -1026,14 +1026,16 @@
                 /* -4px -> -3px */
             }
 
-            /* 버튼 위치 상향 조정 (화면 하단 겹침 방지) */
+            /* 버튼 위치 상향 조정 (화면 하단 겹침 방지 - 탄약 표시와 겹치지 않도록 추가 상향) */
             .mobile-btn {
-                bottom: 80px;
+                bottom: 110px;
+                /* 80px -> 110px */
                 /* 기본값 상향 */
             }
 
             #btn-shoot {
-                bottom: 100px;
+                bottom: 130px;
+                /* 100px -> 130px */
                 right: 40px;
                 width: 50px;
                 /* 70px -> 50px */
@@ -1041,22 +1043,26 @@
             }
 
             #btn-jump {
-                bottom: 160px;
+                bottom: 190px;
+                /* 160px -> 190px */
                 right: 20px;
             }
 
             #btn-reload {
-                bottom: 220px;
+                bottom: 250px;
+                /* 220px -> 250px */
                 right: 20px;
             }
 
             #btn-aim {
-                bottom: 40px;
+                bottom: 70px;
+                /* 40px -> 70px */
                 right: 100px;
             }
 
             #joystick-zone {
-                bottom: 80px;
+                bottom: 110px;
+                /* 80px -> 110px */
                 /* 조이스틱도 상향 */
                 left: 40px;
             }
@@ -1395,10 +1401,10 @@
 
     <!-- 수직 무기 선택기 (왼쪽 가운데) -->
     <div id="weapon-selector-vertical">
-        <div class="weapon-select-btn" data-idx="0"><i class="fas fa-gun"></i></div>
-        <!-- Rifle: changed from fa-fighter-jet -->
-        <div class="weapon-select-btn" data-idx="1"><i class="fas fa-water-pistol"></i></div>
-        <!-- Pistol: changed from fa-bullseye -->
+        <div class="weapon-select-btn" data-idx="0"><i class="fas fa-person-rifle"></i></div>
+        <!-- Rifle: improved icon (fa-person-rifle shows rifle clearly) -->
+        <div class="weapon-select-btn" data-idx="1"><i class="fas fa-gun"></i></div>
+        <!-- Pistol: changed to fa-gun (simpler pistol icon) -->
         <div class="weapon-select-btn" data-idx="2"><i class="fas fa-crosshairs"></i></div> <!-- Sniper -->
         <div class="weapon-select-btn" data-idx="3"><i class="fas fa-gavel"></i></div> <!-- Knife -->
     </div>
@@ -5410,7 +5416,7 @@
             if (btnAim) {
                 btnAim.addEventListener('touchstart', (e) => {
                     e.preventDefault();
-                    e.stopPropagation();
+                    // e.stopPropagation() 제거 - 조준하면서 카메라 회전 가능하도록
                     const w = WEAPONS[curWeaponIdx];
 
                     if (w.type === 'PISTOL') {
