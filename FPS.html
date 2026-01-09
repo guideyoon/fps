@@ -144,8 +144,10 @@
             height: 100%;
             display: none;
             z-index: 20;
-            /* Removed opaque background for better visibility */
-            /* background: radial-gradient(circle, transparent 30%, black 31%); */
+            /* Restore radial gradient for Sniper feel on PC */
+            background: radial-gradient(circle, transparent 20%, black 21%, black 100%);
+            /* Pointer events none to allow clicks if needed, though usually aiming blocks interactions */
+            pointer-events: none;
         }
 
         #scope-line-h {
@@ -228,15 +230,16 @@
 
         #ammo-info {
             position: absolute;
-            bottom: 40px;
-            right: 40px;
+            bottom: 25px;
+            right: 25px;
             color: white;
-            font-size: 40px;
+            font-size: 24px;
             font-weight: 900;
             font-style: italic;
-            text-shadow: 2px 2px 0px #000;
-            letter-spacing: 2px;
+            text-shadow: 1px 1px 2px #000;
+            letter-spacing: 1px;
             text-align: right;
+            pointer-events: none;
         }
 
         #weapon-label {
@@ -275,15 +278,16 @@
 
         #hp-container {
             position: absolute;
-            bottom: 40px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 300px;
-            height: 20px;
-            background: rgba(0, 0, 0, 0.5);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
-            overflow: hidden;
+            bottom: 25px;
+            left: 50px;
+            /* HP text space */
+            width: 200px;
+            height: 15px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            overflow: visible;
+            /* Allow text outside */
         }
 
         #hp-bar {
@@ -291,15 +295,17 @@
             height: 100%;
             background: #4caf50;
             transition: width 0.2s, background-color 0.2s;
+            border-radius: 2px;
         }
 
         #hp-text {
             position: absolute;
-            bottom: 65px;
-            left: 50%;
-            transform: translateX(-50%);
+            left: -35px;
+            /* Left of the bar */
+            bottom: -3px;
             color: white;
             font-weight: bold;
+            font-size: 16px;
             text-shadow: 1px 1px 2px black;
         }
 
@@ -676,11 +682,17 @@
 
         #restart-btn {
             margin-top: 20px;
-            padding: 10px 30px;
-            font-size: 20px;
-            background: white;
-            border: none;
+            padding: 15px 40px;
+            font-size: 24px;
+            font-weight: bold;
+            background: rgba(255, 255, 255, 0.9);
+            border: 3px solid #444;
             cursor: pointer;
+            z-index: 2000;
+            /* Ensure visibility */
+            pointer-events: auto;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
         }
 
         #stats-info {
@@ -958,40 +970,85 @@
         /* 모바일 UI 조정 */
         @media (max-width: 768px) {
 
-            /* 1. HUD 하단 이동 및 축소 */
+            /* 1. HUD 하단 이동 및 축소 - 모바일 전용 오버라이드 */
             #ammo-info {
                 bottom: 20px;
-                left: 50%;
-                right: auto;
-                transform: translateX(20px);
-                /* HP바 오른쪽 */
-                font-size: 16px;
-                text-align: left;
-                text-shadow: 1px 1px 2px black;
+                left: auto;
+                /* 기존 중앙 정렬 해제 */
+                right: 90px;
+                /* 오른쪽 버튼 피해서 배치 */
+                font-size: 14px;
+                /* 더 작게 */
+                text-align: right;
+                transform: none;
             }
 
             #ammo-val {
-                font-size: 20px;
+                font-size: 18px;
             }
 
             #weapon-label {
                 display: none;
-                /* 모바일에서 공간 절약 */
             }
+
+            /* 공간 절약 */
 
             #hp-container {
                 width: 150px;
                 height: 10px;
-                bottom: 25px;
-                left: 50%;
-                transform: translateX(-140px);
-                /* 중앙 기준 왼쪽으로 */
+                bottom: 22px;
+                left: 60px;
+                /* HP 텍스트 공간 확보 */
+                transform: none;
+                /* 중앙 정렬 해제 */
                 background: rgba(0, 0, 0, 0.6);
             }
 
             #hp-text {
-                display: none;
-                /* 바만 표시 */
+                display: block;
+                /* 텍스트 표시 */
+                font-size: 14px;
+                left: -30px;
+                bottom: -4px;
+            }
+
+            /* 버튼 위치 상향 조정 (화면 하단 겹침 방지) */
+            .mobile-btn {
+                bottom: 80px;
+                /* 기본값 상향 */
+            }
+
+            #btn-shoot {
+                bottom: 100px;
+                right: 40px;
+                width: 70px;
+                height: 70px;
+            }
+
+            #btn-jump {
+                bottom: 160px;
+                right: 20px;
+            }
+
+            #btn-reload {
+                bottom: 220px;
+                right: 20px;
+            }
+
+            #btn-aim {
+                bottom: 40px;
+                right: 100px;
+            }
+
+            #joystick-zone {
+                bottom: 80px;
+                /* 조이스틱도 상향 */
+                left: 40px;
+            }
+
+            #weapon-selector-vertical {
+                top: 45%;
+                left: 20px;
             }
 
             #controls-guide {
@@ -1406,8 +1463,8 @@
                 id: 0, name: "ASSAULT RIFLE",
                 type: 'RIFLE', maxAmmo: 30, ammo: 30, automatic: true,
                 posHip: new THREE.Vector3(0.2, -0.25, -0.45),
-                // 수정: ADS 시야 확보를 위해 Z값 변경 (-0.05 -> -0.25)
-                posAds: new THREE.Vector3(0, -0.0621, -0.25),
+                // 수정: ADS 시야 확보를 위해 Z값 대폭 변경 (사용자 요청: 조준기만 보이게)
+                posAds: new THREE.Vector3(0, -0.165, -0.45),
                 fovAds: 20, fireRate: 0.08, recoil: 0.06, damage: 30
             },
             {
@@ -2978,6 +3035,13 @@
             playTime = 0;
             if (elPlayTime) elPlayTime.innerText = "Time: 00:00";
             if (elKillCount) elKillCount.innerText = "Kills: 0";
+
+            // HP Bar Reset
+            if (elHpBar) {
+                elHpBar.style.width = '100%';
+                elHpBar.style.background = '#4caf50'; // Reset color
+                elHpText.innerText = "HP: 100";
+            }
 
             // 1. 엔진 초기화
             initGame();
@@ -6037,16 +6101,30 @@
 
                 const isSniperAiming = isAiming && w.type === 'SNIPER';
                 if (isSniperAiming) {
-                    weaponContainer.visible = false; elScope.style.display = 'block'; elCrosshair.style.display = 'none';
+                    weaponContainer.visible = false;
+                    elScope.style.display = 'block';
+                    elCrosshair.style.display = 'none';
+
+                    // PC vs Mobile Scope Style Logic
+                    if (isMobile) {
+                        elScope.style.background = 'none'; // Mobile: Red dot / Open
+                    } else {
+                        // PC: Restore black scope overlay
+                        elScope.style.background = 'radial-gradient(circle, transparent 20%, black 21%, black 100%)';
+                    }
                 } else {
-                    weaponContainer.visible = true; elScope.style.display = 'none';
-                    // 모바일에서는 권총일 때 조준자 표시
-                    if (isMobile && w.type === 'PISTOL') {
+                    weaponContainer.visible = true;
+                    elScope.style.display = 'none';
+
+                    // Crosshair Logic
+                    if (isMobile) {
+                        // 모바일: 항상 조준선 표시 (사용자 요청)
+                        elCrosshair.style.display = 'block';
+                        elCrosshair.style.opacity = 0.7; // 상시 표시는 약간 투명하게
+                    } else if (w.type === 'PISTOL' || (!isAiming && w.type !== 'KNIFE')) {
+                        // PC: 권총이거나 비조준 상태(칼 제외)일 때 표시
                         elCrosshair.style.display = 'block';
                         elCrosshair.style.opacity = 1;
-                    } else if (!isMobile) {
-                        elCrosshair.style.display = 'block';
-                        elCrosshair.style.opacity = (isAiming && w.type !== 'KNIFE') ? 0 : 1;
                     } else {
                         elCrosshair.style.display = 'none';
                     }
