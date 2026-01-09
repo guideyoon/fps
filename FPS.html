@@ -6459,7 +6459,11 @@
                 if (isSniperAiming) {
                     weaponContainer.visible = false;
                     elScope.style.display = 'block';
-                    elCrosshair.style.display = 'none';
+                    if (isMobile) {
+                        elCrosshair.style.display = 'block';
+                    } else {
+                        elCrosshair.style.display = 'none';
+                    }
 
                     // PC vs Mobile Scope Style Logic
                     if (isMobile) {
@@ -6475,7 +6479,7 @@
                     // Sniper Scope - Show circular scope only for SNIPER when aiming
                     const sniperScope = document.getElementById('sniper-scope');
                     if (sniperScope) {
-                        if (isAiming && w.type === 'SNIPER') {
+                        if (isAiming && w.type === 'SNIPER' && !isMobile) {
                             sniperScope.style.display = 'block';
                         } else {
                             sniperScope.style.display = 'none';
