@@ -1647,6 +1647,30 @@
         let moveDistance = 0;
         const STEP_INTERVAL = 2.5;
 
+        // === 전체화면 함수 (모바일 브라우저 대응) ===
+        function enterFullscreen() {
+            const elem = document.documentElement;
+
+            // 이미 전체화면이면 무시
+            if (document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement) {
+                return;
+            }
+
+            // 크로스 브라우저 전체화면 요청
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen().catch(err => {
+                    console.log('Fullscreen request failed:', err);
+                });
+            } else if (elem.webkitRequestFullscreen) { // iOS Safari
+                elem.webkitRequestFullscreen();
+            } else if (elem.mozRequestFullScreen) { // Firefox
+                elem.mozRequestFullScreen();
+            } else if (elem.msRequestFullscreen) { // IE/Edge
+                elem.msRequestFullscreen();
+            }
+        }
+
+        // === 전역 변수 ===
         const keys = { w: 0, a: 0, s: 0, d: 0, shift: false, ctrl: false, space: false };
 
         // --- Weapon System ---
@@ -3276,6 +3300,9 @@
         // --- 게임 시작 함수 ---
         function startGame() {
             console.log('startGame() CALLED'); // DEBUG
+
+            // 전체화면 요청 (모바일 브라우저 주소창 숨김)
+            enterFullscreen();
 
             // 0. 게임 통계 초기화
             gameStartTime = performance.now();
