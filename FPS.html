@@ -2617,10 +2617,10 @@
             scene.background = new THREE.Color(hotelBgColor);
             scene.fog = new THREE.FogExp2(hotelBgColor, 0.01); // 연한 안개
         } else {
-            // Factory: 어두운 배경 (싱글 + 멀티 factory)
-            const fogColor = 0x10151a;
+            // Factory: 밝게 조정된 배경 (싱글 + 멀티 factory)
+            const fogColor = 0x2a3540; // 어두운 청회색 -> 밝은 청회색
             scene.background = new THREE.Color(fogColor);
-            scene.fog = new THREE.FogExp2(fogColor, 0.025);
+            scene.fog = new THREE.FogExp2(fogColor, 0.02); // 안개 밀도 감소
         }
 
         // 초기 카메라 설정 (모바일 가로 모드 대응)
@@ -2653,8 +2653,8 @@
                 scene.add(light);
             });
         } else {
-            // Factory: 어두운 조명 (싱글 + 멀티 factory)
-            ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+            // Factory: 밝게 조정된 조명 (싱글 + 멀티 factory)
+            ambientLight = new THREE.AmbientLight(0xffffff, 0.6); // 0.4 -> 0.6으로 증가
             scene.add(ambientLight);
 
             ceilingLight = new THREE.PointLight(0xffaa00, 0.8, 25);
@@ -2663,7 +2663,7 @@
             ceilingLight.visible = false; // 초기에는 꺼져있음
             scene.add(ceilingLight);
 
-            const blueLight = new THREE.DirectionalLight(0x4455ff, 0.5);
+            const blueLight = new THREE.DirectionalLight(0x4455ff, 0.7); // 0.5 -> 0.7로 증가
             blueLight.position.set(-10, 5, -10);
             scene.add(blueLight);
         }
