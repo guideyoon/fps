@@ -825,8 +825,9 @@
         /* 모바일 버튼 */
         .mobile-btn {
             position: absolute;
-            width: 50px;
-            height: 50px;
+            width: 40px;
+            /* 50px -> 40px */
+            height: 40px;
             border-radius: 50%;
             background: rgba(255, 255, 255, 0.3);
             border: 2px solid rgba(255, 255, 255, 0.5);
@@ -834,7 +835,8 @@
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 18px;
+            font-size: 16px;
+            /* 18px -> 16px */
             font-weight: bold;
             pointer-events: auto;
             z-index: 30;
@@ -852,8 +854,9 @@
             position: absolute;
             bottom: 40px;
             left: 40px;
-            width: 120px;
-            height: 120px;
+            width: 100px;
+            /* 120px -> 100px */
+            height: 100px;
             z-index: 50;
             /* background: rgba(255, 0, 0, 0.2); Debug */
         }
@@ -874,8 +877,9 @@
             position: absolute;
             top: 50%;
             left: 50%;
-            width: 50px;
-            height: 50px;
+            width: 40px;
+            /* 50px -> 40px */
+            height: 40px;
             background: rgba(255, 255, 255, 0.5);
             border-radius: 50%;
             transform: translate(-50%, -50%);
@@ -897,8 +901,9 @@
         }
 
         .weapon-select-btn {
-            width: 50px;
-            height: 50px;
+            width: 40px;
+            /* 50px -> 40px */
+            height: 40px;
             background: rgba(0, 0, 0, 0.4);
             border: 2px solid rgba(255, 255, 255, 0.2);
             border-radius: 8px;
@@ -906,7 +911,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            font-size: 18px;
+            /* 20px -> 18px */
         }
 
         .weapon-select-btn.active {
@@ -926,10 +932,12 @@
         #btn-shoot {
             bottom: 80px;
             right: 80px;
-            width: 80px;
-            height: 80px;
+            width: 55px;
+            /* 80px -> 55px */
+            height: 55px;
             background: rgba(255, 255, 255, 0.2);
-            font-size: 32px;
+            font-size: 24px;
+            /* 32px -> 24px */
             border-width: 3px;
         }
 
@@ -994,10 +1002,13 @@
             /* 공간 절약 */
 
             #hp-container {
-                width: 150px;
-                height: 10px;
+                width: 120px;
+                /* 150px -> 120px */
+                height: 8px;
+                /* 10px -> 8px */
                 bottom: 22px;
-                left: 60px;
+                left: 45px;
+                /* 60px -> 45px, closer to left */
                 /* HP 텍스트 공간 확보 */
                 transform: none;
                 /* 중앙 정렬 해제 */
@@ -1007,9 +1018,12 @@
             #hp-text {
                 display: block;
                 /* 텍스트 표시 */
-                font-size: 14px;
-                left: -30px;
-                bottom: -4px;
+                font-size: 12px;
+                /* 14px -> 12px */
+                left: -28px;
+                /* -30px -> -28px */
+                bottom: -3px;
+                /* -4px -> -3px */
             }
 
             /* 버튼 위치 상향 조정 (화면 하단 겹침 방지) */
@@ -1021,8 +1035,9 @@
             #btn-shoot {
                 bottom: 100px;
                 right: 40px;
-                width: 70px;
-                height: 70px;
+                width: 50px;
+                /* 70px -> 50px */
+                height: 50px;
             }
 
             #btn-jump {
@@ -1335,7 +1350,7 @@
             <span id="ammo-val">30 / 120</span>
         </div>
 
-        <div id="hp-text">HP: 100</div>
+        <div id="hp-text">HP</div>
         <div id="hp-container">
             <div id="hp-bar"></div>
         </div>
@@ -1380,8 +1395,10 @@
 
     <!-- 수직 무기 선택기 (왼쪽 가운데) -->
     <div id="weapon-selector-vertical">
-        <div class="weapon-select-btn" data-idx="0"><i class="fas fa-fighter-jet"></i></div> <!-- Rifle -->
-        <div class="weapon-select-btn" data-idx="1"><i class="fas fa-bullseye"></i></div> <!-- Pistol (placeholder) -->
+        <div class="weapon-select-btn" data-idx="0"><i class="fas fa-gun"></i></div>
+        <!-- Rifle: changed from fa-fighter-jet -->
+        <div class="weapon-select-btn" data-idx="1"><i class="fas fa-water-pistol"></i></div>
+        <!-- Pistol: changed from fa-bullseye -->
         <div class="weapon-select-btn" data-idx="2"><i class="fas fa-crosshairs"></i></div> <!-- Sniper -->
         <div class="weapon-select-btn" data-idx="3"><i class="fas fa-gavel"></i></div> <!-- Knife -->
     </div>
@@ -1463,8 +1480,8 @@
                 id: 0, name: "ASSAULT RIFLE",
                 type: 'RIFLE', maxAmmo: 30, ammo: 30, automatic: true,
                 posHip: new THREE.Vector3(0.2, -0.25, -0.45),
-                // 수정: ADS 시야 확보를 위해 Z값 대폭 변경 (사용자 요청: 조준기만 보이게)
-                posAds: new THREE.Vector3(0, -0.165, -0.45),
+                // 수정: ADS 시야 확보를 위해 조정 (총기 일부 보이도록, 2번 이미지 참고)
+                posAds: new THREE.Vector3(0, -0.12, -0.35),
                 fovAds: 20, fireRate: 0.08, recoil: 0.06, damage: 30
             },
             {
@@ -4965,7 +4982,7 @@
             playerHP -= amount;
 
             elHpBar.style.width = Math.max(0, playerHP) + '%';
-            elHpText.innerText = "HP: " + Math.max(0, playerHP);
+            // HP number display removed - elHpText now shows "HP" only
 
             if (playerHP > 50) elHpBar.style.background = "#4caf50";
             else if (playerHP > 20) elHpBar.style.background = "#ff9800";
