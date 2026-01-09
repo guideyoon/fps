@@ -147,11 +147,14 @@ io.on('connection', (socket) => {
         const player = room && room.players[socket.id];
 
         if (player && player.isDead) {
-            // Enforce 10-second minimum respawn delay
+            // Enforce minimum respawn delay (Client has 10s timer, so server uses 8s to be safe against lag/race conditions)
             const timeSinceDeath = Date.now() - (player.deathTime || 0);
-            const MIN_RESPAWN_DELAY = 10000; // 10 seconds
+            const MIN_RESPAWN_DELAY = 8000; // 8 seconds (Client waits 10s)
+
+            console.log(`[Respawn Request] Player: ${player.name} (${socket.id}), TimeSinceDeath: ${timeSinceDeath}ms`);
 
             if (timeSinceDeath < MIN_RESPAWN_DELAY) {
+                console.log(`[Respawn Denied] Too early. Remaining: ${MIN_RESPAWN_DELAY - timeSinceDeath}ms`);
                 // Too early - reject respawn
                 socket.emit('respawnDenied', {
                     remainingTime: Math.ceil((MIN_RESPAWN_DELAY - timeSinceDeath) / 1000)

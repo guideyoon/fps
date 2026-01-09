@@ -2775,6 +2775,17 @@
                     }
                 });
 
+                socket.on('respawnDenied', (data) => {
+                    console.warn(`Respawn denied by server. Too early. Waiting ${data.remainingTime}s...`);
+                    // Retry automatically after 1 second
+                    setTimeout(() => {
+                        if (socket && socket.connected) {
+                            console.log('Retrying respawn request...');
+                            socket.emit('requestRespawn');
+                        }
+                    }, 1000);
+                });
+
                 socket.on('playerRespawned', (data) => {
                     console.log('Respawn:', data);
                     if (data.id === myId) {
