@@ -856,6 +856,93 @@
             text-shadow: 0 0 20px rgba(255, 170, 0, 0.8);
         }
 
+        /* Sniper Scope Overlay */
+        #sniper-scope {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center,
+                    transparent 0%,
+                    transparent 23%,
+                    rgba(0, 0, 0, 0.85) 25%,
+                    rgba(0, 0, 0, 0.98) 100%);
+            display: none;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        #scope-circle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: min(600px, 80vh);
+            height: min(600px, 80vh);
+            border: 15px solid #111;
+            border-radius: 50%;
+            box-shadow:
+                inset 0 0 60px rgba(0, 0, 0, 0.9),
+                inset 0 0 20px rgba(0, 0, 0, 0.6),
+                0 0 30px rgba(0, 0, 0, 0.8);
+        }
+
+        .scope-crosshair-h,
+        .scope-crosshair-v {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 2px rgba(0, 0, 0, 0.8);
+        }
+
+        .scope-crosshair-h {
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            transform: translateY(-50%);
+        }
+
+        .scope-crosshair-v {
+            left: 50%;
+            top: 0;
+            width: 1px;
+            height: 100%;
+            transform: translateX(-50%);
+        }
+
+        .scope-center-dot {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 50, 50, 0.9);
+            border-radius: 50%;
+            box-shadow: 0 0 4px rgba(255, 50, 50, 0.8);
+        }
+
+        /* Scope tick marks */
+        .scope-tick {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.6);
+        }
+
+        .scope-tick-h {
+            height: 1px;
+            width: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .scope-tick-v {
+            width: 1px;
+            height: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
         /* 모바일 컨트롤 */
         #controls {
             position: absolute;
@@ -1473,6 +1560,15 @@
         <div id="respawn-timer">10</div>
         <div id="killed-by-label">Killed by</div>
         <div id="killer-name">Unknown</div>
+    </div>
+
+    <!-- Sniper Scope Overlay -->
+    <div id="sniper-scope">
+        <div id="scope-circle">
+            <div class="scope-crosshair-h"></div>
+            <div class="scope-crosshair-v"></div>
+            <div class="scope-center-dot"></div>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
@@ -2416,6 +2512,12 @@
                     // Game hasn't started yet
                     if (!window.scene) return;
 
+                    // Update roomPlayersState for spectator camera
+                    if (roomPlayersState[p.id]) {
+                        roomPlayersState[p.id].position = p.position;
+                        roomPlayersState[p.id].rotation = p.rotation;
+                    }
+
                     const mesh = otherPlayersMap[p.id];
                     if (mesh) {
                         // Keep player on ground (y=0), only use x and z from server
@@ -2534,11 +2636,17 @@
 
                 socket.on('playerDied', (data) => {
                     if (data.id === myId) {
-                        console.log('YOU DIED - Killed by:', data.killerName);
+                        console.log('=== YOU DIED ===');
+                        console.log('Killed by:', data.killerName, '(ID:', data.killerId, ')');
+                        console.log('Current otherPlayersMap:', Object.keys(otherPlayersMap));
+                        console.log('Current roomPlayersState:', Object.keys(roomPlayersState));
+
                         playerHP = 0;
                         isDead = true;
                         isSpectating = true;
                         spectatingPlayerId = data.killerId;
+
+                        console.log('Set spectatingPlayerId to:', spectatingPlayerId);
 
                         // Hide normal game UI
                         elGameOver.style.display = 'none';
@@ -2560,11 +2668,16 @@
                         const countdownInterval = setInterval(() => {
                             countdown--;
                             respawnTimerEl.innerText = countdown;
+                            console.log('Respawn countdown:', countdown, 'seconds remaining');
                             if (countdown <= 0) {
                                 clearInterval(countdownInterval);
+                                console.log('=== COUNTDOWN COMPLETE ===');
                                 // Request respawn after 10 seconds
                                 if (socket && socket.connected) {
+                                    console.log('Socket connected, sending requestRespawn...');
                                     socket.emit('requestRespawn');
+                                } else {
+                                    console.error('ERROR: Socket not connected! Cannot request respawn.');
                                 }
                             }
                         }, 1000);
@@ -6265,6 +6378,16 @@
                 } else {
                     weaponContainer.visible = true;
                     elScope.style.display = 'none';
+
+                    // Sniper Scope - Show circular scope only for SNIPER when aiming
+                    const sniperScope = document.getElementById('sniper-scope');
+                    if (sniperScope) {
+                        if (isAiming && w.type === 'SNIPER') {
+                            sniperScope.style.display = 'block';
+                        } else {
+                            sniperScope.style.display = 'none';
+                        }
+                    }
 
                     // Crosshair Logic
                     if (isMobile) {
