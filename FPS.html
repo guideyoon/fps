@@ -1406,7 +1406,8 @@
                 id: 0, name: "ASSAULT RIFLE",
                 type: 'RIFLE', maxAmmo: 30, ammo: 30, automatic: true,
                 posHip: new THREE.Vector3(0.2, -0.25, -0.45),
-                posAds: new THREE.Vector3(0, -0.0621, -0.05),
+                // 수정: ADS 시야 확보를 위해 Z값 변경 (-0.05 -> -0.25)
+                posAds: new THREE.Vector3(0, -0.0621, -0.25),
                 fovAds: 20, fireRate: 0.08, recoil: 0.06, damage: 30
             },
             {
@@ -5227,7 +5228,8 @@
                 const moveDy = touch.clientY - lastTouchY;
 
                 // Sensitivity
-                const sens = isAiming ? SENSITIVITY_ADS * 1.5 : SENSITIVITY_MOUSE * 1.2;
+                // Sensitivity - User requested 3-4x increase
+                const sens = (isAiming ? SENSITIVITY_ADS * 5.0 : SENSITIVITY_MOUSE * 4.0);
                 rotation.y -= moveDx * sens;
                 rotation.x -= moveDy * sens;
                 rotation.x = Math.max(-1.5, Math.min(1.5, rotation.x));
