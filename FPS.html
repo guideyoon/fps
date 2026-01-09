@@ -5761,33 +5761,12 @@
             btnShoot.addEventListener('touchstart', (e) => {
                 e.preventDefault();
                 // e.stopPropagation() 제거 - 격발하면서 카메라 회전 가능하도록
-                const w = WEAPONS[curWeaponIdx];
-                if (w.type === 'SNIPER') {
-                    // 저격총: 누르면 조준 시작 (발사 X)
-                    isAimingHeld = true;
-                    isAiming = true;
-                    isFiring = false;
-                } else {
-                    // 기타: 즉시 발사
-                    isFiring = true;
-                }
+                isFiring = true;
             }, { passive: false });
             btnShoot.addEventListener('touchend', (e) => {
                 e.preventDefault();
                 // e.stopPropagation() 제거
-                const w = WEAPONS[curWeaponIdx];
-                if (w.type === 'SNIPER') {
-                    // 저격총: 떼면 발사 + 조준 해제 (Release to Fire)
-                    if (isAiming) {
-                        shoot(w);
-                    }
-                    isAimingHeld = false;
-                    isAiming = false;
-                    isFiring = false;
-                } else {
-                    // 기타: 발사 중지
-                    isFiring = false;
-                }
+                isFiring = false;
             }, { passive: false });
 
             // 조준 버튼 - 저격 모드는 조준만, 소총은 조준+발사, 권총은 발사만
@@ -5802,15 +5781,16 @@
                         isAimingHeld = true;
                         isAiming = true;
                         isFiring = true;
-                    } else {
-                        // 소총, 저격총은 조준 모드 활성화
+                    } else if (w.type === 'SNIPER') {
+                        // 저격총 (User Request): 눈 버튼 누르면 조준 (발사 준비)
                         isAimingHeld = true;
                         isAiming = true;
-                        if (w.type !== 'SNIPER') {
-                            isFiring = true; // 소총은 자동 발사 시작
-                        } else {
-                            isFiring = false; // 저격 모드는 왼쪽 터치로 발사 (또는 별도 처리)
-                        }
+                        isFiring = false;
+                    } else {
+                        // 소총: 조준 모드 활성화 + 발사
+                        isAimingHeld = true;
+                        isAiming = true;
+                        isFiring = true;
                     }
                 }, { passive: false });
 
@@ -5825,8 +5805,16 @@
                         isAiming = false;
                         isFiring = false;
                         hasFiredSemi = false;
+                    } else if (w.type === 'SNIPER') {
+                        // 저격총 (User Request): 눈 버튼 떼면 발사 + 조준 해제
+                        if (isAiming) {
+                            shoot(w);
+                        }
+                        isAimingHeld = false;
+                        isAiming = false;
+                        isFiring = false;
                     } else {
-                        // 소총, 저격총은 조준 모드도 해제
+                        // 소총: 조준 모드도 해제
                         isAimingHeld = false;
                         isAiming = false;
                         isFiring = false;
