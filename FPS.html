@@ -834,45 +834,57 @@
             transform: scale(0.95);
         }
 
-        /* 무기 교체 버튼 - 상단 중앙 */
-        #btn-weapon1 {
-            top: 10px;
-            left: 50%;
-            transform: translateX(-150%);
-        }
-
-        #btn-weapon2 {
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-
-        #btn-weapon3 {
-            top: 10px;
-            left: 50%;
-            transform: translateX(50%);
-        }
-
+        /* 무기 교체 버튼 (기본적으로 숨김, 미디어 쿼리에서 처리) */
+        #btn-weapon1,
+        #btn-weapon2,
+        #btn-weapon3,
         #btn-weapon4 {
-            top: 10px;
-            left: 50%;
-            transform: translateX(150%);
+            display: none !important;
         }
 
-        /* 기타 버튼 - 하단 */
-        #btn-jump {
-            bottom: 20px;
+        /* 크런커 스타일 클러스터 배치 */
+        #btn-shoot {
+            bottom: 80px;
+            right: 80px;
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.2);
+            font-size: 32px;
+            border-width: 3px;
+        }
+
+        #btn-aim {
+            bottom: 180px;
             right: 20px;
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
+        }
+
+        #btn-jump {
+            bottom: 110px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
         }
 
         #btn-reload {
             bottom: 20px;
-            right: 90px;
+            right: 140px;
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
         }
 
-        #btn-aim {
+        #btn-weapon-cycle {
             bottom: 20px;
-            right: 160px;
+            right: 220px;
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
+            background: rgba(251, 188, 5, 0.3);
+            border-color: #fbbc05;
         }
 
         /* 모바일 UI 조정 */
@@ -909,15 +921,28 @@
                 display: flex;
             }
 
-            /* 무기 버튼 상단 중앙 정렬 */
+            /* 상단 스탯 정보 최적화 */
+            #stats-info {
+                top: 10px;
+                gap: 15px;
+                font-size: 14px;
+            }
+
+            #play-time,
+            #kill-count {
+                padding: 4px 10px;
+            }
+
+            .mobile-btn {
+                display: flex;
+            }
+
+            /* 기존 무기 버튼 강제 숨김 */
             #btn-weapon1,
             #btn-weapon2,
             #btn-weapon3,
             #btn-weapon4 {
-                width: 45px;
-                height: 45px;
-                font-size: 16px;
-                top: 10px;
+                display: none !important;
             }
         }
 
@@ -1195,12 +1220,12 @@
 
     <!-- 모바일 컨트롤 -->
     <button class="mobile-btn" id="btn-weapon1">1</button>
-    <button class="mobile-btn" id="btn-weapon2">2</button>
-    <button class="mobile-btn" id="btn-weapon3">3</button>
-    <button class="mobile-btn" id="btn-weapon4">4</button>
-    <button class="mobile-btn" id="btn-jump">↑</button>
-    <button class="mobile-btn" id="btn-reload">R</button>
-    <button class="mobile-btn" id="btn-aim">🎯</button>
+    <!-- 모바일 컨트롤 (Krunker 스타일 클러스터) -->
+    <button class="mobile-btn" id="btn-shoot"><i class="fas fa-crosshairs"></i></button>
+    <button class="mobile-btn" id="btn-aim"><i class="fas fa-eye"></i></button>
+    <button class="mobile-btn" id="btn-jump"><i class="fas fa-chevron-up"></i></button>
+    <button class="mobile-btn" id="btn-reload"><i class="fas fa-redo"></i></button>
+    <button class="mobile-btn" id="btn-weapon-cycle"><i class="fas fa-sync-alt"></i></button>
 
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
@@ -5176,10 +5201,8 @@
             // 모바일 버튼 이벤트
             const btnJump = document.getElementById('btn-jump');
             const btnReload = document.getElementById('btn-reload');
-            const btnWeapon1 = document.getElementById('btn-weapon1');
-            const btnWeapon2 = document.getElementById('btn-weapon2');
-            const btnWeapon3 = document.getElementById('btn-weapon3');
-            const btnWeapon4 = document.getElementById('btn-weapon4');
+            const btnCycle = document.getElementById('btn-weapon-cycle');
+            const btnShoot = document.getElementById('btn-shoot');
             const btnAim = document.getElementById('btn-aim');
 
             if (btnJump) {
@@ -5208,32 +5231,26 @@
                 }, { passive: false });
             }
 
-            if (btnWeapon1) {
-                btnWeapon1.addEventListener('touchstart', (e) => {
+            if (btnCycle) {
+                btnCycle.addEventListener('touchstart', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    switchWeaponTo(0);
+                    // 현재 무기 인덱스를 순환 (0~3)
+                    const nextIdx = (curWeaponIdx + 1) % 4;
+                    switchWeaponTo(nextIdx);
                 }, { passive: false });
             }
-            if (btnWeapon2) {
-                btnWeapon2.addEventListener('touchstart', (e) => {
+
+            if (btnShoot) {
+                btnShoot.addEventListener('touchstart', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    switchWeaponTo(1);
+                    isFiring = true;
                 }, { passive: false });
-            }
-            if (btnWeapon3) {
-                btnWeapon3.addEventListener('touchstart', (e) => {
+                btnShoot.addEventListener('touchend', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    switchWeaponTo(2);
-                }, { passive: false });
-            }
-            if (btnWeapon4) {
-                btnWeapon4.addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    switchWeaponTo(3);
+                    isFiring = false;
                 }, { passive: false });
             }
 
