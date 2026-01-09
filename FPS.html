@@ -2789,6 +2789,25 @@
         elHeadshot = document.getElementById('headshot-msg');
         elHitMarker = document.getElementById('hit-marker');
 
+        // Restart button - Add mobile touch support
+        const restartBtn = document.getElementById('restart-btn');
+        if (restartBtn) {
+            const restartGame = () => {
+                location.reload();
+            };
+            restartBtn.addEventListener('click', restartGame);
+            // Mobile touch support
+            restartBtn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+            });
+            restartBtn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                restartGame();
+            });
+        }
+
         scene = new THREE.Scene();
 
         // 맵에 따라 다른 배경/안개 설정
@@ -5282,9 +5301,8 @@
 
             document.body.addEventListener('touchstart', (e) => {
                 const target = e.target;
-                // Ignore if touching controls
-                if (target.closest('.mobile-btn') ||
-                    target.closest('#joystick-zone') ||
+                // Ignore if touching controls (조준 버튼 제외 - 조준하면서 시점 변경 가능하도록)
+                if (target.closest('#joystick-zone') ||
                     target.closest('.weapon-select-btn') ||
                     target.closest('#light-toggle-btn')) {
                     return;
