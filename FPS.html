@@ -5,6 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+
+    <!-- PWA / Standalone 모드 설정 - 주소창 숨기기 -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#000000">
+
     <title>FPS Multiplayer - Room System</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -6524,7 +6531,28 @@
                 applyPostProcessing();
             }
         }
+
+        // 모바일 주소창 숨기기 - 페이지 로드 후 자동 스크롤
+        window.addEventListener('load', function () {
+            // iOS Safari와 Android 크롬에서 주소창 숨기기
+            setTimeout(function () {
+                window.scrollTo(0, 1);
+            }, 100);
+
+            // 터치 시작 시에도 스크롤 (주소창 자동 숨김)
+            document.body.addEventListener('touchstart', function () {
+                window.scrollTo(0, 1);
+            }, { once: true });
+        });
+
+        // 화면 방향 변경 시에도 주소창 숨기기
+        window.addEventListener('orientationchange', function () {
+            setTimeout(function () {
+                window.scrollTo(0, 1);
+            }, 100);
+        });
     </script>
+
 </body>
 
 </html>
