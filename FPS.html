@@ -78,12 +78,6 @@
             transition: opacity 0.1s;
         }
 
-        @media (max-width: 768px) {
-            #crosshair {
-                display: none !important;
-            }
-        }
-
         #crosshair::before,
         #crosshair::after {
             content: '';
@@ -151,8 +145,8 @@
             height: 100%;
             display: none;
             z-index: 20;
-            /* Restore radial gradient for Sniper feel on PC */
-            background: radial-gradient(circle, transparent 20%, black 21%, black 100%);
+            /* PUBG 스타일 - 주변도 보이도록 반투명 처리 */
+            background: radial-gradient(circle, transparent 20%, rgba(0, 0, 0, 0.7) 21%, rgba(0, 0, 0, 0.85) 100%);
             /* Pointer events none to allow clicks if needed, though usually aiming blocks interactions */
             pointer-events: none;
         }
@@ -3272,6 +3266,55 @@
             }, 100);
         });
 
+
+
+        // --- 게임 재시작 함수 ---
+        function restartGame() {
+            console.log('restartGame() called');
+
+            // 게임 오버 화면 숨김
+            const elGameOver = document.getElementById('game-over');
+            if (elGameOver) elGameOver.style.display = 'none';
+
+            // 데스 오버레이 숨김
+            const deathOverlay = document.getElementById('death-overlay');
+            if (deathOverlay) deathOverlay.style.display = 'none';
+
+            // 피격 효과 제거
+            const elDamage = document.getElementById('damage-overlay');
+            if (elDamage) elDamage.style.opacity = 0;
+
+            // 플레이어 상태 초기화
+            isDead = false;
+            playerHP = 100;
+
+            // 혼자하기 모드: 모드 선택 화면으로 돌아가기
+            if (gameMode === 'single') {
+                // 모드 선택 화면 표시
+                const modeSelection = document.getElementById('mode-selection');
+                if (modeSelection) modeSelection.style.display = 'flex';
+
+                // 적 제거
+                enemies.forEach(e => scene.remove(e));
+                enemies = [];
+
+                // 체력 회복 아이템 제거
+                healthPills.forEach(pill => scene.remove(pill));
+                healthPills = [];
+
+                console.log('Returned to mode selection screen');
+            }
+            // 멀티플레이어 모드: 대기실로 돌아가기
+            else if (gameMode === 'multi') {
+                const roomWaiting = document.getElementById('room-waiting');
+                if (roomWaiting) roomWaiting.style.display = 'flex';
+
+                // 리스폰 요청
+                if (socket && socket.connected) {
+                    socket.emit('requestRespawn');
+                }
+            }
+        }
 
         // --- 게임 시작 카운트다운 ---
         function startCountdown() {
