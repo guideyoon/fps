@@ -301,13 +301,17 @@
 
         #hp-text {
             position: absolute;
-            left: -35px;
-            /* Left of the bar */
-            bottom: -3px;
+            left: 10px;
+            /* User Request: Left align INSIDE the bar */
+            bottom: 0;
+            line-height: 15px;
+            /* Vertically center */
             color: white;
             font-weight: bold;
-            font-size: 16px;
+            font-size: 14px;
             text-shadow: 1px 1px 2px black;
+            z-index: 5;
+            pointer-events: none;
         }
 
         #game-over {
@@ -1547,19 +1551,12 @@
         </div>
 
         <div id="controls-guide">
-            <span class="key">1</span>소총 <span class="key">2</span>권총 <span class="key">3</span>저격 <span
-                class="key">4</span>칼<br>
-            <span class="key">WASD</span> 이동 <br>
-            <span class="key">Space</span> 점프 / <span class="key">Shift</span> 달리기 <br>
-            <span class="key">R</span> 재장전 <br>
-            <span class="key">Click</span> 발사/조준
-        </div>
-
-        <!-- PC 감도 조정 UI -->
-        <div id="sensitivity-control" style="display: none;">
-            <label for="sensitivity-slider">마우스 감도:</label>
-            <input type="range" id="sensitivity-slider" min="0.0005" max="0.01" step="0.0005" value="0.002">
-            <span id="sensitivity-value">1.0</span>
+            <div class="key">WASD <span style="color:white">이동</span></div>
+            <div class="key">Space <span style="color:white">점프</span> / Shift <span style="color:white">달리기</span>
+            </div>
+            <div class="key">R <span style="color:white">재장전</span></div>
+            <div class="key">Click <span style="color:white">발사/조준</span></div>
+            <div class="key">ESC <span style="color:white">일시정지</span></div> <!-- Added User Request -->
         </div>
     </div>
 
@@ -1593,6 +1590,20 @@
     <button class="mobile-btn" id="btn-aim"><i class="fas fa-eye"></i></button>
     <button class="mobile-btn" id="btn-jump"><i class="fas fa-chevron-up"></i></button>
     <button class="mobile-btn" id="btn-reload"><i class="fas fa-redo"></i></button>
+
+    <!-- Pause Overlay (Menu) -->
+    <div id="pause-overlay" style="display:none;">
+        <h1>PAUSE</h1>
+        <p>Click to Resume</p>
+
+        <!-- Sensitivity Control (Moved into Pause Menu - User Request) -->
+        <div id="sensitivity-control"
+            style="background:none; border:none; padding:0; margin-top:20px; position:static; display:block; pointer-events:auto;">
+            <label for="sensitivity-slider">Mouse Sensitivity:</label>
+            <input type="range" id="sensitivity-slider" min="0.0005" max="0.01" step="0.0001" value="0.002">
+            <span id="sensitivity-value">1.00</span>
+        </div>
+    </div>
 
     <!-- Death Overlay (Multiplayer) -->
     <div id="death-overlay">
@@ -3356,12 +3367,8 @@
             isDead = false;
             playerHP = 100;
 
-            // 혼자하기 모드: 모드 선택 화면으로 돌아가기
+            // 혼자하기 모드: 바로 재시작 (User Request)
             if (gameMode === 'single') {
-                // 모드 선택 화면 표시
-                const modeSelection = document.getElementById('mode-selection');
-                if (modeSelection) modeSelection.style.display = 'flex';
-
                 // 적 제거
                 enemies.forEach(e => scene.remove(e));
                 enemies = [];
@@ -3370,7 +3377,9 @@
                 healthPills.forEach(pill => scene.remove(pill));
                 healthPills = [];
 
-                console.log('Returned to mode selection screen');
+                // 게임 바로 시작
+                console.log('Restarting Single Player Game immediately...');
+                startGame();
             }
             // 멀티플레이어 모드: 대기실로 돌아가기
             else if (gameMode === 'multi') {
@@ -3462,6 +3471,21 @@
             // 2.5. 혼자하기 모드일 때 적 생성
             if (gameMode === 'single') {
                 for (let i = 0; i < 6; i++) createEnemyAI();
+            }
+
+            // Pause Overlay Click -> Resume & Fullscreen (User Request)
+            const elPauseOverlay = document.getElementById('pause-overlay');
+            if (elPauseOverlay) {
+                elPauseOverlay.addEventListener('click', () => {
+                    if (isPaused) {
+                        isPaused = false;
+                        elPauseOverlay.style.display = 'none';
+                        // Resume Pointer Lock
+                        document.body.requestPointerLock();
+                        // Request Fullscreen
+                        enterFullscreen();
+                    }
+                });
             }
 
             // 3. 컨트롤 설정
@@ -5762,6 +5786,9 @@
                 e.preventDefault();
                 // e.stopPropagation() 제거 - 격발하면서 카메라 회전 가능하도록
                 isFiring = true;
+                // Fix: Shoot button not working for semi-auto (Sniper)
+                // Reset semi-auto flag on new touch to allow firing
+                hasFiredSemi = false;
             }, { passive: false });
             btnShoot.addEventListener('touchend', (e) => {
                 e.preventDefault();
@@ -5808,7 +5835,12 @@
                     } else if (w.type === 'SNIPER') {
                         // 저격총 (User Request): 눈 버튼 떼면 발사 + 조준 해제
                         if (isAiming) {
-                            shoot(w);
+                            // Fix: Rapid fire issue - Check cooldown
+                            if (fireCooldown <= 0) {
+                                shoot(w);
+                                fireCooldown = w.fireRate; // Apply cooldown
+                                hasFiredSemi = true;
+                            }
                         }
                         isAimingHeld = false;
                         isAiming = false;
@@ -5826,16 +5858,14 @@
 
         // PC 감도 조정 설정
         function setupSensitivityControl() {
-            if (isMobile) return; // 모바일에서는 표시 안 함
+            if (isMobile) return;
 
+            // Elements are now inside pause-overlay
             const sensitivityControl = document.getElementById('sensitivity-control');
             const sensitivitySlider = document.getElementById('sensitivity-slider');
             const sensitivityValue = document.getElementById('sensitivity-value');
 
             if (!sensitivityControl || !sensitivitySlider || !sensitivityValue) return;
-
-            // PC에서만 표시
-            sensitivityControl.style.display = 'block';
 
             // 현재 감도로 슬라이더 설정
             sensitivitySlider.value = SENSITIVITY_MOUSE;
@@ -5845,16 +5875,20 @@
             sensitivitySlider.addEventListener('input', (e) => {
                 const newSensitivity = parseFloat(e.target.value);
                 SENSITIVITY_MOUSE = newSensitivity;
-                SENSITIVITY_ADS = newSensitivity * 0.25; // ADS는 일반 감도의 25%
-
-                // localStorage에 저장
+                SENSITIVITY_ADS = newSensitivity * 0.25;
                 localStorage.setItem('mouseSensitivity', newSensitivity.toString());
-
                 updateSensitivityDisplay();
             });
 
+            // Prevent clicks on slider/control from resuming the game
+            sensitivityControl.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+            sensitivitySlider.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+
             function updateSensitivityDisplay() {
-                // 0.002를 기준(1.0)으로 표시
                 const displayValue = (SENSITIVITY_MOUSE / 0.002).toFixed(2);
                 sensitivityValue.textContent = displayValue;
             }
