@@ -144,7 +144,8 @@
             height: 100%;
             display: none;
             z-index: 20;
-            background: radial-gradient(circle, transparent 30%, black 31%);
+            /* Removed opaque background for better visibility */
+            /* background: radial-gradient(circle, transparent 30%, black 31%); */
         }
 
         #scope-line-h {
@@ -834,6 +835,73 @@
             transform: scale(0.95);
         }
 
+        /* --- 1. Joystick --- */
+        #joystick-zone {
+            position: absolute;
+            bottom: 40px;
+            left: 40px;
+            width: 120px;
+            height: 120px;
+            z-index: 50;
+            /* background: rgba(255, 0, 0, 0.2); Debug */
+        }
+
+        #joystick-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        #joystick-handle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        /* --- 2. Vertical Weapon Selector (Left) --- */
+        #weapon-selector-vertical {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: none;
+            /* Mobile only */
+            flex-direction: column;
+            gap: 15px;
+            z-index: 50;
+        }
+
+        .weapon-select-btn {
+            width: 50px;
+            height: 50px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .weapon-select-btn.active {
+            background: rgba(255, 170, 0, 0.6);
+            border-color: #ffaa00;
+        }
+
         /* 무기 교체 버튼 (기본적으로 숨김, 미디어 쿼리에서 처리) */
         #btn-weapon1,
         #btn-weapon2,
@@ -889,27 +957,41 @@
 
         /* 모바일 UI 조정 */
         @media (max-width: 768px) {
+
+            /* 1. HUD 하단 이동 및 축소 */
             #ammo-info {
-                bottom: 80px;
-                right: 20px;
-                font-size: 24px;
+                bottom: 20px;
+                left: 50%;
+                right: auto;
+                transform: translateX(20px);
+                /* HP바 오른쪽 */
+                font-size: 16px;
+                text-align: left;
+                text-shadow: 1px 1px 2px black;
+            }
+
+            #ammo-val {
+                font-size: 20px;
             }
 
             #weapon-label {
-                font-size: 14px;
+                display: none;
+                /* 모바일에서 공간 절약 */
             }
 
             #hp-container {
-                width: 200px;
-                height: 15px;
-                bottom: 80px;
-                left: 20px;
+                width: 150px;
+                height: 10px;
+                bottom: 25px;
+                left: 50%;
+                transform: translateX(-140px);
+                /* 중앙 기준 왼쪽으로 */
+                background: rgba(0, 0, 0, 0.6);
             }
 
             #hp-text {
-                bottom: 100px;
-                left: 20px;
-                font-size: 14px;
+                display: none;
+                /* 바만 표시 */
             }
 
             #controls-guide {
@@ -923,26 +1005,39 @@
 
             /* 상단 스탯 정보 최적화 */
             #stats-info {
-                top: 10px;
-                gap: 15px;
-                font-size: 14px;
+                top: 5px;
+                gap: 10px;
+                font-size: 12px;
             }
 
             #play-time,
             #kill-count {
-                padding: 4px 10px;
+                padding: 2px 8px;
+                background: rgba(0, 0, 0, 0.3);
+                border: none;
             }
 
             .mobile-btn {
                 display: flex;
             }
 
-            /* 기존 무기 버튼 강제 숨김 */
+            /* 기존 무기 버튼 및 사이클 버튼 숨김 (새로운 수직 선택기로 대체) */
             #btn-weapon1,
             #btn-weapon2,
             #btn-weapon3,
-            #btn-weapon4 {
+            #btn-weapon4,
+            #btn-weapon-cycle {
                 display: none !important;
+            }
+
+            /* 무기 선택기 표시 */
+            #weapon-selector-vertical {
+                display: flex;
+            }
+
+            /* 조이스틱 표시 */
+            #joystick-zone {
+                display: block;
             }
         }
 
@@ -1221,11 +1316,23 @@
     <!-- 모바일 컨트롤 -->
     <button class="mobile-btn" id="btn-weapon1">1</button>
     <!-- 모바일 컨트롤 (Krunker 스타일 클러스터) -->
+    <div id="joystick-zone">
+        <div id="joystick-bg"></div>
+        <div id="joystick-handle"></div>
+    </div>
+
+    <!-- 수직 무기 선택기 (왼쪽 가운데) -->
+    <div id="weapon-selector-vertical">
+        <div class="weapon-select-btn" data-idx="0"><i class="fas fa-fighter-jet"></i></div> <!-- Rifle -->
+        <div class="weapon-select-btn" data-idx="1"><i class="fas fa-bullseye"></i></div> <!-- Pistol (placeholder) -->
+        <div class="weapon-select-btn" data-idx="2"><i class="fas fa-crosshairs"></i></div> <!-- Sniper -->
+        <div class="weapon-select-btn" data-idx="3"><i class="fas fa-gavel"></i></div> <!-- Knife -->
+    </div>
+
     <button class="mobile-btn" id="btn-shoot"><i class="fas fa-crosshairs"></i></button>
     <button class="mobile-btn" id="btn-aim"><i class="fas fa-eye"></i></button>
     <button class="mobile-btn" id="btn-jump"><i class="fas fa-chevron-up"></i></button>
     <button class="mobile-btn" id="btn-reload"><i class="fas fa-redo"></i></button>
-    <button class="mobile-btn" id="btn-weapon-cycle"><i class="fas fa-sync-alt"></i></button>
 
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
@@ -5007,201 +5114,153 @@
             const screenWidth = window.innerWidth;
             const leftHalf = screenWidth / 2;
 
-            // 화면 전체 터치 이벤트 - document.body에 직접 등록
-            document.body.addEventListener('touchstart', (e) => {
-                // 버튼 영역 체크 (버튼 클릭은 무시)
-                const target = e.target;
-                if (target.closest('.mobile-btn') || target.closest('#light-toggle-btn')) {
-                    return; // 버튼 클릭은 처리하지 않음
-                }
+            // --- Mobile Controls Refactor (Joystick & Full Screen Look) ---
 
-                // 모든 터치 처리
-                Array.from(e.touches).forEach(touch => {
-                    const isLeftSide = touch.clientX < leftHalf;
-                    const btnAim = document.getElementById('btn-aim');
-                    const btnRect = btnAim ? btnAim.getBoundingClientRect() : null;
-                    const isOnAimButton = btnRect && touch.clientX >= btnRect.left && touch.clientX <= btnRect.right &&
-                        touch.clientY >= btnRect.top && touch.clientY <= btnRect.bottom;
+            // Joystick Variables
+            const joystickZone = document.getElementById('joystick-zone');
+            const joystickHandle = document.getElementById('joystick-handle');
+            let joystickTouchId = null;
+            const joystickMaxRadius = 35; // Handle movement range
+            const joystickCenter = { x: 0, y: 0 };
 
-                    if (isLeftSide && touchMoveId === null && !isOnAimButton) {
-                        // 왼쪽 화면 - 이동 제어 (조준 버튼 제외)
-                        touchMoveId = touch.identifier;
-                        touchMoveActive = true;
-                        touchStartX = touch.clientX;
-                        touchStartY = touch.clientY;
-                        lastTouchX = touch.clientX;
-                        lastTouchY = touch.clientY;
-                    } else if (!isLeftSide && touchLookId === null && !isOnAimButton) {
-                        // 오른쪽 화면 - 시점 제어 (조준 버튼 제외)
-                        touchLookId = touch.identifier;
-                        touchLookActive = true;
-                        lastTouchX = touch.clientX;
-                        lastTouchY = touch.clientY;
+            // Weapon Selector Variables
+            const weaponSelectBtns = document.querySelectorAll('.weapon-select-btn');
+
+            // 1. Joystick Logic
+            if (joystickZone && joystickHandle) {
+                joystickZone.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const touch = e.changedTouches[0];
+                    joystickTouchId = touch.identifier;
+
+                    // Center is relative to the zone
+                    const rect = joystickZone.getBoundingClientRect();
+                    joystickCenter.x = rect.left + rect.width / 2;
+                    joystickCenter.y = rect.top + rect.height / 2;
+
+                    updateJoystick(touch.clientX, touch.clientY);
+                }, { passive: false });
+
+                joystickZone.addEventListener('touchmove', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const touch = Array.from(e.changedTouches).find(t => t.identifier === joystickTouchId);
+                    if (touch) {
+                        updateJoystick(touch.clientX, touch.clientY);
                     }
-                });
-            }, { passive: false });
+                }, { passive: false });
 
-            document.body.addEventListener('touchmove', (e) => {
-                // 버튼 영역 체크
+                const endJoystick = (e) => {
+                    e.preventDefault();
+                    const touch = Array.from(e.changedTouches).find(t => t.identifier === joystickTouchId);
+                    if (touch) {
+                        joystickTouchId = null;
+                        joystickHandle.style.transform = `translate(-50%, -50%) translate(0px, 0px)`;
+                        keys.w = 0; keys.s = 0; keys.a = 0; keys.d = 0;
+                    }
+                };
+                joystickZone.addEventListener('touchend', endJoystick);
+                joystickZone.addEventListener('touchcancel', endJoystick);
+            }
+
+            function updateJoystick(clientX, clientY) {
+                const dx = clientX - joystickCenter.x;
+                const dy = clientY - joystickCenter.y;
+                const distance = Math.min(Math.sqrt(dx * dx + dy * dy), joystickMaxRadius);
+                const angle = Math.atan2(dy, dx);
+
+                const moveX = distance * Math.cos(angle);
+                const moveY = distance * Math.sin(angle);
+
+                joystickHandle.style.transform = `translate(-50%, -50%) translate(${moveX}px, ${moveY}px)`;
+
+                // Map to keys (normalized 0-1)
+                const normX = moveX / joystickMaxRadius;
+                const normY = moveY / joystickMaxRadius; // Up is negative in screen coords
+
+                // Reset keys
+                keys.w = 0; keys.s = 0; keys.a = 0; keys.d = 0;
+
+                // Threshold for movement
+                if (Math.abs(normY) > 0.1) {
+                    if (normY < 0) keys.w = Math.abs(normY);
+                    else keys.s = Math.abs(normY);
+                }
+                if (Math.abs(normX) > 0.1) {
+                    if (normX < 0) keys.a = Math.abs(normX);
+                    else keys.d = Math.abs(normX);
+                }
+            }
+
+            // 2. Camera Look Logic (Full Screen Drag)
+            let touchLookId = null;
+            let lastTouchX = 0;
+            let lastTouchY = 0;
+
+            document.body.addEventListener('touchstart', (e) => {
                 const target = e.target;
-                if (target.closest('.mobile-btn') || target.closest('#light-toggle-btn')) {
+                // Ignore if touching controls
+                if (target.closest('.mobile-btn') ||
+                    target.closest('#joystick-zone') ||
+                    target.closest('.weapon-select-btn') ||
+                    target.closest('#light-toggle-btn')) {
                     return;
                 }
 
                 e.preventDefault();
+                const touch = e.changedTouches[0];
+                touchLookId = touch.identifier;
+                lastTouchX = touch.clientX;
+                lastTouchY = touch.clientY;
+            }, { passive: false });
 
-                const currentScreenWidth = window.innerWidth;
-                const currentLeftHalf = currentScreenWidth / 2;
+            document.body.addEventListener('touchmove', (e) => {
+                if (touchLookId === null) return;
+                const touch = Array.from(e.changedTouches).find(t => t.identifier === touchLookId);
+                if (!touch) return;
 
-                // 왼쪽 터치 - 앞/뒤/좌/우 이동 (대각선 이동 가능) 또는 조준 모드 시점 변경
-                const w = WEAPONS[curWeaponIdx];
-                const isSniperAiming = w.type === 'SNIPER' && isAimingHeld;
+                const target = e.target;
+                if (target.closest('.mobile-btn') || target.closest('#joystick-zone')) return;
 
-                if (touchMoveActive && touchMoveId !== null) {
-                    const touch = Array.from(e.touches).find(t => t.identifier === touchMoveId);
-                    if (touch && touch.clientX < currentLeftHalf) {
-                        // 저격 조준 모드에서는 왼쪽 터치가 발사 버튼 역할
-                        if (isSniperAiming) {
-                            // 발사 처리 (터치 시 한 번만)
-                            if (!isFiring) {
-                                isFiring = true;
-                                hasFiredSemi = false;
-                            }
-                        } else if (isAimingHeld) {
-                            // 조준 모드일 때는 왼쪽 터치로 시점 변경하지 않음 (이동도 안 함)
-                            // 조준 모드는 오른쪽 터치로만 시점 변경
-                            keys.w = 0;
-                            keys.s = 0;
-                            keys.a = 0;
-                            keys.d = 0;
-                        } else {
-                            // 일반 이동 모드
-                            const dx = touch.clientX - touchStartX;
-                            const dy = touch.clientY - touchStartY;
-                            const distance = Math.sqrt(dx * dx + dy * dy);
+                const moveDx = touch.clientX - lastTouchX;
+                const moveDy = touch.clientY - lastTouchY;
 
-                            // 대각선 이동 가능
-                            if (distance > 5) {
-                                const moveX = Math.max(-1, Math.min(1, dx / 60));
-                                const moveY = Math.max(-1, Math.min(1, -dy / 60)); // 위로 드래그 = 양수
+                // Sensitivity
+                const sens = isAiming ? SENSITIVITY_ADS * 1.5 : SENSITIVITY_MOUSE * 1.2;
+                rotation.y -= moveDx * sens;
+                rotation.x -= moveDy * sens;
+                rotation.x = Math.max(-1.5, Math.min(1.5, rotation.x));
 
-                                keys.w = Math.max(0, moveY);
-                                keys.s = Math.max(0, -moveY);
-                                keys.a = Math.max(0, -moveX);
-                                keys.d = Math.max(0, moveX);
-                            } else {
-                                keys.w = 0;
-                                keys.s = 0;
-                                keys.a = 0;
-                                keys.d = 0;
-                            }
-                        }
-                    }
-                }
-
-                // 오른쪽 터치 - 시점 변경 (조준 버튼을 누르고 있어도 가능)
-                if (touchLookActive && touchLookId !== null) {
-                    const touch = Array.from(e.touches).find(t => t.identifier === touchLookId);
-                    if (touch && touch.clientX >= currentLeftHalf) {
-                        const moveDx = touch.clientX - lastTouchX;
-                        const moveDy = touch.clientY - lastTouchY;
-                        // 이동 중일 때 시점 변경 속도 증가
-                        const moveSpeedMultiplier = (touchMoveActive && keys.w > 0 || keys.s > 0 || keys.a > 0 || keys.d > 0) ? 1.5 : 1.0;
-                        const sens = (isAiming ? SENSITIVITY_ADS * 1.5 : SENSITIVITY_MOUSE * 1.2) * moveSpeedMultiplier;
-
-                        rotation.y -= moveDx * sens;
-                        rotation.x -= moveDy * sens;
-                        rotation.x = Math.max(-1.5, Math.min(1.5, rotation.x));
-
-                        lastTouchX = touch.clientX;
-                        lastTouchY = touch.clientY;
-                    }
-                }
-
-                // 조준 버튼을 누르고 있는 상태에서도 오른쪽 화면 터치로 시점 변경 가능
-                if (isAimingHeld) {
-                    // 조준 버튼이 아닌 오른쪽 화면의 다른 터치 찾기
-                    const btnAim = document.getElementById('btn-aim');
-                    const btnRect = btnAim ? btnAim.getBoundingClientRect() : null;
-                    const rightSideTouch = Array.from(e.touches).find(t => {
-                        if (!btnRect) return false;
-                        const isOnButton = t.clientX >= btnRect.left && t.clientX <= btnRect.right &&
-                            t.clientY >= btnRect.top && t.clientY <= btnRect.bottom;
-                        return !isOnButton && t.clientX >= currentLeftHalf && t.identifier !== touchMoveId;
-                    });
-
-                    if (rightSideTouch) {
-                        // 조준 버튼을 누르고 있는 상태에서 오른쪽 화면 터치로 시점 변경
-                        if (touchLookId === null || touchLookId !== rightSideTouch.identifier) {
-                            touchLookId = rightSideTouch.identifier;
-                            touchLookActive = true;
-                            lastTouchX = rightSideTouch.clientX;
-                            lastTouchY = rightSideTouch.clientY;
-                        }
-                    }
-
-                    // touchLookId가 설정되어 있으면 시점 변경 처리
-                    if (touchLookActive && touchLookId !== null) {
-                        const lookTouch = Array.from(e.touches).find(t => t.identifier === touchLookId);
-                        if (lookTouch && lookTouch.clientX >= currentLeftHalf) {
-                            const moveDx = lookTouch.clientX - lastTouchX;
-                            const moveDy = lookTouch.clientY - lastTouchY;
-                            const sens = SENSITIVITY_ADS * 1.5; // 조준 모드 감도 (모바일)
-
-                            rotation.y -= moveDx * sens;
-                            rotation.x -= moveDy * sens;
-                            rotation.x = Math.max(-1.5, Math.min(1.5, rotation.x));
-
-                            lastTouchX = lookTouch.clientX;
-                            lastTouchY = lookTouch.clientY;
-                        }
-                    }
-                }
+                lastTouchX = touch.clientX;
+                lastTouchY = touch.clientY;
             }, { passive: false });
 
             document.body.addEventListener('touchend', (e) => {
-                const endedTouches = Array.from(e.changedTouches);
-
-                // 이동 제어 종료
-                const moveTouch = endedTouches.find(t => t.identifier === touchMoveId);
-                if (moveTouch) {
-                    touchMoveActive = false;
-                    touchMoveId = null;
-                    keys.w = 0;
-                    keys.s = 0;
-                    keys.a = 0;
-                    keys.d = 0;
-                    // 저격 조준 모드에서 왼쪽 터치 종료 시 발사 중지
-                    const w = WEAPONS[curWeaponIdx];
-                    if (w.type === 'SNIPER' && isAimingHeld) {
-                        isFiring = false;
-                    }
-                }
-
-                // 시점 제어 종료
-                const lookTouch = endedTouches.find(t => t.identifier === touchLookId);
-                if (lookTouch) {
-                    touchLookActive = false;
+                const touch = Array.from(e.changedTouches).find(t => t.identifier === touchLookId);
+                if (touch) {
                     touchLookId = null;
                 }
-            }, { passive: false });
+            });
 
-            document.body.addEventListener('touchcancel', (e) => {
-                // 터치가 취소되면 모든 키 리셋
-                touchMoveActive = false;
-                touchLookActive = false;
-                touchMoveId = null;
-                touchLookId = null;
-                keys.w = 0;
-                keys.s = 0;
-                keys.a = 0;
-                keys.d = 0;
-            }, { passive: false });
+            // 3. Weapon Selector Logic
+            weaponSelectBtns.forEach(btn => {
+                btn.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const idx = parseInt(btn.dataset.idx);
+                    switchWeaponTo(idx);
+
+                    // Update Active State
+                    weaponSelectBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                }, { passive: false });
+            });
 
             // 모바일 버튼 이벤트
             const btnJump = document.getElementById('btn-jump');
             const btnReload = document.getElementById('btn-reload');
-            const btnCycle = document.getElementById('btn-weapon-cycle');
+            // btnCycle 제거
             const btnShoot = document.getElementById('btn-shoot');
             const btnAim = document.getElementById('btn-aim');
 
@@ -5231,15 +5290,7 @@
                 }, { passive: false });
             }
 
-            if (btnCycle) {
-                btnCycle.addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    // 현재 무기 인덱스를 순환 (0~3)
-                    const nextIdx = (curWeaponIdx + 1) % 4;
-                    switchWeaponTo(nextIdx);
-                }, { passive: false });
-            }
+            // btnCycle logic removed
 
             if (btnShoot) {
                 btnShoot.addEventListener('touchstart', (e) => {
