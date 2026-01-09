@@ -1486,8 +1486,8 @@
                 id: 0, name: "ASSAULT RIFLE",
                 type: 'RIFLE', maxAmmo: 30, ammo: 30, automatic: true,
                 posHip: new THREE.Vector3(0.2, -0.25, -0.45),
-                // 수정: ADS 시야 확보를 위해 조정 (총기 일부 보이도록, 2번 이미지 참고)
-                posAds: new THREE.Vector3(0, -0.12, -0.35),
+                // ADS 위치: PC에서 조준기(레드닷) 정렬이 맞도록 조정
+                posAds: new THREE.Vector3(0, -0.08, -0.25),
                 fovAds: 20, fireRate: 0.08, recoil: 0.06, damage: 30
             },
             {
@@ -5402,12 +5402,12 @@
             if (btnShoot) {
                 btnShoot.addEventListener('touchstart', (e) => {
                     e.preventDefault();
-                    e.stopPropagation();
+                    // e.stopPropagation() 제거 - 격발하면서 카메라 회전 가능하도록
                     isFiring = true;
                 }, { passive: false });
                 btnShoot.addEventListener('touchend', (e) => {
                     e.preventDefault();
-                    e.stopPropagation();
+                    // e.stopPropagation() 제거
                     isFiring = false;
                 }, { passive: false });
             }
