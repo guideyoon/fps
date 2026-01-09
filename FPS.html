@@ -5758,18 +5758,37 @@
 
             // btnCycle logic removed
 
-            if (btnShoot) {
-                btnShoot.addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    // e.stopPropagation() 제거 - 격발하면서 카메라 회전 가능하도록
-                    isFiring = true;
-                }, { passive: false });
-                btnShoot.addEventListener('touchend', (e) => {
-                    e.preventDefault();
-                    // e.stopPropagation() 제거
+            btnShoot.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                // e.stopPropagation() 제거 - 격발하면서 카메라 회전 가능하도록
+                const w = WEAPONS[curWeaponIdx];
+                if (w.type === 'SNIPER') {
+                    // 저격총: 누르면 조준 시작 (발사 X)
+                    isAimingHeld = true;
+                    isAiming = true;
                     isFiring = false;
-                }, { passive: false });
-            }
+                } else {
+                    // 기타: 즉시 발사
+                    isFiring = true;
+                }
+            }, { passive: false });
+            btnShoot.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                // e.stopPropagation() 제거
+                const w = WEAPONS[curWeaponIdx];
+                if (w.type === 'SNIPER') {
+                    // 저격총: 떼면 발사 + 조준 해제 (Release to Fire)
+                    if (isAiming) {
+                        shoot(w);
+                    }
+                    isAimingHeld = false;
+                    isAiming = false;
+                    isFiring = false;
+                } else {
+                    // 기타: 발사 중지
+                    isFiring = false;
+                }
+            }, { passive: false });
 
             // 조준 버튼 - 저격 모드는 조준만, 소총은 조준+발사, 권총은 발사만
             if (btnAim) {
@@ -5779,7 +5798,9 @@
                     const w = WEAPONS[curWeaponIdx];
 
                     if (w.type === 'PISTOL') {
-                        // 권총은 조준 모드가 이미 활성화되어 있으므로 발사만
+                        // 권총: 조준 버튼 누르면 조준 모드 + 연속 격발 (User Request)
+                        isAimingHeld = true;
+                        isAiming = true;
                         isFiring = true;
                     } else {
                         // 소총, 저격총은 조준 모드 활성화
@@ -5788,7 +5809,7 @@
                         if (w.type !== 'SNIPER') {
                             isFiring = true; // 소총은 자동 발사 시작
                         } else {
-                            isFiring = false; // 저격 모드는 왼쪽 터치로 발사
+                            isFiring = false; // 저격 모드는 왼쪽 터치로 발사 (또는 별도 처리)
                         }
                     }
                 }, { passive: false });
@@ -5799,7 +5820,9 @@
                     const w = WEAPONS[curWeaponIdx];
 
                     if (w.type === 'PISTOL') {
-                        // 권총은 발사만 중지
+                        // 권총: 조준 및 발사 모두 해제
+                        isAimingHeld = false;
+                        isAiming = false;
                         isFiring = false;
                         hasFiredSemi = false;
                     } else {
@@ -6170,7 +6193,10 @@
             if (isFiring && !isReloading) {
                 if (w.type === 'KNIFE' || w.ammo > 0) {
                     if (fireCooldown <= 0) {
-                        if (w.automatic) {
+                        // 모바일에서 권총은 자동 발사 허용 (사용자 요청: 조준 유지 시 연속 격발)
+                        const isMobilePistol = isMobile && w.type === 'PISTOL';
+
+                        if (w.automatic || isMobilePistol) {
                             fireCooldown = w.fireRate;
                             shoot(w);
                         } else {
@@ -6534,12 +6560,8 @@
                     }
 
                     // PC vs Mobile Scope Style Logic
-                    if (isMobile) {
-                        elScope.style.background = 'none'; // Mobile: Red dot / Open
-                    } else {
-                        // PC: Restore black scope overlay
-                        elScope.style.background = 'radial-gradient(circle, transparent 20%, rgba(0, 0, 0, 0.7) 21%, rgba(0, 0, 0, 0.9) 100%)';
-                    }
+                    // PC/Mobile Common Scope Style (User Request: Mobile should look like PC)
+                    elScope.style.background = 'radial-gradient(circle, transparent 20%, rgba(0, 0, 0, 0.7) 21%, rgba(0, 0, 0, 0.9) 100%)';
                 } else {
                     weaponContainer.visible = true;
                     elScope.style.display = 'none';
@@ -6561,8 +6583,14 @@
                         elCrosshair.style.opacity = 0.7; // 상시 표시는 약간 투명하게
                     } else if (w.type === 'PISTOL' || (!isAiming && w.type !== 'KNIFE')) {
                         // PC: 권총이거나 비조준 상태(칼 제외)일 때 표시
-                        elCrosshair.style.display = 'block';
-                        elCrosshair.style.opacity = 1;
+                        // Mobile PISTOL update: Aiming hidden crosshair logic same as PC now?
+                        // Actually, if mobile pistol behaves like rifle now (ADS available), hide crosshair when aiming
+                        if (isMobile && w.type === 'PISTOL' && isAiming) {
+                            elCrosshair.style.display = 'none';
+                        } else {
+                            elCrosshair.style.display = 'block';
+                            elCrosshair.style.opacity = 1;
+                        }
                     } else {
                         elCrosshair.style.display = 'none';
                     }
@@ -6571,8 +6599,8 @@
                 // Hide/Show front sight based on aiming
                 weaponModel.traverse((child) => {
                     if (child.userData && child.userData.isSight) {
-                        // 모바일에서 권총은 항상 조준 모드
-                        const shouldAim = isAiming || (isMobile && w.type === 'PISTOL');
+                        // 모바일에서 권총 강제 조준 제거 - 사용자 요청 (평상시에는 들고 있는 모습)
+                        const shouldAim = isAiming;
                         child.visible = shouldAim;
                     }
                 });
