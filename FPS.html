@@ -1562,6 +1562,9 @@
         <div id="respawn-timer">10</div>
         <div id="killed-by-label">Killed by</div>
         <div id="killer-name">Unknown</div>
+        <button id="manual-respawn-btn"
+            style="display: none; margin-top: 20px; padding: 10px 20px; font-size: 24px; background: #4caf50; color: white; border: none; border-radius: 5px; cursor: pointer;">RESPAWN
+            NOW</button>
     </div>
 
     <!-- Sniper Scope Overlay -->
@@ -2685,6 +2688,9 @@
                         const killerNameEl = document.getElementById('killer-name');
 
                         deathOverlay.style.display = 'flex';
+                        const manualRespawnBtn = document.getElementById('manual-respawn-btn');
+                        if (manualRespawnBtn) manualRespawnBtn.style.display = 'none';
+
                         killerNameEl.innerText = data.killerName || 'Unknown';
 
                         // 10-second countdown
@@ -2698,12 +2704,26 @@
                             if (countdown <= 0) {
                                 clearInterval(countdownInterval);
                                 console.log('=== COUNTDOWN COMPLETE ===');
-                                // Request respawn after 10 seconds
+
+                                // Enable manual respawn button on the overlay as well
+                                const respawnBtn = document.getElementById('manual-respawn-btn');
+                                if (respawnBtn) {
+                                    respawnBtn.style.display = 'block';
+                                    respawnBtn.onclick = () => {
+                                        if (socket && socket.connected) {
+                                            console.log('Manual respawn requested');
+                                            socket.emit('requestRespawn');
+                                        }
+                                    };
+                                }
+
+                                // Auto-Request respawn
                                 if (socket && socket.connected) {
                                     console.log('Socket connected, sending requestRespawn...');
                                     socket.emit('requestRespawn');
                                 } else {
                                     console.error('ERROR: Socket not connected! Cannot request respawn.');
+                                    alert('서버와 연결이 끊어졌습니다. 새로고침 해주세요.');
                                 }
                             }
                         }, 1000);
