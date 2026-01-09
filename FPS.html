@@ -1487,8 +1487,8 @@
                 id: 0, name: "ASSAULT RIFLE",
                 type: 'RIFLE', maxAmmo: 30, ammo: 30, automatic: true,
                 posHip: new THREE.Vector3(0.2, -0.25, -0.45),
-                // ADS 위치: 이전 조정값(-0.015)이 높았으므로 최적의 정렬값(-0.062)으로 설정
-                posAds: new THREE.Vector3(0, -0.062, -0.15),
+                // ADS 위치: Y=-0.062로 정렬 유지, 클리핑 방지를 위해 Z=-0.35로 거리 조정
+                posAds: new THREE.Vector3(0, -0.062, -0.35),
                 fovAds: 20, fireRate: 0.08, recoil: 0.06, damage: 30
             },
             {
