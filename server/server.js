@@ -127,7 +127,14 @@ io.on('connection', (socket) => {
             if (room.players[targetId].hp <= 0) {
                 room.players[targetId].hp = 0;
                 room.players[targetId].isDead = true;
-                io.to(roomId).emit('playerDied', { id: targetId, killerId: socket.id });
+                room.players[targetId].deathTime = Date.now(); // Track death timestamp
+
+                // Send death event with killer info
+                io.to(roomId).emit('playerDied', {
+                    id: targetId,
+                    killerId: socket.id,
+                    killerName: room.players[socket.id] ? room.players[socket.id].name : 'Unknown'
+                });
             } else {
                 io.to(roomId).emit('playerDamaged', { id: targetId, hp: room.players[targetId].hp, dealerId: socket.id });
             }
@@ -137,18 +144,31 @@ io.on('connection', (socket) => {
     socket.on('requestRespawn', () => {
         const roomId = playerRoomMap[socket.id];
         const room = rooms[roomId];
+        const player = room && room.players[socket.id];
 
-        if (room && room.players[socket.id] && room.players[socket.id].isDead) {
+        if (player && player.isDead) {
+            // Enforce 10-second minimum respawn delay
+            const timeSinceDeath = Date.now() - (player.deathTime || 0);
+            const MIN_RESPAWN_DELAY = 10000; // 10 seconds
+
+            if (timeSinceDeath < MIN_RESPAWN_DELAY) {
+                // Too early - reject respawn
+                socket.emit('respawnDenied', {
+                    remainingTime: Math.ceil((MIN_RESPAWN_DELAY - timeSinceDeath) / 1000)
+                });
+                return;
+            }
+
             // Track respawn count for this room to cycle through spawn points
             if (!room.respawnCounter) room.respawnCounter = 0;
             const spawnPos = getSafeSpawnPosition(room.respawnCounter++, room.map);
 
-            const p = room.players[socket.id];
-            p.hp = 100;
-            p.isDead = false;
-            p.isInvincible = true;
-            p.position = spawnPos;
-            p.rotation = { x: 0, y: 0 };
+            player.hp = 100;
+            player.isDead = false;
+            player.isInvincible = true;
+            player.deathTime = null; // Clear death timestamp
+            player.position = spawnPos;
+            player.rotation = { x: 0, y: 0 };
 
             setTimeout(() => {
                 if (room && room.players[socket.id]) {
@@ -158,10 +178,10 @@ io.on('connection', (socket) => {
 
             io.to(roomId).emit('playerRespawned', {
                 id: socket.id,
-                name: p.name,
-                hp: p.hp,
-                position: p.position,
-                rotation: p.rotation
+                name: player.name,
+                hp: player.hp,
+                position: player.position,
+                rotation: player.rotation
             });
         }
     });

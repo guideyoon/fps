@@ -803,6 +803,59 @@
             box-shadow: 0 0 15px rgba(255, 170, 0, 0.5);
         }
 
+        /* Death Overlay & Killcam UI */
+        #death-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 150;
+            pointer-events: none;
+        }
+
+        #respawn-timer {
+            font-size: 96px;
+            font-weight: bold;
+            color: #ff3333;
+            text-shadow: 0 0 30px rgba(255, 51, 51, 0.9), 0 0 60px rgba(255, 51, 51, 0.5);
+            margin-bottom: 30px;
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.05);
+                opacity: 0.9;
+            }
+        }
+
+        #killed-by-label {
+            font-size: 28px;
+            color: #ffffff;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+            margin-bottom: 10px;
+        }
+
+        #killer-name {
+            font-size: 48px;
+            font-weight: bold;
+            color: #ffaa00;
+            text-shadow: 0 0 20px rgba(255, 170, 0, 0.8);
+        }
+
         /* 모바일 컨트롤 */
         #controls {
             position: absolute;
@@ -1415,6 +1468,13 @@
     <button class="mobile-btn" id="btn-jump"><i class="fas fa-chevron-up"></i></button>
     <button class="mobile-btn" id="btn-reload"><i class="fas fa-redo"></i></button>
 
+    <!-- Death Overlay (Multiplayer) -->
+    <div id="death-overlay">
+        <div id="respawn-timer">10</div>
+        <div id="killed-by-label">Killed by</div>
+        <div id="killer-name">Unknown</div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script>
@@ -1474,6 +1534,10 @@
         let otherPlayersMap = {}; // id -> mesh
         let roomPlayersState = {}; // Global player data
         const PLAYER_RADIUS = 0.4;
+
+        // Spectator/Killcam System
+        let isSpectating = false;
+        let spectatingPlayerId = null;
 
         // Footsteps
         let moveDistance = 0;
@@ -2470,25 +2534,40 @@
 
                 socket.on('playerDied', (data) => {
                     if (data.id === myId) {
-                        console.log('YOU DIED');
+                        console.log('YOU DIED - Killed by:', data.killerName);
                         playerHP = 0;
                         isDead = true;
+                        isSpectating = true;
+                        spectatingPlayerId = data.killerId;
+
+                        // Hide normal game UI
+                        elGameOver.style.display = 'none';
                         elDamage.style.opacity = 0.8;
                         elDamage.style.background = 'radial-gradient(circle, rgba(0,0,0,0.9) 30%, rgba(255,0,0,0.6) 100%)';
-                        elGameOver.innerHTML = '<h1 style="color: red; font-size: 60px; text-shadow: 0 0 20px rgba(255,0,0,0.8);">YOU DIED</h1><p style="font-size: 24px;">Respawning in <span id="respawn-timer">3</span> seconds...</p>';
-                        elGameOver.style.display = 'flex';
 
-                        let countdown = 3;
-                        const timerEl = document.getElementById('respawn-timer');
+                        // Show death overlay with killer info
+                        const deathOverlay = document.getElementById('death-overlay');
+                        const respawnTimerEl = document.getElementById('respawn-timer');
+                        const killerNameEl = document.getElementById('killer-name');
+
+                        deathOverlay.style.display = 'flex';
+                        killerNameEl.innerText = data.killerName || 'Unknown';
+
+                        // 10-second countdown
+                        let countdown = 10;
+                        respawnTimerEl.innerText = countdown;
+
                         const countdownInterval = setInterval(() => {
                             countdown--;
-                            if (timerEl) timerEl.innerText = countdown;
-                            if (countdown <= 0) clearInterval(countdownInterval);
+                            respawnTimerEl.innerText = countdown;
+                            if (countdown <= 0) {
+                                clearInterval(countdownInterval);
+                                // Request respawn after 10 seconds
+                                if (socket && socket.connected) {
+                                    socket.emit('requestRespawn');
+                                }
+                            }
                         }, 1000);
-
-                        setTimeout(() => {
-                            if (socket && socket.connected) socket.emit('requestRespawn');
-                        }, 3000);
                     } else {
                         const mesh = otherPlayersMap[data.id];
                         if (mesh) {
@@ -2542,6 +2621,8 @@
                     if (data.id === myId) {
                         playerHP = 100;
                         isDead = false;
+                        isSpectating = false;
+                        spectatingPlayerId = null;
 
                         // HP UI 업데이트
                         elHpBar.style.width = '100%';
@@ -2551,6 +2632,9 @@
                         // Update BOTH position variable and camera
                         position.set(data.position.x, data.position.y, data.position.z);
                         camera.position.copy(position);
+
+                        // Hide death overlay
+                        document.getElementById('death-overlay').style.display = 'none';
                         elGameOver.style.display = 'none';
                         elDamage.style.opacity = 0;
                     } else {
@@ -6090,6 +6174,30 @@
                 if (elPlayTime) {
                     elPlayTime.innerText = `Time: ${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
                 }
+            }
+
+            // Spectator Camera (Killcam) - Follow killer's position and rotation
+            if (isSpectating && spectatingPlayerId && gameMode === 'multi') {
+                const killerMesh = otherPlayersMap[spectatingPlayerId];
+                if (killerMesh) {
+                    // Position camera at killer's head position
+                    camera.position.set(
+                        killerMesh.position.x,
+                        killerMesh.position.y + 1.7, // Eye height
+                        killerMesh.position.z
+                    );
+
+                    // Match killer's rotation if available from server state
+                    if (roomPlayersState[spectatingPlayerId] && roomPlayersState[spectatingPlayerId].rotation) {
+                        rotation.x = roomPlayersState[spectatingPlayerId].rotation.x;
+                        rotation.y = roomPlayersState[spectatingPlayerId].rotation.y;
+                        const q = new THREE.Quaternion();
+                        q.setFromEuler(new THREE.Euler(rotation.x, rotation.y, 0, 'YXZ'));
+                        camera.quaternion.copy(q);
+                    }
+                }
+                // Skip normal player control during spectating
+                return;
             }
 
             if (!isDead && !isPaused) {
