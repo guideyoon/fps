@@ -778,7 +778,8 @@
             background: rgba(0, 0, 0, 0.7);
             border: 2px solid rgba(255, 255, 255, 0.5);
             border-radius: 50%;
-            display: flex;
+            display: none;
+            /* Hide by default, show only during gameplay */
             align-items: center;
             justify-content: center;
             color: #ffaa00;
@@ -3286,6 +3287,12 @@
             // 1. 엔진 초기화
             initGame();
 
+            // Show light toggle button during gameplay
+            const lightToggleBtn = document.getElementById('light-toggle-btn');
+            if (lightToggleBtn) {
+                lightToggleBtn.style.display = 'flex';
+            }
+
             // 1.5. 멀티플레이어 맵 생성 (currentMap은 gameStart 이벤트에서 설정됨)
             if (gameMode === 'multi') {
                 console.log('Creating map for multiplayer:', currentMap);
@@ -5505,7 +5512,8 @@
 
             document.body.addEventListener('touchstart', (e) => {
                 const target = e.target;
-                // Ignore if touching controls (조준 버튼 제외 - 조준하면서 시점 변경 가능하도록)
+                // Ignore if touching joystick, weapon selector, or light toggle
+                // Allow camera rotation while shooting/aiming (removed #btn-shoot and #btn-aim from blocking)
                 if (target.closest('#joystick-zone') ||
                     target.closest('.weapon-select-btn') ||
                     target.closest('#light-toggle-btn')) {
