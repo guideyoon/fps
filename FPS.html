@@ -5512,11 +5512,12 @@
 
             document.body.addEventListener('touchstart', (e) => {
                 const target = e.target;
-                // Ignore if touching joystick, weapon selector, or light toggle
-                // Allow camera rotation while shooting/aiming (removed #btn-shoot and #btn-aim from blocking)
+                // Allow camera rotation while shooting/aiming (exclude only joystick, weapon selector, light toggle, jump, reload)
                 if (target.closest('#joystick-zone') ||
                     target.closest('.weapon-select-btn') ||
-                    target.closest('#light-toggle-btn')) {
+                    target.closest('#light-toggle-btn') ||
+                    target.closest('#btn-jump') ||
+                    target.closest('#btn-reload')) {
                     return;
                 }
 
@@ -5533,7 +5534,14 @@
                 if (!touch) return;
 
                 const target = e.target;
-                if (target.closest('.mobile-btn') || target.closest('#joystick-zone')) return;
+                // Allow camera rotation while shooting/aiming (exclude only joystick, weapon selector, and light toggle)
+                if (target.closest('#joystick-zone') ||
+                    target.closest('.weapon-select-btn') ||
+                    target.closest('#light-toggle-btn') ||
+                    target.closest('#btn-jump') ||
+                    target.closest('#btn-reload')) {
+                    return;
+                }
 
                 const moveDx = touch.clientX - lastTouchX;
                 const moveDy = touch.clientY - lastTouchY;
