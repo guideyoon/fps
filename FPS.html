@@ -1946,14 +1946,12 @@
             return false;
         };
         /*
-        FPS.html VERSION: 2026-01-11-0130 (Final Zombie Mode Fix)
+        FPS.html VERSION: 2026-01-11-0145 (Debug Zombie Mode)
         Updates:
-        - Critical Fix: Enabled isGameStarted for Single Player (was frozen)
-        - Critical Fix: Forced Scene Background/Fog reset to fix darkness
-        - Critical Fix: Explicitly calls initPlayer() to reset controls/camera
-        - Added safety check to restore missing lights
+        - Added console.logs to trace start variable state
+        - Checking if gameMode is correctly set to 'single'
         */
-        console.log('=== FPS.html VERSION: 2026-01-11-0130 ==='); // VERSION CHECK
+        console.log('=== FPS.html VERSION: 2026-01-11-0145 ==='); // VERSION CHECK
         let camera, scene, renderer;
         let postProcessingCanvas, postProcessingCtx; // Global declaration
         let postProcessingEnabled = false;
@@ -4063,6 +4061,7 @@
         // --- 게임 시작 함수 ---
         function startGame() {
             console.log('startGame() CALLED'); // DEBUG
+            console.log('Current gameMode:', gameMode); // DEBUG: Check mode
 
             // 전체화면 요청 (모바일 브라우저 주소창 숨김)
             enterFullscreen();
