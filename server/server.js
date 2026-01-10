@@ -222,23 +222,29 @@ io.on('connection', (socket) => {
 // Predefined safe spawn points (tested and clear of pillars/walls)
 // Factory Map (200x200)
 const FACTORY_SPAWN_POINTS = [
-    { x: -15, y: 1.7, z: -15 },
-    { x: -15, y: 1.7, z: 15 },
-    { x: 15, y: 1.7, z: -15 },
-    { x: 15, y: 1.7, z: 15 },
-    { x: -25, y: 1.7, z: 0 },
-    { x: 25, y: 1.7, z: 0 },
-    { x: 0, y: 1.7, z: -25 },
-    { x: 0, y: 1.7, z: 25 },
-    { x: -5, y: 1.7, z: -5 },
-    { x: -5, y: 1.7, z: 5 },
-    { x: 5, y: 1.7, z: -5 },
-    { x: 5, y: 1.7, z: 5 },
-    { x: -15, y: 1.7, z: 0 },
-    { x: 15, y: 1.7, z: 0 },
-    { x: 0, y: 1.7, z: -15 },
-    { x: 0, y: 1.7, z: 15 }
+    // Center Area
+    { x: 0, y: 1.7, z: 0 },
+    { x: -10, y: 1.7, z: -10 }, { x: 10, y: 1.7, z: 10 },
+    { x: -10, y: 1.7, z: 10 }, { x: 10, y: 1.7, z: -10 },
+
+    // Wide Outer Ring (near walls but safe)
+    { x: -85, y: 1.7, z: -85 }, { x: 85, y: 1.7, z: 85 },
+    { x: -85, y: 1.7, z: 85 }, { x: 85, y: 1.7, z: -85 },
+    { x: -85, y: 1.7, z: 0 }, { x: 85, y: 1.7, z: 0 },
+    { x: 0, y: 1.7, z: -85 }, { x: 0, y: 1.7, z: 85 },
+
+    // Mid-Range Scatter
+    { x: -45, y: 1.7, z: -30 }, { x: 45, y: 1.7, z: 30 },
+    { x: -30, y: 1.7, z: 45 }, { x: 30, y: 1.7, z: -45 },
+    { x: -60, y: 1.7, z: -20 }, { x: 60, y: 1.7, z: 20 },
+    { x: -20, y: 1.7, z: 60 }, { x: 20, y: 1.7, z: -60 },
+
+    // Random Tactical Spots
+    { x: -75, y: 1.7, z: -40 }, { x: 75, y: 1.7, z: 40 },
+    { x: -40, y: 1.7, z: 75 }, { x: 40, y: 1.7, z: -75 },
+    { x: -55, y: 1.7, z: 55 }, { x: 55, y: 1.7, z: -55 }
 ];
+
 
 // Hotel Map (80x80)
 const HOTEL_SPAWN_POINTS = [
