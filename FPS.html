@@ -6627,19 +6627,20 @@
                 // Pickup
                 const dist = drop.position.distanceTo(position);
                 if (dist < 1.2) {
+                    // Check declared flag to prevent double pickup
+                    if (drop.userData.claimed) continue;
+
                     // Find Grenade Weapon
                     const gWeapon = WEAPONS.find(w => w.type === 'GRENADE');
                     if (gWeapon) {
-                        // Refill logic: +1 ammo, up to max? or override?
-                        // User said "Can use grenade if eaten".
-                        // If empty (0), becomes 1. If full, stays full?
-                        // Let's allow +1 up to max.
+                        // Refill logic: +1 ammo
                         if (gWeapon.ammo < gWeapon.maxAmmo) {
+                            drop.userData.claimed = true; // Mark as claimed immediately
+
                             gWeapon.ammo++;
-                            SoundGen.playSwitch(); // Reuse switch sound for pickup
+                            SoundGen.playSwitch();
                             if (typeof updateUI === 'function') updateUI();
 
-                            // Visual Feedback
                             addChatMessage('System', '수류탄 획득!', true);
 
                             scene.remove(drop);
