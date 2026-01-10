@@ -638,8 +638,8 @@
             flex-direction: column;
             gap: 10px;
             pointer-events: auto;
-            /* [User Request] HP 바 가리지 않도록 위치 상향 */
-            bottom: 60px;
+            /* [User Request] HP 바 및 조이스틱 가리지 않도록 위치 대폭 상향 */
+            bottom: 250px;
         }
 
         #chat-messages {
@@ -1579,7 +1579,8 @@
                 /* Managed by JS toggle */
                 width: 60%;
                 height: 150px;
-                bottom: 80px;
+                /* 모바일에서도 위로 올려서 조이스틱/HP 바 피함 */
+                bottom: 150px;
                 left: 10px;
             }
 
@@ -1939,13 +1940,13 @@
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script>
         /*
-        FPS.html VERSION: 2026-01-10-2210 (Fix Timer & Chat & Spawns)
+        FPS.html VERSION: 2026-01-10-2230 (Fix Collision & Passable & UI)
         Updates:
-        - Fixed match timer counting up in multiplayer
-        - Positioned chat container higher to avoid HP bar overlap
-        - Refined safe spawn points for Factory map
+        - Fixed passable platforms/beams by adding colliders
+        - Relocated chat higher to avoid HP bar and joystick
+        - Safer spawn points offset from grid (x.3, z.3)
         */
-        console.log('=== FPS.html VERSION: 2026-01-10-2210 ==='); // VERSION CHECK
+        console.log('=== FPS.html VERSION: 2026-01-10-2230 ==='); // VERSION CHECK
         let camera, scene, renderer;
         let postProcessingCanvas, postProcessingCtx; // Global declaration
         let postProcessingEnabled = false;
@@ -4591,6 +4592,7 @@
                         support.position.set(p.x + dx, p.height / 2, p.z + dz);
                         support.castShadow = true;
                         scene.add(support);
+                        addBoxCollider(support); // Added missing collider
                     }
                 }
             });
@@ -4694,6 +4696,7 @@
                 const beam = new THREE.Mesh(beamGeo, matMetal);
                 beam.position.set(0, 9, z);
                 scene.add(beam);
+                addBoxCollider(beam); // Added missing collider
             }
 
             // Old barrels for decoration (non-collidable)

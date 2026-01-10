@@ -247,24 +247,23 @@ io.on('connection', (socket) => {
 // Predefined safe spawn points (tested and clear of pillars/walls)
 // Factory Map (200x200)
 const FACTORY_SPAWN_POINTS = [
-    // Center-ish Area but avoiding the cross-intersection beams (±10, ±20)
-    { x: 5.5, y: 1.7, z: 5.5 }, { x: -5.5, y: 1.7, z: -5.5 },
-    { x: 5.5, y: 1.7, z: -15.5 }, { x: -15.5, y: 1.7, z: 5.5 },
+    // Center Area (Avoiding Pillars at 0, 10, 20)
+    { x: 3.3, y: 1.7, z: 3.3 }, { x: -3.3, y: 1.7, z: -3.3 },
+    { x: 7.3, y: 1.7, z: 3.3 }, { x: 3.3, y: 1.7, z: 7.3 },
 
-    // Middle Ring - Avoiding Pillars (multiples of 10) and Platforms (±60)
-    { x: 35.5, y: 1.7, z: 35.5 }, { x: -35.5, y: 1.7, z: -35.5 },
-    { x: 35.5, y: 1.7, z: -35.5 }, { x: -35.5, y: 1.7, z: 35.5 },
-    { x: 45.5, y: 1.7, z: 15.5 }, { x: -45.5, y: 1.7, z: -15.5 },
+    // Middle Area (Avoiding Crates at 15, 25, 30, 45, 55, 70)
+    { x: 27.3, y: 1.7, z: 27.3 }, { x: -27.3, y: 1.7, z: -27.3 },
+    { x: 37.3, y: 1.7, z: 37.3 }, { x: -37.3, y: 1.7, z: 37.3 },
+    { x: 53.3, y: 1.7, z: 12.3 }, { x: -53.3, y: 1.7, z: -12.3 },
 
-    // Outer ring - Avoiding Containers (±70, ±85) and Fence (±90)
-    { x: 77.5, y: 1.7, z: 25.5 }, { x: -77.5, y: 1.7, z: -25.5 },
-    { x: 25.5, y: 1.7, z: 77.5 }, { x: -25.5, y: 1.7, z: -77.5 },
-    { x: 55.5, y: 1.7, z: -77.5 }, { x: -55.5, y: 1.7, z: 77.5 },
+    // Outer Area (Avoiding Containers at ±70, ±85 and Platforms at ±60)
+    { x: 78.3, y: 1.7, z: 27.3 }, { x: -78.3, y: 1.7, z: -27.3 },
+    { x: 27.3, y: 1.7, z: 78.3 }, { x: -27.3, y: 1.7, z: -78.3 },
+    { x: 67.3, y: 1.7, z: -33.3 }, { x: -67.3, y: 1.7, z: 33.3 },
 
-    // Corner Quadrants - Clear of boxes and supports
-    { x: 45.5, y: 1.7, z: 45.5 }, { x: -45.5, y: 1.7, z: -45.5 },
-    { x: 45.5, y: 1.7, z: -45.5 }, { x: -45.5, y: 1.7, z: 45.5 },
-    { x: 65.5, y: 1.7, z: 15.5 }, { x: -65.5, y: 1.7, z: -15.5 }
+    // Safe Pockets
+    { x: 12.3, y: 1.7, z: 37.3 }, { x: 37.3, y: 1.7, z: 12.3 },
+    { x: -12.3, y: 1.7, z: 67.3 }, { x: 67.3, y: 1.7, z: -12.3 }
 ];
 
 
