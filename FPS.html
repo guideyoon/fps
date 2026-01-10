@@ -3,8 +3,12 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- Cache Control to prevent old version persistence on Vercel -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>FPS Game</title>
 
     <!-- PWA / Standalone 모드 설정 - 주소창 숨기기 -->
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1946,12 +1950,13 @@
             return false;
         };
         /*
-        FPS.html VERSION: 2026-01-11-0145 (Debug Zombie Mode)
+        /*
+        FPS.html VERSION: 2026-01-11-0200-STABLE
         Updates:
-        - Added console.logs to trace start variable state
-        - Checking if gameMode is correctly set to 'single'
+        - Critical Fix: Zombie Mode (Single Player) Initialization & Map Loading
+        - Added Cache-Control Headers
         */
-        console.log('=== FPS.html VERSION: 2026-01-11-0145 ==='); // VERSION CHECK
+        console.log('=== FPS.html VERSION: 2026-01-11-0200-STABLE ==='); // VERSION CHECK
         let camera, scene, renderer;
         let postProcessingCanvas, postProcessingCtx; // Global declaration
         let postProcessingEnabled = false;
