@@ -6478,6 +6478,38 @@
                 });
             }
 
+            if (w.type === 'GRENADE') {
+                if (w.ammo > 0) {
+                    w.ammo--;
+                    updateUI();
+
+                    // Throw Physics
+                    const throwDir = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion).normalize();
+                    // Add some upward arc
+                    throwDir.y += 0.2;
+                    throwDir.normalize();
+
+                    const vel = throwDir.multiplyScalar(15.0); // Throw speed
+
+                    const gMesh = new THREE.Mesh(new THREE.SphereGeometry(0.15, 16, 16), matGrenade);
+                    gMesh.position.copy(camera.position).add(new THREE.Vector3(0, -0.2, 0)); // Start from slightly below camera
+                    gMesh.castShadow = true;
+                    scene.add(gMesh);
+
+                    grenades.push({
+                        mesh: gMesh,
+                        vel: vel,
+                        fuse: 3.0, // 3 seconds
+                        radius: 0.15
+                    });
+
+                    // Hand animation (hide momentarily)
+                    weaponModel.visible = false;
+                    setTimeout(() => { if (curWeaponIdx === 4) weaponModel.visible = true; }, 500);
+                }
+                return; // Stop here, no raycast for grenades
+            }
+
             if (w.type !== 'KNIFE') {
                 w.ammo--;
                 updateUI();
@@ -6531,35 +6563,6 @@
 
                 spawnShell();
                 SoundGen.playShoot(w.type);
-            } else if (w.type === 'GRENADE') {
-                if (w.ammo > 0) {
-                    w.ammo--;
-                    updateUI();
-
-                    // Throw Physics
-                    const throwDir = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion).normalize();
-                    // Add some upward arc
-                    throwDir.y += 0.2;
-                    throwDir.normalize();
-
-                    const vel = throwDir.multiplyScalar(15.0); // Throw speed
-
-                    const gMesh = new THREE.Mesh(new THREE.SphereGeometry(0.15, 16, 16), matGrenade);
-                    gMesh.position.copy(camera.position).add(new THREE.Vector3(0, -0.2, 0)); // Start from slightly below camera
-                    gMesh.castShadow = true;
-                    scene.add(gMesh);
-
-                    grenades.push({
-                        mesh: gMesh,
-                        vel: vel,
-                        fuse: 3.0, // 3 seconds
-                        radius: 0.15
-                    });
-
-                    // Hand animation (hide momentarily)
-                    weaponModel.visible = false;
-                    setTimeout(() => { if (curWeaponIdx === 4) weaponModel.visible = true; }, 500);
-                }
             } else {
                 knifeSwing = 1.0;
                 SoundGen.playKnife();
