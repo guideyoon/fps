@@ -743,16 +743,18 @@
         }
 
         /* PC 감도 조정 UI */
+        /* PC 감도 조정 UI - Modified for Pause Menu */
         #sensitivity-control {
-            position: absolute;
-            top: 120px;
-            left: 20px;
-            background: rgba(0, 0, 0, 0.7);
+            /* Originally absolute, now static in flex container */
+            background: rgba(0, 0, 0, 0.5);
             padding: 15px;
             border-radius: 8px;
             border: 2px solid rgba(255, 255, 255, 0.3);
-            z-index: 100;
+            margin-top: 20px;
             pointer-events: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         #sensitivity-control label {
@@ -1595,11 +1597,10 @@
     <!-- Pause Overlay (Menu) -->
     <div id="pause-overlay" style="display:none;">
         <h1>PAUSE</h1>
-        <p>Click to Resume</p>
+        <p>Click to Continue</p>
 
-        <!-- Sensitivity Control (Moved into Pause Menu - User Request) -->
-        <div id="sensitivity-control"
-            style="background:none; border:none; padding:0; margin-top:20px; position:static; display:block; pointer-events:auto;">
+        <!-- Sensitivity Control (Inside Pause Menu) -->
+        <div id="sensitivity-control">
             <label for="sensitivity-slider">Mouse Sensitivity:</label>
             <input type="range" id="sensitivity-slider" min="0.0005" max="0.01" step="0.0001" value="0.002">
             <span id="sensitivity-value">1.00</span>
@@ -5857,11 +5858,10 @@
             }
         }
 
-        // PC 감도 조정 설정
+        // PC 마우스 감도 설정
         function setupSensitivityControl() {
-            if (isMobile) return;
-
-            // Elements are now inside pause-overlay
+            // Check if elements exist (Mobile hides them?)
+            // Actually, we want this available if elements are present.
             const sensitivityControl = document.getElementById('sensitivity-control');
             const sensitivitySlider = document.getElementById('sensitivity-slider');
             const sensitivityValue = document.getElementById('sensitivity-value');
