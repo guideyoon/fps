@@ -2198,7 +2198,11 @@
 
                 // User Request: Play hit.mp3 when hitting a target
                 if (this.audioBuffers['hit']) {
-                    this.playAudioFile('hit', 1.0);
+                    // Stop previous sound to prevent overlapping long clips
+                    if (this.lastHitSource) {
+                        try { this.lastHitSource.stop(); } catch (e) { }
+                    }
+                    this.lastHitSource = this.playAudioFile('hit', 1.0);
                     return;
                 }
 
