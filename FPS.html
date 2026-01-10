@@ -2187,8 +2187,14 @@
                 osc.start(t);
                 osc.stop(t + 0.1);
             },
+            lastHitTime: 0, // Debounce for hit sound
             playHit: function () {
                 if (!this.ensureContext()) return;
+
+                const now = this.ctx.currentTime;
+                // Cooldown: Don't play hit sound more than once every 0.1s
+                if (now - this.lastHitTime < 0.1) return;
+                this.lastHitTime = now;
 
                 // User Request: Play hit.mp3 when hitting a target
                 if (this.audioBuffers['hit']) {
@@ -2262,8 +2268,8 @@
                 if (this.audioBuffers['damage']) {
                     this.playAudioFile('damage', 1.0);
                 } else {
-                    // Fallback sound if file not loaded
-                    this.playHit();
+                    // Fallback sound check: Do NOT fallback to playHit() as that is for attacking!
+                    console.warn('Damage sound (uak.mp3) not loaded.');
                 }
             }
         };
