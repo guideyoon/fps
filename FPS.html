@@ -626,15 +626,20 @@
             background: #f44336;
         }
 
-        /* Chat System */
-        padding: 15px;
-        z-index: 100;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        pointer-events: auto;
-        /* [User Request] HP 바 가리지 않도록 위치 상향 */
-        bottom: 60px;
+        #chat-container {
+            position: absolute;
+            left: 20px;
+            width: 350px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 10px;
+            padding: 15px;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: auto;
+            /* [User Request] HP 바 가리지 않도록 위치 상향 */
+            bottom: 60px;
         }
 
         #chat-messages {
