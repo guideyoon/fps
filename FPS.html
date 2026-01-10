@@ -1532,6 +1532,17 @@
             transform: scale(1.1);
         }
 
+        /* Desktop/PC - Hide mobile controls */
+        @media (min-width: 769px) {
+
+            .mobile-btn,
+            #joystick-zone,
+            #weapon-selector-vertical,
+            #chat-toggle-btn {
+                display: none !important;
+            }
+        }
+
         @media (max-width: 768px) {
             #mobile-player-name {
                 display: block;
@@ -1795,7 +1806,7 @@
 
         <div id="controls-guide">
             <div class="key">WASD <span style="color:white">이동</span></div>
-            <div class="key">Space <span style="color:white">점프</span> / Shift <span style="color:white">달리기</span>
+            <div class="key">Space <span style="color:white">점프</span> / Shift <span style="color:white">걷기</span>
             </div>
             <div class="key">R <span style="color:white">재장전</span></div>
             <div class="key">Click <span style="color:white">발사/조준</span></div>
