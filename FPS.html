@@ -5450,7 +5450,7 @@
             SoundGen.playExplosion();
 
             // 3. Damage (AoE) - WIDER RANGE
-            const EXPLOSION_RADIUS = 15.0; // Increased
+            const EXPLOSION_RADIUS = 10.0; // Reduced from 15.0
             const MAX_DAMAGE = 300; // Increased from 100 to ensure kill
 
             // Enemies
@@ -6351,7 +6351,7 @@
             elWeaponLabel.innerText = w.name;
             elAmmoVal.classList.remove('no-ammo');
             if (w.type === 'KNIFE') elAmmoVal.innerText = "-";
-            else elAmmoVal.innerText = w.ammo + " / " + w.maxAmmo * 4;
+            else elAmmoVal.innerText = w.ammo + " / " + w.maxAmmo;
         }
 
         function doReload() {
@@ -7195,7 +7195,7 @@
                     if (pistol) {
                         pistol.maxAmmo = 10;
                         pistol.ammo = 10;
-                        pistol.name = "TACTICAL PISTOL (10)"; // Visual proof
+                        // pistol.name = "TACTICAL PISTOL (10)"; // Removed debug name
                         console.log("Fixed Pistol Ammo: 10");
                     }
                     // Sniper (ID 2)
@@ -7203,7 +7203,7 @@
                     if (sniper) {
                         sniper.maxAmmo = 4;
                         sniper.ammo = 4;
-                        sniper.name = "TAC-50 SNIPER (4)"; // Visual proof
+                        // sniper.name = "TAC-50 SNIPER (4)"; // Removed debug name
                         console.log("Fixed Sniper Ammo: 4");
                     }
                     // Grenade (ID 4)
@@ -7211,7 +7211,7 @@
                     if (grenade) {
                         grenade.maxAmmo = 3;
                         grenade.ammo = 3;
-                        grenade.name = "GRENADE (3)";
+                        // grenade.name = "GRENADE (3)"; // Removed debug name
                     }
                     if (typeof updateUI === 'function') updateUI();
                 }
