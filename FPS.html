@@ -2745,8 +2745,8 @@
                 document.body.classList.add('single-player');
                 document.body.classList.add('game-active'); // Hide all menus
 
-                // Try fullscreen on mobile
-                if (isMobile) enterFullscreen();
+                // 전체화면 요청 (모든 기기)
+                enterFullscreen();
 
                 resetAmmo();
                 startGame();
@@ -2776,6 +2776,9 @@
                 modeSelection.style.display = 'none';
                 document.body.classList.remove('single-player');
                 document.body.classList.add('multi-player');
+                // 전체화면 요청 (모든 기기)
+                enterFullscreen();
+
                 // Skip name setup, go directly to room menu
                 roomMenu.style.display = 'flex';
 
