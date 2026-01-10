@@ -1419,6 +1419,64 @@
                 display: none !important;
             }
         }
+
+        /* Mobile specific names and chat toggle */
+        #mobile-player-name {
+            display: none;
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: bold;
+            z-index: 20;
+            text-shadow: 1px 1px 2px #000;
+            pointer-events: none;
+        }
+
+        #chat-toggle-btn {
+            display: none;
+            position: fixed;
+            bottom: 300px;
+            /* Adjust based on valid area */
+            left: 10px;
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            z-index: 101;
+            /* Higher than chat container z-index if needed */
+            font-size: 20px;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            #mobile-player-name {
+                display: block;
+            }
+
+            #chat-toggle-btn {
+                display: flex;
+            }
+
+            #chat-container {
+                /* Initially hidden on mobile or small helper mode */
+                display: none !important;
+                /* Managed by JS toggle */
+                width: 60%;
+                height: 150px;
+                bottom: 80px;
+                left: 10px;
+            }
+
+            #chat-container.visible {
+                display: flex !important;
+            }
+        }
     </style>
 </head>
 
@@ -1426,6 +1484,8 @@
     <div id="game-container"></div>
     <div id="vignette"></div>
     <div id="damage-overlay"></div>
+    <div id="mobile-player-name"></div> <!-- Mobile Player Name -->
+    <button id="chat-toggle-btn"><i class="fas fa-comment"></i></button> <!-- Chat Toggle -->
     <div id="scope-overlay">
         <div id="scope-line-h"></div>
         <div id="scope-line-v"></div>
@@ -2591,6 +2651,12 @@
 
                     // Update start button based on player count
                     updateStartButtonState(data.isHost);
+
+                    // Update Mobile Player Name Display
+                    if (myId && data.players[myId]) {
+                        const elMobileName = document.getElementById('mobile-player-name');
+                        if (elMobileName) elMobileName.innerText = `ID: ${data.players[myId].name}`;
+                    }
                 });
 
                 socket.on('playerJoined', (player) => {
