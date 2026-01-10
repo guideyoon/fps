@@ -2241,6 +2241,16 @@
                 gain2.gain.exponentialRampToValueAtTime(0.01, t + 0.25);
                 osc2.connect(gain2); gain2.connect(this.ctx.destination);
                 osc2.start(); osc2.stop(t + 0.25);
+            },
+            playDamage: function () {
+                if (!this.ensureContext()) return;
+                // User Request: Play uak.mp3 upon damage
+                if (this.audioBuffers['damage']) {
+                    this.playAudioFile('damage', 1.0);
+                } else {
+                    // Fallback sound if file not loaded
+                    this.playHit();
+                }
             }
         };
 
@@ -2300,6 +2310,9 @@
             const createRoomModal = document.getElementById('create-room-modal');
             const roomWaiting = document.getElementById('room-waiting');
             const chatContainer = document.getElementById('chat-container');
+
+            // --- Load User Sounds ---
+            SoundGen.loadAudioFile('uak.mp3', 'damage').catch(e => console.log('Damage sound (uak.mp3) not found or failed to load:', e));
 
             // 1. Mode Selection
             modeSelection.style.display = 'flex';
@@ -5391,6 +5404,9 @@
 
             elDamage.style.opacity = 0.8;
             setTimeout(() => elDamage.style.opacity = 0, 100);
+
+            // Play damage sound (User Request)
+            SoundGen.playDamage();
 
             if (playerHP <= 0) {
                 isDead = true;
