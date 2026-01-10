@@ -1939,15 +1939,13 @@
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script>
         /*
-        FPS.html VERSION: 2026-01-10-2100 (Late Join & Room List Fix)
+        FPS.html VERSION: 2026-01-10-2110 (Lobby Player Count Fix)
         Updates:
-        - Room List: Display map and mode info
-        - Late Join: Fixed "Join" button being disabled in lobby
-        - Late Join: Immediate 3D mesh creation for mid-game joiners
-        - FFA/TDM lobby settings support
-        - 10-minute match timer (Server-driven sync)
+        - Fixed Lobby player count (0/0) not syncing with room state
+        - Unified updatePlayersList to use roomPlayersState for all UI
+        - Optimized Room List and Late Join functionality
         */
-        console.log('=== FPS.html VERSION: 2026-01-10-2100 ==='); // VERSION CHECK
+        console.log('=== FPS.html VERSION: 2026-01-10-2110 ==='); // VERSION CHECK
         let camera, scene, renderer;
         let postProcessingCanvas, postProcessingCtx; // Global declaration
         let postProcessingEnabled = false;
@@ -3037,6 +3035,7 @@
                     document.getElementById('chat-container').style.display = 'flex';
 
                     document.getElementById('room-title').innerText = data.roomName;
+                    maxPlayers = data.maxPlayers || 4; // Save maxPlayers from server
 
                     // Save map & mode info
                     currentMap = data.map || 'factory';
@@ -6221,32 +6220,39 @@
         }
 
         function updatePlayersList() {
+            const players = roomPlayersState ? Object.values(roomPlayersState) : [];
+            const count = players.length;
+
+            // 1. Update lobby badge (the 0/0 icon)
+            const elPlayerCount = document.getElementById('player-count');
+            if (elPlayerCount) {
+                elPlayerCount.innerText = `${count}/${maxPlayers}`;
+            }
+
+            // 2. Update lobby list area
             const playersListEl = document.getElementById('players-list');
             if (playersListEl) {
                 playersListEl.innerHTML = '';
-                playersList.forEach(player => {
+                players.forEach(p => {
                     const playerItem = document.createElement('div');
                     playerItem.className = 'player-item';
-                    playerItem.textContent = player.name;
+                    playerItem.textContent = p.name;
                     playersListEl.appendChild(playerItem);
                 });
-                playersListEl.innerHTML += `<div style="margin-top: 10px; color: rgba(255,255,255,0.7);">참여 인원: ${currentPlayers} / ${maxPlayers}</div>`;
+                playersListEl.innerHTML += `<div style="margin-top: 10px; color: rgba(255,255,255,0.7);">참여 인원: ${count} / ${maxPlayers}</div>`;
             }
 
-            // Update in-game overlay list
+            // 3. Update in-game overlay list (top-right scoreboard)
             const igContent = document.getElementById('ingame-players-content');
             if (igContent) {
                 igContent.innerHTML = '';
-                // roomPlayersState has all players in room
-                if (roomPlayersState) {
-                    Object.values(roomPlayersState).forEach(p => {
-                        const div = document.createElement('div');
-                        div.style.padding = '2px 0';
-                        div.style.fontSize = '14px';
-                        div.innerHTML = `<span style="color: #4CAF50;">●</span> ${p.name} ${p.id === myId ? '(You)' : ''}`;
-                        igContent.appendChild(div);
-                    });
-                }
+                players.forEach(p => {
+                    const div = document.createElement('div');
+                    div.style.padding = '2px 0';
+                    div.style.fontSize = '14px';
+                    div.innerHTML = `<span style="color: #4CAF50;">●</span> ${p.name} ${p.id === myId ? '(You)' : ''}`;
+                    igContent.appendChild(div);
+                });
             }
         }
 
