@@ -2606,9 +2606,10 @@
                 }
             };
             document.getElementById('btn-send-chat').addEventListener('click', sendChat);
-            chatInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') sendChat();
-            });
+            chatInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendChat(); });
+
+            // Force ammo reset on load to ensure correct values
+            resetAmmo();
 
             // Global Join Function
             window.joinRoom = function (roomId) {
@@ -5441,8 +5442,8 @@
             SoundGen.playExplosion();
 
             // 3. Damage (AoE) - WIDER RANGE
-            const EXPLOSION_RADIUS = 15.0; // Increased from 8.0
-            const MAX_DAMAGE = 100;
+            const EXPLOSION_RADIUS = 15.0; // Increased
+            const MAX_DAMAGE = 300; // Increased from 100 to ensure kill
 
             // Enemies
             enemies.forEach(e => {
