@@ -5450,7 +5450,28 @@
                 }
             });
 
-            // Self Damage optional? Let's skip self damage for fun factor or keep it minimal
+            // 4. Local Player Damage (Self Damage)
+            const distToPlayer = position.distanceTo(pos);
+            if (distToPlayer < EXPLOSION_RADIUS) {
+                const dmg = Math.floor(MAX_DAMAGE * (1 - distToPlayer / EXPLOSION_RADIUS));
+                if (dmg > 0) damagePlayer(dmg);
+            }
+
+            // 5. Other Players Damage (Multiplayer)
+            if (gameMode === 'multi') {
+                otherPlayers.forEach(p => {
+                    const dist = p.position.distanceTo(pos);
+                    if (dist < EXPLOSION_RADIUS) {
+                        const dmg = Math.floor(MAX_DAMAGE * (1 - dist / EXPLOSION_RADIUS));
+                        if (dmg > 0 && socket && socket.connected) {
+                            socket.emit('damagePlayer', {
+                                targetId: p.userData.playerId,
+                                damage: dmg
+                            });
+                        }
+                    }
+                });
+            }
         }
 
         function updateGrenades(dt) {
