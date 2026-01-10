@@ -1103,7 +1103,9 @@
             /* Mobile only */
             flex-direction: column;
             gap: 15px;
-            z-index: 50;
+            z-index: 1000;
+            /* Increased to ensure visibility above other layers */
+            pointer-events: auto;
         }
 
         .weapon-select-btn {
@@ -1462,11 +1464,18 @@
 
         @media (max-width: 768px) {
             #light-toggle-btn {
-                top: 15px;
-                right: 15px;
+                top: 15px !important;
+                right: 15px !important;
                 width: 45px;
                 height: 45px;
                 font-size: 22px;
+            }
+
+            .exit-game-btn {
+                top: 15px !important;
+                right: 75px !important;
+                width: 45px;
+                height: 45px;
             }
         }
 
@@ -1643,14 +1652,16 @@
                 display: flex !important;
                 top: 25% !important;
                 /* Slightly higher in landscape */
+                z-index: 1000 !important;
+                pointer-events: auto !important;
             }
 
             #exit-game-btn {
-                top: 10px;
-                right: 70px;
-                width: 40px;
-                height: 40px;
-                font-size: 20px;
+                top: 15px !important;
+                right: 75px !important;
+                width: 45px !important;
+                height: 45px !important;
+                font-size: 22px !important;
             }
         }
 
@@ -2737,6 +2748,10 @@
                 const exitBtn = document.getElementById('exit-game-btn');
                 if (exitBtn) exitBtn.style.display = 'flex';
 
+                // Hide chat toggle in single player
+                const chatToggle = document.getElementById('chat-toggle-btn');
+                if (chatToggle) chatToggle.style.display = 'none';
+
                 // Force hide weapon-inventory on mobile devices
                 if (isMobile) {
                     const weaponInv = document.getElementById('weapon-inventory');
@@ -2761,14 +2776,23 @@
                 } else {
                     socket.emit('setIdentity', { name: 'AutoPlayer' });
                 }
+
+                // Show chat toggle in multiplayer
+                const chatToggle = document.getElementById('chat-toggle-btn');
+                if (chatToggle) chatToggle.style.display = 'flex';
             });
 
             // Exit Game Button Handler (Zombie Mode)
-            document.getElementById('exit-game-btn').addEventListener('click', () => {
+            const exitGameHandler = () => {
                 document.getElementById('exit-game-btn').style.display = 'none';
                 modeSelection.style.display = 'flex';
                 document.body.classList.remove('game-active');
                 location.reload(); // Reload to reset game state
+            };
+            document.getElementById('exit-game-btn').addEventListener('click', exitGameHandler);
+            document.getElementById('exit-game-btn').addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                exitGameHandler();
             });
 
             // 2. Name Setup
