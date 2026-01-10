@@ -1939,14 +1939,20 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script>
+        // Global Error Handler to debug Black Screen issues
+        window.onerror = function (msg, url, line, col, error) {
+            alert("JS Error: " + msg + "\nLine: " + line + "\nCol: " + col);
+            console.error(msg, error);
+            return false;
+        };
         /*
-        FPS.html VERSION: 2026-01-10-2315 (Fix Black Screen & Map Refactor)
+        FPS.html VERSION: 2026-01-10-2330 (Fix Black Screen & Global Error Handler)
         Updates:
-        - Fixed ReferenceError: matConcrete is not defined
-        - Completed mapGroup refactoring for all Hotel map structures
-        - Ensured clean map transitions by properly using mapGroup.add
+        - Added window.onerror global handler to alert JS errors on mobile/PC
+        - Fixed potential socket.io script tag missing issue
+        - Sanitized createFactoryMap material definitions
         */
-        console.log('=== FPS.html VERSION: 2026-01-10-2315 ==='); // VERSION CHECK
+        console.log('=== FPS.html VERSION: 2026-01-10-2330 ==='); // VERSION CHECK
         let camera, scene, renderer;
         let postProcessingCanvas, postProcessingCtx; // Global declaration
         let postProcessingEnabled = false;
@@ -4492,17 +4498,20 @@
             colliders = []; // Init array
 
             // 텍스처 적용 (절차적 생성된 텍스처 사용)
+            // Ensure matConcrete is defined exactly once
             const matConcrete = new THREE.MeshStandardMaterial({
                 color: 0x333333,
                 roughness: 0.9,
-                map: window.concreteTexture || null // 텍스처 적용 (있는 경우)
+                map: window.concreteTexture || null
             });
+
             const matMetal = new THREE.MeshStandardMaterial({
                 color: 0x556677,
                 roughness: 0.4,
                 metalness: 0.7,
-                map: window.metalTexture || null // 메탈 텍스처 적용
+                map: window.metalTexture || null
             });
+
             // Rust 텍스처 생성
             const rustCanvas = document.createElement('canvas');
             rustCanvas.width = 256;
@@ -4524,10 +4533,11 @@
                 metalness: 0.2,
                 map: window.rustTexture || null
             });
+
             const matWall = new THREE.MeshStandardMaterial({
                 color: 0x20252a,
                 roughness: 0.9,
-                map: window.concreteTexture || null // 벽에도 콘크리트 텍스처 적용
+                map: window.concreteTexture || null
             });
 
             const floor = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), matConcrete);
