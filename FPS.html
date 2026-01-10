@@ -1946,13 +1946,12 @@
             return false;
         };
         /*
-        FPS.html VERSION: 2026-01-11-0010 (Fix Sync & Zombie Mode Map)
+        FPS.html VERSION: 2026-01-11-0020 (Fix UI Overlap)
         Updates:
-        - Fixed Multiplayer Start Sync: Game loop is blocked until countdown finishes
-        - Fixed Zombie Mode Map: Ensures map loading for Single Player
-        - Added isGameStarted flag for strict state control
+        - Fixed Chat Window covering Weapon Selection Menu
+        - Removed JS override to respect CSS positioning (bottom: 300px)
         */
-        console.log('=== FPS.html VERSION: 2026-01-11-0010 ==='); // VERSION CHECK
+        console.log('=== FPS.html VERSION: 2026-01-11-0020 ==='); // VERSION CHECK
         let camera, scene, renderer;
         let postProcessingCanvas, postProcessingCtx; // Global declaration
         let postProcessingEnabled = false;
@@ -3152,7 +3151,7 @@
                     }
 
                     document.getElementById('room-waiting').style.display = 'none';
-                    document.getElementById('chat-container').style.bottom = '20px';
+                    // document.getElementById('chat-container').style.bottom = '20px'; // REMOVED: Respect CSS positioning
 
                     // Use spawn position from server (already set in roomJoined event)
                     // Only initialize if position is completely unset
