@@ -2152,12 +2152,19 @@
                     return;
                 }
 
+                // User Request: Play gtunt.mp3 on jump start
+                if (this.audioBuffers['jump']) {
+                    this.playAudioFile('jump', 0.8);
+                    return;
+                }
+
+                // Fallback Oscillator Jump Sound
                 const t = this.ctx.currentTime;
                 const osc = this.ctx.createOscillator();
                 const gain = this.ctx.createGain();
                 osc.frequency.setValueAtTime(100, t);
                 osc.frequency.exponentialRampToValueAtTime(50, t + 0.1);
-                gain.gain.setValueAtTime(land ? 0.2 : 0.1, t);
+                gain.gain.setValueAtTime(0.1, t);
                 gain.gain.linearRampToValueAtTime(0, t + 0.1);
                 osc.connect(gain); gain.connect(this.ctx.destination);
                 osc.start(); osc.stop(t + 0.15);
@@ -2463,6 +2470,7 @@
             SoundGen.loadAudioFile('hit.mp3', 'hit').catch(e => console.log('Hit sound (hit.mp3) not found or failed to load:', e));
             SoundGen.loadAudioFile('headshot.mp3', 'headshot').catch(e => console.log('Headshot sound (headshot.mp3) not found or failed to load:', e));
             SoundGen.loadAudioFile('chak.mp3', 'land').catch(e => console.log('Land sound (chak.mp3) not found or failed to load:', e));
+            SoundGen.loadAudioFile('gtunt.mp3', 'jump').catch(e => console.log('Jump sound (gtunt.mp3) not found or failed to load:', e));
 
             // 1. Mode Selection
             modeSelection.style.display = 'flex';
