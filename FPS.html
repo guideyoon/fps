@@ -1946,13 +1946,13 @@
             return false;
         };
         /*
-        FPS.html VERSION: 2026-01-11-0050 (Fix Chat Overlap & Game Freeze)
+        FPS.html VERSION: 2026-01-11-0100 (Fix Zombie Mode Map)
         Updates:
-        - Reinforced Chat CSS with !important to strictly prevent overlap
-        - Fixed Game Freeze: Ensured gameMode sync strictly unlocks game loop
-        - Robust startCountdown logic handling map/mode variations
+        - Fixed Zombie Mode (Single Player) map not loading
+        - Forced map regeneration in startGame for Single Player
+        - Ensured consistent map state across game modes
         */
-        console.log('=== FPS.html VERSION: 2026-01-11-0050 ==='); // VERSION CHECK
+        console.log('=== FPS.html VERSION: 2026-01-11-0100 ==='); // VERSION CHECK
         let camera, scene, renderer;
         let postProcessingCanvas, postProcessingCtx; // Global declaration
         let postProcessingEnabled = false;
@@ -4127,6 +4127,21 @@
                 // Show ingame player list overlay
                 const igList = document.getElementById('ingame-players-list');
                 if (igList) igList.style.display = 'block';
+            }
+            // 1.6. 싱글플레이어 맵 생성 (강제 재생성)
+            else if (gameMode === 'single') {
+                console.log('Creating Factory map for Single Player...');
+
+                // Clear map group before creating new map
+                if (mapGroup) {
+                    mapGroup.clear();
+                } else {
+                    mapGroup = new THREE.Group();
+                    scene.add(mapGroup);
+                }
+
+                // 싱글플레이어는 항상 Factory 맵
+                createFactoryMap();
             }
 
             // 2. 룸에 있는 다른 플레이어 메시 생성
