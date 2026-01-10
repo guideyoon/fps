@@ -59,8 +59,11 @@ io.on('connection', (socket) => {
             host: socket.id,
             maxPlayers: maxPlayers,
             map: mapName,
+            gameMode: data.gameMode || 'ffa', // ffa or tdm
             players: {},
             gameStarted: false,
+            timeLeft: 600, // 10 minutes in seconds
+            timerId: null,
             createdAt: Date.now()
         };
 
@@ -79,10 +82,7 @@ io.on('connection', (socket) => {
             socket.emit('error', '방이 꽉 찼습니다.');
             return;
         }
-        if (room.gameStarted) {
-            socket.emit('error', '이미 게임이 시작되었습니다.');
-            return;
-        }
+        // [User Request] 난입 가능 (gameStarted 체크 제거)
 
         joinRoom(socket, roomId);
     });
@@ -94,8 +94,33 @@ io.on('connection', (socket) => {
 
         if (room && room.host === socket.id && !room.gameStarted) {
             room.gameStarted = true;
-            // 맵 정보 포함하여 전송
-            io.to(roomId).emit('gameStart', { map: room.map });
+            room.timeLeft = 600; // Reset timer to 10m on start
+
+            // Start Server-side Timer
+            if (room.timerId) clearInterval(room.timerId);
+            room.timerId = setInterval(() => {
+                if (rooms[roomId]) {
+                    rooms[roomId].timeLeft--;
+                    io.to(roomId).emit('timerSync', { timeLeft: rooms[roomId].timeLeft });
+
+                    if (rooms[roomId].timeLeft <= 0) {
+                        clearInterval(rooms[roomId].timerId);
+                        rooms[roomId].timerId = null;
+                        rooms[roomId].gameStarted = false; // Match ended
+                        io.to(roomId).emit('gameEnded', { message: '시간 종료! 게임이 종료되었습니다.' });
+                        io.emit('roomListUpdated', getRoomList());
+                    }
+                } else {
+                    clearInterval(room.timerId);
+                }
+            }, 1000);
+
+            // 맵 정보 및 초기 상태 전송
+            io.to(roomId).emit('gameStart', {
+                map: room.map,
+                gameMode: room.gameMode,
+                timeLeft: room.timeLeft
+            });
             io.emit('roomListUpdated', getRoomList()); // Status update
         }
     });
@@ -301,6 +326,9 @@ function joinRoom(socket, roomId) {
         roomName: room.name,
         isHost: room.host === socket.id,
         map: room.map,
+        gameMode: room.gameMode,
+        gameStarted: room.gameStarted,
+        timeLeft: room.timeLeft,
         players: room.players
     });
 
@@ -329,7 +357,9 @@ function leaveRoom(socket) {
         delete playerRoomMap[socket.id];
 
         // If room empty, delete room
+        // If room empty, delete room & timer
         if (Object.keys(room.players).length === 0) {
+            if (room.timerId) clearInterval(room.timerId);
             delete rooms[roomId];
         } else {
             // If host left, assign new host

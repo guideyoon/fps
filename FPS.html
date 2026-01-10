@@ -1756,6 +1756,13 @@
                 </select>
             </div>
             <div class="input-group">
+                <label>게임 모드</label>
+                <select id="new-room-mode">
+                    <option value="ffa" selected>개인전 (FFA)</option>
+                    <option value="tdm">팀 데스매치 (TDM)</option>
+                </select>
+            </div>
+            <div class="input-group">
                 <label>맵 선택</label>
                 <select id="new-room-map">
                     <option value="factory" selected>창고 (Factory)</option>
@@ -1932,14 +1939,14 @@
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script>
         /*
-        FPS.html VERSION: 2026-01-10-2040 (Multiplayer UI & Map Fix)
+        FPS.html VERSION: 2026-01-10-2045 (Multiplayer Lobby & Rules)
         Updates:
-        - In-game Player List position fixed (No overlap)
-        - Player List update logic fixed (Now showing names)
-        - Enhanced map cleanup (Prevent Hotel floor Z-fighting)
-        - Multiplayer "Exit" button fixed
+        - Individual (FFA) and Team Deathmatch (TDM) lobby settings
+        - 10-minute match timer (Server-driven sync)
+        - Late join enabled (Join games in progress)
+        - In-game Player List position and names fixed
         */
-        console.log('=== FPS.html VERSION: 2026-01-10-2040 ==='); // VERSION CHECK
+        console.log('=== FPS.html VERSION: 2026-01-10-2045 ==='); // VERSION CHECK
         let camera, scene, renderer;
         let postProcessingCanvas, postProcessingCtx; // Global declaration
         let postProcessingEnabled = false;
@@ -1982,6 +1989,7 @@
         let isDead = false;
         let isPaused = false;
         let gameMode = null; // 'single' or 'multi'
+        let currentGameMode = 'ffa'; // 'ffa' or 'tdm'
         let currentMap = 'factory'; // 선택된 맵 (기본값: factory)
         let isRoomHost = false;
         let maxPlayers = 4;
@@ -2914,7 +2922,8 @@
                     socket.emit('createRoom', {
                         name: roomName,
                         maxPlayers: maxPlayers,
-                        map: mapName // 맵 정보 전송
+                        map: mapName,
+                        gameMode: document.getElementById('new-room-mode').value
                     });
                     createRoomModal.style.display = 'none';
                     // Expected to receive 'roomJoined' event
@@ -3024,9 +3033,22 @@
 
                     document.getElementById('room-title').innerText = data.roomName;
 
-                    // Save map info
+                    // Save map & mode info
                     currentMap = data.map || 'factory';
-                    console.log('Room map:', currentMap);
+                    currentGameMode = data.gameMode || 'ffa';
+                    console.log('Room map:', currentMap, 'Mode:', currentGameMode);
+
+                    // Sync timer
+                    if (data.timeLeft !== undefined) {
+                        updateTimerUI(data.timeLeft);
+                    }
+
+                    // [User Request] 난입 가능 (Late Join)
+                    if (data.gameStarted) {
+                        console.log('Joining mid-game!');
+                        document.getElementById('room-waiting').style.display = 'none';
+                        startGame(); // Immediately enter game
+                    }
 
                     // Save own spawn position from server
                     const myData = data.players[myId];
@@ -3086,13 +3108,24 @@
                     }
                 });
 
+                socket.on('timerSync', (data) => {
+                    updateTimerUI(data.timeLeft);
+                });
+
+                socket.on('gameEnded', (data) => {
+                    alert(data.message);
+                    location.reload(); // Simple way to reset state
+                });
+
                 socket.on('gameStart', (data) => {
                     console.log('Game Start Event Received with data:', data); // DEBUG
 
                     // 서버에서 받은 맵 정보로 설정
                     if (data && data.map) {
                         currentMap = data.map;
-                        console.log('Map set to:', currentMap);
+                        currentGameMode = data.gameMode || 'ffa';
+                        updateTimerUI(data.timeLeft || 600);
+                        console.log('Map set to:', currentMap, 'Mode:', currentGameMode);
                     }
 
                     document.getElementById('room-waiting').style.display = 'none';
@@ -3118,6 +3151,9 @@
                     } catch (e) {
                         console.error('ERROR in startCountdown:', e);
                     }
+
+                    // Start game logic
+                    startGame();
                 });
 
 
@@ -6159,6 +6195,17 @@
                     document.exitPointerLock();
                 }
             }
+        }
+
+        function updateTimerUI(seconds) {
+            const elPlayTime = document.getElementById('play-time');
+            if (!elPlayTime) return;
+
+            if (seconds < 0) seconds = 0;
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            const timeStr = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            elPlayTime.textContent = `Time: ${timeStr}`;
         }
 
         function updatePlayersList() {
