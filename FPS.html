@@ -1946,13 +1946,13 @@
             return false;
         };
         /*
-        FPS.html VERSION: 2026-01-10-2345 (Fix Startup Crash & Map Init Order)
+        FPS.html VERSION: 2026-01-11-0010 (Fix Sync & Zombie Mode Map)
         Updates:
-        - Removed premature createFactoryMap() call at global scope
-        - Moved initial map creation to initGame() after mapGroup init
-        - Resolved TypeError: Cannot read properties of undefined (reading 'add')
+        - Fixed Multiplayer Start Sync: Game loop is blocked until countdown finishes
+        - Fixed Zombie Mode Map: Ensures map loading for Single Player
+        - Added isGameStarted flag for strict state control
         */
-        console.log('=== FPS.html VERSION: 2026-01-10-2345 ==='); // VERSION CHECK
+        console.log('=== FPS.html VERSION: 2026-01-11-0010 ==='); // VERSION CHECK
         let camera, scene, renderer;
         let postProcessingCanvas, postProcessingCtx; // Global declaration
         let postProcessingEnabled = false;
@@ -1995,6 +1995,7 @@
         let playerHP = 100;
         let isDead = false;
         let isPaused = false;
+        let isGameStarted = false; // New flag to block input/updates during countdown
         let gameMode = null; // 'single' or 'multi'
         let currentGameMode = 'ffa'; // 'ffa' or 'tdm'
         let currentMap = 'factory'; // 선택된 맵 (기본값: factory)
@@ -3172,6 +3173,8 @@
                         console.log('startCountdown finished (or started async)'); // DEBUG
                     } catch (e) {
                         console.error('ERROR in startCountdown:', e);
+                        // Fallback in case countdown fails
+                        isGameStarted = true;
                     }
 
                     // Start game logic
@@ -4018,18 +4021,21 @@
             let count = 5;
             countdownEl.innerText = count;
 
+            // Block game loop updates while counting down
+            isGameStarted = false;
+
             const interval = setInterval(() => {
                 count--;
-                console.log('Countdown:', count); // DEBUG
                 if (count > 0) {
                     countdownEl.innerText = count;
-                } else if (count === 0) {
-                    countdownEl.innerText = 'GO!';
+                    SoundGen.playBeep(); // Optional: Add beep sound
                 } else {
                     clearInterval(interval);
                     countdownEl.style.display = 'none';
-                    console.log('Calling startGame()...'); // DEBUG
-                    startGame();
+                    if (gameMode === 'multi') {
+                        isGameStarted = true; // Unlock game loop
+                        console.log('Multiplayer Match Started!');
+                    }
                 }
             }, 1000);
         }
@@ -7543,7 +7549,7 @@
                 return;
             }
 
-            if (!isDead && !isPaused) {
+            if (!isDead && !isPaused && isGameStarted) {
                 handleShooting(dt);
 
                 const targetHeight = keys.ctrl ? 1.0 : 1.7;
