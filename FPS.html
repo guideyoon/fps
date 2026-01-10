@@ -1539,9 +1539,11 @@
                 display: flex !important;
             }
 
-            /* Hide text-based weapon inventory on mobile */
-            #weapon-inventory {
+            /* Hide text-based weapon inventory on mobile - FORCE */
+            body #weapon-inventory {
                 display: none !important;
+                visibility: hidden !important;
+                opacity: 0 !important;
             }
         }
 
@@ -1565,9 +1567,11 @@
                 margin: 10px !important;
             }
 
-            /* Hide text-based weapon inventory in landscape too */
-            #weapon-inventory {
+            /* Hide text-based weapon inventory in landscape too - FORCE */
+            body #weapon-inventory {
                 display: none !important;
+                visibility: hidden !important;
+                opacity: 0 !important;
             }
 
             /* Adjust ammo display */
@@ -1655,6 +1659,7 @@
         <div class="menu-actions">
             <button id="btn-show-create-room"><i class="fas fa-plus-circle"></i> 방 만들기</button>
             <button id="btn-refresh-rooms"><i class="fas fa-sync-alt"></i> 목록 갱신</button>
+            <button class="cancel" id="btn-back-to-mode-from-room"><i class="fas fa-arrow-left"></i> 뒤로가기</button>
         </div>
         <div id="room-list-container">
             <!-- 방 목록이 여기에 표시됨 -->
@@ -2713,6 +2718,14 @@
             document.getElementById('btn-back-to-name').addEventListener('click', () => {
                 roomMenu.style.display = 'none';
                 nameSetup.style.display = 'flex';
+                // Optional: Disconnect socket?
+            });
+
+            // Back button to return to mode selection from room menu
+            document.getElementById('btn-back-to-mode-from-room').addEventListener('click', () => {
+                roomMenu.style.display = 'none';
+                modeSelection.style.display = 'flex';
+                document.body.classList.remove('game-active');
                 // Optional: Disconnect socket?
             });
 
