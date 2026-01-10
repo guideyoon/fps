@@ -399,6 +399,56 @@
             transform: scale(0.98);
         }
 
+        /* Weapon Inventory Display */
+        #weapon-inventory {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .weapon-slot {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            background: rgba(0, 0, 0, 0.5);
+            border-left: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .weapon-slot.active {
+            background: rgba(76, 175, 80, 0.3);
+            border-left-color: #4CAF50;
+        }
+
+        .weapon-number {
+            font-size: 18px;
+            font-weight: bold;
+            color: rgba(255, 255, 255, 0.6);
+            min-width: 20px;
+        }
+
+        .weapon-slot.active .weapon-number {
+            color: #4CAF50;
+        }
+
+        .weapon-name {
+            font-size: 14px;
+            font-weight: bold;
+            color: rgba(255, 255, 255, 0.7);
+            letter-spacing: 1px;
+        }
+
+        .weapon-slot.active .weapon-name {
+            color: white;
+        }
+
         /* Room System UI Common Styles */
         #name-setup,
         #room-menu,
@@ -1601,6 +1651,30 @@
         <div id="ammo-info">
             <span id="weapon-label">ASSAULT RIFLE</span>
             <span id="ammo-val">30 / 120</span>
+        </div>
+
+        <!-- Weapon Inventory List -->
+        <div id="weapon-inventory">
+            <div class="weapon-slot active" data-weapon-id="0">
+                <span class="weapon-number">1</span>
+                <span class="weapon-name">RIFLE</span>
+            </div>
+            <div class="weapon-slot" data-weapon-id="1">
+                <span class="weapon-number">2</span>
+                <span class="weapon-name">PISTOL</span>
+            </div>
+            <div class="weapon-slot" data-weapon-id="2">
+                <span class="weapon-number">3</span>
+                <span class="weapon-name">SNIPER</span>
+            </div>
+            <div class="weapon-slot" data-weapon-id="3">
+                <span class="weapon-number">4</span>
+                <span class="weapon-name">KNIFE</span>
+            </div>
+            <div class="weapon-slot" data-weapon-id="4">
+                <span class="weapon-number">5</span>
+                <span class="weapon-name">GRENADE</span>
+            </div>
         </div>
 
         <div id="hp-text">HP</div>
@@ -6351,6 +6425,12 @@
                 // 기존 소리 (폴백)
                 SoundGen.playSwitch();
             }
+
+            // Update weapon inventory display
+            document.querySelectorAll('.weapon-slot').forEach(slot => slot.classList.remove('active'));
+            const activeSlot = document.querySelector(`.weapon-slot[data-weapon-id="${idx}"]`);
+            if (activeSlot) activeSlot.classList.add('active');
+
             updateUI();
         }
 
