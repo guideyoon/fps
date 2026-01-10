@@ -1946,12 +1946,13 @@
             return false;
         };
         /*
-        FPS.html VERSION: 2026-01-11-0020 (Fix UI Overlap)
+        FPS.html VERSION: 2026-01-11-0035 (Fix Sound Crash & Zombie Mode Logic)
         Updates:
-        - Fixed Chat Window covering Weapon Selection Menu
-        - Removed JS override to respect CSS positioning (bottom: 300px)
+        - Fixed TypeError: SoundGen.playBeep is not a function (added missing beep sound)
+        - Reinforced Single Player Map Loading logic
+        - Ensured Countdown doesn't crash game
         */
-        console.log('=== FPS.html VERSION: 2026-01-11-0020 ==='); // VERSION CHECK
+        console.log('=== FPS.html VERSION: 2026-01-11-0035 ==='); // VERSION CHECK
         let camera, scene, renderer;
         let postProcessingCanvas, postProcessingCtx; // Global declaration
         let postProcessingEnabled = false;
@@ -2496,6 +2497,19 @@
                     osc.connect(gain); gain.connect(this.ctx.destination);
                     osc.start(); osc.stop(t + 0.1);
                 }
+            },
+            playBeep: function () {
+                if (!this.ensureContext()) return;
+                const t = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine'; // Beep sound
+                osc.frequency.setValueAtTime(800, t); // Start at 800Hz
+                osc.frequency.linearRampToValueAtTime(600, t + 0.1); // Drop to 600Hz
+                gain.gain.setValueAtTime(0.2, t);
+                gain.gain.linearRampToValueAtTime(0, t + 0.1);
+                osc.connect(gain); gain.connect(this.ctx.destination);
+                osc.start(); osc.stop(t + 0.1);
             },
             playHeadshot: function () {
                 if (!this.ensureContext()) return;
