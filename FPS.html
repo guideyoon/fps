@@ -2182,8 +2182,15 @@
             },
             playHit: function () {
                 if (!this.ensureContext()) return;
+
+                // User Request: Play hit.mp3 when hitting a target
+                if (this.audioBuffers['hit']) {
+                    this.playAudioFile('hit', 1.0);
+                    return;
+                }
+
                 const t = this.ctx.currentTime;
-                // 피격 사운드 - 짧고 날카로운 소리 (볼륨 약간 감소)
+                // Fallback: 피격 사운드 - 짧고 날카로운 소리 (볼륨 약간 감소)
                 const osc1 = this.ctx.createOscillator();
                 const gain1 = this.ctx.createGain();
                 osc1.type = 'square';
@@ -2313,6 +2320,7 @@
 
             // --- Load User Sounds ---
             SoundGen.loadAudioFile('uak.mp3', 'damage').catch(e => console.log('Damage sound (uak.mp3) not found or failed to load:', e));
+            SoundGen.loadAudioFile('hit.mp3', 'hit').catch(e => console.log('Hit sound (hit.mp3) not found or failed to load:', e));
 
             // 1. Mode Selection
             modeSelection.style.display = 'flex';
