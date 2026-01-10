@@ -1275,7 +1275,8 @@
             }
 
             #weapon-selector-vertical {
-                top: 45%;
+                top: 30%;
+                /* Move higher up from 45% */
                 left: 20px;
             }
 
@@ -1511,13 +1512,34 @@
             cursor: pointer;
         }
 
+        /* Exit Game Button (Zombie Mode) */
+        .exit-game-btn {
+            position: absolute;
+            top: 20px;
+            right: 80px;
+            padding: 12px 16px;
+            font-size: 24px;
+            background: rgba(244, 67, 54, 0.9);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            z-index: 1000;
+            transition: all 0.3s;
+        }
+
+        .exit-game-btn:hover {
+            background: rgba(244, 67, 54, 1);
+            transform: scale(1.1);
+        }
+
         @media (max-width: 768px) {
             #mobile-player-name {
                 display: block;
             }
 
             #chat-toggle-btn {
-                display: flex;
+                display: flex !important;
+                /* Force show on mobile */
             }
 
             #chat-container {
