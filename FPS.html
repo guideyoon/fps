@@ -2490,6 +2490,7 @@
             SoundGen.loadAudioFile('chak.MP3', 'land').catch(e => console.log('Land sound (chak.MP3) not found or failed to load:', e));
             SoundGen.loadAudioFile('grunt.mp3', 'jump').catch(e => console.log('Jump sound (grunt.mp3) not found or failed to load:', e));
             SoundGen.loadAudioFile('grenade.mp3', 'grenade_throw').catch(e => console.log('Grenade sound (grenade.mp3) not found or failed to load:', e));
+            SoundGen.loadAudioFile('remove.mp3', 'grenade_switch').catch(e => console.log('Grenade switch sound (remove.mp3) not found or failed to load:', e));
 
             // 1. Mode Selection
             modeSelection.style.display = 'flex';
@@ -6324,6 +6325,9 @@
             } else if (w.type === 'SNIPER' && SoundGen.audioBuffers['c-rifle']) {
                 // 저격총으로 전환 (3번)
                 SoundGen.playAudioFile('c-rifle', 0.8);
+            } else if (w.type === 'GRENADE' && SoundGen.audioBuffers['grenade_switch']) {
+                // 수류탄으로 전환 (5번) - remove.mp3
+                SoundGen.playAudioFile('grenade_switch', 0.8);
             } else {
                 // 기존 소리 (폴백)
                 SoundGen.playSwitch();
