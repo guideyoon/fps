@@ -1940,13 +1940,13 @@
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script>
         /*
-        FPS.html VERSION: 2026-01-10-2300 (Fix Map Corruption & Cleanup)
+        FPS.html VERSION: 2026-01-10-2315 (Fix Black Screen & Map Refactor)
         Updates:
-        - Implemented mapGroup to ensure old map assets (pillars, boxes) are cleared
-        - Fixed persistent Factory objects appearing in Hotel map
-        - Refined scene management in startGame
+        - Fixed ReferenceError: matConcrete is not defined
+        - Completed mapGroup refactoring for all Hotel map structures
+        - Ensured clean map transitions by properly using mapGroup.add
         */
-        console.log('=== FPS.html VERSION: 2026-01-10-2300 ==='); // VERSION CHECK
+        console.log('=== FPS.html VERSION: 2026-01-10-2315 ==='); // VERSION CHECK
         let camera, scene, renderer;
         let postProcessingCanvas, postProcessingCtx; // Global declaration
         let postProcessingEnabled = false;
