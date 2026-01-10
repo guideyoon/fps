@@ -1526,6 +1526,17 @@
             #chat-container.visible {
                 display: flex !important;
             }
+
+            /* Hide icon-based weapon selector on mobile */
+            #weapon-selector-vertical {
+                display: none !important;
+            }
+
+            /* Scale down weapon inventory to 50% on mobile */
+            #weapon-inventory {
+                transform: translateY(-50%) scale(0.5);
+                left: 5px;
+            }
         }
 
         /* Landscape Orientation Fixes for Mobile */
