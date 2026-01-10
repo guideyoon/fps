@@ -2130,6 +2130,13 @@
             },
             playHeadshot: function () {
                 if (!this.ensureContext()) return;
+
+                // User Request: Play headshot.mp3 on headshot
+                if (this.audioBuffers['headshot']) {
+                    this.playAudioFile('headshot', 1.0);
+                    return;
+                }
+
                 const t = this.ctx.currentTime;
 
                 // 깨지는 소리 - 노이즈 기반
@@ -2321,6 +2328,7 @@
             // --- Load User Sounds ---
             SoundGen.loadAudioFile('uak.mp3', 'damage').catch(e => console.log('Damage sound (uak.mp3) not found or failed to load:', e));
             SoundGen.loadAudioFile('hit.mp3', 'hit').catch(e => console.log('Hit sound (hit.mp3) not found or failed to load:', e));
+            SoundGen.loadAudioFile('headshot.mp3', 'headshot').catch(e => console.log('Headshot sound (headshot.mp3) not found or failed to load:', e));
 
             // 1. Mode Selection
             modeSelection.style.display = 'flex';
