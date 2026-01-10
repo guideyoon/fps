@@ -1946,13 +1946,13 @@
             return false;
         };
         /*
-        FPS.html VERSION: 2026-01-10-2330 (Fix Black Screen & Global Error Handler)
+        FPS.html VERSION: 2026-01-10-2345 (Fix Startup Crash & Map Init Order)
         Updates:
-        - Added window.onerror global handler to alert JS errors on mobile/PC
-        - Fixed potential socket.io script tag missing issue
-        - Sanitized createFactoryMap material definitions
+        - Removed premature createFactoryMap() call at global scope
+        - Moved initial map creation to initGame() after mapGroup init
+        - Resolved TypeError: Cannot read properties of undefined (reading 'add')
         */
-        console.log('=== FPS.html VERSION: 2026-01-10-2330 ==='); // VERSION CHECK
+        console.log('=== FPS.html VERSION: 2026-01-10-2345 ==='); // VERSION CHECK
         let camera, scene, renderer;
         let postProcessingCanvas, postProcessingCtx; // Global declaration
         let postProcessingEnabled = false;
