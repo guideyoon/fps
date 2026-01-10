@@ -3647,22 +3647,24 @@
             group.userData.hpBar = hpFg;
             group.userData.playerId = p.id;
 
-            // Scale group so that model eye level (2.05) matches server eye level (1.7)
-            // 1.7 / 2.05 = 0.829
-            group.scale.set(0.83, 0.83, 0.83);
+            // Ensure scene exists before adding
+            if (window.scene) {
+                // Scale group so that model eye level (2.05) matches server eye level (1.7)
+                // 1.7 / 2.05 = 0.829
+                group.scale.set(0.83, 0.83, 0.83);
 
-            // Position so that feet are on ground
-            // Even with scale, its relative feet are still at group center 0
-            group.position.set(p.position.x, p.position.y - 1.7, p.position.z);
-            console.log('Player actual position in scene:', group.position); // DEBUG
-            console.log('Camera position:', camera.position); // DEBUG
-            scene.add(group);
-            otherPlayersMap[p.id] = group;
-            if (typeof otherPlayers !== 'undefined') otherPlayers.push(group);
-            console.log('Player mesh added successfully. Total children in group:', group.children.length); // DEBUG
-        } else {
-            console.error('Window.scene is missing in createRemotePlayer!'); // DEBUG
-        }
+                // Position so that feet are on ground
+                // Even with scale, its relative feet are still at group center 0
+                group.position.set(p.position.x, p.position.y - 1.7, p.position.z);
+                console.log('Player actual position in scene:', group.position); // DEBUG
+                console.log('Camera position:', camera.position); // DEBUG
+                scene.add(group);
+                otherPlayersMap[p.id] = group;
+                if (typeof otherPlayers !== 'undefined') otherPlayers.push(group);
+                console.log('Player mesh added successfully. Total children in group:', group.children.length); // DEBUG
+            } else {
+                console.error('Window.scene is missing in createRemotePlayer!'); // DEBUG
+            }
         }
 
         // 바로 시작하기 (Legacy code - Force Start handled by Host Controls now)
