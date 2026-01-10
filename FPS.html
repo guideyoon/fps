@@ -2334,21 +2334,16 @@
             },
             playGrenadeThrow: function () {
                 if (!this.ensureContext()) return;
-                // User Request: Play grenade.mp3 immediately on throw
-                if (this.audioBuffers['grenade_throw']) {
-                    this.playAudioFile('grenade_throw', 1.0);
-                } else {
-                    // Fallback: Pin pull sound 'chink'
-                    const t = this.ctx.currentTime;
-                    const osc = this.ctx.createOscillator();
-                    const gain = this.ctx.createGain();
-                    osc.frequency.setValueAtTime(2000, t);
-                    osc.frequency.exponentialRampToValueAtTime(1000, t + 0.1);
-                    gain.gain.setValueAtTime(0.3, t);
-                    gain.gain.exponentialRampToValueAtTime(0.01, t + 0.1);
-                    osc.connect(gain); gain.connect(this.ctx.destination);
-                    osc.start(); osc.stop(t + 0.1);
-                }
+                // Fallback: Pin pull sound 'chink'
+                const t = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.frequency.setValueAtTime(2000, t);
+                osc.frequency.exponentialRampToValueAtTime(1000, t + 0.1);
+                gain.gain.setValueAtTime(0.3, t);
+                gain.gain.exponentialRampToValueAtTime(0.01, t + 0.1);
+                osc.connect(gain); gain.connect(this.ctx.destination);
+                osc.start(); osc.stop(t + 0.1);
             },
             playSwitch: function () {
                 if (!this.ensureContext()) return;
@@ -2399,6 +2394,13 @@
             },
             playExplosion: function () {
                 if (!this.ensureContext()) return;
+
+                // User Request: Play grenade.mp3 on explosion
+                if (this.audioBuffers['grenade_explosion']) {
+                    this.playAudioFile('grenade_explosion', 1.0);
+                    return;
+                }
+
                 const t = this.ctx.currentTime;
                 // Low rumble
                 const osc1 = this.ctx.createOscillator();
@@ -2489,7 +2491,7 @@
             SoundGen.loadAudioFile('headshot.mp3', 'headshot').catch(e => console.log('Headshot sound (headshot.mp3) not found or failed to load:', e));
             SoundGen.loadAudioFile('chak.MP3', 'land').catch(e => console.log('Land sound (chak.MP3) not found or failed to load:', e));
             SoundGen.loadAudioFile('grunt.mp3', 'jump').catch(e => console.log('Jump sound (grunt.mp3) not found or failed to load:', e));
-            SoundGen.loadAudioFile('grenade.mp3', 'grenade_throw').catch(e => console.log('Grenade sound (grenade.mp3) not found or failed to load:', e));
+            SoundGen.loadAudioFile('grenade.mp3', 'grenade_explosion').catch(e => console.log('Grenade sound (grenade.mp3) not found or failed to load:', e));
             SoundGen.loadAudioFile('remove.mp3', 'grenade_switch').catch(e => console.log('Grenade switch sound (remove.mp3) not found or failed to load:', e));
 
             // 1. Mode Selection
