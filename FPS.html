@@ -3804,9 +3804,10 @@
         }
 
         // 맵 선택에 따라 맵 생성 (멀티가 아니면 factory 생성)
-        if (gameMode !== 'multi') {
-            createFactoryMap(); // 싱글 플레이어 또는 초기 로드 시
-        }
+        // 맵 선택에 따라 맵 생성은 startGame() 내부에서 처리됨 (mapGroup 생성 후)
+        // if (gameMode !== 'multi') {
+        //    createFactoryMap(); // DELETED: Premature call causing crash
+        // }
         // 멀티플레이어는 gameStart 이벤트에서 currentMap 설정 후 startGame에서 맵 생성
 
 
@@ -4195,7 +4196,13 @@
 
             // 6) 맵 생성 & 7) 플레이어 초기화
             // (기존 코드에 의존하거나 여기서 간단히 생성)
-            createMap();
+            // 6) 맵 생성 & 7) 플레이어 초기화
+            // mapGroup이 생성된 후 맵을 생성해야 함
+            if (currentMap === 'hotel') {
+                createHotelMap();
+            } else {
+                createFactoryMap();
+            }
             initPlayer();
 
             // 텍스처 시스템 초기화 (기존 함수 호출)
