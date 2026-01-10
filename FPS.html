@@ -627,19 +627,14 @@
         }
 
         /* Chat System */
-        #chat-container {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            width: 350px;
-            background: rgba(0, 0, 0, 0.6);
-            border-radius: 10px;
-            padding: 15px;
-            z-index: 100;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            pointer-events: auto;
+        padding: 15px;
+        z-index: 100;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        pointer-events: auto;
+        /* [User Request] HP 바 가리지 않도록 위치 상향 */
+        bottom: 60px;
         }
 
         #chat-messages {
@@ -1939,13 +1934,13 @@
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script>
         /*
-        FPS.html VERSION: 2026-01-10-2120 (Refine Spawn & Timer Sync)
+        FPS.html VERSION: 2026-01-10-2210 (Fix Timer & Chat & Spawns)
         Updates:
-        - Shifted Factory spawn points to avoid pillar collisions
-        - Immediate match timer sync on game start
-        - Unified updatePlayersList using roomPlayersState
+        - Fixed match timer counting up in multiplayer
+        - Positioned chat container higher to avoid HP bar overlap
+        - Refined safe spawn points for Factory map
         */
-        console.log('=== FPS.html VERSION: 2026-01-10-2120 ==='); // VERSION CHECK
+        console.log('=== FPS.html VERSION: 2026-01-10-2210 ==='); // VERSION CHECK
         let camera, scene, renderer;
         let postProcessingCanvas, postProcessingCtx; // Global declaration
         let postProcessingEnabled = false;
@@ -7482,8 +7477,9 @@
             const dt = Math.min((time - lastTime) / 1000, 0.1);
             lastTime = time;
 
-            // 플레이 시간 업데이트
-            if (!isDead && !isPaused && gameStartTime > 0) {
+            // 플레이 시간 업데이트 (싱글플레이어 전용)
+            // 멀티플레이어 매치 타이머는 timerSync 소켓 이벤트가 담당함
+            if (!isDead && !isPaused && gameStartTime > 0 && gameMode === 'single') {
                 playTime = Math.floor((time - gameStartTime) / 1000);
                 const minutes = Math.floor(playTime / 60);
                 const seconds = playTime % 60;

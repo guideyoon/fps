@@ -247,27 +247,24 @@ io.on('connection', (socket) => {
 // Predefined safe spawn points (tested and clear of pillars/walls)
 // Factory Map (200x200)
 const FACTORY_SPAWN_POINTS = [
-    // Center Area (Avoid x,z in {0, ±10, ±20})
-    { x: 4.5, y: 1.7, z: 4.5 },
-    { x: -14.5, y: 1.7, z: -14.5 }, { x: 14.5, y: 1.7, z: 14.5 },
-    { x: -14.5, y: 1.7, z: 14.5 }, { x: 14.5, y: 1.7, z: -14.5 },
+    // Center-ish Area but avoiding the cross-intersection beams (±10, ±20)
+    { x: 5.5, y: 1.7, z: 5.5 }, { x: -5.5, y: 1.7, z: -5.5 },
+    { x: 5.5, y: 1.7, z: -15.5 }, { x: -15.5, y: 1.7, z: 5.5 },
 
-    // Wide Outer Ring
-    { x: -77.5, y: 1.7, z: -77.5 }, { x: 77.5, y: 1.7, z: 77.5 },
-    { x: -77.5, y: 1.7, z: 77.5 }, { x: 77.5, y: 1.7, z: -77.5 },
-    { x: -84.5, y: 1.7, z: 4.5 }, { x: 84.5, y: 1.7, z: 4.5 },
-    { x: 4.5, y: 1.7, z: -84.5 }, { x: 4.5, y: 1.7, z: 84.5 },
+    // Middle Ring - Avoiding Pillars (multiples of 10) and Platforms (±60)
+    { x: 35.5, y: 1.7, z: 35.5 }, { x: -35.5, y: 1.7, z: -35.5 },
+    { x: 35.5, y: 1.7, z: -35.5 }, { x: -35.5, y: 1.7, z: 35.5 },
+    { x: 45.5, y: 1.7, z: 15.5 }, { x: -45.5, y: 1.7, z: -15.5 },
 
-    // Mid-Range Scatter (Away from multiples of 10)
-    { x: -44.5, y: 1.7, z: -34.5 }, { x: 44.5, y: 1.7, z: 34.5 },
-    { x: -34.5, y: 1.7, z: 44.5 }, { x: 34.5, y: 1.7, z: -44.5 },
-    { x: -64.5, y: 1.7, z: -24.5 }, { x: 64.5, y: 1.7, z: 24.5 },
-    { x: -24.5, y: 1.7, z: 64.5 }, { x: 24.5, y: 1.7, z: -64.5 },
+    // Outer ring - Avoiding Containers (±70, ±85) and Fence (±90)
+    { x: 77.5, y: 1.7, z: 25.5 }, { x: -77.5, y: 1.7, z: -25.5 },
+    { x: 25.5, y: 1.7, z: 77.5 }, { x: -25.5, y: 1.7, z: -77.5 },
+    { x: 55.5, y: 1.7, z: -77.5 }, { x: -55.5, y: 1.7, z: 77.5 },
 
-    // Random Tactical Spots
-    { x: -74.5, y: 1.7, z: -44.5 }, { x: 74.5, y: 1.7, z: 44.5 },
-    { x: -44.5, y: 1.7, z: 74.5 }, { x: 44.5, y: 1.7, z: -74.5 },
-    { x: -54.5, y: 1.7, z: 54.5 }, { x: 54.5, y: 1.7, z: -54.5 }
+    // Corner Quadrants - Clear of boxes and supports
+    { x: 45.5, y: 1.7, z: 45.5 }, { x: -45.5, y: 1.7, z: -45.5 },
+    { x: 45.5, y: 1.7, z: -45.5 }, { x: -45.5, y: 1.7, z: 45.5 },
+    { x: 65.5, y: 1.7, z: 15.5 }, { x: -65.5, y: 1.7, z: -15.5 }
 ];
 
 
