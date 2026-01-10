@@ -2145,6 +2145,13 @@
             },
             playJump: function (land) {
                 if (!this.ensureContext()) return;
+
+                // Landing Sound (Now handled by playLand with chak.mp3 if available)
+                if (land) {
+                    this.playLand();
+                    return;
+                }
+
                 const t = this.ctx.currentTime;
                 const osc = this.ctx.createOscillator();
                 const gain = this.ctx.createGain();
@@ -2154,6 +2161,23 @@
                 gain.gain.linearRampToValueAtTime(0, t + 0.1);
                 osc.connect(gain); gain.connect(this.ctx.destination);
                 osc.start(); osc.stop(t + 0.15);
+            },
+            playLand: function () {
+                if (!this.ensureContext()) return;
+                if (this.audioBuffers['land']) {
+                    this.playAudioFile('land', 0.8);
+                } else {
+                    // Fallback to synthetic thud if file missing
+                    const t = this.ctx.currentTime;
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.frequency.setValueAtTime(100, t);
+                    osc.frequency.exponentialRampToValueAtTime(50, t + 0.1);
+                    gain.gain.setValueAtTime(0.3, t);
+                    gain.gain.exponentialRampToValueAtTime(0.01, t + 0.1);
+                    osc.connect(gain); gain.connect(this.ctx.destination);
+                    osc.start(); osc.stop(t + 0.1);
+                }
             },
             playStep: function () {
                 if (!this.ensureContext()) return;
@@ -2438,6 +2462,7 @@
             SoundGen.loadAudioFile('uak.mp3', 'damage').catch(e => console.log('Damage sound (uak.mp3) not found or failed to load:', e));
             SoundGen.loadAudioFile('hit.mp3', 'hit').catch(e => console.log('Hit sound (hit.mp3) not found or failed to load:', e));
             SoundGen.loadAudioFile('headshot.mp3', 'headshot').catch(e => console.log('Headshot sound (headshot.mp3) not found or failed to load:', e));
+            SoundGen.loadAudioFile('chak.mp3', 'land').catch(e => console.log('Land sound (chak.mp3) not found or failed to load:', e));
 
             // 1. Mode Selection
             modeSelection.style.display = 'flex';
