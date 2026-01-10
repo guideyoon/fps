@@ -301,11 +301,12 @@
 
         #hp-text {
             position: absolute;
-            left: 10px;
-            /* User Request: Left align INSIDE the bar */
-            bottom: 0;
+            left: 15px;
+            /* User Request: Left of the bar */
+            bottom: 25px;
+            /* Aligned with bar bottom */
             line-height: 15px;
-            /* Vertically center */
+            /* Match bar height */
             color: white;
             font-weight: bold;
             font-size: 14px;
@@ -3435,7 +3436,7 @@
             if (elHpBar) {
                 elHpBar.style.width = '100%';
                 elHpBar.style.background = '#4caf50'; // Reset color
-                elHpText.innerText = "HP: 100";
+                elHpText.innerText = "HP";
             }
 
             // 1. 엔진 초기화
@@ -6148,7 +6149,7 @@
 
                     if (playerHP !== oldHP) { // 실제로 회복된 경우에만
                         elHpBar.style.width = playerHP + '%';
-                        elHpText.innerText = "HP: " + playerHP;
+                        elHpText.innerText = "HP";
                         if (playerHP > 50) elHpBar.style.background = "#4caf50";
                         else if (playerHP > 20) elHpBar.style.background = "#ff9800";
                         else elHpBar.style.background = "#f44336";
