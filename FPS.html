@@ -5544,6 +5544,8 @@
                     if (!isPaused && !isDead) {
                         isPaused = true;
                         elPauseOverlay.style.display = 'flex';
+                        // Force check/setup sensitivity control when pausing
+                        setupSensitivityControl();
                         if (document.pointerLockElement === document.body) {
                             document.exitPointerLock();
                         }
@@ -5867,6 +5869,9 @@
             const sensitivityValue = document.getElementById('sensitivity-value');
 
             if (!sensitivityControl || !sensitivitySlider || !sensitivityValue) return;
+
+            // Force visibility
+            sensitivityControl.style.display = 'flex';
 
             // 현재 감도로 슬라이더 설정
             sensitivitySlider.value = SENSITIVITY_MOUSE;
