@@ -7354,6 +7354,16 @@
                 window.scrollTo(0, 1);
             }, 100);
         });
+
+        // Auto-fullscreen on mobile (immediate on load)
+        if (isMobile) {
+            // Try fullscreen on first user interaction
+            const triggerFullscreen = () => {
+                enterFullscreen();
+            };
+            document.addEventListener('click', triggerFullscreen, { once: true });
+            document.addEventListener('touchstart', triggerFullscreen, { once: true });
+        }
         // --- EMERGENCY AMMO FIX SCRIPT ---
         // This script runs at the very end to enforce weapon stats regardless of prior definitions.
         (function () {
