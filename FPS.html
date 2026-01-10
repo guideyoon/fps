@@ -1781,6 +1781,9 @@
         </div>
     </div>
 
+    <!-- 나가기 버튼 (좀비모드) -->
+    <button id="exit-game-btn" class="exit-game-btn" title="게임 나가기" style="display: none;">🚪</button>
+
     <!-- 조명 토글 버튼 -->
     <button id="light-toggle-btn" class="light-toggle-btn" title="조명 켜기/끄기">💡</button>
 
@@ -2674,6 +2677,19 @@
 
                 resetAmmo();
                 startGame();
+
+                // Show exit button in single player (zombie mode)
+                document.getElementById('exit-game-btn').style.display = 'block';
+
+                // Force hide weapon-inventory on mobile devices
+                if (isMobile) {
+                    const weaponInv = document.getElementById('weapon-inventory');
+                    if (weaponInv) {
+                        weaponInv.style.display = 'none';
+                        weaponInv.style.visibility = 'hidden';
+                        weaponInv.style.opacity = '0';
+                    }
+                }
             });
 
             document.getElementById('btn-multi-player').addEventListener('click', () => {
@@ -2689,6 +2705,14 @@
                 } else {
                     socket.emit('setIdentity', { name: 'AutoPlayer' });
                 }
+            });
+
+            // Exit Game Button Handler (Zombie Mode)
+            document.getElementById('exit-game-btn').addEventListener('click', () => {
+                document.getElementById('exit-game-btn').style.display = 'none';
+                modeSelection.style.display = 'flex';
+                document.body.classList.remove('game-active');
+                location.reload(); // Reload to reset game state
             });
 
             // 2. Name Setup
