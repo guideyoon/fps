@@ -1848,7 +1848,7 @@
 
         let grenades = []; // Active grenades in the world
         const matGrenade = new THREE.MeshStandardMaterial({ color: 0x4caf50, roughness: 0.7, metalness: 0.4 });
-        const GRAVITY = -9.8;
+        const GRAVITY = -5.0; // Reduced from -9.8 for longer airtime
 
 
         let enemies = [];
@@ -5862,7 +5862,7 @@
                 if (k === 'control') keys.ctrl = true;
                 if (k === ' ') {
                     if (!keys.space && isGrounded) {
-                        velocityY = 8.0;
+                        velocityY = 10.0;
                         isGrounded = false;
                         SoundGen.playJump(false);
                     }
