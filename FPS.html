@@ -1946,13 +1946,14 @@
             return false;
         };
         /*
-        FPS.html VERSION: 2026-01-11-0115 (Fix Zombie Mode Freeze & Darkness)
+        FPS.html VERSION: 2026-01-11-0130 (Final Zombie Mode Fix)
         Updates:
         - Critical Fix: Enabled isGameStarted for Single Player (was frozen)
         - Critical Fix: Forced Scene Background/Fog reset to fix darkness
-        - Reinforced Single Player startup sequence
+        - Critical Fix: Explicitly calls initPlayer() to reset controls/camera
+        - Added safety check to restore missing lights
         */
-        console.log('=== FPS.html VERSION: 2026-01-11-0115 ==='); // VERSION CHECK
+        console.log('=== FPS.html VERSION: 2026-01-11-0130 ==='); // VERSION CHECK
         let camera, scene, renderer;
         let postProcessingCanvas, postProcessingCtx; // Global declaration
         let postProcessingEnabled = false;
@@ -4151,6 +4152,24 @@
                 if (scene) {
                     scene.background = new THREE.Color(0x87CEEB);
                     scene.fog = new THREE.Fog(0x87CEEB, 10, 150);
+                }
+
+                // [CRITICAL FIX] Re-initialize Player State & Camera
+                // (Fixes camera being stuck at 0,0,0 or dead state)
+                initPlayer();
+                isDead = false;
+                playerHP = 100;
+
+                // Ensure lighting exists (in case scene was cleared or invalid)
+                // Simply checking if we have lights, if not, add them.
+                const lights = scene.children.filter(c => c.isLight);
+                if (lights.length === 0) {
+                    console.log('Restoring missing lights...');
+                    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+                    scene.add(ambientLight);
+                    const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+                    dirLight.position.set(50, 50, 50);
+                    scene.add(dirLight);
                 }
             }
 
