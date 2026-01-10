@@ -1939,13 +1939,13 @@
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script>
         /*
-        FPS.html VERSION: 2026-01-10-2110 (Lobby Player Count Fix)
+        FPS.html VERSION: 2026-01-10-2120 (Refine Spawn & Timer Sync)
         Updates:
-        - Fixed Lobby player count (0/0) not syncing with room state
-        - Unified updatePlayersList to use roomPlayersState for all UI
-        - Optimized Room List and Late Join functionality
+        - Shifted Factory spawn points to avoid pillar collisions
+        - Immediate match timer sync on game start
+        - Unified updatePlayersList using roomPlayersState
         */
-        console.log('=== FPS.html VERSION: 2026-01-10-2110 ==='); // VERSION CHECK
+        console.log('=== FPS.html VERSION: 2026-01-10-2120 ==='); // VERSION CHECK
         let camera, scene, renderer;
         let postProcessingCanvas, postProcessingCtx; // Global declaration
         let postProcessingEnabled = false;
@@ -1995,6 +1995,7 @@
         let currentPlayers = 1;
         let playersList = [];
         let countdownTimer = null;
+        let currentRoomTimeLeft = 600; // Track match time for UI sync
 
         // Multiplayer Socket
         let socket = null;
@@ -3044,6 +3045,7 @@
 
                     // Sync timer
                     if (data.timeLeft !== undefined) {
+                        currentRoomTimeLeft = data.timeLeft;
                         updateTimerUI(data.timeLeft);
                     }
 
@@ -3120,6 +3122,7 @@
                 });
 
                 socket.on('timerSync', (data) => {
+                    currentRoomTimeLeft = data.timeLeft;
                     updateTimerUI(data.timeLeft);
                 });
 
@@ -4032,7 +4035,16 @@
             gameStartTime = performance.now();
             killCount = 0;
             playTime = 0;
-            if (elPlayTime) elPlayTime.innerText = "Time: 00:00";
+
+            // [User Request] 멀티플레이어 매치 타이머 초기값 표시
+            if (gameMode === 'multi') {
+                // 서버 연동 시에는 서버에서 받은 timeLeft를 보여줌
+                // timeLeft가 있으면 즉시 UI 업데이트, 없으면 10분 기본값
+                const initialTime = (typeof currentRoomTimeLeft !== 'undefined') ? currentRoomTimeLeft : 600;
+                updateTimerUI(initialTime);
+            } else {
+                if (elPlayTime) elPlayTime.innerText = "Time: 00:00";
+            }
             if (elKillCount) elKillCount.innerText = "Kills: 0";
 
             // HP Bar Reset
