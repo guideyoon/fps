@@ -7184,6 +7184,36 @@
                 window.scrollTo(0, 1);
             }, 100);
         });
+        // --- EMERGENCY AMMO FIX SCRIPT ---
+        // This script runs at the very end to enforce weapon stats regardless of prior definitions.
+        (function () {
+            setTimeout(() => {
+                console.log("Applying Weapon Ammo Fixes Forcefully...");
+                if (typeof WEAPONS !== 'undefined') {
+                    // Pistol (ID 1)
+                    const pistol = WEAPONS.find(w => w.name.includes("PISTOL"));
+                    if (pistol) {
+                        pistol.maxAmmo = 10;
+                        pistol.ammo = 10;
+                        console.log("Fixed Pistol Ammo: 10");
+                    }
+                    // Sniper (ID 2)
+                    const sniper = WEAPONS.find(w => w.name.includes("SNIPER"));
+                    if (sniper) {
+                        sniper.maxAmmo = 4;
+                        sniper.ammo = 4;
+                        console.log("Fixed Sniper Ammo: 4");
+                    }
+                    // Grenade (ID 4)
+                    const grenade = WEAPONS.find(w => w.type === 'GRENADE');
+                    if (grenade) {
+                        grenade.maxAmmo = 3;
+                        grenade.ammo = 3;
+                    }
+                    if (typeof updateUI === 'function') updateUI();
+                }
+            }, 500); // Slight delay to ensure everything loaded
+        })();
     </script>
 
 </body>
