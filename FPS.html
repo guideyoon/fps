@@ -638,8 +638,8 @@
             flex-direction: column;
             gap: 10px;
             pointer-events: auto;
-            /* [User Request] HP 바 및 조이스틱 가리지 않도록 위치 대폭 상향 */
-            bottom: 250px;
+            /* [User Request] HP 바 및 조이스틱 가리지 않도록 위치 더 크게 상향 */
+            bottom: 300px;
         }
 
         #chat-messages {
@@ -1579,8 +1579,8 @@
                 /* Managed by JS toggle */
                 width: 60%;
                 height: 150px;
-                /* 모바일에서도 위로 올려서 조이스틱/HP 바 피함 */
-                bottom: 150px;
+                /* 모바일에서도 대폭 위로 올려서 조이스틱/HP 바 피함 */
+                bottom: 220px;
                 left: 10px;
             }
 
@@ -1940,13 +1940,14 @@
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script>
         /*
-        FPS.html VERSION: 2026-01-10-2230 (Fix Collision & Passable & UI)
+        FPS.html VERSION: 2026-01-10-2245 (Fix Traverse Error & Hitbox & UI)
         Updates:
-        - Fixed passable platforms/beams by adding colliders
-        - Relocated chat higher to avoid HP bar and joystick
-        - Safer spawn points offset from grid (x.3, z.3)
+        - Added null checks for weaponModel and scene in traverse/processing
+        - Corrected checkCollision box to cover full player height (floor to head)
+        - Fixed remote player height offset (feet on ground)
+        - Moved chat even higher (300px desktop, 220px mobile)
         */
-        console.log('=== FPS.html VERSION: 2026-01-10-2230 ==='); // VERSION CHECK
+        console.log('=== FPS.html VERSION: 2026-01-10-2245 ==='); // VERSION CHECK
         let camera, scene, renderer;
         let postProcessingCanvas, postProcessingCtx; // Global declaration
         let postProcessingEnabled = false;
@@ -3648,9 +3649,9 @@
 
             // Ensure scene exists before adding
             if (window.scene) {
-                console.log('Adding player mesh to scene:', p.id, 'at position:', p.position); // DEBUG
-                // Position on ground (y = 0 is floor level)
-                group.position.set(p.position.x, 0, p.position.z);
+                // Position so that feet are on ground
+                // Server sends eye height (1.7), so offset group by -1.7
+                group.position.set(p.position.x, p.position.y - 1.7, p.position.z);
                 console.log('Player actual position in scene:', group.position); // DEBUG
                 console.log('Camera position:', camera.position); // DEBUG
                 scene.add(group);
@@ -4466,18 +4467,20 @@
             if (!effects) return;
 
             // 전체 장면의 밝기 조정 (더 부드러운 효과)
-            scene.traverse((object) => {
-                if (object.isMesh && object.material) {
-                    // emissive를 사용한 간접적인 밝기 조정
-                    if (object.material.emissive && effects.brightness !== 1.0) {
-                        const baseEmissive = object.userData.baseEmissive || new THREE.Color(0x000000);
-                        if (!object.userData.baseEmissive) {
-                            object.userData.baseEmissive = object.material.emissive.clone();
+            if (window.scene) {
+                scene.traverse((object) => {
+                    if (object.isMesh && object.material) {
+                        // emissive를 사용한 간접적인 밝기 조정
+                        if (object.material.emissive && effects.brightness !== 1.0) {
+                            const baseEmissive = object.userData.baseEmissive || new THREE.Color(0x000000);
+                            if (!object.userData.baseEmissive) {
+                                object.userData.baseEmissive = object.material.emissive.clone();
+                            }
+                            object.material.emissive.copy(baseEmissive).multiplyScalar(effects.brightness * 0.1);
                         }
-                        object.material.emissive.copy(baseEmissive).multiplyScalar(effects.brightness * 0.1);
                     }
-                }
-            });
+                });
+            }
         }
 
         // --- Map with Collision ---
@@ -7439,8 +7442,10 @@
         }
 
         function checkCollision(newPos) {
-            const playerMin = new THREE.Vector3(newPos.x - PLAYER_RADIUS, newPos.y - 0.5, newPos.z - PLAYER_RADIUS);
-            const playerMax = new THREE.Vector3(newPos.x + PLAYER_RADIUS, newPos.y + 0.5, newPos.z + PLAYER_RADIUS);
+            // Player height: 1.7 (eye), collider should go from 0 (feet) to 1.8 (head)
+            // relative to position (eye level)
+            const playerMin = new THREE.Vector3(newPos.x - PLAYER_RADIUS, newPos.y - 1.7, newPos.z - PLAYER_RADIUS);
+            const playerMax = new THREE.Vector3(newPos.x + PLAYER_RADIUS, newPos.y + 0.3, newPos.z + PLAYER_RADIUS);
             const playerBox = new THREE.Box3(playerMin, playerMax);
             for (const collider of colliders) {
                 if (playerBox.intersectsBox(collider)) return true;
@@ -7620,13 +7625,15 @@
                 }
 
                 // Hide/Show front sight based on aiming
-                weaponModel.traverse((child) => {
-                    if (child.userData && child.userData.isSight) {
-                        // 모바일에서 권총 강제 조준 제거 - 사용자 요청 (평상시에는 들고 있는 모습)
-                        const shouldAim = isAiming;
-                        child.visible = shouldAim;
-                    }
-                });
+                if (weaponModel) {
+                    weaponModel.traverse((child) => {
+                        if (child.userData && child.userData.isSight) {
+                            // 모바일에서 권총 강제 조준 제거 - 사용자 요청 (평상시에는 들고 있는 모습)
+                            const shouldAim = isAiming;
+                            child.visible = shouldAim;
+                        }
+                    });
+                }
 
                 let targetPos = w.posHip; let targetFov = 70;
                 if (isAiming) {
