@@ -6543,9 +6543,12 @@
                 position.y = nextY;
 
                 const w = WEAPONS[curWeaponIdx];
-                let speed = 5.0;
-                if (keys.shift && !isAiming && !keys.ctrl && w.type !== 'KNIFE') speed = 9.0;
-                if (keys.ctrl) speed = 2.5; if (isAiming) speed = 2.0;
+                let speed = 9.0; // Default: RUN (User Request)
+                if (keys.shift) speed = 5.0; // Shift: WALK
+
+                // Overrides (Crouch & Aim take priority)
+                if (keys.ctrl) speed = 2.5;
+                if (isAiming) speed = 2.0;
 
                 const q = new THREE.Quaternion();
                 q.setFromEuler(new THREE.Euler(rotation.x, rotation.y, 0, 'YXZ'));
