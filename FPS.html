@@ -1855,6 +1855,15 @@
     <!-- 나가기 버튼 (좀비모드) -->
     <button id="exit-game-btn" class="exit-game-btn" title="게임 나가기" style="display: none;">🚪</button>
 
+    <!-- 인게임 플레이어 리스트 (스코어보드) -->
+    <div id="ingame-players-list"
+        style="display: none; position: fixed; top: 10px; left: 10px; background: rgba(0,0,0,0.5); color: white; padding: 10px; border-radius: 5px; font-family: monospace; z-index: 1000; pointer-events: none;">
+        <div
+            style="font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.3); margin-bottom: 5px; padding-bottom: 2px;">
+            PLAYERS</div>
+        <div id="ingame-players-content"></div>
+    </div>
+
     <!-- 조명 토글 버튼 -->
     <button id="light-toggle-btn" class="light-toggle-btn" title="조명 켜기/끄기">💡</button>
 
@@ -1923,15 +1932,15 @@
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script>
         /*
-        FPS.html VERSION: 2026-01-10-2025 (Multi-Death Fix)
+        FPS.html VERSION: 2026-01-10-2035 (Multiplayer Enhancements)
         Updates:
+        - In-game Player List (Scoreboard) added
+        - Multiplayer "Exit" button fixed
+        - Hotel map floor Z-fighting resolved
+        - Enhanced spawn points (Avoid pillars)
         - Multiplayer Death UI (Hide Single-player Try Again)
-        - Instant ESC Pause (Pointer Lock Sync)
-        - Home Screen UI Cleanup (Weapon icons hidden)
-        - Mobile Zombie Mode Chat Hidden
-        - Weapon Selector Position Adjusted
         */
-        console.log('=== FPS.html VERSION: 2026-01-10-2025 ==='); // VERSION CHECK
+        console.log('=== FPS.html VERSION: 2026-01-10-2035 ==='); // VERSION CHECK
         let camera, scene, renderer;
         let postProcessingCanvas, postProcessingCtx; // Global declaration
         let postProcessingEnabled = false;
@@ -3999,11 +4008,25 @@
             // 1.5. 멀티플레이어 맵 생성 (currentMap은 gameStart 이벤트에서 설정됨)
             if (gameMode === 'multi') {
                 console.log('Creating map for multiplayer:', currentMap);
+                // Clear existing map (prevent Z-fighting floor)
+                if (window.baseFloor) {
+                    scene.remove(window.baseFloor);
+                    window.baseFloor = null;
+                }
+
                 if (currentMap === 'hotel') {
                     createHotelMap();
                 } else {
                     createFactoryMap(); // 기본값
                 }
+
+                // Show exit button for multiplayer
+                const exitBtn = document.getElementById('exit-game-btn');
+                if (exitBtn) exitBtn.style.display = 'flex';
+
+                // Show ingame player list overlay
+                const igList = document.getElementById('ingame-players-list');
+                if (igList) igList.style.display = 'block';
             }
 
             // 2. 룸에 있는 다른 플레이어 메시 생성
@@ -4130,6 +4153,7 @@
             floor.rotation.x = -Math.PI / 2;
             floor.receiveShadow = true;
             scene.add(floor);
+            window.baseFloor = floor;
 
             // 벽 (임시)
             const boxGeo = new THREE.BoxGeometry(1, 1, 1);
@@ -6132,14 +6156,32 @@
 
         function updatePlayersList() {
             const playersListEl = document.getElementById('players-list');
-            playersListEl.innerHTML = '';
-            playersList.forEach(player => {
-                const playerItem = document.createElement('div');
-                playerItem.className = 'player-item';
-                playerItem.textContent = player.name;
-                playersListEl.appendChild(playerItem);
-            });
-            playersListEl.innerHTML += `<div style="margin-top: 10px; color: rgba(255,255,255,0.7);">참여 인원: ${currentPlayers} / ${maxPlayers}</div>`;
+            if (playersListEl) {
+                playersListEl.innerHTML = '';
+                playersList.forEach(player => {
+                    const playerItem = document.createElement('div');
+                    playerItem.className = 'player-item';
+                    playerItem.textContent = player.name;
+                    playersListEl.appendChild(playerItem);
+                });
+                playersListEl.innerHTML += `<div style="margin-top: 10px; color: rgba(255,255,255,0.7);">참여 인원: ${currentPlayers} / ${maxPlayers}</div>`;
+            }
+
+            // Update in-game overlay list
+            const igContent = document.getElementById('ingame-players-content');
+            if (igContent) {
+                igContent.innerHTML = '';
+                // roomPlayersState has all players in room
+                if (roomPlayersState) {
+                    Object.values(roomPlayersState).forEach(p => {
+                        const div = document.createElement('div');
+                        div.style.padding = '2px 0';
+                        div.style.fontSize = '14px';
+                        div.innerHTML = `<span style="color: #4CAF50;">●</span> ${p.name} ${p.id === myId ? '(You)' : ''}`;
+                        igContent.appendChild(div);
+                    });
+                }
+            }
         }
 
         function simulatePlayerJoin() {
