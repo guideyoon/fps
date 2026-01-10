@@ -6627,30 +6627,24 @@
                 // Pickup
                 const dist = drop.position.distanceTo(position);
                 if (dist < 0.8) {
-                    // Check declared flag to prevent double pickup
                     if (drop.userData.claimed) continue;
 
                     // Find Grenade Weapon
                     const gWeapon = WEAPONS.find(w => w.type === 'GRENADE');
-                    if (gWeapon) {
-                        drop.userData.claimed = true; // Mark as claimed immediately
+                    if (gWeapon && gWeapon.ammo < gWeapon.maxAmmo) {
+                        // Only pick up if not at max
+                        drop.userData.claimed = true;
 
-                        if (gWeapon.ammo < gWeapon.maxAmmo) {
-                            gWeapon.ammo++;
-                            SoundGen.playSwitch();
-                            addChatMessage('System', '수류탄 획득! (+1)', true);
-                        } else {
-                            // Full ammo case
-                            SoundGen.playSwitch();
-                            addChatMessage('System', '수류탄 최대 소지!', true);
-                        }
+                        gWeapon.ammo++;
+                        SoundGen.playSwitch();
+                        addChatMessage('System', '수류탄 획득! (+1)', true);
 
                         if (typeof updateUI === 'function') updateUI();
 
-                        // Always remove on contact
                         scene.remove(drop);
                         grenadeDrops.splice(i, 1);
                     }
+                    // If at max, drop remains on ground (30s lifetime)
                 }
             }
         }
