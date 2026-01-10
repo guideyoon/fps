@@ -5478,6 +5478,14 @@
                             if (idx > -1) enemies.splice(idx, 1);
                             killCount++;
                             if (elKillCount) elKillCount.innerText = `Kills: ${killCount}`;
+
+                            // Drop Items
+                            const enemyPos = e.position.clone();
+                            if (Math.random() < 0.3) {
+                                createHealthPill(enemyPos);
+                            } else if (Math.random() < 0.2) {
+                                createGrenadeDrop(enemyPos);
+                            }
                         }
                     }
                 }
@@ -6544,6 +6552,9 @@
                 // 플레이어와의 거리 체크 (3D 거리)
                 const dist = pill.position.distanceTo(position);
                 if (dist < 1.2) {
+                    // HP가 이미 100이면 먹지 않음
+                    if (playerHP >= 100) continue;
+
                     // HP 회복
                     const oldHP = playerHP;
                     playerHP = Math.min(100, playerHP + 20);
@@ -6561,6 +6572,80 @@
 
                     scene.remove(pill);
                     healthPills.splice(i, 1);
+                }
+            }
+        }
+
+        // --- Grenade Drops System ---
+        let grenadeDrops = [];
+
+        function createGrenadeDrop(pos) {
+            const dropGroup = new THREE.Group();
+
+            // Visual: Small Box representing crate or distinct item
+            const dropGeo = new THREE.BoxGeometry(0.3, 0.3, 0.3);
+            const dropMat = new THREE.MeshStandardMaterial({
+                color: 0xffff00, // Yellow
+                emissive: 0xaa8800,
+                emissiveIntensity: 0.5,
+                metalness: 0.8,
+                roughness: 0.2
+            });
+            const dropBody = new THREE.Mesh(dropGeo, dropMat);
+            dropGroup.add(dropBody);
+
+            // Light
+            const dropLight = new THREE.PointLight(0xffff00, 1.0, 3);
+            dropGroup.add(dropLight);
+
+            dropGroup.position.copy(pos);
+            dropGroup.position.y = 0.5;
+            dropGroup.userData.baseY = 0.5;
+            dropGroup.userData.floatTime = 0;
+            dropGroup.userData.lifeTime = 0;
+            scene.add(dropGroup);
+            grenadeDrops.push(dropGroup);
+        }
+
+        function updateGrenadeDrops(dt) {
+            for (let i = grenadeDrops.length - 1; i >= 0; i--) {
+                const drop = grenadeDrops[i];
+                drop.userData.lifeTime += dt;
+
+                // 30s lifetime
+                if (drop.userData.lifeTime >= 30.0) {
+                    scene.remove(drop);
+                    grenadeDrops.splice(i, 1);
+                    continue;
+                }
+
+                // Animation
+                drop.rotation.y += dt;
+                drop.userData.floatTime += dt;
+                drop.position.y = drop.userData.baseY + Math.sin(drop.userData.floatTime * 2) * 0.1;
+
+                // Pickup
+                const dist = drop.position.distanceTo(position);
+                if (dist < 1.2) {
+                    // Find Grenade Weapon
+                    const gWeapon = WEAPONS.find(w => w.type === 'GRENADE');
+                    if (gWeapon) {
+                        // Refill logic: +1 ammo, up to max? or override?
+                        // User said "Can use grenade if eaten".
+                        // If empty (0), becomes 1. If full, stays full?
+                        // Let's allow +1 up to max.
+                        if (gWeapon.ammo < gWeapon.maxAmmo) {
+                            gWeapon.ammo++;
+                            SoundGen.playSwitch(); // Reuse switch sound for pickup
+                            if (typeof updateUI === 'function') updateUI();
+
+                            // Visual Feedback
+                            addChatMessage('System', '수류탄 획득!', true);
+
+                            scene.remove(drop);
+                            grenadeDrops.splice(i, 1);
+                        }
+                    }
                 }
             }
         }
@@ -6867,6 +6952,8 @@
                         // 30% 확률로 HP 회복 알약 드랍
                         if (Math.random() < 0.3) {
                             createHealthPill(enemyPos);
+                        } else if (Math.random() < 0.2) { // 20% Chance for Grenade (if no pill)
+                            createGrenadeDrop(enemyPos);
                         }
 
                         // setTimeout 제거 - spawnTimer 시스템이 처리함
@@ -7132,6 +7219,7 @@
             updateGrenades(dt); // Grenade Physics
             if (!isPaused) {
                 updateHealthPills(dt);
+                updateGrenadeDrops(dt);
             }
             // 모드별 업데이트
             if (gameMode === 'single') {
