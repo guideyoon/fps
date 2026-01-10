@@ -1939,14 +1939,15 @@
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script>
         /*
-        FPS.html VERSION: 2026-01-10-2045 (Multiplayer Lobby & Rules)
+        FPS.html VERSION: 2026-01-10-2100 (Late Join & Room List Fix)
         Updates:
-        - Individual (FFA) and Team Deathmatch (TDM) lobby settings
+        - Room List: Display map and mode info
+        - Late Join: Fixed "Join" button being disabled in lobby
+        - Late Join: Immediate 3D mesh creation for mid-game joiners
+        - FFA/TDM lobby settings support
         - 10-minute match timer (Server-driven sync)
-        - Late join enabled (Join games in progress)
-        - In-game Player List position and names fixed
         */
-        console.log('=== FPS.html VERSION: 2026-01-10-2045 ==='); // VERSION CHECK
+        console.log('=== FPS.html VERSION: 2026-01-10-2100 ==='); // VERSION CHECK
         let camera, scene, renderer;
         let postProcessingCanvas, postProcessingCtx; // Global declaration
         let postProcessingEnabled = false;
@@ -3006,17 +3007,21 @@
                     rooms.forEach(room => {
                         const roomEl = document.createElement('div');
                         roomEl.className = 'room-item';
-                        const statusClass = room.status === 'playing' ? 'playing' : (room.currentPlayers >= room.maxPlayers ? 'full' : 'waiting');
-                        const statusText = room.status === 'playing' ? '게임 중' : (room.currentPlayers >= room.maxPlayers ? '만원' : '대기 중');
+                        const isFull = room.currentPlayers >= room.maxPlayers;
+                        const statusClass = room.status === 'playing' ? 'playing' : (isFull ? 'full' : 'waiting');
+                        const statusText = room.status === 'playing' ? '게임 중' : (isFull ? '만원' : '대기 중');
+
+                        const mapNameDisp = room.map === 'factory' ? '창고' : '호텔';
+                        const modeNameDisp = room.gameMode === 'ffa' ? '개인전' : '팀전';
 
                         roomEl.innerHTML = `
                             <div class="room-info">
                                 <h3>${room.name}</h3>
-                                <p>${room.currentPlayers}/${room.maxPlayers}명</p>
+                                <p>${room.currentPlayers}/${room.maxPlayers}명 | ${mapNameDisp} | ${modeNameDisp}</p>
                             </div>
                             <div class="room-status">
                                 <span class="status-badge ${statusClass}">${statusText}</span>
-                                <button onclick="joinRoom('${room.id}')" ${statusClass !== 'waiting' ? 'disabled' : ''}>참여</button>
+                                <button onclick="joinRoom('${room.id}')" ${isFull ? 'disabled' : ''}>참여</button>
                             </div>
                         `;
                         roomListContainer.appendChild(roomEl);
@@ -3088,6 +3093,13 @@
                     // Update start button when player joins
                     const isHost = myId && roomPlayersState[myId];
                     if (isHost) updateStartButtonState(true);
+
+                    // [User Request] 난입 지원: 게임 중이면 즉시 메시 생성
+                    if (document.body.classList.contains('game-active') && window.scene) {
+                        if (player.id !== myId && !otherPlayersMap[player.id]) {
+                            createRemotePlayer(player);
+                        }
+                    }
                 });
 
                 socket.on('playerLeft', (playerId) => {

@@ -381,6 +381,8 @@ function getRoomList() {
         name: r.name,
         currentPlayers: Object.keys(r.players).length,
         maxPlayers: r.maxPlayers,
+        map: r.map,
+        gameMode: r.gameMode,
         status: r.gameStarted ? 'playing' : 'waiting'
     }));
 }
