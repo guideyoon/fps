@@ -2633,6 +2633,11 @@
             document.getElementById('btn-single-player').addEventListener('click', () => {
                 gameMode = 'single';
                 modeSelection.style.display = 'none';
+                document.body.classList.add('game-active'); // Hide all menus
+
+                // Try fullscreen on mobile
+                if (isMobile) enterFullscreen();
+
                 resetAmmo();
                 startGame();
             });
