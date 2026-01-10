@@ -1534,15 +1534,14 @@
                 display: flex !important;
             }
 
-            /* Hide icon-based weapon selector on mobile */
+            /* Show icon-based weapon selector on mobile (reverted) */
             #weapon-selector-vertical {
-                display: none !important;
+                display: flex !important;
             }
 
-            /* Scale down weapon inventory to 50% on mobile */
+            /* Hide text-based weapon inventory on mobile */
             #weapon-inventory {
-                transform: translateY(-50%) scale(0.5);
-                left: 5px;
+                display: none !important;
             }
         }
 
@@ -1627,7 +1626,7 @@
 
     <div id="game-over">
         YOU DIED
-        <button id="restart-btn">TRY AGAIN</button>
+        <button id="restart-btn" onclick="restartGame()">TRY AGAIN</button>
     </div>
 
     <!-- Duplicate pause overlay removed -->
@@ -1802,6 +1801,7 @@
         <!-- Pistol: changed to fa-gun (simpler pistol icon) -->
         <div class="weapon-select-btn" data-idx="2"><i class="fas fa-crosshairs"></i></div> <!-- Sniper -->
         <div class="weapon-select-btn" data-idx="3"><i class="fas fa-gavel"></i></div> <!-- Knife -->
+        <div class="weapon-select-btn" data-idx="4"><i class="fas fa-bomb"></i></div> <!-- Grenade -->
     </div>
 
     <button class="mobile-btn" id="btn-shoot"><i class="fas fa-crosshairs"></i></button>
@@ -2716,6 +2716,17 @@
                 nameSetup.style.display = 'flex';
                 // Optional: Disconnect socket?
             });
+
+            // Restart Game Function (Skip mode selection for single-player)
+            window.restartGame = function () {
+                if (gameMode === 'single') {
+                    // Restart single-player directly
+                    location.reload();
+                } else {
+                    // Multi-player: go back to mode selection
+                    location.reload();
+                }
+            };
 
             // Weapon Inventory Click Handler (for both PC and mobile)
             document.getElementById('weapon-inventory').addEventListener('click', (e) => {
