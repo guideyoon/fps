@@ -1566,9 +1566,9 @@
                 display: block;
             }
 
-            #chat-toggle-btn {
+            body.game-active.multi-player #chat-toggle-btn {
                 display: flex !important;
-                /* Force show on mobile */
+                /* Force show on mobile during multiplayer gameplay */
             }
 
             #chat-container {
@@ -1585,8 +1585,8 @@
                 display: flex !important;
             }
 
-            /* Show icon-based weapon selector on mobile (reverted) */
-            #weapon-selector-vertical {
+            /* Show icon-based weapon selector on mobile during gameplay */
+            body.game-active #weapon-selector-vertical {
                 display: flex !important;
             }
 
@@ -1649,10 +1649,10 @@
                 font-size: 12px;
             }
 
-            /* Explicitly show weapon selector in landscape */
-            #weapon-selector-vertical {
+            /* Explicitly show weapon selector in landscape during gameplay */
+            body.game-active #weapon-selector-vertical {
                 display: flex !important;
-                top: 25% !important;
+                top: 18% !important;
                 /* Slightly higher in landscape */
                 z-index: 1000 !important;
                 pointer-events: auto !important;
@@ -2739,6 +2739,8 @@
             document.getElementById('btn-single-player').addEventListener('click', () => {
                 gameMode = 'single';
                 modeSelection.style.display = 'none';
+                document.body.classList.remove('multi-player');
+                document.body.classList.add('single-player');
                 document.body.classList.add('game-active'); // Hide all menus
 
                 // Try fullscreen on mobile
@@ -2770,6 +2772,8 @@
                 const serverAddr = 'https://murphy-highs-cradle-acting.trycloudflare.com';
                 gameMode = 'multi';
                 modeSelection.style.display = 'none';
+                document.body.classList.remove('single-player');
+                document.body.classList.add('multi-player');
                 // Skip name setup, go directly to room menu
                 roomMenu.style.display = 'flex';
 
@@ -3960,6 +3964,9 @@
             // 전체화면 요청 (모바일 브라우저 주소창 숨김)
             enterFullscreen();
 
+            // 게임 활성화 클래스 추가
+            document.body.classList.add('game-active');
+
             // 0. 게임 통계 초기화
             gameStartTime = performance.now();
             killCount = 0;
@@ -4091,9 +4098,15 @@
 
             // 9) 마우스 락 이벤트 연결
             document.addEventListener('pointerlockchange', () => {
+                if (isDead) return;
                 isPaused = !document.pointerLockElement;
-                const menu = document.getElementById('menu');
-                if (menu) menu.style.display = isPaused ? 'flex' : 'none';
+                const elPauseOverlay = document.getElementById('pause-overlay');
+                if (elPauseOverlay) {
+                    elPauseOverlay.style.display = isPaused ? 'flex' : 'none';
+                    if (isPaused) {
+                        if (typeof setupSensitivityControl === 'function') setupSensitivityControl();
+                    }
+                }
             });
 
             window.addEventListener('resize', onResize, false);
@@ -6195,13 +6208,7 @@
             } else {
                 console.log('Desktop controls enabled');
                 // 데스크톱에서만 포인터 락 사용
-                // 포인터 잠금 변경 감지
-                document.addEventListener('pointerlockchange', () => {
-                    if (document.pointerLockElement !== document.body && isPaused) {
-                        // 포인터 잠금이 해제되고 일시정지 상태면 오버레이 유지
-                        elPauseOverlay.style.display = 'flex';
-                    }
-                });
+                // (이벤트 리스너는 initGame에서 통합 관리됨)
 
                 document.body.addEventListener('mousedown', (e) => {
                     if (document.pointerLockElement !== document.body && !isDead && !isPaused) {
@@ -6254,20 +6261,26 @@
                 // ESC 키 처리 - key와 code 모두 체크
                 if (e.key === 'Escape' || e.key === 'Esc' || e.code === 'Escape') {
                     e.preventDefault();
-                    e.stopPropagation();
-                    e.stopImmediatePropagation();
-                    if (!isPaused && !isDead) {
-                        isPaused = true;
-                        elPauseOverlay.style.display = 'flex';
-                        // Force check/setup sensitivity control when pausing
-                        setupSensitivityControl();
+                    if (isDead) return;
+
+                    if (!isPaused) {
+                        // 이미 실행 중이면 포인터 락 해제 -> pointerlockchange 리스너가 일시정지 처리
                         if (document.pointerLockElement === document.body) {
                             document.exitPointerLock();
+                        } else {
+                            // 포인터 락이 없는 상태(모바일 등)에서의 강제 일시정지 처리
+                            isPaused = true;
+                            const overlay = document.getElementById('pause-overlay');
+                            if (overlay) overlay.style.display = 'flex';
                         }
-                    } else if (isPaused) {
+                    } else {
+                        // 일시정지 상태면 재개
                         isPaused = false;
-                        elPauseOverlay.style.display = 'none';
-                        // 재개 시 포인터 잠금은 사용자가 클릭해야 함
+                        const overlay = document.getElementById('pause-overlay');
+                        if (overlay) overlay.style.display = 'none';
+                        if (document.body.requestPointerLock) {
+                            document.body.requestPointerLock();
+                        }
                     }
                     return false;
                 }
