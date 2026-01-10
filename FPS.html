@@ -14,6 +14,8 @@
 
     <title>FPS Multiplayer - Room System</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Favicon fix to prevent 404 -->
+    <link rel="icon" href="data:,">
     <style>
         * {
             box-sizing: border-box;
@@ -1921,14 +1923,14 @@
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script>
         /*
-        FPS.html VERSION: 2026-01-10-1735 (Ammo Fixed)
+        FPS.html VERSION: 2026-01-10-2020 (UI & Pause Refined)
         Updates:
-        - Pistol Ammo: 10
-        - Sniper Ammo: 4
-        - Grenade Damage: 300
-        - Grenade Sounds: Explosion, Switch, Pin-pull
+        - Instant ESC Pause (Pointer Lock Sync)
+        - Home Screen UI Cleanup (Weapon icons hidden)
+        - Mobile Zombie Mode Chat Hidden
+        - Weapon Selector Position Adjusted
         */
-        console.log('=== FPS.html VERSION: 2026-01-10-1735 ==='); // VERSION CHECK
+        console.log('=== FPS.html VERSION: 2026-01-10-2020 ==='); // VERSION CHECK
         let camera, scene, renderer;
         let postProcessingCanvas, postProcessingCtx; // Global declaration
         let postProcessingEnabled = false;
