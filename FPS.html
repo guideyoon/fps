@@ -2497,6 +2497,7 @@
             document.getElementById('btn-single-player').addEventListener('click', () => {
                 gameMode = 'single';
                 modeSelection.style.display = 'none';
+                resetAmmo();
                 startGame();
             });
 
@@ -2531,6 +2532,7 @@
 
                 // Connect to Server Lobby
                 if (!socket || !socket.connected) {
+                    resetAmmo();
                     initMultiplayer(serverAddr, name);
                 } else {
                     socket.emit('setIdentity', { name: name });
@@ -5796,7 +5798,14 @@
         // function startGame() { ... }
 
 
+        function resetAmmo() {
+            WEAPONS.forEach(w => w.ammo = w.maxAmmo);
+            // If already initialized, update UI
+            if (typeof updateUI === 'function') updateUI();
+        }
+
         function restartGame() {
+            resetAmmo();
             playerHP = 100;
             isDead = false;
             isPaused = false;
