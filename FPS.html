@@ -1751,6 +1751,13 @@
                 posHip: new THREE.Vector3(0.25, -0.25, -0.5),
                 posAds: new THREE.Vector3(0.25, -0.25, -0.45),
                 fovAds: 65, fireRate: 0.4, recoil: 0, damage: 15
+            },
+            {
+                id: 4, name: "GRENADE",
+                type: 'GRENADE', maxAmmo: 3, ammo: 3, automatic: false,
+                posHip: new THREE.Vector3(0.1, -0.2, -0.3),
+                posAds: new THREE.Vector3(0.1, -0.2, -0.3), // No ADS for grenade
+                fovAds: 70, fireRate: 1.5, recoil: 0, damage: 100 // Area Damage
             }
         ];
         let curWeaponIdx = 0;
@@ -1778,6 +1785,11 @@
         let decals = [];
         let healthPills = [];
         const matHealthPill = new THREE.MeshStandardMaterial({ color: 0xff00ff, roughness: 0.2, metalness: 0.8, emissive: 0xff00ff, emissiveIntensity: 0.5 });
+
+        let grenades = []; // Active grenades in the world
+        const matGrenade = new THREE.MeshStandardMaterial({ color: 0x4caf50, roughness: 0.7, metalness: 0.4 });
+        const GRAVITY = -9.8;
+
 
         let enemies = [];
         const ZOMBIE_SPEED = 2.5;
@@ -2275,8 +2287,35 @@
                     // Fallback sound check: Do NOT fallback to playHit() as that is for attacking!
                     console.warn('Damage sound (uak.mp3) not loaded.');
                 }
+            },
+            playExplosion: function () {
+                if (!this.ensureContext()) return;
+                const t = this.ctx.currentTime;
+                // Low rumble
+                const osc1 = this.ctx.createOscillator();
+                const gain1 = this.ctx.createGain();
+                osc1.type = 'sawtooth';
+                osc1.frequency.setValueAtTime(100, t);
+                osc1.frequency.exponentialRampToValueAtTime(10, t + 0.5);
+                gain1.gain.setValueAtTime(1.0, t);
+                gain1.gain.exponentialRampToValueAtTime(0.01, t + 0.5);
+                osc1.connect(gain1); gain1.connect(this.ctx.destination);
+                osc1.start(); osc1.stop(t + 0.5);
+
+                // Noise burst
+                const bufferSize = this.ctx.sampleRate * 0.5;
+                const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufferSize, 2);
+                const noise = this.ctx.createBufferSource();
+                noise.buffer = buffer;
+                const gainN = this.ctx.createGain();
+                gainN.gain.setValueAtTime(0.8, t);
+                noise.connect(gainN); gainN.connect(this.ctx.destination);
+                noise.start();
             }
         };
+
 
         // ============================================
         // 볼륨 조절 방법:
@@ -4495,9 +4534,11 @@
             if (wData.type === 'RIFLE') buildRifle();
             else if (wData.type === 'PISTOL') buildPistol();
             else if (wData.type === 'KNIFE') buildKnife();
+            else if (wData.type === 'KNIFE') buildKnife();
             else if (wData.type === 'SNIPER') buildSniper();
+            else if (wData.type === 'GRENADE') buildGrenade();
 
-            if (wData.type !== 'KNIFE') {
+            if (wData.type !== 'KNIFE' && wData.type !== 'GRENADE') {
                 const fGeo = new THREE.PlaneGeometry(0.5, 0.5);
                 const fMat = new THREE.MeshBasicMaterial({ color: 0xffdd88, transparent: true, opacity: 0, side: THREE.DoubleSide });
                 muzzleFlash = new THREE.Mesh(fGeo, fMat);
@@ -5034,6 +5075,27 @@
             return grp;
         }
 
+        function buildGrenade() {
+            const grp = new THREE.Group();
+
+            // Grenade Body
+            const body = new THREE.Mesh(new THREE.SphereGeometry(0.1, 16, 16), matGrenade);
+            grp.add(body);
+
+            // Pin/Handle
+            const pin = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.1, 8), matMetal);
+            pin.position.y = 0.1;
+            grp.add(pin);
+
+            // Hand
+            const hand = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.1), matGlove);
+            hand.position.set(0.05, -0.05, 0.05);
+            grp.add(hand);
+
+            weaponModel.add(grp);
+            return grp;
+        }
+
         // --- Enemy AI & Parts ---
         function createEnemyAI() {
             const enemy = new THREE.Group();
@@ -5219,6 +5281,123 @@
 
             scene.add(enemy);
             enemies.push(enemy);
+        }
+
+        function explodeGrenade(pos) {
+            // 1. Visuals
+            const blastGeo = new THREE.SphereGeometry(0.2, 16, 16);
+            const blastMat = new THREE.MeshBasicMaterial({ color: 0xff4500, transparent: true, opacity: 0.8 });
+            const blast = new THREE.Mesh(blastGeo, blastMat);
+            blast.position.copy(pos);
+            scene.add(blast);
+
+            // Expand animation loop embedded
+            let duration = 0;
+            const expandAnim = () => {
+                duration += 0.05;
+                const scale = 1 + duration * 15;
+                blast.scale.set(scale, scale, scale);
+                blast.material.opacity = 0.8 * (1 - duration / 0.5); // Fade out over 0.5s
+                if (duration < 0.5) requestAnimationFrame(expandAnim);
+                else scene.remove(blast);
+            };
+            expandAnim();
+
+            // 2. Sound
+            SoundGen.playExplosion();
+
+            // 3. Damage (AoE)
+            const EXPLOSION_RADIUS = 8.0;
+            const MAX_DAMAGE = 100;
+
+            // Enemies
+            enemies.forEach(e => {
+                const dist = e.position.distanceTo(pos);
+                if (dist < EXPLOSION_RADIUS) {
+                    const dmg = Math.floor(MAX_DAMAGE * (1 - dist / EXPLOSION_RADIUS));
+                    if (dmg > 0 && e.userData.hp > 0) {
+                        e.userData.hp -= dmg;
+
+                        // Flash red
+                        e.children.forEach(c => {
+                            if (c.isMesh && c.material && c.material.emissive) {
+                                c.material.emissive.setHex(0xff0000);
+                                c.material.emissiveIntensity = 1.5;
+                            }
+                        });
+                        e.userData.flashTimer = 0.2;
+
+                        if (e.userData.hp <= 0) {
+                            // Kill logic (simplified copy from generic logic)
+                            e.userData.isDead = true;
+                            scene.remove(e);
+                            const idx = enemies.indexOf(e);
+                            if (idx > -1) enemies.splice(idx, 1);
+                            killCount++;
+                            if (elKillCount) elKillCount.innerText = `Kills: ${killCount}`;
+                        }
+                    }
+                }
+            });
+
+            // Self Damage optional? Let's skip self damage for fun factor or keep it minimal
+        }
+
+        function updateGrenades(dt) {
+            for (let i = grenades.length - 1; i >= 0; i--) {
+                const g = grenades[i];
+
+                // Gravity
+                g.vel.y += GRAVITY * dt;
+
+                // Move
+                const nextPos = g.mesh.position.clone().add(g.vel.clone().multiplyScalar(dt));
+
+                // Collision (Simple Box Check)
+                let collided = false;
+
+                // Floor check
+                if (nextPos.y < 0.15) {
+                    nextPos.y = 0.15;
+                    g.vel.y *= -0.5; // Bounce dampen
+                    g.vel.x *= 0.7; // Friction
+                    g.vel.z *= 0.7;
+                    collided = true;
+                }
+
+                // Wall check (Simple collider iteration)
+                const gBox = new THREE.Box3(
+                    new THREE.Vector3(nextPos.x - g.radius, nextPos.y - g.radius, nextPos.z - g.radius),
+                    new THREE.Vector3(nextPos.x + g.radius, nextPos.y + g.radius, nextPos.z + g.radius)
+                );
+
+                for (const c of colliders) {
+                    if (gBox.intersectsBox(c)) {
+                        // Very simple bounce: reverse velocity roughly
+                        // Determine reflection normal roughly by checking center delta?
+                        // For simplicity in this quick implementation, just reverse horizontal velocity if hitting vertical wall
+                        g.vel.x *= -0.5;
+                        g.vel.z *= -0.5;
+                        collided = true;
+                        break;
+                    }
+                }
+
+                if (!collided) {
+                    g.mesh.position.copy(nextPos);
+                    g.mesh.rotation.x += g.vel.length() * dt; // Spin
+                } else {
+                    g.mesh.position.copy(nextPos); // Still update pos if bouncing
+                }
+
+                // Fuse
+                g.fuse -= dt;
+                if (g.fuse <= 0) {
+                    explodeGrenade(g.mesh.position);
+                    scene.remove(g.mesh);
+                    grenades.splice(i, 1);
+                }
+            }
         }
 
         function updateEnemies(dt) {
@@ -6351,6 +6530,35 @@
 
                 spawnShell();
                 SoundGen.playShoot(w.type);
+            } else if (w.type === 'GRENADE') {
+                if (w.ammo > 0) {
+                    w.ammo--;
+                    updateUI();
+
+                    // Throw Physics
+                    const throwDir = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion).normalize();
+                    // Add some upward arc
+                    throwDir.y += 0.2;
+                    throwDir.normalize();
+
+                    const vel = throwDir.multiplyScalar(15.0); // Throw speed
+
+                    const gMesh = new THREE.Mesh(new THREE.SphereGeometry(0.15, 16, 16), matGrenade);
+                    gMesh.position.copy(camera.position).add(new THREE.Vector3(0, -0.2, 0)); // Start from slightly below camera
+                    gMesh.castShadow = true;
+                    scene.add(gMesh);
+
+                    grenades.push({
+                        mesh: gMesh,
+                        vel: vel,
+                        fuse: 3.0, // 3 seconds
+                        radius: 0.15
+                    });
+
+                    // Hand animation (hide momentarily)
+                    weaponModel.visible = false;
+                    setTimeout(() => { if (curWeaponIdx === 4) weaponModel.visible = true; }, 500);
+                }
             } else {
                 knifeSwing = 1.0;
                 SoundGen.playKnife();
@@ -6740,6 +6948,7 @@
 
             updateShells(dt);
             updateParticles(dt);
+            updateGrenades(dt); // Grenade Physics
             if (!isPaused) {
                 updateHealthPills(dt);
             }
