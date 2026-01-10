@@ -6626,11 +6626,13 @@
 
                 // Pickup
                 const dist = drop.position.distanceTo(position);
-                if (dist < 0.8) {
+                if (dist < 1.5) {
                     if (drop.userData.claimed) continue;
 
                     // Find Grenade Weapon
                     const gWeapon = WEAPONS.find(w => w.type === 'GRENADE');
+                    console.log('[Grenade Pickup] Distance:', dist.toFixed(2), 'Ammo:', gWeapon?.ammo, '/', gWeapon?.maxAmmo);
+
                     if (gWeapon && gWeapon.ammo < gWeapon.maxAmmo) {
                         // Only pick up if not at max
                         drop.userData.claimed = true;
@@ -6643,6 +6645,7 @@
 
                         scene.remove(drop);
                         grenadeDrops.splice(i, 1);
+                        console.log('[Grenade Pickup] SUCCESS! New ammo:', gWeapon.ammo);
                     }
                     // If at max, drop remains on ground (30s lifetime)
                 }
