@@ -833,7 +833,6 @@
             display: inline-block;
         }
 
-        /* 조명 토글 버튼 */
         #light-toggle-btn {
             position: fixed;
             top: 20px;
@@ -841,7 +840,8 @@
             width: 50px;
             height: 50px;
             background: rgba(0, 0, 0, 0.7);
-            border: 2px solid rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            /* Reduced from 2px for better alignment */
             border-radius: 50%;
             display: none;
             /* Hide by default, show only during gameplay */
@@ -852,7 +852,7 @@
             cursor: pointer;
             z-index: 1000;
             user-select: none;
-            transition: background 0.2s, border-color 0.2s;
+            transition: all 0.2s;
             pointer-events: auto;
             -webkit-tap-highlight-color: transparent;
         }
@@ -1524,11 +1524,13 @@
         /* Exit Game Button (Zombie Mode) - Styled like Light Toggle */
         .exit-game-btn {
             position: fixed;
-            top: 15px;
-            right: 75px;
-            /* Positioned to the left of the light bulb */
-            width: 45px;
-            height: 45px;
+            top: 20px;
+            /* Match light toggle fixed position */
+            right: 80px;
+            /* Consistently spaced */
+            width: 50px;
+            /* Match light toggle size */
+            height: 50px;
             background: rgba(0, 0, 0, 0.5);
             color: white;
             border: 1px solid rgba(255, 255, 255, 0.3);
