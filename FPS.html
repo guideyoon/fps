@@ -2389,9 +2389,18 @@
             });
 
             document.getElementById('btn-multi-player').addEventListener('click', () => {
+                const serverAddr = 'https://murphy-highs-cradle-acting.trycloudflare.com';
+                gameMode = 'multi';
                 modeSelection.style.display = 'none';
-                nameSetup.style.display = 'flex';
-                document.getElementById('player-name-input').focus();
+                // Skip name setup, go directly to room menu
+                roomMenu.style.display = 'flex';
+
+                // Connect to Server Lobby (Server will assign "Player N" automatically)
+                if (!socket || !socket.connected) {
+                    initMultiplayer(serverAddr, 'AutoPlayer');
+                } else {
+                    socket.emit('setIdentity', { name: 'AutoPlayer' });
+                }
             });
 
             // 2. Name Setup

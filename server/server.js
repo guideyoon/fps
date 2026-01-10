@@ -20,6 +20,7 @@ const io = new Server(server, {
 // Room and Player Management
 const rooms = {};
 const playerRoomMap = {}; // socket.id -> roomId
+let globalPlayerCounter = 1; // Global counter for assigning "Player 1", "Player 2", etc.
 
 function generateRoomId() {
     return Math.random().toString(36).substr(2, 6).toUpperCase();
@@ -30,9 +31,14 @@ io.on('connection', (socket) => {
 
     // 1. Initial Identity Setup (Lobby Join)
     socket.on('setIdentity', (data) => {
+        // User Request: Auto-assign "Player N" in order using global counter
+        // Use data.name ONLY if it's explicitly set (unlikely with this change), otherwise default to counter
+        // Actually, user wants "Player 1, 2..." forced.
+        const name = `Player ${globalPlayerCounter++}`;
+
         socket.userData = {
             id: socket.id,
-            name: data.name || `Player ${socket.id.substr(0, 4)}`,
+            name: name,
             hp: 100,
             isDead: false
         };
