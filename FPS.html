@@ -1946,13 +1946,13 @@
             return false;
         };
         /*
-        FPS.html VERSION: 2026-01-11-0100 (Fix Zombie Mode Map)
+        FPS.html VERSION: 2026-01-11-0115 (Fix Zombie Mode Freeze & Darkness)
         Updates:
-        - Fixed Zombie Mode (Single Player) map not loading
-        - Forced map regeneration in startGame for Single Player
-        - Ensured consistent map state across game modes
+        - Critical Fix: Enabled isGameStarted for Single Player (was frozen)
+        - Critical Fix: Forced Scene Background/Fog reset to fix darkness
+        - Reinforced Single Player startup sequence
         */
-        console.log('=== FPS.html VERSION: 2026-01-11-0100 ==='); // VERSION CHECK
+        console.log('=== FPS.html VERSION: 2026-01-11-0115 ==='); // VERSION CHECK
         let camera, scene, renderer;
         let postProcessingCanvas, postProcessingCtx; // Global declaration
         let postProcessingEnabled = false;
@@ -4142,6 +4142,16 @@
 
                 // 싱글플레이어는 항상 Factory 맵
                 createFactoryMap();
+
+                // [CRITICAL FIX] Force Start Game Loop for Single Player
+                isGameStarted = true;
+
+                // [CRITICAL FIX] Ensure Environment (Background/Fog) is correct
+                // (Fixes darkness if initGame was skipped)
+                if (scene) {
+                    scene.background = new THREE.Color(0x87CEEB);
+                    scene.fog = new THREE.Fog(0x87CEEB, 10, 150);
+                }
             }
 
             // 2. 룸에 있는 다른 플레이어 메시 생성
