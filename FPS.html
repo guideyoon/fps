@@ -639,7 +639,7 @@
             gap: 10px;
             pointer-events: auto;
             /* [User Request] HP 바 및 조이스틱 가리지 않도록 위치 더 크게 상향 */
-            bottom: 300px;
+            bottom: 300px !important;
         }
 
         #chat-messages {
@@ -1946,13 +1946,13 @@
             return false;
         };
         /*
-        FPS.html VERSION: 2026-01-11-0035 (Fix Sound Crash & Zombie Mode Logic)
+        FPS.html VERSION: 2026-01-11-0050 (Fix Chat Overlap & Game Freeze)
         Updates:
-        - Fixed TypeError: SoundGen.playBeep is not a function (added missing beep sound)
-        - Reinforced Single Player Map Loading logic
-        - Ensured Countdown doesn't crash game
+        - Reinforced Chat CSS with !important to strictly prevent overlap
+        - Fixed Game Freeze: Ensured gameMode sync strictly unlocks game loop
+        - Robust startCountdown logic handling map/mode variations
         */
-        console.log('=== FPS.html VERSION: 2026-01-11-0035 ==='); // VERSION CHECK
+        console.log('=== FPS.html VERSION: 2026-01-11-0050 ==='); // VERSION CHECK
         let camera, scene, renderer;
         let postProcessingCanvas, postProcessingCtx; // Global declaration
         let postProcessingEnabled = false;
@@ -3061,8 +3061,10 @@
                     maxPlayers = data.maxPlayers || 4; // Save maxPlayers from server
 
                     // Save map & mode info
+                    // Save map & mode info
                     currentMap = data.map || 'factory';
                     currentGameMode = data.gameMode || 'ffa';
+                    gameMode = 'multi'; // CRITICAL: Sync global gameMode for start logic
                     console.log('Room map:', currentMap, 'Mode:', currentGameMode);
 
                     // Sync timer
@@ -3159,7 +3161,9 @@
                     // 서버에서 받은 맵 정보로 설정
                     if (data && data.map) {
                         currentMap = data.map;
+                        currentMap = data.map;
                         currentGameMode = data.gameMode || 'ffa';
+                        gameMode = 'multi'; // CRITICAL: Sync global gameMode
                         updateTimerUI(data.timeLeft || 600);
                         console.log('Map set to:', currentMap, 'Mode:', currentGameMode);
                     }
@@ -4048,6 +4052,8 @@
                     if (gameMode === 'multi') {
                         isGameStarted = true; // Unlock game loop
                         console.log('Multiplayer Match Started!');
+                    } else if (gameMode === 'single') {
+                        isGameStarted = true;
                     }
                 }
             }, 1000);
