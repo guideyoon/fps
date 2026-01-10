@@ -1527,6 +1527,57 @@
                 display: flex !important;
             }
         }
+
+        /* Landscape Orientation Fixes for Mobile */
+        @media (max-width: 768px) and (orientation: landscape) {
+
+            /* Ensure mode selection isn't visible during gameplay */
+            #mode-selection {
+                display: none !important;
+            }
+
+            /* Adjust weapon inventory position for landscape */
+            #weapon-inventory {
+                left: 10px;
+                transform: translateY(-50%) scale(0.9);
+            }
+
+            /* Adjust ammo display */
+            #ammo-info {
+                bottom: 15px;
+                right: 15px;
+            }
+
+            /* Adjust HP bar */
+            #hp-container {
+                bottom: 15px;
+            }
+
+            /* Make other UI elements more compact */
+            .weapon-slot {
+                padding: 6px 10px;
+            }
+
+            .weapon-number {
+                font-size: 16px;
+            }
+
+            .weapon-name {
+                font-size: 12px;
+            }
+        }
+
+        /* Force hide mode-selection when game is active */
+        body.game-active #mode-selection,
+        body.game-active #name-setup,
+        body.game-active #room-menu,
+        body.game-active #create-room-modal,
+        body.game-active #room-waiting {
+            display: none !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+            visibility: hidden !important;
+        }
     </style>
 </head>
 
