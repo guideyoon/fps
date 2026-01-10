@@ -1940,17 +1940,17 @@
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script>
         /*
-        FPS.html VERSION: 2026-01-10-2245 (Fix Traverse Error & Hitbox & UI)
+        FPS.html VERSION: 2026-01-10-2300 (Fix Map Corruption & Cleanup)
         Updates:
-        - Added null checks for weaponModel and scene in traverse/processing
-        - Corrected checkCollision box to cover full player height (floor to head)
-        - Fixed remote player height offset (feet on ground)
-        - Moved chat even higher (300px desktop, 220px mobile)
+        - Implemented mapGroup to ensure old map assets (pillars, boxes) are cleared
+        - Fixed persistent Factory objects appearing in Hotel map
+        - Refined scene management in startGame
         */
-        console.log('=== FPS.html VERSION: 2026-01-10-2245 ==='); // VERSION CHECK
+        console.log('=== FPS.html VERSION: 2026-01-10-2300 ==='); // VERSION CHECK
         let camera, scene, renderer;
         let postProcessingCanvas, postProcessingCtx; // Global declaration
         let postProcessingEnabled = false;
+        let mapGroup; // Global group for map-specific objects
 
         let isMobile = /Android|webOS|iPhone|iPad|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
             ('ontouchstart' in window) ||
@@ -4072,19 +4072,15 @@
             // 1.5. 멀티플레이어 맵 생성 (currentMap은 gameStart 이벤트에서 설정됨)
             if (gameMode === 'multi') {
                 console.log('Creating map for multiplayer:', currentMap);
-                // Clear existing map (prevent Z-fighting floor)
-                if (window.baseFloor) {
-                    scene.remove(window.baseFloor);
-                    window.baseFloor = null;
-                }
 
-                // Extra cleanup to ensure NO other floors exist
-                scene.traverse(obj => {
-                    if (obj.isMesh && obj.geometry.type === 'PlaneGeometry' && obj.rotation.x < -1.5) {
-                        console.log('Removing extra floor mesh:', obj);
-                        scene.remove(obj);
-                    }
-                });
+                // Clear map group before creating new map
+                if (mapGroup) {
+                    mapGroup.clear();
+                } else {
+                    // mapGroup이 없으면(드문 경우) 새로 생성
+                    mapGroup = new THREE.Group();
+                    scene.add(mapGroup);
+                }
 
                 if (currentMap === 'hotel') {
                     createHotelMap();
@@ -4187,6 +4183,10 @@
             dirLight.shadow.mapSize.height = 2048;
             scene.add(dirLight);
 
+            // 5.5) 맵 전용 그룹 생성 및 추가
+            mapGroup = new THREE.Group();
+            scene.add(mapGroup);
+
             // 6) 맵 생성 & 7) 플레이어 초기화
             // (기존 코드에 의존하거나 여기서 간단히 생성)
             createMap();
@@ -4224,7 +4224,7 @@
             const floor = new THREE.Mesh(floorGeo, floorMat);
             floor.rotation.x = -Math.PI / 2;
             floor.receiveShadow = true;
-            scene.add(floor);
+            mapGroup.add(floor);
             window.baseFloor = floor;
 
             // 벽 (임시)
@@ -4233,7 +4233,7 @@
             for (let i = 0; i < 10; i++) {
                 const box = new THREE.Mesh(boxGeo, boxMat);
                 box.position.set((Math.random() - 0.5) * 40, 0.5, (Math.random() - 0.5) * 40);
-                scene.add(box);
+                mapGroup.add(box);
             }
         }
 
@@ -4533,7 +4533,7 @@
             const floor = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), matConcrete);
             floor.rotation.x = -Math.PI / 2;
             floor.receiveShadow = true;
-            scene.add(floor);
+            mapGroup.add(floor);
 
             function addBoxCollider(mesh) {
                 const box = new THREE.Box3().setFromObject(mesh);
@@ -4547,7 +4547,7 @@
                 const w = new THREE.Mesh(wallGeo, matWall);
                 w.position.set(x, y, z);
                 if (rotY) w.rotation.y = rotY;
-                scene.add(w);
+                mapGroup.add(w);
                 addBoxCollider(w);
             };
             // Walls at ±100 for 200x200 map
@@ -4571,7 +4571,7 @@
                 wall.rotation.y = (i % 2) * Math.PI / 2; // Alternate orientation
                 wall.castShadow = true;
                 wall.receiveShadow = true;
-                scene.add(wall);
+                mapGroup.add(wall);
                 addBoxCollider(wall);
             });
 
@@ -4589,7 +4589,7 @@
                 platform.position.set(p.x, p.height, p.z);
                 platform.castShadow = true;
                 platform.receiveShadow = true;
-                scene.add(platform);
+                mapGroup.add(platform);
                 addBoxCollider(platform);
 
                 // Support pillars
@@ -4598,7 +4598,7 @@
                         const support = new THREE.Mesh(platformSupport, matMetal);
                         support.position.set(p.x + dx, p.height / 2, p.z + dz);
                         support.castShadow = true;
-                        scene.add(support);
+                        mapGroup.add(support);
                         addBoxCollider(support); // Added missing collider
                     }
                 }
@@ -4616,7 +4616,7 @@
                 crate.position.set(p.x, 1.5, p.z);
                 crate.castShadow = true;
                 crate.receiveShadow = true;
-                scene.add(crate);
+                mapGroup.add(crate);
                 addBoxCollider(crate);
             });
 
@@ -4635,7 +4635,7 @@
                     crate.rotation.y = Math.random() * Math.PI;
                     crate.castShadow = true;
                     crate.receiveShadow = true;
-                    scene.add(crate);
+                    mapGroup.add(crate);
                     addBoxCollider(crate);
                 }
             });
@@ -4662,8 +4662,8 @@
                 }
                 wall1.castShadow = true;
                 wall2.castShadow = true;
-                scene.add(wall1);
-                scene.add(wall2);
+                mapGroup.add(wall1);
+                mapGroup.add(wall2);
                 addBoxCollider(wall1);
                 addBoxCollider(wall2);
             });
@@ -4672,7 +4672,7 @@
             const centralBase = new THREE.Mesh(new THREE.BoxGeometry(15, 1, 15), matConcrete);
             centralBase.position.set(0, 0.5, 0);
             centralBase.receiveShadow = true;
-            scene.add(centralBase);
+            mapGroup.add(centralBase);
             addBoxCollider(centralBase);
 
             // Ramps for central structure
@@ -4681,7 +4681,7 @@
                 const ramp = new THREE.Mesh(rampGeo, matMetal);
                 ramp.position.set(offset, 1, 0);
                 ramp.rotation.x = Math.PI / 12;
-                scene.add(ramp);
+                mapGroup.add(ramp);
             });
 
             // Keep existing pillars for vertical gameplay
@@ -4693,7 +4693,7 @@
                     pillar.position.set(x, 5, z);
                     pillar.castShadow = true;
                     pillar.receiveShadow = true;
-                    scene.add(pillar);
+                    mapGroup.add(pillar);
                     addBoxCollider(pillar);
                 }
             }
@@ -4702,7 +4702,7 @@
             for (let z = -20; z <= 20; z += 5) {
                 const beam = new THREE.Mesh(beamGeo, matMetal);
                 beam.position.set(0, 9, z);
-                scene.add(beam);
+                mapGroup.add(beam);
                 addBoxCollider(beam); // Added missing collider
             }
 
@@ -4717,10 +4717,7 @@
                 barrel.position.set(p.x, 0.6, p.z);
                 barrel.castShadow = true;
                 barrel.receiveShadow = true;
-                scene.add(barrel);
-
-                barrel.receiveShadow = true;
-                scene.add(barrel);
+                mapGroup.add(barrel);
 
                 // 원통형 충돌 박스 (간단한 박스로 근사)
                 const barrelCollider = new THREE.Box3().setFromCenterAndSize(
@@ -4756,7 +4753,7 @@
                 container.rotation.y = c.rotation;
                 container.castShadow = true;
                 container.receiveShadow = true;
-                scene.add(container);
+                mapGroup.add(container);
                 addBoxCollider(container);
 
                 // Add container details (corrugated pattern simulation)
@@ -4765,7 +4762,7 @@
                     const strip = new THREE.Mesh(stripGeo, c.material);
                     strip.position.set(c.x, (c.height || 1.3) + i, c.z);
                     strip.rotation.y = c.rotation;
-                    scene.add(strip);
+                    mapGroup.add(strip);
                 }
             });
 
@@ -4784,7 +4781,7 @@
                 barrier.rotation.y = (i % 3) * Math.PI / 3; // Varied angles
                 barrier.castShadow = true;
                 barrier.receiveShadow = true;
-                scene.add(barrier);
+                mapGroup.add(barrier);
                 addBoxCollider(barrier);
             });
 
@@ -4803,7 +4800,7 @@
                 fence.position.set(f.x, 1, f.z);
                 fence.rotation.y = f.rotation;
                 fence.castShadow = true;
-                scene.add(fence);
+                mapGroup.add(fence);
                 addBoxCollider(fence);
             });
 
@@ -4819,14 +4816,14 @@
                 tank.position.set(p.x, 2, p.z);
                 tank.castShadow = true;
                 tank.receiveShadow = true;
-                scene.add(tank);
+                mapGroup.add(tank);
                 addBoxCollider(tank);
 
                 // Tank top/cap
                 const capGeo = new THREE.CylinderGeometry(2.2, 2.2, 0.2, 16);
                 const cap = new THREE.Mesh(capGeo, matMetal);
                 cap.position.set(p.x, 4.1, p.z);
-                scene.add(cap);
+                mapGroup.add(cap);
             });
 
             // === SANDBAG WALLS - LOW TACTICAL COVER ===
@@ -4843,7 +4840,7 @@
                 wall.rotation.y = (i % 2) * Math.PI / 2;
                 wall.castShadow = true;
                 wall.receiveShadow = true;
-                scene.add(wall);
+                mapGroup.add(wall);
                 addBoxCollider(wall);
             });
         }
@@ -4912,7 +4909,7 @@
             );
             floor.rotation.x = -Math.PI / 2;
             floor.receiveShadow = true;
-            scene.add(floor);
+            mapGroup.add(floor);
 
             // === 외벽 (경계) ===
             function addBoxCollider(mesh) {
@@ -4927,7 +4924,7 @@
                 if (rotY) w.rotation.y = rotY;
                 w.castShadow = true;
                 w.receiveShadow = true;
-                scene.add(w);
+                mapGroup.add(w);
                 addBoxCollider(w);
             };
 
@@ -4944,7 +4941,7 @@
             desk.position.set(0, 0.6, -30);
             desk.castShadow = true;
             desk.receiveShadow = true;
-            scene.add(desk);
+            mapGroup.add(desk);
             addBoxCollider(desk);
 
             // 로비 소파들 (대기 공간)
@@ -4962,7 +4959,7 @@
                 sofa.position.set(pos.x, 0.4, pos.z);
                 sofa.castShadow = true;
                 sofa.receiveShadow = true;
-                scene.add(sofa);
+                mapGroup.add(sofa);
                 addBoxCollider(sofa);
             });
 
@@ -4976,7 +4973,7 @@
             leftWall.position.set(-15, 2, 5);
             leftWall.castShadow = true;
             leftWall.receiveShadow = true;
-            scene.add(leftWall);
+            mapGroup.add(leftWall);
             addBoxCollider(leftWall);
 
             // 오른쪽 복도 벽
@@ -4984,7 +4981,7 @@
             rightWall.position.set(15, 2, 5);
             rightWall.castShadow = true;
             rightWall.receiveShadow = true;
-            scene.add(rightWall);
+            mapGroup.add(rightWall);
             addBoxCollider(rightWall);
 
             // === 객실 (양쪽) ===
@@ -5001,7 +4998,7 @@
                 frontWall.position.set(-25, 2, z);
                 frontWall.castShadow = true;
                 frontWall.receiveShadow = true;
-                scene.add(frontWall);
+                mapGroup.add(frontWall);
                 addBoxCollider(frontWall);
 
                 // 객실 문
@@ -5010,7 +5007,7 @@
                 door.position.set(-19, 1.5, z);
                 door.castShadow = true;
                 door.receiveShadow = true;
-                scene.add(door);
+                mapGroup.add(door);
                 // 문은 충돌체에 추가하지 않음 (통과 가능)
 
                 // 객실 침대
@@ -5019,7 +5016,7 @@
                 bed.position.set(-28, 0.3, z);
                 bed.castShadow = true;
                 bed.receiveShadow = true;
-                scene.add(bed);
+                mapGroup.add(bed);
                 addBoxCollider(bed);
 
                 // 객실 뒷벽 (추가)
@@ -5028,7 +5025,7 @@
                 backWall.position.set(-31, 2, z);
                 backWall.castShadow = true;
                 backWall.receiveShadow = true;
-                scene.add(backWall);
+                mapGroup.add(backWall);
                 addBoxCollider(backWall);
             }
 
@@ -5041,7 +5038,7 @@
                 frontWall.position.set(25, 2, z);
                 frontWall.castShadow = true;
                 frontWall.receiveShadow = true;
-                scene.add(frontWall);
+                mapGroup.add(frontWall);
                 addBoxCollider(frontWall);
 
                 // 객실 문
@@ -5050,7 +5047,7 @@
                 door.position.set(19, 1.5, z);
                 door.castShadow = true;
                 door.receiveShadow = true;
-                scene.add(door);
+                mapGroup.add(door);
 
                 // 객실 침대
                 const bedGeo = new THREE.BoxGeometry(3, 0.6, 2);
@@ -5058,7 +5055,7 @@
                 bed.position.set(28, 0.3, z);
                 bed.castShadow = true;
                 bed.receiveShadow = true;
-                scene.add(bed);
+                mapGroup.add(bed);
                 addBoxCollider(bed);
 
                 // 객실 뒷벽
@@ -5067,7 +5064,7 @@
                 backWall.position.set(31, 2, z);
                 backWall.castShadow = true;
                 backWall.receiveShadow = true;
-                scene.add(backWall);
+                mapGroup.add(backWall);
                 addBoxCollider(backWall);
             }
 
@@ -5077,7 +5074,7 @@
             elevator.position.set(0, 2.5, 35);
             elevator.castShadow = true;
             elevator.receiveShadow = true;
-            scene.add(elevator);
+            mapGroup.add(elevator);
             addBoxCollider(elevator);
 
             // === 화분 (장식) ===
@@ -5095,7 +5092,7 @@
                 plant.position.set(pos.x, 0.75, pos.z);
                 plant.castShadow = true;
                 plant.receiveShadow = true;
-                scene.add(plant);
+                mapGroup.add(plant);
                 addBoxCollider(plant);
             });
         }
