@@ -5392,21 +5392,23 @@
         }
 
         function explodeGrenade(pos) {
-            // 1. Visuals
-            const blastGeo = new THREE.SphereGeometry(0.2, 16, 16);
-            const blastMat = new THREE.MeshBasicMaterial({ color: 0xff4500, transparent: true, opacity: 0.8 });
+            // 1. Visuals - Bigger and more impressive
+            const blastGeo = new THREE.SphereGeometry(0.5, 32, 32); // Increased base size 0.2 -> 0.5
+            const blastMat = new THREE.MeshBasicMaterial({ color: 0xff4500, transparent: true, opacity: 0.9 });
             const blast = new THREE.Mesh(blastGeo, blastMat);
             blast.position.copy(pos);
             scene.add(blast);
 
-            // Expand animation loop embedded
+            // Expand animation loop
             let duration = 0;
             const expandAnim = () => {
-                duration += 0.05;
-                const scale = 1 + duration * 15;
+                duration += 0.04; // Slightly faster updates
+                // Much larger scale factor for wide explosion
+                // Max size approx: 0.5 * (1 + 0.6 * 60) = ~18.5 units radius visual
+                const scale = 1 + duration * 60;
                 blast.scale.set(scale, scale, scale);
-                blast.material.opacity = 0.8 * (1 - duration / 0.5); // Fade out over 0.5s
-                if (duration < 0.5) requestAnimationFrame(expandAnim);
+                blast.material.opacity = 0.9 * (1 - duration / 0.6); // Fade out over 0.6s
+                if (duration < 0.6) requestAnimationFrame(expandAnim);
                 else scene.remove(blast);
             };
             expandAnim();
@@ -5414,8 +5416,8 @@
             // 2. Sound
             SoundGen.playExplosion();
 
-            // 3. Damage (AoE)
-            const EXPLOSION_RADIUS = 8.0;
+            // 3. Damage (AoE) - WIDER RANGE
+            const EXPLOSION_RADIUS = 15.0; // Increased from 8.0
             const MAX_DAMAGE = 100;
 
             // Enemies
