@@ -244,26 +244,48 @@ io.on('connection', (socket) => {
 });
 
 // Helper Functions
-// Predefined safe spawn points (tested and clear of pillars/walls)
+// Predefined safe spawn points - VERIFIED clear of all structures
 // Factory Map (200x200)
+// Avoiding: Pillars (-20 to 20, step 10), Platforms (±60,±60), Containers (±70,±70, ±85/0),
+// Tanks, Crates, Barriers, Cover walls, Corridors, Central structure (±7.5 from center)
 const FACTORY_SPAWN_POINTS = [
-    // Center Area (Safe spawn away from pillars)
-    { x: 0, y: 1.7, z: 0 }, { x: -8, y: 1.7, z: -8 },
-    { x: 8, y: 1.7, z: -8 }, { x: -8, y: 1.7, z: 8 },
+    // === SAFE ZONE A: Inner ring (between center structure and pillars) ===
+    // Center structure is at 0,0 with 15x15 size, pillars start at ±10
+    // These spots are in the gaps between structures
 
-    // Middle Area (Avoiding Crates at 15, 25, 30, 45, 55, 70)
-    { x: 27.3, y: 1.7, z: 27.3 }, { x: -27.3, y: 1.7, z: -27.3 },
-    { x: 37.3, y: 1.7, z: 37.3 }, { x: -37.3, y: 1.7, z: 37.3 },
-    { x: 53.3, y: 1.7, z: 12.3 }, { x: -53.3, y: 1.7, z: -12.3 },
+    // === SAFE ZONE B: Open areas between pillars and outer structures ===
+    // Clear corridor areas (avoiding cover walls, crates, barriers)
+    { x: 22, y: 1.7, z: 22 },   // NE quadrant open space
+    { x: -22, y: 1.7, z: 22 },  // NW quadrant open space
+    { x: 22, y: 1.7, z: -22 },  // SE quadrant open space
+    { x: -22, y: 1.7, z: -22 }, // SW quadrant open space
 
-    // Outer Area (Avoiding Containers at ±70, ±85 and Platforms at ±60)
-    { x: 78.3, y: 1.7, z: 27.3 }, { x: -78.3, y: 1.7, z: -27.3 },
-    { x: 27.3, y: 1.7, z: 78.3 }, { x: -27.3, y: 1.7, z: -78.3 },
-    { x: 67.3, y: 1.7, z: -33.3 }, { x: -67.3, y: 1.7, z: 33.3 },
+    // === SAFE ZONE C: Mid-range areas ===
+    // Avoiding crates at (±45,±15), (±15,±45), (±70,±30), etc.
+    { x: 38, y: 1.7, z: 0 },    // East mid
+    { x: -38, y: 1.7, z: 0 },   // West mid
+    { x: 0, y: 1.7, z: 38 },    // North mid
+    { x: 0, y: 1.7, z: -38 },   // South mid
 
-    // Safe Pockets
-    { x: 12.3, y: 1.7, z: 37.3 }, { x: 37.3, y: 1.7, z: 12.3 },
-    { x: -12.3, y: 1.7, z: 67.3 }, { x: 67.3, y: 1.7, z: -12.3 }
+    // === SAFE ZONE D: Diagonal open corridors ===
+    { x: 32, y: 1.7, z: 52 },   // NE diagonal
+    { x: -32, y: 1.7, z: 52 },  // NW diagonal  
+    { x: 32, y: 1.7, z: -52 },  // SE diagonal
+    { x: -32, y: 1.7, z: -52 }, // SW diagonal
+
+    // === SAFE ZONE E: Outer ring safe spots ===
+    // Avoiding containers (±70,±70), tanks (±50,±70), fences (±90,±40)
+    { x: 52, y: 1.7, z: 32 },   // East outer
+    { x: -52, y: 1.7, z: 32 },  // West outer
+    { x: 52, y: 1.7, z: -32 },  // East outer south
+    { x: -52, y: 1.7, z: -32 }, // West outer south
+
+    // === SAFE ZONE F: Corner approach areas ===
+    // Avoiding platforms at ±60,±60 and containers
+    { x: 78, y: 1.7, z: 52 },   // Far NE
+    { x: -78, y: 1.7, z: 52 },  // Far NW
+    { x: 78, y: 1.7, z: -52 },  // Far SE
+    { x: -78, y: 1.7, z: -52 }  // Far SW
 ];
 
 
@@ -284,9 +306,9 @@ function getSafeSpawnPosition(playerIndex = 0, mapName = 'factory') {
     // 맵에 따라 다른 스폰 포인트 사용
     const spawnPoints = mapName === 'hotel' ? HOTEL_SPAWN_POINTS : FACTORY_SPAWN_POINTS;
 
-    // Pick spawn point based on player index to avoid overlapping
-    const index = playerIndex % spawnPoints.length;
-    return { ...spawnPoints[index] }; // Clone to avoid mutation
+    // ALWAYS pick a RANDOM spawn point (not sequential)
+    const randomIndex = Math.floor(Math.random() * spawnPoints.length);
+    return { ...spawnPoints[randomIndex] }; // Clone to avoid mutation
 }
 
 function joinRoom(socket, roomId) {

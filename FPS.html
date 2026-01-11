@@ -1741,7 +1741,6 @@
             <!-- 방 목록이 여기에 표시됨 -->
             <div class="no-rooms-message">생성된 방이 없습니다.</div>
         </div>
-        <button class="cancel" id="btn-back-to-name">뒤로가기</button>
     </div>
 
     <!-- 3. 방 생성 모달 -->
@@ -2906,11 +2905,14 @@
             });
 
             // 3. Room Menu (Lobby)
-            document.getElementById('btn-back-to-name').addEventListener('click', () => {
-                roomMenu.style.display = 'none';
-                nameSetup.style.display = 'flex';
-                // Optional: Disconnect socket?
-            });
+            const btnBackToName = document.getElementById('btn-back-to-name');
+            if (btnBackToName) {
+                btnBackToName.addEventListener('click', () => {
+                    roomMenu.style.display = 'none';
+                    nameSetup.style.display = 'flex';
+                    // Optional: Disconnect socket?
+                });
+            }
 
             // Back button to return to mode selection from room menu
             document.getElementById('btn-back-to-mode-from-room').addEventListener('click', () => {
@@ -2920,16 +2922,7 @@
                 // Optional: Disconnect socket?
             });
 
-            // Restart Game Function (Skip mode selection for single-player)
-            window.restartGame = function () {
-                if (gameMode === 'single') {
-                    // Restart single-player directly
-                    location.reload();
-                } else {
-                    // Multi-player: go back to mode selection
-                    location.reload();
-                }
-            };
+            // Restart Game logic is now consolidated in the global restartGame function below.
 
             // Weapon Inventory Click Handler (for both PC and mobile)
             document.getElementById('weapon-inventory').addEventListener('click', (e) => {
@@ -3787,13 +3780,19 @@
         elHeadshot = document.getElementById('headshot-msg');
         elHitMarker = document.getElementById('hit-marker');
 
-        // Restart button - Add mobile touch support
+        // Restart button - Add mobile touch support handlers
         const restartBtn = document.getElementById('restart-btn');
         if (restartBtn) {
-            const restartGame = () => {
-                location.reload();
-            };
-            restartBtn.addEventListener('click', restartGame);
+            // Remove any existing listeners if possible (though difficult with anonymous functions)
+            // Instead, we ensure the global restartGame is used
+            restartBtn.addEventListener('click', () => {
+                if (typeof window.restartGame === 'function') {
+                    window.restartGame();
+                } else if (typeof restartGame === 'function') {
+                    restartGame();
+                }
+            });
+
             // Mobile touch support
             restartBtn.addEventListener('touchstart', (e) => {
                 e.preventDefault();
@@ -3802,7 +3801,11 @@
             restartBtn.addEventListener('touchend', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                restartGame();
+                if (typeof window.restartGame === 'function') {
+                    window.restartGame();
+                } else if (typeof restartGame === 'function') {
+                    restartGame();
+                }
             });
         }
 
@@ -3977,7 +3980,7 @@
         document.body.addEventListener('mousedown', loadAudioFiles, { once: true });
         document.body.addEventListener('touchstart', loadAudioFiles, { once: true });
 
-        document.getElementById('restart-btn').addEventListener('click', restartGame);
+        // Global restartGame handler is already attached above
 
         // 조명 토글 버튼 이벤트
         const lightToggleBtn = document.getElementById('light-toggle-btn');
@@ -4037,51 +4040,83 @@
 
 
 
-        // --- 게임 재시작 함수 ---
+        // --- 게임 재시작 함수 (통합형) ---
         function restartGame() {
-            console.log('restartGame() called');
+            console.log('restartGame() called, mode:', gameMode);
 
-            // 게임 오버 화면 숨김
+            // 1. 공통 UI 초기화
             const elGameOver = document.getElementById('game-over');
             if (elGameOver) elGameOver.style.display = 'none';
-
-            // 데스 오버레이 숨김
             const deathOverlay = document.getElementById('death-overlay');
             if (deathOverlay) deathOverlay.style.display = 'none';
-
-            // 피격 효과 제거
             const elDamage = document.getElementById('damage-overlay');
             if (elDamage) elDamage.style.opacity = 0;
+            const elPauseOverlay = document.getElementById('pause-overlay');
+            if (elPauseOverlay) elPauseOverlay.style.display = 'none';
 
-            // 플레이어 상태 초기화
+            // 2. 공통 상태 초기화
             isDead = false;
             playerHP = 100;
+            isPaused = false;
+            if (typeof spawnTimer !== 'undefined') spawnTimer = 0;
+
+            // 3. UI 바 초기화
+            const hpBar = document.getElementById('hp-bar');
+            const hpText = document.getElementById('hp-text');
+            if (hpBar) hpBar.style.width = '100%';
+            if (hpText) hpText.innerText = 'HP: 100';
 
             // 혼자하기 모드: 바로 재시작 (User Request)
             if (gameMode === 'single') {
-                // 적 제거
-                enemies.forEach(e => scene.remove(e));
-                enemies = [];
-
-                // 체력 회복 아이템 제거
-                healthPills.forEach(pill => scene.remove(pill));
-                healthPills = [];
-
-                // 게임 바로 시작
                 console.log('Restarting Single Player Game immediately...');
+
+                // 적 및 아이템 제거
+                if (typeof enemies !== 'undefined') {
+                    enemies.forEach(e => scene.remove(e));
+                    enemies = [];
+                }
+                if (typeof healthPills !== 'undefined') {
+                    healthPills.forEach(pill => scene.remove(pill));
+                    healthPills = [];
+                }
+
+                // 탄약 및 위치 리셋
+                if (typeof resetAmmo === 'function') resetAmmo();
+                if (typeof position !== 'undefined') position.set(0, 1.7, 5);
+
+                // 게임 통계 리셋
+                gameStartTime = performance.now();
+                killCount = 0;
+                playTime = 0;
+                const elPlayTime = document.getElementById('play-time');
+                const elKillCount = document.getElementById('kill-count');
+                if (elPlayTime) elPlayTime.innerText = "Time: 00:00";
+                if (elKillCount) elKillCount.innerText = "Kills: 0";
+
+                // 게임 엔진 시작
                 startGame();
+
+                // 마우스 포인트 락 활성화 요청 (데스크톱)
+                if (!isMobile) {
+                    document.body.requestPointerLock();
+                }
             }
-            // 멀티플레이어 모드: 대기실로 돌아가기
+            // 멀티플레이어 모드: 대기실로 이동 및 리스폰 요청
             else if (gameMode === 'multi') {
+                // 멀티플레이어는 상황에 따라 reload가 필요할 수 있으나, 
+                // 여기서는 최대한 lobby로 복귀를 시도함
                 const roomWaiting = document.getElementById('room-waiting');
                 if (roomWaiting) roomWaiting.style.display = 'flex';
 
-                // 리스폰 요청
                 if (socket && socket.connected) {
                     socket.emit('requestRespawn');
+                } else {
+                    // 소켓 끊겼으면 어쩔 수 없이 새로고침
+                    location.reload();
                 }
             }
         }
+        window.restartGame = restartGame; // 전역 바인딩 보장
 
         // --- 게임 시작 카운트다운 ---
         function startCountdown() {
@@ -6448,36 +6483,7 @@
             if (typeof updateUI === 'function') updateUI();
         }
 
-        function restartGame() {
-            resetAmmo();
-            playerHP = 100;
-            isDead = false;
-            isPaused = false;
-            spawnTimer = 0;
-            elPauseOverlay.style.display = 'none';
-            elHpBar.style.width = '100%';
-            elHpText.innerText = "HP: 100";
-            elGameOver.style.display = 'none';
-            position.set(0, 1.7, 5);
-
-            // 게임 통계 리셋
-            gameStartTime = performance.now();
-            killCount = 0;
-            playTime = 0;
-            if (elPlayTime) elPlayTime.innerText = "Time: 00:00";
-            if (elKillCount) elKillCount.innerText = "Kills: 0";
-
-            enemies.forEach(e => scene.remove(e));
-            enemies = [];
-            healthPills.forEach(pill => scene.remove(pill));
-            healthPills = [];
-            for (let i = 0; i < 6; i++) createEnemyAI();
-
-            // 재시작 후에는 포인터 잠금을 요청하지 않음 (사용자가 클릭해야 함)
-            if (!isMobile && document.pointerLockElement === document.body) {
-                document.exitPointerLock();
-            }
-        }
+        // Duplicate restartGame function removed (Consolidated at line 4093)
 
         // 모바일 터치 컨트롤 변수
         // 더 확실한 모바일 감지: User Agent + 터치 지원 + 화면 크기
@@ -7499,6 +7505,7 @@
                 if (!isEnemy && !isOtherPlayer) {
                     // Check if it's a map collider before placing decal
                     if (w.type !== 'KNIFE' && h.object.geometry && h.face) createDecal(h.point, h.face.normal);
+                    break; // 첫 번째 충돌 지점에서만 탄흔 생성
                 }
 
                 // 다른 플레이어에게 데미지
