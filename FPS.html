@@ -7507,16 +7507,24 @@
                 }
 
                 if (!isEnemy && !isOtherPlayer) {
-                    // 캐릭터 부위(head, limb)만 필터링, 맵 구조물에는 탄흔 생성
-                    const isCharacterPart = (
-                        h.object.name === 'head' ||
-                        h.object.name === 'limb'
-                    );
-
-                    if (!isCharacterPart && w.type !== 'KNIFE' && h.object.geometry && h.face) {
-                        createDecal(h.point, h.face.normal);
+                    // 맵 구조물(mapGroup)인지 확인
+                    let isMap = false;
+                    let curr = h.object;
+                    while (curr) {
+                        if (curr === mapGroup) { isMap = true; break; }
+                        if (curr.parent === scene || !curr.parent) break;
+                        curr = curr.parent;
                     }
-                    break; // 첫 번째 충돌 지점에서만 탄흔 생성
+
+                    if (isMap) {
+                        if (w.type !== 'KNIFE' && h.object.geometry && h.face) {
+                            createDecal(h.point, h.face.normal);
+                        }
+                        break; // 맵에 맞으면 탄흔 생성하고 총알 멈춤
+                    }
+
+                    // 맵도 아니고 적도 아니면(탄피, 이펙트 등) 통과
+                    continue;
                 }
 
                 // 다른 플레이어에게 데미지
@@ -7611,7 +7619,7 @@
                     break;
                 }
 
-                if (!isEnemy) break;
+                // 관통 (break 제거)
             }
         }
 
