@@ -1,1 +1,4 @@
 항상 설명은 한글로 해줘
+모든 로직은 순수 자바스크립트(Vanilla JS)로 작성한다.
+외부 UI 라이브러리(React, Vue 등)를 절대 도입하지 않는다.
+Three.js와 Socket.io 외의 새로운 의존성(npm package) 추가 시 반드시 사용자의 승인을 받는다.

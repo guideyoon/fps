@@ -2837,12 +2837,44 @@
                 if (chatToggle) chatToggle.style.display = 'flex';
             });
 
-            // Exit Game Button Handler (Zombie Mode)
+            // Exit Game Button Handler
             const exitGameHandler = () => {
                 document.getElementById('exit-game-btn').style.display = 'none';
-                modeSelection.style.display = 'flex';
                 document.body.classList.remove('game-active');
-                location.reload(); // Reload to reset game state
+
+                if (gameMode === 'multi') {
+                    // 멀티플레이어: 소켓에 방 나가기 알리고 로비로 이동
+                    if (socket && socket.connected) {
+                        socket.emit('leaveRoom');
+                    }
+
+                    // 게임 상태 초기화
+                    isGameStarted = false;
+                    isDead = false;
+                    playerHP = 100;
+
+                    // UI 초기화
+                    document.getElementById('room-waiting').style.display = 'none';
+                    chatContainer.style.display = 'none';
+                    roomMenu.style.display = 'flex';
+
+                    // 인게임 플레이어 리스트 숨기기
+                    const igList = document.getElementById('ingame-players-list');
+                    if (igList) igList.style.display = 'none';
+
+                    // 타이머 UI 숨기기
+                    const timerEl = document.getElementById('game-timer');
+                    if (timerEl) timerEl.style.display = 'none';
+
+                    // 방 목록 새로고침 요청
+                    if (socket && socket.connected) {
+                        socket.emit('setIdentity', { name: socket.userData ? socket.userData.name : 'Player' });
+                    }
+                } else {
+                    // 싱글플레이어(좀비 모드): 페이지 새로고침
+                    modeSelection.style.display = 'flex';
+                    location.reload();
+                }
             };
             document.getElementById('exit-game-btn').addEventListener('click', exitGameHandler);
             document.getElementById('exit-game-btn').addEventListener('touchstart', (e) => {
@@ -3082,6 +3114,23 @@
                         console.log('Joining mid-game!');
                         document.getElementById('room-waiting').style.display = 'none';
                         startGame(); // Immediately enter game
+
+                        // [CRITICAL FIX] 난입 시 isGameStarted를 true로 설정
+                        // startCountdown()을 거치지 않기 때문에 수동으로 설정해야 함
+                        isGameStarted = true;
+                        console.log('Late join: isGameStarted set to true');
+
+                        // 기존 플레이어들의 메시 생성 (roomJoined에서 받은 players 사용)
+                        setTimeout(() => {
+                            if (window.scene && data.players) {
+                                Object.values(data.players).forEach(p => {
+                                    if (p.id !== myId && !otherPlayersMap[p.id]) {
+                                        console.log('Late join: Creating mesh for existing player:', p.name);
+                                        createRemotePlayer(p);
+                                    }
+                                });
+                            }
+                        }, 100); // scene 초기화 완료 후 실행
                     }
 
                     // Save own spawn position from server
@@ -4325,16 +4374,32 @@
 
         function initPlayer() {
             camera.position.set(0, 1.6, 5);
-            weaponContainer = new THREE.Group();
-            camera.add(weaponContainer);
+
+            // [FIX] 기존 weaponContainer가 scene에 직접 추가되어 있으면 제거하고 camera에 추가
+            // 이전 init()에서 scene.add(weaponContainer)로 추가된 경우
+            if (weaponContainer && weaponContainer.parent === scene) {
+                scene.remove(weaponContainer);
+            }
+
+            // weaponContainer가 없으면 새로 생성
+            if (!weaponContainer) {
+                weaponContainer = new THREE.Group();
+            }
+
+            // Camera에 weaponContainer 추가 (1인칭 시점에서 보이도록)
+            if (weaponContainer.parent !== camera) {
+                camera.add(weaponContainer);
+            }
             scene.add(camera);
 
-            // 무기 모델 (간단)
-            const geo = new THREE.BoxGeometry(0.1, 0.1, 0.6);
-            const mat = new THREE.MeshStandardMaterial({ color: 0x333333 });
-            weaponModel = new THREE.Mesh(geo, mat);
-            weaponModel.position.set(0.2, -0.2, -0.4);
-            weaponContainer.add(weaponModel);
+            // [FIX] weaponModel이 없거나 비어있으면 새로 생성
+            if (!weaponModel) {
+                weaponModel = new THREE.Group();
+                weaponContainer.add(weaponModel);
+            }
+
+            // [FIX] 상세한 무기 모델을 buildWeapon으로 생성 (단순 박스 대신)
+            buildWeapon(curWeaponIdx);
         }
 
         function initDecalSystem() {
@@ -7752,13 +7817,26 @@
                 camera.position.copy(position);
                 camera.position.x += hitShake.x;
                 camera.position.y += hitShake.y;
-                weaponContainer.position.copy(position);
-                weaponContainer.position.x += hitShake.x;
-                weaponContainer.position.y += hitShake.y;
-                weaponContainer.quaternion.copy(camera.quaternion);
-                weaponContainer.translateX(currentPos.x);
-                weaponContainer.translateY(currentPos.y);
-                weaponContainer.translateZ(currentPos.z);
+
+                // [FIX] weaponContainer가 camera의 자식인지 확인하여 위치 업데이트 방식 결정
+                if (weaponContainer.parent === camera) {
+                    // 카메라의 자식일 경우: 로컬 오프셋만 설정 (카메라를 자동으로 따라감)
+                    weaponContainer.position.set(
+                        currentPos.x + hitShake.x,
+                        currentPos.y + hitShake.y,
+                        currentPos.z
+                    );
+                    weaponContainer.rotation.set(0, 0, 0); // 카메라 회전을 상속받으므로 자체 회전은 0
+                } else {
+                    // scene의 자식일 경우: 월드 좌표 직접 업데이트 (기존 로직)
+                    weaponContainer.position.copy(position);
+                    weaponContainer.position.x += hitShake.x;
+                    weaponContainer.position.y += hitShake.y;
+                    weaponContainer.quaternion.copy(camera.quaternion);
+                    weaponContainer.translateX(currentPos.x);
+                    weaponContainer.translateY(currentPos.y);
+                    weaponContainer.translateZ(currentPos.z);
+                }
 
                 recoil.x *= (1 - 10 * dt); recoil.z *= (1 - 10 * dt);
 
