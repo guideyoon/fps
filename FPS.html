@@ -633,26 +633,26 @@
         #chat-container {
             position: absolute;
             left: 20px;
-            width: 350px;
+            width: 280px;
             background: rgba(0, 0, 0, 0.6);
             border-radius: 10px;
-            padding: 15px;
+            padding: 10px;
             z-index: 100;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
             pointer-events: auto;
-            /* [User Request] HP 바 및 조이스틱 가리지 않도록 위치 더 크게 상향 */
-            bottom: 300px !important;
+            /* HP 바 위, 무기 인벤토리 아래에 배치 */
+            bottom: 55px;
         }
 
         #chat-messages {
-            height: 200px;
+            height: 100px;
             overflow-y: auto;
             padding-right: 5px;
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: 4px;
         }
 
         #chat-messages::-webkit-scrollbar {

@@ -247,9 +247,9 @@ io.on('connection', (socket) => {
 // Predefined safe spawn points (tested and clear of pillars/walls)
 // Factory Map (200x200)
 const FACTORY_SPAWN_POINTS = [
-    // Center Area (Avoiding Pillars at 0, 10, 20)
-    { x: 3.3, y: 1.7, z: 3.3 }, { x: -3.3, y: 1.7, z: -3.3 },
-    { x: 7.3, y: 1.7, z: 3.3 }, { x: 3.3, y: 1.7, z: 7.3 },
+    // Center Area (Safe spawn away from pillars)
+    { x: 0, y: 1.7, z: 0 }, { x: -8, y: 1.7, z: -8 },
+    { x: 8, y: 1.7, z: -8 }, { x: -8, y: 1.7, z: 8 },
 
     // Middle Area (Avoiding Crates at 15, 25, 30, 45, 55, 70)
     { x: 27.3, y: 1.7, z: 27.3 }, { x: -27.3, y: 1.7, z: -27.3 },
