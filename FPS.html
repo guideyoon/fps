@@ -3016,6 +3016,58 @@
             const roomWaiting = document.getElementById('room-waiting');
             const chatContainer = document.getElementById('chat-container');
 
+            // --- UI 요소 초기화 (안전하게 init 내부로 이동) ---
+            elAmmoCurrent = document.getElementById('hud-ammo-current');
+            elAmmoReserve = document.getElementById('hud-ammo-reserve');
+            elWeaponName = document.getElementById('hud-weapon-name');
+            elCrosshair = document.getElementById('hud-crosshair');
+            
+            elVignette = document.getElementById('vignette');
+            if (!elVignette) {
+                elVignette = document.createElement('div');
+                elVignette.id = 'vignette';
+                document.body.appendChild(elVignette);
+            }
+            // Force critical styles
+            elVignette.style.position = 'absolute';
+            elVignette.style.top = '0'; elVignette.style.left = '0';
+            elVignette.style.width = '100%'; elVignette.style.height = '100%';
+            elVignette.style.background = 'radial-gradient(circle, transparent 50%, black 150%)';
+            elVignette.style.opacity = '0';
+            elVignette.style.transition = 'opacity 0.2s';
+            elVignette.style.pointerEvents = 'none';
+            elVignette.style.zIndex = '5';
+
+            elScope = document.getElementById('scope-overlay');
+            elHpBar = document.getElementById('hud-hp-bar');
+            elHpGhost = document.getElementById('hud-hp-bar-ghost');
+            elHpText = document.getElementById('hud-hp-text');
+            elDamage = document.getElementById('hud-damage-vignette');
+            
+            elTimer = document.getElementById('hud-timer');
+            elScoreAlly = document.getElementById('hud-score-ally');
+            elScoreEnemy = document.getElementById('hud-score-enemy');
+            elKillFeed = document.getElementById('hud-kill-feed');
+
+            elGameOver = document.getElementById('game-over');
+            elPauseOverlay = document.getElementById('pause-overlay');
+            elHeadshot = document.getElementById('headshot-msg');
+            elHitMarker = document.getElementById('hit-marker');
+
+            // Restart button - Add mobile touch support handlers (init 내부로 이동)
+            const restartBtn = document.getElementById('restart-btn');
+            if (restartBtn) {
+                restartBtn.addEventListener('click', () => {
+                    if (typeof window.restartGame === 'function') window.restartGame();
+                    else if (typeof restartGame === 'function') restartGame();
+                });
+                restartBtn.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    if (typeof window.restartGame === 'function') window.restartGame();
+                    else if (typeof restartGame === 'function') restartGame();
+                });
+            }
+
             // --- Load User Sounds ---
             SoundGen.loadAudioFile('uak.mp3', 'damage').catch(e => console.log('Damage sound (uak.mp3) not found or failed to load:', e));
             SoundGen.loadAudioFile('hit.mp3', 'hit').catch(e => console.log('Hit sound (hit.mp3) not found or failed to load:', e));
@@ -3206,6 +3258,9 @@
                 // Server sends updates automatically, but could request manual refresh if needed
                 if (socket) socket.emit('setIdentity', { name: socket.userData ? socket.userData.name : 'Player' });
             });
+
+            // 우클릭 메뉴 방지 (조준 기능과 충돌 방지)
+            document.addEventListener('contextmenu', e => e.preventDefault());
 
             // 4. Create Room Modal
             document.getElementById('btn-create-cancel').addEventListener('click', () => {
@@ -3986,226 +4041,6 @@
                 console.error('Window.scene is missing in createRemotePlayer!'); // DEBUG
             }
         }
-
-        // 바로 시작하기 (Legacy code - Force Start handled by Host Controls now)
-        const btnForceStart = document.getElementById('btn-force-start');
-        if (btnForceStart) {
-            btnForceStart.addEventListener('click', () => {
-                if (socket && socket.connected) {
-                    socket.emit('requestStart');
-                }
-            });
-        }
-
-        // 방 나가기
-        document.getElementById('btn-leave-room').addEventListener('click', () => {
-            if (countdownTimer) {
-                clearInterval(countdownTimer);
-                countdownTimer = null;
-            }
-            roomWaiting.style.display = 'none';
-            modeSelection.style.display = 'flex';
-            gameMode = null;
-            isRoomHost = false;
-            currentPlayers = 1;
-            playersList = [];
-            document.getElementById('countdown').style.display = 'none';
-        });
-
-        // UI 요소 초기화 (DOM이 로드된 후)
-        elAmmoCurrent = document.getElementById('hud-ammo-current');
-        elAmmoReserve = document.getElementById('hud-ammo-reserve');
-        elWeaponName = document.getElementById('hud-weapon-name');
-        elCrosshair = document.getElementById('hud-crosshair');
-        
-        // Re-create or style aiming vignette
-        elVignette = document.getElementById('vignette');
-        if (!elVignette) {
-            elVignette = document.createElement('div');
-            elVignette.id = 'vignette';
-            document.body.appendChild(elVignette);
-        }
-        // Force critical styles since CSS might be replaced
-        elVignette.style.position = 'absolute';
-        elVignette.style.top = '0'; elVignette.style.left = '0';
-        elVignette.style.width = '100%'; elVignette.style.height = '100%';
-        elVignette.style.background = 'radial-gradient(circle, transparent 50%, black 150%)';
-        elVignette.style.opacity = '0';
-        elVignette.style.transition = 'opacity 0.2s';
-        elVignette.style.pointerEvents = 'none';
-        elVignette.style.zIndex = '5';
-
-        elScope = document.getElementById('scope-overlay');
-        elHpBar = document.getElementById('hud-hp-bar');
-        elHpGhost = document.getElementById('hud-hp-bar-ghost');
-        elHpText = document.getElementById('hud-hp-text');
-        elDamage = document.getElementById('hud-damage-vignette');
-        
-        elTimer = document.getElementById('hud-timer');
-        elScoreAlly = document.getElementById('hud-score-ally');
-        elScoreEnemy = document.getElementById('hud-score-enemy');
-        elKillFeed = document.getElementById('hud-kill-feed');
-
-        elGameOver = document.getElementById('game-over');
-        elPauseOverlay = document.getElementById('pause-overlay');
-        elHeadshot = document.getElementById('headshot-msg');
-        elHitMarker = document.getElementById('hit-marker');
-
-
-        // Restart button - Add mobile touch support handlers
-        const restartBtn = document.getElementById('restart-btn');
-        if (restartBtn) {
-            // Remove any existing listeners if possible (though difficult with anonymous functions)
-            // Instead, we ensure the global restartGame is used
-            restartBtn.addEventListener('click', () => {
-                if (typeof window.restartGame === 'function') {
-                    window.restartGame();
-                } else if (typeof restartGame === 'function') {
-                    restartGame();
-                }
-            });
-
-            // Mobile touch support
-            restartBtn.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-            });
-            restartBtn.addEventListener('touchend', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                if (typeof window.restartGame === 'function') {
-                    window.restartGame();
-                } else if (typeof restartGame === 'function') {
-                    restartGame();
-                }
-            });
-        }
-
-        scene = new THREE.Scene();
-
-        // 맵에 따라 다른 배경/안개 설정
-        // 싱글 플레이어는 항상 factory 조명
-        if (gameMode === 'multi' && currentMap === 'hotel') {
-            // 호텔: 밝은 배경 (멀티 플레이어만)
-            const hotelBgColor = 0xf5f5f0;
-            scene.background = new THREE.Color(hotelBgColor);
-            scene.fog = new THREE.FogExp2(hotelBgColor, 0.01); // 연한 안개
-        } else {
-            // Factory: 밝게 조정된 배경 (싱글 + 멀티 factory)
-            const fogColor = 0x2a3540; // 어두운 청회색 -> 밝은 청회색
-            scene.background = new THREE.Color(fogColor);
-            scene.fog = new THREE.FogExp2(fogColor, 0.02); // 안개 밀도 감소
-        }
-
-        // 초기 카메라 설정 (모바일 가로 모드 대응)
-        let initAspect = window.innerWidth / window.innerHeight;
-        if (window.visualViewport) {
-            initAspect = window.visualViewport.width / window.visualViewport.height;
-        }
-        camera = new THREE.PerspectiveCamera(70, initAspect, 0.005, 1000);
-
-        // 맵에 따라 다른 조명 설정
-        // 싱글 플레이어는 항상 factory 조명
-        if (gameMode === 'multi' && currentMap === 'hotel') {
-            // 호텔: 밝은 조명 (멀티 플레이어만)
-            ambientLight = new THREE.AmbientLight(0xffffff, 0.8); // 더 밝게
-            scene.add(ambientLight);
-
-            // 천장 조명 여러 개
-            const hotelLights = [
-                { x: 0, z: -25 },
-                { x: 0, z: 0 },
-                { x: 0, z: 25 },
-                { x: -20, z: 0 },
-                { x: 20, z: 0 }
-            ];
-
-            hotelLights.forEach(pos => {
-                const light = new THREE.PointLight(0xffffee, 1.5, 30);
-                light.position.set(pos.x, 8, pos.z);
-                light.castShadow = true;
-                scene.add(light);
-            });
-        } else {
-            // Factory: 밝게 조정된 조명 (싱글 + 멀티 factory)
-            ambientLight = new THREE.AmbientLight(0xffffff, 0.6); // 0.4 -> 0.6으로 증가
-            scene.add(ambientLight);
-
-            ceilingLight = new THREE.PointLight(0xffaa00, 0.8, 25);
-            ceilingLight.position.set(0, 15, 0);
-            ceilingLight.castShadow = true;
-            ceilingLight.visible = false; // 초기에는 꺼져있음
-            scene.add(ceilingLight);
-
-            const blueLight = new THREE.DirectionalLight(0x4455ff, 0.7); // 0.5 -> 0.7로 증가
-            blueLight.position.set(-10, 5, -10);
-            scene.add(blueLight);
-        }
-
-        // 확장 기능 초기화 (맵 생성 전에 텍스처 시스템을 먼저 초기화)
-        try {
-            initTextureSystem();
-            initModelLoader();
-            initPhysics();
-        } catch (error) {
-            console.warn('Some extension features failed to initialize:', error);
-        }
-
-        // 맵 선택에 따라 맵 생성 (멀티가 아니면 factory 생성)
-        // 맵 선택에 따라 맵 생성은 startGame() 내부에서 처리됨 (mapGroup 생성 후)
-        // if (gameMode !== 'multi') {
-        //    createFactoryMap(); // DELETED: Premature call causing crash
-        // }
-        // 멀티플레이어는 gameStart 이벤트에서 currentMap 설정 후 startGame에서 맵 생성
-
-
-
-        weaponContainer = new THREE.Group();
-        scene.add(weaponContainer);
-        weaponModel = new THREE.Group();
-        weaponContainer.add(weaponModel);
-
-        shellGeo = new THREE.CylinderGeometry(0.005, 0.005, 0.025, 6);
-        shellGeo.rotateX(Math.PI / 2);
-        shellMat = new THREE.MeshStandardMaterial({ color: 0xFFD700, metalness: 1.0, roughness: 0.3 });
-
-        buildWeapon(0);
-        updateUI();
-
-        // 게임 시작 시간 설정
-        gameStartTime = performance.now();
-        killCount = 0;
-        playTime = 0;
-        if (elPlayTime) elPlayTime.innerText = "Time: 00:00";
-        if (elKillCount) elKillCount.innerText = "Kills: 0";
-
-        // 적 생성은 startGame()에서 처리
-
-        // 성능 최적화: 렌더러 설정
-        renderer = new THREE.WebGLRenderer({
-            antialias: true,
-            powerPreference: "high-performance" // 고성능 모드
-        });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        // 모바일 성능 최적화: 픽셀 비율 조정
-        const pixelRatio = isMobile ? Math.min(window.devicePixelRatio, 1.5) : Math.min(window.devicePixelRatio, 2);
-        renderer.setPixelRatio(pixelRatio);
-        renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        renderer.shadowMap.autoUpdate = false; // 성능 향상
-        renderer.shadowMap.needsUpdate = true;
-        document.getElementById('game-container').appendChild(renderer.domElement);
-
-        // 후처리 효과 초기화 (활성화)
-        try {
-            initPostProcessing();
-        } catch (error) {
-            console.warn('Post-processing initialization failed:', error);
-            usePostProcessing = false;
-        }
-
-        // 리사이즈 이벤트는 init() 끝부분에서 별도로 처리 (중복 방지)
-        document.addEventListener('contextmenu', e => e.preventDefault());
 
         const loadAudioFiles = () => {
             if (!SoundGen.ctx) SoundGen.init();
