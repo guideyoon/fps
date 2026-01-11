@@ -7004,7 +7004,7 @@
 
         function doReload() {
             const w = WEAPONS[curWeaponIdx];
-            if (w.type === 'KNIFE') return;
+            if (w.type === 'KNIFE' || w.type === 'GRENADE') return;
             isReloading = true;
 
             // 저격총은 c-rifle.mp3 사용, 다른 무기는 기존 재장전 소리
