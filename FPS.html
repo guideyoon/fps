@@ -2201,6 +2201,11 @@
         let isPaused = false;
         let isGameStarted = false; // New flag to block input/updates during countdown
         let gameMode = null; // 'single' or 'multi'
+        
+        // UI Globals (Legacy/Compatibility)
+        let elPlayTime = null;
+        let elKillCount = null;
+        
         let currentGameMode = 'ffa'; // 'ffa' or 'tdm'
         let currentMap = 'factory'; // 선택된 맵 (기본값: factory)
         let isRoomHost = false;
@@ -3048,6 +3053,12 @@
             elScoreAlly = document.getElementById('hud-score-ally');
             elScoreEnemy = document.getElementById('hud-score-enemy');
             elKillFeed = document.getElementById('hud-kill-feed');
+            
+            // Map Legacy UI variables to new HUD elements for compatibility
+            elPlayTime = elTimer;
+            // elKillCount maps to nothing specific in new HUD, but we prevent errors
+            // Use dummy object if element missing to prevent null pointer
+            if (!elKillCount) elKillCount = { innerText: '' }; 
 
             elGameOver = document.getElementById('game-over');
             elPauseOverlay = document.getElementById('pause-overlay');
@@ -3225,15 +3236,25 @@
             // Restart Game logic is now consolidated in the global restartGame function below.
 
             // Weapon Inventory Click Handler (for both PC and mobile)
-            document.getElementById('weapon-inventory').addEventListener('click', (e) => {
-                const weaponSlot = e.target.closest('.weapon-slot');
-                if (weaponSlot) {
-                    const weaponId = parseInt(weaponSlot.dataset.weaponId);
-                    if (!isNaN(weaponId)) {
-                        switchWeaponTo(weaponId);
+            // Use 'hud-weapon-selector' for new UI, fallback to 'weapon-inventory' if old exists
+            const weaponSelector = document.getElementById('hud-weapon-selector') || document.getElementById('weapon-inventory');
+            
+            if (weaponSelector) {
+                weaponSelector.addEventListener('click', (e) => {
+                    const weaponSlot = e.target.closest('.weapon-slot');
+                    if (weaponSlot) {
+                        // Check both data-slot (new UI) and data-weapon-id (legacy)
+                        let weaponId = parseInt(weaponSlot.dataset.slot);
+                        if (isNaN(weaponId)) {
+                            weaponId = parseInt(weaponSlot.dataset.weaponId);
+                        }
+                        
+                        if (!isNaN(weaponId)) {
+                            switchWeaponTo(weaponId);
+                        }
                     }
-                }
-            });
+                });
+            }
 
             // NEW: Weapon Selector Vertical (Icons) Click Handler
             const weaponSelectorVertical = document.getElementById('weapon-selector-vertical');
