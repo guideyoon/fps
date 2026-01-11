@@ -4536,7 +4536,16 @@
         }
 
         function initPlayer() {
-            camera.position.set(0, 1.6, 5);
+            // [CRITICAL FIX] Multiplayer: Do NOT overwrite camera position if already set by server
+            if (gameMode === 'multi' && position && (position.x !== 0 || position.z !== 0)) {
+                console.log('initPlayer: Keeping existing position for multiplayer:', position);
+                camera.position.copy(position);
+            } else {
+                // Single player or fallback
+                camera.position.set(0, 1.6, 5);
+                // Also reset position var
+                if (typeof position !== 'undefined') position.set(0, 1.6, 5);
+            }
 
             // [FIX] 기존 weaponContainer가 scene에 직접 추가되어 있으면 제거하고 camera에 추가
             // 이전 init()에서 scene.add(weaponContainer)로 추가된 경우
