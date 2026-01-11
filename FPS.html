@@ -7877,6 +7877,9 @@
 
 
         function onResize() {
+            // Safety check: Ensure camera and renderer exist before resizing
+            if (!camera || !renderer) return;
+
             // 모바일 가로 모드에서 실제 화면 크기 계산
             let width, height;
 
