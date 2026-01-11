@@ -4874,6 +4874,7 @@
                 ramp.position.set(offset, 1, 0);
                 ramp.rotation.x = Math.PI / 12;
                 mapGroup.add(ramp);
+                addBoxCollider(ramp); // 램프 충돌 박스 추가
             });
 
             // Keep existing pillars for vertical gameplay
@@ -5016,6 +5017,7 @@
                 const cap = new THREE.Mesh(capGeo, matMetal);
                 cap.position.set(p.x, 4.1, p.z);
                 mapGroup.add(cap);
+                addBoxCollider(cap); // 탱크 뚜껑 충돌 박스 추가
             });
 
             // === SANDBAG WALLS - LOW TACTICAL COVER ===
@@ -7505,12 +7507,10 @@
                 }
 
                 if (!isEnemy && !isOtherPlayer) {
-                    // 캐릭터 부위나 그룹이 아닌 맵 지형에만 탄흔 생성
+                    // 캐릭터 부위(head, limb)만 필터링, 맵 구조물에는 탄흔 생성
                     const isCharacterPart = (
                         h.object.name === 'head' ||
-                        h.object.name === 'limb' ||
-                        h.object.type === 'Group' ||
-                        h.object.parent?.type === 'Group'
+                        h.object.name === 'limb'
                     );
 
                     if (!isCharacterPart && w.type !== 'KNIFE' && h.object.geometry && h.face) {
