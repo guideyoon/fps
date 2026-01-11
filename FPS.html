@@ -1990,8 +1990,8 @@
             }
         }
 
-        // Player State
-        let position = new THREE.Vector3(0, 1.7, 5);
+        // Player State - 안전한 스폰 위치 (맵 구석, 구조물 없는 곳)
+        let position = new THREE.Vector3(-70, 1.7, -70);
         let rotation = { x: 0, y: 0 };
         let velocityY = 0;
         let isGrounded = false;
@@ -2165,8 +2165,8 @@
 
         const matZombieSkin = new THREE.MeshStandardMaterial({ color: 0x5e7052, roughness: 0.8 });
         const matZombieClothes = new THREE.MeshStandardMaterial({ color: 0x4a3b2a, roughness: 0.9 });
-        let matHpBg = new THREE.MeshBasicMaterial({ color: 0x000000 });
-        let matHpFg = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        let matHpBg = new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.DoubleSide });
+        let matHpFg = new THREE.MeshBasicMaterial({ color: 0xff0000, side: THREE.DoubleSide });
 
         const SoundGen = {
             ctx: null,
@@ -4080,9 +4080,9 @@
                     healthPills = [];
                 }
 
-                // 탄약 및 위치 리셋
+                // 탄약 및 위치 리셋 (안전한 스폰 위치)
                 if (typeof resetAmmo === 'function') resetAmmo();
-                if (typeof position !== 'undefined') position.set(0, 1.7, 5);
+                if (typeof position !== 'undefined') position.set(-70, 1.7, -70);
 
                 // 게임 통계 리셋
                 gameStartTime = performance.now();
@@ -7503,8 +7503,17 @@
                 }
 
                 if (!isEnemy && !isOtherPlayer) {
-                    // Check if it's a map collider before placing decal
-                    if (w.type !== 'KNIFE' && h.object.geometry && h.face) createDecal(h.point, h.face.normal);
+                    // 캐릭터 부위나 그룹이 아닌 맵 지형에만 탄흔 생성
+                    const isCharacterPart = (
+                        h.object.name === 'head' ||
+                        h.object.name === 'limb' ||
+                        h.object.type === 'Group' ||
+                        h.object.parent?.type === 'Group'
+                    );
+
+                    if (!isCharacterPart && w.type !== 'KNIFE' && h.object.geometry && h.face) {
+                        createDecal(h.point, h.face.normal);
+                    }
                     break; // 첫 번째 충돌 지점에서만 탄흔 생성
                 }
 
