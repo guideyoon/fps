@@ -55,15 +55,214 @@
             }
         }
 
-        #game-container {
+        /* --- NEON TACTICAL HUD CSS --- */
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&display=swap');
+
+        :root {
+            --neon-cyan: #00f3ff;
+            --neon-red: #ff003c;
+            --dark-bg: rgba(9, 9, 11, 0.65);
+            --font-stack: 'Rajdhani', sans-serif;
+        }
+
+        /* Utility & Layout */
+        .hud-container {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 1;
-            cursor: crosshair;
+            pointer-events: none;
+            z-index: 10;
+            font-family: var(--font-stack);
+            color: white;
         }
+
+        /* Glassmorphism Panels */
+        .vitals-panel, .weapon-panel, .scoreboard-mini {
+            background: var(--dark-bg);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+            transform: skewX(-10deg);
+            padding: 1rem;
+            position: absolute;
+        }
+
+        /* Top Center: Scoreboard */
+        .scoreboard-mini {
+            top: 1rem;
+            left: 50%;
+            transform: translateX(-50%) skewX(-10deg);
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        .scoreboard-mini > div { transform: skewX(10deg); }
+        .score.ally { color: var(--neon-cyan); }
+        .score.enemy { color: var(--neon-red); }
+
+        /* Top Right: Kill Feed */
+        .kill-feed {
+            position: absolute;
+            top: 5rem; /* Below scoreboard */
+            right: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            text-align: right;
+            align-items: flex-end;
+        }
+        .feed-item {
+            background: linear-gradient(90deg, transparent, rgba(0,0,0,0.8));
+            padding: 5px 10px;
+            border-right: 2px solid var(--neon-red);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            opacity: 0.9;
+            color: white;
+            animation: slideIn 0.3s ease-out;
+        }
+        .feed-item .killer { color: var(--neon-cyan); font-weight: bold; }
+        .feed-item .victim { color: var(--neon-red); }
+
+        /* Center: Crosshair */
+        .crosshair {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .crosshair .line {
+            background: rgba(255, 255, 255, 0.8);
+            position: absolute;
+            transition: all 0.1s ease-out;
+            box-shadow: 0 0 2px black;
+        }
+        .crosshair .horizontal { width: 20px; height: 2px; }
+        .crosshair .vertical { width: 2px; height: 20px; }
+        .crosshair .dot { width: 4px; height: 4px; background: var(--neon-red); border-radius: 50%; }
+        .crosshair.firing .horizontal { width: 35px; opacity: 0.5; }
+        .crosshair.firing .vertical { height: 35px; opacity: 0.5; }
+        .crosshair.enemy-detected .line { background: var(--neon-red); box-shadow: 0 0 5px red; }
+
+        /* Bottom Left: Vitals */
+        .vitals-panel {
+            bottom: 2rem;
+            left: 2rem;
+            width: 300px;
+            border-left: 4px solid var(--neon-cyan);
+        }
+        .value-group {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+            transform: skewX(10deg);
+        }
+        .health-text {
+            font-size: 3rem;
+            font-weight: 700;
+            line-height: 0.8;
+            text-shadow: 0 0 10px var(--neon-cyan);
+        }
+        .bar-container {
+            margin-top: 10px;
+            height: 8px;
+            background: rgba(255,255,255,0.1);
+            position: relative;
+            transform: skewX(10deg);
+            overflow: hidden;
+        }
+        .health-bar {
+            height: 100%;
+            background: var(--neon-cyan);
+            box-shadow: 0 0 15px var(--neon-cyan);
+            transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 2;
+            position: relative;
+        }
+        .health-bar-ghost {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: white;
+            transition: width 1s ease-out 0.2s;
+            z-index: 1;
+        }
+
+        /* Bottom Right: Weapon */
+        .weapon-panel {
+            bottom: 2rem;
+            right: 2rem;
+            text-align: right;
+            border-right: 4px solid white;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+        .ammo-group { transform: skewX(10deg); }
+        .ammo-current {
+            font-size: 4rem;
+            font-weight: 700;
+            line-height: 0.8;
+        }
+        .ammo-reserve {
+            font-size: 1.5rem;
+            color: #aaa;
+        }
+        .weapon-selector {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 10px;
+            transform: skewX(10deg);
+        }
+        .weapon-slot {
+            width: 30px;
+            height: 6px;
+            background: rgba(255,255,255,0.2);
+            transition: all 0.2s;
+            color: transparent; /* Hide number */
+            font-size: 0;
+        }
+        .weapon-slot.active {
+            background: white;
+            box-shadow: 0 0 10px white;
+            transform: scaleY(1.5);
+        }
+
+        /* Damage Vignette */
+        .damage-vignette {
+            position: absolute;
+            inset: 0;
+            box-shadow: inset 0 0 100px var(--neon-red);
+            opacity: 0;
+            transition: opacity 0.2s;
+            mix-blend-mode: overlay;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 0.9; }
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 768px) {
+            .vitals-panel { width: 200px; bottom: 1rem; left: 1rem; padding: 0.5rem; }
+            .health-text { font-size: 2rem; }
+            .weapon-panel { bottom: 1rem; right: 1rem; padding: 0.5rem; }
+            .ammo-current { font-size: 2.5rem; }
+            .scoreboard-mini { top: 0.5rem; font-size: 1rem; }
+            /* Hide crosshair lines on mobile if needed, but keeping for now */
+        }
+
 
         #ui-layer {
             position: absolute;
@@ -1812,56 +2011,56 @@
         </div>
     </div>
 
-    <div id="ui-layer">
-        <div id="crosshair"></div>
-        <div id="ammo-info">
-            <span id="weapon-label">ASSAULT RIFLE</span>
-            <span id="ammo-val">30 / 120</span>
+    <div class="hud-container">
+        <!-- Top Center: Match Status -->
+        <div class="scoreboard-mini">
+            <div class="score ally" id="hud-score-ally">0</div>
+            <div class="timer" id="hud-timer">10:00</div>
+            <div class="score enemy" id="hud-score-enemy">0</div>
         </div>
 
-        <!-- Weapon Inventory List -->
-        <div id="weapon-inventory">
-            <div class="weapon-slot active" data-weapon-id="0">
-                <span class="weapon-number">1</span>
-                <span class="weapon-name">RIFLE</span>
+        <!-- Top Right: Kill Feed -->
+        <div class="kill-feed" id="hud-kill-feed"></div>
+
+        <!-- Center: Dynamic Crosshair -->
+        <div class="crosshair" id="hud-crosshair">
+            <div class="line horizontal"></div>
+            <div class="line vertical"></div>
+            <div class="dot"></div>
+        </div>
+
+        <!-- Bottom Left: Vitals -->
+        <div class="vitals-panel" id="hud-vitals">
+            <div class="value-group">
+                <span class="label">HP</span>
+                <span class="value health-text" id="hud-hp-text">100</span>
             </div>
-            <div class="weapon-slot" data-weapon-id="1">
-                <span class="weapon-number">2</span>
-                <span class="weapon-name">PISTOL</span>
-            </div>
-            <div class="weapon-slot" data-weapon-id="2">
-                <span class="weapon-number">3</span>
-                <span class="weapon-name">SNIPER</span>
-            </div>
-            <div class="weapon-slot" data-weapon-id="3">
-                <span class="weapon-number">4</span>
-                <span class="weapon-name">KNIFE</span>
-            </div>
-            <div class="weapon-slot" data-weapon-id="4">
-                <span class="weapon-number">5</span>
-                <span class="weapon-name">GRENADE</span>
+            <div class="bar-container">
+                <div class="health-bar" id="hud-hp-bar" style="width: 100%;"></div>
+                <div class="health-bar-ghost" id="hud-hp-bar-ghost" style="width: 100%;"></div>
             </div>
         </div>
 
-        <div id="hp-text">HP</div>
-        <div id="hp-container">
-            <div id="hp-bar"></div>
-        </div>
-
-        <div id="stats-info">
-            <div id="play-time">Time: 00:00</div>
-            <div id="kill-count">Kills: 0</div>
-        </div>
-
-        <div id="controls-guide">
-            <div class="key">WASD <span style="color:white">이동</span></div>
-            <div class="key">Space <span style="color:white">점프</span> / Shift <span style="color:white">걷기</span>
+        <!-- Bottom Right: Weapon & Ammo -->
+        <div class="weapon-panel" id="hud-weapon">
+            <div class="weapon-selector" id="hud-weapon-selector">
+                <div class="weapon-slot" data-slot="0">1</div>
+                <div class="weapon-slot" data-slot="1">2</div>
+                <div class="weapon-slot" data-slot="2">3</div>
+                <div class="weapon-slot" data-slot="3">4</div>
+                <div class="weapon-slot" data-slot="4">5</div>
             </div>
-            <div class="key">R <span style="color:white">재장전</span></div>
-            <div class="key">Click <span style="color:white">발사/조준</span></div>
-            <div class="key">ESC <span style="color:white">일시정지</span></div> <!-- Added User Request -->
+            <div class="ammo-group">
+                <span class="ammo-current" id="hud-ammo-current">30</span>
+                <span class="ammo-reserve" id="hud-ammo-reserve">/ 120</span>
+            </div>
+            <div class="weapon-name" id="hud-weapon-name" style="font-size: 1rem; color: #facc15; margin-top:5px; transform: skewX(10deg);">RIFLE</div>
         </div>
+
+        <!-- Damage Overlay (Vignette) -->
+        <div class="damage-vignette" id="hud-damage-vignette"></div>
     </div>
+
 
     <!-- 나가기 버튼 (좀비모드) -->
     <button id="exit-game-btn" class="exit-game-btn" title="게임 나가기" style="display: none;">🚪</button>
@@ -2052,6 +2251,52 @@
         // === 전역 변수 ===
         const keys = { w: 0, a: 0, s: 0, d: 0, shift: false, ctrl: false, space: false };
 
+        // --- Physics Optimization: Spatial Hash Grid ---
+        class SpatialHash {
+            constructor(cellSize) {
+                this.cellSize = cellSize;
+                this.cells = new Map();
+            }
+            getKey(x, z) {
+                return Math.floor(x / this.cellSize) + "," + Math.floor(z / this.cellSize);
+            }
+            insert(box) {
+                const minX = Math.floor(box.min.x / this.cellSize);
+                const maxX = Math.floor(box.max.x / this.cellSize);
+                const minZ = Math.floor(box.min.z / this.cellSize);
+                const maxZ = Math.floor(box.max.z / this.cellSize);
+                for (let x = minX; x <= maxX; x++) {
+                    for (let z = minZ; z <= maxZ; z++) {
+                        const key = x + "," + z;
+                        if (!this.cells.has(key)) this.cells.set(key, []);
+                        this.cells.get(key).push(box);
+                    }
+                }
+            }
+            query(box) {
+                const results = new Set();
+                const minX = Math.floor(box.min.x / this.cellSize);
+                const maxX = Math.floor(box.max.x / this.cellSize);
+                const minZ = Math.floor(box.min.z / this.cellSize);
+                const maxZ = Math.floor(box.max.z / this.cellSize);
+                for (let x = minX; x <= maxX; x++) {
+                    for (let z = minZ; z <= maxZ; z++) {
+                        const key = x + "," + z;
+                        const cell = this.cells.get(key);
+                        if (cell) {
+                            for (const item of cell) results.add(item);
+                        }
+                    }
+                }
+                return results;
+            }
+            clear() {
+                this.cells.clear();
+            }
+        }
+        const spatialGrid = new SpatialHash(10); // 10 unit cells
+
+
         // --- Weapon System ---
         const WEAPONS = [
             {
@@ -2148,9 +2393,10 @@
         let colliders = [];
 
         // UI - init() 함수 내부에서 초기화
-        let elAmmoVal, elWeaponLabel, elCrosshair, elVignette, elScope;
-        let elHpBar, elHpText, elDamage, elPlayTime, elKillCount;
+        let elAmmoCurrent, elAmmoReserve, elWeaponName, elCrosshair, elVignette, elScope;
+        let elHpBar, elHpGhost, elHpText, elDamage, elTimer, elScoreAlly, elScoreEnemy, elKillFeed;
         let elGameOver, elPauseOverlay, elHeadshot, elHitMarker;
+
 
         // Materials
         const matBody = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.4, metalness: 0.6 });
@@ -3767,20 +4013,44 @@
         });
 
         // UI 요소 초기화 (DOM이 로드된 후)
-        elAmmoVal = document.getElementById('ammo-val');
-        elWeaponLabel = document.getElementById('weapon-label');
-        elCrosshair = document.getElementById('crosshair');
+        elAmmoCurrent = document.getElementById('hud-ammo-current');
+        elAmmoReserve = document.getElementById('hud-ammo-reserve');
+        elWeaponName = document.getElementById('hud-weapon-name');
+        elCrosshair = document.getElementById('hud-crosshair');
+        
+        // Re-create or style aiming vignette
         elVignette = document.getElementById('vignette');
+        if (!elVignette) {
+            elVignette = document.createElement('div');
+            elVignette.id = 'vignette';
+            document.body.appendChild(elVignette);
+        }
+        // Force critical styles since CSS might be replaced
+        elVignette.style.position = 'absolute';
+        elVignette.style.top = '0'; elVignette.style.left = '0';
+        elVignette.style.width = '100%'; elVignette.style.height = '100%';
+        elVignette.style.background = 'radial-gradient(circle, transparent 50%, black 150%)';
+        elVignette.style.opacity = '0';
+        elVignette.style.transition = 'opacity 0.2s';
+        elVignette.style.pointerEvents = 'none';
+        elVignette.style.zIndex = '5';
+
         elScope = document.getElementById('scope-overlay');
-        elHpBar = document.getElementById('hp-bar');
-        elHpText = document.getElementById('hp-text');
-        elDamage = document.getElementById('damage-overlay');
-        elPlayTime = document.getElementById('play-time');
-        elKillCount = document.getElementById('kill-count');
+        elHpBar = document.getElementById('hud-hp-bar');
+        elHpGhost = document.getElementById('hud-hp-bar-ghost');
+        elHpText = document.getElementById('hud-hp-text');
+        elDamage = document.getElementById('hud-damage-vignette');
+        
+        elTimer = document.getElementById('hud-timer');
+        elScoreAlly = document.getElementById('hud-score-ally');
+        elScoreEnemy = document.getElementById('hud-score-enemy');
+        elKillFeed = document.getElementById('hud-kill-feed');
+
         elGameOver = document.getElementById('game-over');
         elPauseOverlay = document.getElementById('pause-overlay');
         elHeadshot = document.getElementById('headshot-msg');
         elHitMarker = document.getElementById('hit-marker');
+
 
         // Restart button - Add mobile touch support handlers
         const restartBtn = document.getElementById('restart-btn');
@@ -4678,8 +4948,10 @@
         // --- Map with Collision ---
         function createFactoryMap() {
             colliders = []; // Init array
+            spatialGrid.clear(); // Clear grid
 
             // 텍스처 적용 (절차적 생성된 텍스처 사용)
+
             // Ensure matConcrete is defined exactly once
             const matConcrete = new THREE.MeshStandardMaterial({
                 color: 0x333333,
@@ -4730,7 +5002,9 @@
             function addBoxCollider(mesh) {
                 const box = new THREE.Box3().setFromObject(mesh);
                 colliders.push(box);
+                spatialGrid.insert(box);
             }
+
 
 
 
@@ -5042,8 +5316,10 @@
         // --- Hotel Map ---
         function createHotelMap() {
             colliders = []; // Init array
+            spatialGrid.clear(); // Clear grid
 
             // === 호텔 맵 재질 정의 ===
+
 
             // 밝은 대리석 바닥
             const matFloor = new THREE.MeshStandardMaterial({
@@ -5109,7 +5385,9 @@
             function addBoxCollider(mesh) {
                 const box = new THREE.Box3().setFromObject(mesh);
                 colliders.push(box);
+                spatialGrid.insert(box);
             }
+
 
             const wallGeo = new THREE.BoxGeometry(80, 10, 1);
             const createWall = (x, y, z, rotY) => {
@@ -6162,23 +6440,23 @@
                     collided = true;
                 }
 
-                // Wall check (Simple collider iteration)
+                // Wall check (Spatial Grid Optimization)
                 const gBox = new THREE.Box3(
                     new THREE.Vector3(nextPos.x - g.radius, nextPos.y - g.radius, nextPos.z - g.radius),
                     new THREE.Vector3(nextPos.x + g.radius, nextPos.y + g.radius, nextPos.z + g.radius)
                 );
 
-                for (const c of colliders) {
+                const nearby = spatialGrid.query(gBox);
+                for (const c of nearby) {
                     if (gBox.intersectsBox(c)) {
                         // Very simple bounce: reverse velocity roughly
-                        // Determine reflection normal roughly by checking center delta?
-                        // For simplicity in this quick implementation, just reverse horizontal velocity if hitting vertical wall
                         g.vel.x *= -0.5;
                         g.vel.z *= -0.5;
                         collided = true;
                         break;
                     }
                 }
+
 
                 if (!collided) {
                     g.mesh.position.copy(nextPos);
@@ -6392,28 +6670,45 @@
                 }
             });
         }
-
         function damagePlayer(amount) {
             if (isDead) return;
+            const oldHP = playerHP;
             playerHP -= amount;
+            playerHP = Math.max(0, playerHP);
 
-            elHpBar.style.width = Math.max(0, playerHP) + '%';
-            // HP number display removed - elHpText now shows "HP" only
+            // 1. Update Main Bar
+            if (elHpBar) elHpBar.style.width = playerHP + '%';
+            if (elHpText) elHpText.innerText = Math.floor(playerHP);
 
-            if (playerHP > 50) elHpBar.style.background = "#4caf50";
-            else if (playerHP > 20) elHpBar.style.background = "#ff9800";
-            else elHpBar.style.background = "#f44336";
+            // 2. Ghost Bar Logic
+            if (elHpGhost) {
+                elHpGhost.style.width = oldHP + '%';
+                elHpGhost.style.transition = 'none';
+                setTimeout(() => {
+                    elHpGhost.style.transition = 'width 0.5s ease-out';
+                    elHpGhost.style.width = playerHP + '%';
+                }, 300);
+            }
 
-            elDamage.style.opacity = 0.8;
-            setTimeout(() => elDamage.style.opacity = 0, 100);
+            // 3. Color State
+            const vitalsPanel = document.querySelector('.vitals-panel');
+            if (vitalsPanel) {
+                if (playerHP <= 30) vitalsPanel.classList.add('critical');
+                else vitalsPanel.classList.remove('critical');
+            }
 
-            // Play damage sound (User Request)
+            // 4. Damage Vignette
+            if (elDamage) {
+                elDamage.style.opacity = 1;
+                setTimeout(() => elDamage.style.opacity = 0, 300);
+            }
+
             SoundGen.playDamage();
 
             if (playerHP <= 0) {
                 isDead = true;
                 if (gameMode === 'single') {
-                    elGameOver.style.display = 'flex';
+                    if (elGameOver) elGameOver.style.display = 'flex';
                 }
                 if (!isMobile && document.pointerLockElement === document.body) {
                     document.exitPointerLock();
@@ -6421,16 +6716,48 @@
             }
         }
 
-        function updateTimerUI(seconds) {
-            const elPlayTime = document.getElementById('play-time');
-            if (!elPlayTime) return;
-
-            if (seconds < 0) seconds = 0;
-            const mins = Math.floor(seconds / 60);
-            const secs = seconds % 60;
-            const timeStr = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-            elPlayTime.textContent = `Time: ${timeStr}`;
+        function addKillFeed(killer, victim, isHeadshot) {
+            if (!elKillFeed) return;
+            const item = document.createElement('div');
+            item.className = 'feed-item';
+            const icon = isHeadshot ? '⌖' : '➔';
+            item.innerHTML = `<span class="killer">${killer}</span> <span style="margin:0 5px;">${icon}</span> <span class="victim">${victim}</span>`;
+            elKillFeed.prepend(item); // Add to top
+            setTimeout(() => {
+                item.style.opacity = '0';
+                setTimeout(() => item.remove(), 300);
+            }, 4000);
         }
+
+        function updateTimerUI(seconds) {
+            // Update HUD Timer
+            if (elTimer) {
+                if (seconds < 0) seconds = 0;
+                const mins = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                const timeStr = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                elTimer.innerText = timeStr;
+            }
+            // Keep updating old elPlayTime if it exists (for compatibility)
+            const elPlayTime = document.getElementById('play-time');
+            if (elPlayTime) {
+                // ... legacy logic ...
+            }
+        }
+
+
+
+        function updateTimerUI(seconds) {
+            // Update HUD Timer
+            if (elTimer) {
+                if (seconds < 0) seconds = 0;
+                const mins = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                const timeStr = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                elTimer.innerText = timeStr;
+            }
+        }
+
 
         function updatePlayersList() {
             const players = roomPlayersState ? Object.values(roomPlayersState) : [];
@@ -6939,6 +7266,7 @@
             if (curWeaponIdx === idx) return;
             isReloading = false;
             const w = WEAPONS[idx];
+            
             // 모바일에서 권총으로 변경 시 자동으로 조준 모드 활성화
             if (isMobile && w.type === 'PISTOL') {
                 isAiming = true;
@@ -6947,62 +7275,107 @@
             }
             curWeaponIdx = idx;
             buildWeapon(curWeaponIdx);
-            // 무기 전환 시 초기 위치 설정 (나이프가 아닌 경우만)
+            
+            // 무기 전환 시 초기 위치 설정
             if (w.type !== 'KNIFE') {
-                weaponModel.position.y = -0.5;
-                weaponModel.position.x = 0;
-                weaponModel.position.z = 0;
-                weaponModel.rotation.x = 0;
-                weaponModel.rotation.y = 0;
-                weaponModel.rotation.z = 0;
+                weaponModel.position.set(0, -0.5, 0);
+                weaponModel.rotation.set(0, 0, 0);
             } else {
-                // 나이프는 기본 위치 설정 (개선된 위치)
-                weaponModel.position.x = 0.3;
-                weaponModel.position.y = -0.2;
-                weaponModel.position.z = -0.35;
-                weaponModel.rotation.x = 0.25;
-                weaponModel.rotation.y = 0;
-                weaponModel.rotation.z = -0.15;
+                weaponModel.position.set(0.3, -0.2, -0.35);
+                weaponModel.rotation.set(0.25, 0, -0.15);
             }
 
-            // 무기별 교체 소리 적용
-            if (w.type === 'KNIFE' && SoundGen.audioBuffers['c-sword']) {
-                // 나이프로 전환
-                SoundGen.playAudioFile('c-sword', 0.8);
-            } else if (w.type === 'RIFLE' && SoundGen.audioBuffers['c-sochong']) {
-                // 소총으로 전환 (1번)
-                SoundGen.playAudioFile('c-sochong', 0.8);
-            } else if (w.type === 'PISTOL' && SoundGen.audioBuffers['c-gun']) {
-                // 권총으로 전환 (2번)
-                SoundGen.playAudioFile('c-gun', 0.8);
-            } else if (w.type === 'SNIPER' && SoundGen.audioBuffers['c-rifle']) {
-                // 저격총으로 전환 (3번)
-                SoundGen.playAudioFile('c-rifle', 0.8);
-            } else if (w.type === 'GRENADE' && SoundGen.audioBuffers['grenade_switch']) {
-                // 수류탄으로 전환 (5번) - remove.mp3
-                SoundGen.playAudioFile('grenade_switch', 0.8);
-            } else {
-                // 기존 소리 (폴백)
-                SoundGen.playSwitch();
-            }
+            // Play Switch Sound
+            if (w.type === 'KNIFE' && SoundGen.audioBuffers['c-sword']) SoundGen.playAudioFile('c-sword', 0.8);
+            else if (w.type === 'RIFLE' && SoundGen.audioBuffers['c-sochong']) SoundGen.playAudioFile('c-sochong', 0.8);
+            else if (w.type === 'PISTOL' && SoundGen.audioBuffers['c-gun']) SoundGen.playAudioFile('c-gun', 0.8);
+            else if (w.type === 'SNIPER' && SoundGen.audioBuffers['c-rifle']) SoundGen.playAudioFile('c-rifle', 0.8);
+            else if (w.type === 'GRENADE' && SoundGen.audioBuffers['grenade_switch']) SoundGen.playAudioFile('grenade_switch', 0.8);
+            else SoundGen.playSwitch();
 
-            // Update weapon inventory display
+            // Update Weapon Selector UI
             document.querySelectorAll('.weapon-slot').forEach(slot => slot.classList.remove('active'));
-            const activeSlot = document.querySelector(`.weapon-slot[data-weapon-id="${idx}"]`);
+            // New HTML uses data-slot
+            const activeSlot = document.querySelector(`.weapon-slot[data-slot="${idx}"]`);
             if (activeSlot) activeSlot.classList.add('active');
 
             updateUI();
         }
 
         function updateUI() {
+            if (!elWeaponName || !elAmmoCurrent) return;
+            
             const w = WEAPONS[curWeaponIdx];
-            elWeaponLabel.innerText = w.name;
-            elAmmoVal.classList.remove('no-ammo');
-            if (w.type === 'KNIFE') elAmmoVal.innerText = "-";
-            else elAmmoVal.innerText = w.ammo + " / " + w.maxAmmo;
+            elWeaponName.innerText = w.name;
+            
+            if (w.type === 'KNIFE') {
+                elAmmoCurrent.innerText = "-";
+                elAmmoReserve.innerText = "";
+            } else if (w.type === 'GRENADE') {
+                elAmmoCurrent.innerText = w.ammo;
+                elAmmoReserve.innerText = "";
+            } else {
+                elAmmoCurrent.innerText = w.ammo;
+                elAmmoReserve.innerText = "/ " + w.maxAmmo;
+            }
+            
+            // Reload Warning
+            if (w.ammo <= w.maxAmmo * 0.3 && w.type !== 'KNIFE') {
+                elAmmoCurrent.style.color = '#ff003c'; // Red
+            } else {
+                elAmmoCurrent.style.color = 'white';
+            }
         }
 
-        function doReload() {
+        function damagePlayer(amount) {
+            if (isDead) return;
+            const oldHP = playerHP;
+            playerHP -= amount;
+            playerHP = Math.max(0, playerHP);
+
+            // 1. Update Main Bar
+            if (elHpBar) elHpBar.style.width = playerHP + '%';
+            if (elHpText) elHpText.innerText = Math.floor(playerHP);
+
+            // 2. Ghost Bar Logic
+            if (elHpGhost) {
+                // Ghost bar stays at old width momentarily
+                elHpGhost.style.width = oldHP + '%';
+                elHpGhost.style.transition = 'none'; // Reset transition
+                
+                // Then shrinks
+                setTimeout(() => {
+                    elHpGhost.style.transition = 'width 0.5s ease-out';
+                    elHpGhost.style.width = playerHP + '%';
+                }, 300);
+            }
+
+            // 3. Color State (Critical)
+            const vitalsPanel = document.querySelector('.vitals-panel');
+            if (vitalsPanel) {
+                if (playerHP <= 30) vitalsPanel.classList.add('critical');
+                else vitalsPanel.classList.remove('critical');
+            }
+
+            // 4. Damage Vignette
+            if (elDamage) {
+                elDamage.style.opacity = 1;
+                setTimeout(() => elDamage.style.opacity = 0, 300);
+            }
+
+            SoundGen.playDamage();
+
+            if (playerHP <= 0) {
+                isDead = true;
+                if (gameMode === 'single') {
+                    if (elGameOver) elGameOver.style.display = 'flex';
+                }
+                if (!isMobile && document.pointerLockElement === document.body) {
+                    document.exitPointerLock();
+                }
+            }
+        }
+
             const w = WEAPONS[curWeaponIdx];
             if (w.type === 'KNIFE' || w.type === 'GRENADE') return;
             isReloading = true;
@@ -7629,11 +8002,15 @@
             const playerMin = new THREE.Vector3(newPos.x - PLAYER_RADIUS, newPos.y - 1.7, newPos.z - PLAYER_RADIUS);
             const playerMax = new THREE.Vector3(newPos.x + PLAYER_RADIUS, newPos.y + 0.3, newPos.z + PLAYER_RADIUS);
             const playerBox = new THREE.Box3(playerMin, playerMax);
-            for (const collider of colliders) {
+            
+            // Spatial Grid Optimization
+            const nearby = spatialGrid.query(playerBox);
+            for (const collider of nearby) {
                 if (playerBox.intersectsBox(collider)) return true;
             }
             return false;
         }
+
 
         function onResize() {
             // 모바일 가로 모드에서 실제 화면 크기 계산
