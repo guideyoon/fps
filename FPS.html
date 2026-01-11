@@ -1990,8 +1990,10 @@
             }
         }
 
-        // Player State - 안전한 스폰 위치 (맵 구석, 구조물 없는 곳)
-        let position = new THREE.Vector3(-70, 1.7, -70);
+        // Player State - 안전한 스폰 위치 (구조물 사이 빈 공간)
+        // Factory 맵 분석: 중앙(0,0) 근처 및 ±22 근처는 비교적 빈 공간
+        // 구조물: 컨테이너(±70,±70), 플랫폼(±60,±60), 크레이트(여러 위치), 커버월 등
+        let position = new THREE.Vector3(25, 1.7, 0);
         let rotation = { x: 0, y: 0 };
         let velocityY = 0;
         let isGrounded = false;
@@ -4082,7 +4084,7 @@
 
                 // 탄약 및 위치 리셋 (안전한 스폰 위치)
                 if (typeof resetAmmo === 'function') resetAmmo();
-                if (typeof position !== 'undefined') position.set(-70, 1.7, -70);
+                if (typeof position !== 'undefined') position.set(25, 1.7, 0);
 
                 // 게임 통계 리셋
                 gameStartTime = performance.now();
