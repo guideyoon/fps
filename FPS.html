@@ -7211,10 +7211,11 @@
             }
         }
 
+        function doReload() {
             const w = WEAPONS[curWeaponIdx];
             if (w.type === 'KNIFE' || w.type === 'GRENADE') return;
             isReloading = true;
-
+            
             // 저격총은 c-rifle.mp3 사용, 다른 무기는 기존 재장전 소리
             if (w.type === 'SNIPER' && SoundGen.audioBuffers['c-rifle']) {
                 SoundGen.playAudioFile('c-rifle', 0.8);
@@ -7222,14 +7223,21 @@
                 SoundGen.playReload();
             }
 
-            elWeaponLabel.innerText = "RELOADING...";
-            weaponModel.rotation.z = 0.5;
-            weaponModel.position.y = -0.1;
+            if (elWeaponName) elWeaponName.innerText = "RELOADING...";
+            
+            // Animation
+            if (weaponModel) {
+                weaponModel.rotation.z = 0.5;
+                weaponModel.position.y = -0.1;
+            }
+
             setTimeout(() => {
                 w.ammo = w.maxAmmo;
                 isReloading = false;
-                weaponModel.rotation.z = 0;
-                weaponModel.position.y = 0;
+                if (weaponModel) {
+                    weaponModel.rotation.z = 0;
+                    weaponModel.position.y = 0;
+                }
                 updateUI();
             }, 1000);
         }
