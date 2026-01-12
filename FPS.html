@@ -6299,6 +6299,19 @@
             enemies.push(enemy);
         }
 
+        function showHitMarker() {
+            if (elHitMarker) {
+                elHitMarker.style.opacity = '1';
+                elHitMarker.style.transform = 'translate(-50%, -50%) scale(1.2)';
+                setTimeout(() => {
+                    if (elHitMarker) {
+                        elHitMarker.style.transform = 'translate(-50%, -50%) scale(1)';
+                        elHitMarker.style.opacity = '0';
+                    }
+                }, 150);
+            }
+        }
+
         function explodeGrenade(pos) {
             // 1. Visuals - Bigger and more impressive
             const blastGeo = new THREE.SphereGeometry(0.5, 32, 32); // Increased base size 0.2 -> 0.5
