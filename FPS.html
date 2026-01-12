@@ -2302,6 +2302,16 @@
         const spatialGrid = new SpatialHash(10); // 10 unit cells
 
 
+        // === Event Helper ===
+        function addSafeListener(el, callback) {
+            if (!el) return;
+            el.addEventListener('click', callback);
+            el.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                callback(e);
+            }, { passive: false });
+        }
+
         // --- Weapon System ---
         const WEAPONS = [
             {
@@ -2310,7 +2320,8 @@
                 posHip: new THREE.Vector3(0.2, -0.25, -0.45),
                 // ADS 위치: Y=-0.062로 정렬 유지, 클리핑 방지를 위해 Z=-0.35로 거리 조정
                 posAds: new THREE.Vector3(0, -0.062, -0.35),
-                fovAds: 20, fireRate: 0.08, recoil: 0.06, damage: 30
+                fovAds: 20, fireRate: 0.08, recoil: 0.06, damage: 30,
+                switchSound: 'c-sochong'
             },
             {
                 id: 1, name: "TACTICAL PISTOL",
@@ -2318,28 +2329,32 @@
                 posHip: new THREE.Vector3(0.15, -0.2, -0.35),
                 // 수정: ADS 좌표 정밀 보정 (가늠자 높이와 일치)
                 posAds: new THREE.Vector3(0, -0.0482, -0.35),
-                fovAds: 35, fireRate: 0.15, recoil: 0.1, damage: 20
+                fovAds: 35, fireRate: 0.15, recoil: 0.1, damage: 20,
+                switchSound: 'c-gun'
             },
             {
                 id: 2, name: "TAC-50 SNIPER",
                 type: 'SNIPER', maxAmmo: 4, ammo: 4, automatic: false,
                 posHip: new THREE.Vector3(0.2, -0.3, -0.5),
                 posAds: new THREE.Vector3(0, -0.06, -0.15),
-                fovAds: 8, fireRate: 2.0, recoil: 0.4, damage: 100
+                fovAds: 8, fireRate: 2.0, recoil: 0.4, damage: 100,
+                switchSound: 'c-rifle'
             },
             {
                 id: 3, name: "KARAMBIT",
                 type: 'KNIFE', maxAmmo: 0, ammo: 0, automatic: true,
                 posHip: new THREE.Vector3(0.25, -0.25, -0.5),
                 posAds: new THREE.Vector3(0.25, -0.25, -0.45),
-                fovAds: 65, fireRate: 0.4, recoil: 0, damage: 15
+                fovAds: 65, fireRate: 0.4, recoil: 0, damage: 15,
+                switchSound: 'c-sword'
             },
             {
                 id: 4, name: "GRENADE",
                 type: 'GRENADE', maxAmmo: 3, ammo: 3, automatic: false,
                 posHip: new THREE.Vector3(0.1, -0.2, -0.3),
                 posAds: new THREE.Vector3(0.1, -0.2, -0.3), // No ADS for grenade
-                fovAds: 70, fireRate: 1.5, recoil: 0, damage: 100 // Area Damage
+                fovAds: 70, fireRate: 1.5, recoil: 0, damage: 100, // Area Damage
+                switchSound: 'grenade_switch'
             }
         ];
         let curWeaponIdx = 0;
@@ -3067,17 +3082,10 @@
 
             // Restart button - Add mobile touch support handlers (init 내부로 이동)
             const restartBtn = document.getElementById('restart-btn');
-            if (restartBtn) {
-                restartBtn.addEventListener('click', () => {
-                    if (typeof window.restartGame === 'function') window.restartGame();
-                    else if (typeof restartGame === 'function') restartGame();
-                });
-                restartBtn.addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    if (typeof window.restartGame === 'function') window.restartGame();
-                    else if (typeof restartGame === 'function') restartGame();
-                });
-            }
+            addSafeListener(restartBtn, () => {
+                if (typeof window.restartGame === 'function') window.restartGame();
+                else if (typeof restartGame === 'function') restartGame();
+            });
 
             // --- Load User Sounds ---
             SoundGen.loadAudioFile('uak.mp3', 'damage').catch(e => console.log('Damage sound (uak.mp3) not found or failed to load:', e));
@@ -3186,11 +3194,7 @@
                     location.reload();
                 }
             };
-            document.getElementById('exit-game-btn').addEventListener('click', exitGameHandler);
-            document.getElementById('exit-game-btn').addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                exitGameHandler();
-            });
+            addSafeListener(document.getElementById('exit-game-btn'), exitGameHandler);
 
             // 2. Name Setup
             document.getElementById('btn-back-to-mode').addEventListener('click', () => {
@@ -4128,12 +4132,10 @@
                     lightToggleBtn.classList.toggle('active', ceilingLight.visible);
                 }
             };
-            lightToggleBtn.addEventListener('click', toggleLight);
-            lightToggleBtn.addEventListener('touchstart', (e) => {
-                e.preventDefault();
+            addSafeListener(lightToggleBtn, (e) => {
                 e.stopPropagation();
                 toggleLight();
-            }, { passive: false });
+            });
         }
 
         // setupControls와 animate는 startGame()에서 호출됨
@@ -4280,8 +4282,9 @@
             console.log('startGame() CALLED'); // DEBUG
             console.log('Current gameMode:', gameMode); // DEBUG: Check mode
 
-            // 전체화면 요청 (모바일 브라우저 주소창 숨김)
-            enterFullscreen();
+            // 전체화면 요청 제거 (소켓 이벤트 등 비동기 호출 시 오류 방지)
+            // 버튼 핸들러(btn-single-player 등)에서 이미 처리됨
+            // enterFullscreen(); 
 
             // 게임 활성화 클래스 추가
             document.body.classList.add('game-active');
@@ -7151,12 +7154,11 @@
             }
 
             // Play Switch Sound
-            if (w.type === 'KNIFE' && SoundGen.audioBuffers['c-sword']) SoundGen.playAudioFile('c-sword', 0.8);
-            else if (w.type === 'RIFLE' && SoundGen.audioBuffers['c-sochong']) SoundGen.playAudioFile('c-sochong', 0.8);
-            else if (w.type === 'PISTOL' && SoundGen.audioBuffers['c-gun']) SoundGen.playAudioFile('c-gun', 0.8);
-            else if (w.type === 'SNIPER' && SoundGen.audioBuffers['c-rifle']) SoundGen.playAudioFile('c-rifle', 0.8);
-            else if (w.type === 'GRENADE' && SoundGen.audioBuffers['grenade_switch']) SoundGen.playAudioFile('grenade_switch', 0.8);
-            else SoundGen.playSwitch();
+            if (w.switchSound && SoundGen.audioBuffers[w.switchSound]) {
+                SoundGen.playAudioFile(w.switchSound, 0.8);
+            } else {
+                SoundGen.playSwitch();
+            }
 
             // Update Weapon Selector UI
             document.querySelectorAll('.weapon-slot').forEach(slot => slot.classList.remove('active'));
@@ -8208,8 +8210,7 @@
             const triggerFullscreen = () => {
                 enterFullscreen();
             };
-            document.addEventListener('click', triggerFullscreen, { once: true });
-            document.addEventListener('touchstart', triggerFullscreen, { once: true });
+            addSafeListener(document, triggerFullscreen);
         }
         // --- EMERGENCY AMMO FIX SCRIPT ---
         // This script runs at the very end to enforce weapon stats regardless of prior definitions.
