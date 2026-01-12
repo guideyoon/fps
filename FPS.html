@@ -7386,6 +7386,35 @@
             }
         }
 
+        // [FIX] Add missing killEnemy function
+        function killEnemy(e) {
+            e.userData.isDead = true;
+            createBlood(e.position);
+            
+            // Death Animation (Simple Fall)
+            e.rotation.x = -Math.PI / 2;
+            e.position.y = 0.2;
+
+            // Remove after delay
+            setTimeout(() => {
+                scene.remove(e);
+                const idx = enemies.indexOf(e);
+                if (idx > -1) enemies.splice(idx, 1);
+            }, 3000);
+
+            // Drop Item (Health Pill)
+            if (Math.random() < 0.3) {
+                createHealthPill(e.position.clone());
+            }
+
+            // Update Kill Count
+            killCount++;
+            if (elKillCount) elKillCount.innerText = "Kills: " + killCount;
+            
+            // Add Kill Feed (Local)
+            addKillFeed("You", "Zombie", false);
+        }
+
         function doReload() {
             const w = WEAPONS[curWeaponIdx];
             if (w.type === 'KNIFE' || w.type === 'GRENADE') return;
