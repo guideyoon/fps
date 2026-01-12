@@ -2223,7 +2223,23 @@
         - Critical Fix: Zombie Mode (Single Player) Initialization & Map Loading
         - Added Cache-Control Headers
         */
-        console.log('=== FPS.html VERSION: 2026-01-11-0200-STABLE ==='); // VERSION CHECK
+        console.log('=== FPS.html VERSION: 2026-01-13-FIX-HITMARKER ==='); // VERSION CHECK
+        
+        // [FIX] Ensure showHitMarker is globally available
+        window.showHitMarker = function() {
+            const el = document.getElementById('hit-marker');
+            if (el) {
+                el.style.opacity = '1';
+                el.style.transform = 'translate(-50%, -50%) scale(1.2)';
+                setTimeout(() => {
+                    if (el) {
+                        el.style.transform = 'translate(-50%, -50%) scale(1)';
+                        el.style.opacity = '0';
+                    }
+                }, 150);
+            }
+        };
+
         let camera, scene, renderer;
         let postProcessingCanvas, postProcessingCtx; // Global declaration
         let postProcessingEnabled = false;
@@ -6300,6 +6316,9 @@
         }
 
         function showHitMarker() {
+            // Ensure global availability
+            if (!window.showHitMarker) window.showHitMarker = showHitMarker;
+            
             if (elHitMarker) {
                 elHitMarker.style.opacity = '1';
                 elHitMarker.style.transform = 'translate(-50%, -50%) scale(1.2)';
@@ -6311,6 +6330,8 @@
                 }, 150);
             }
         }
+        // Force global assignment immediately
+        window.showHitMarker = showHitMarker;
 
         function explodeGrenade(pos) {
             // 1. Visuals - Bigger and more impressive
