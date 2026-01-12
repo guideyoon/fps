@@ -1960,7 +1960,7 @@
         <div id="scope-dot"></div>
     </div>
     <div id="headshot-msg">HEADSHOT!</div>
-    <div id="grenade-kill-msg">BOOM!</div>
+    <div id="grenade-kill-msg" style="display: none; position: fixed; top: 35%; left: 50%; transform: translate(-50%, -50%); color: #ff6600; font-size: 60px; font-weight: 900; text-shadow: 0 0 20px #ff0000; z-index: 100; pointer-events: none; font-style: italic;">GRENADE KILL!</div>
     <div id="hit-marker"></div>
 
     <div id="game-over">
@@ -2513,7 +2513,7 @@
         // UI - init() 함수 내부에서 초기화
         let elAmmoCurrent, elAmmoReserve, elWeaponName, elCrosshair, elVignette, elScope;
         let elHpBar, elHpGhost, elHpText, elDamage, elTimer, elScoreAlly, elScoreEnemy, elKillFeed;
-        let elGameOver, elPauseOverlay, elHeadshot, elHitMarker;
+        let elGameOver, elPauseOverlay, elHeadshot, elHitMarker, elGrenadeKill;
 
 
         // Materials
@@ -3176,6 +3176,7 @@
             elGameOver = document.getElementById('game-over');
             elPauseOverlay = document.getElementById('pause-overlay');
             elHeadshot = document.getElementById('headshot-msg');
+            elGrenadeKill = document.getElementById('grenade-kill-msg');
             elHitMarker = document.getElementById('hit-marker');
 
             // Restart button - Add mobile touch support handlers (init 내부로 이동)
@@ -6333,6 +6334,23 @@
         // Force global assignment immediately
         window.showHitMarker = showHitMarker;
 
+        function showGrenadeKillMessage() {
+            if (elGrenadeKill) {
+                elGrenadeKill.style.display = 'block';
+                elGrenadeKill.style.opacity = '1';
+                elGrenadeKill.style.transform = 'translate(-50%, -50%) scale(1.5)';
+                
+                // Animation
+                setTimeout(() => {
+                    if (elGrenadeKill) elGrenadeKill.style.transform = 'translate(-50%, -50%) scale(1.0)';
+                }, 100);
+
+                setTimeout(() => {
+                    if (elGrenadeKill) elGrenadeKill.style.display = 'none';
+                }, 2000);
+            }
+        }
+
         function explodeGrenade(pos) {
             // 1. Visuals - Bigger and more impressive
             const blastGeo = new THREE.SphereGeometry(0.5, 32, 32); // Increased base size 0.2 -> 0.5
@@ -6345,8 +6363,6 @@
             let duration = 0;
             const expandAnim = () => {
                 duration += 0.04; // Slightly faster updates
-                // Much larger scale factor for wide explosion
-                // Max size approx: 0.5 * (1 + 0.6 * 60) = ~18.5 units radius visual
                 const scale = 1 + duration * 60;
                 blast.scale.set(scale, scale, scale);
                 blast.material.opacity = 0.9 * (1 - duration / 0.6); // Fade out over 0.6s
@@ -6359,8 +6375,8 @@
             SoundGen.playExplosion();
 
             // 3. Damage (AoE) - WIDER RANGE
-            const EXPLOSION_RADIUS = 10.0; // Reduced from 15.0
-            const MAX_DAMAGE = 300; // Increased from 100 to ensure kill
+            const EXPLOSION_RADIUS = 10.0;
+            const MAX_DAMAGE = 300;
 
             // Enemies
             enemies.forEach(e => {
@@ -6370,27 +6386,32 @@
                     if (dmg > 0 && e.userData.hp > 0) {
                         e.userData.hp -= dmg;
                         
-                        // Hit Marker for Grenade
+                        // [FIX] Update Health Bar UI
+                        if (e.userData.hpBar) {
+                            const hpPercent = Math.max(0, e.userData.hp / e.userData.maxHp);
+                            e.userData.hpBar.scale.x = hpPercent;
+                            e.userData.hpBar.visible = hpPercent > 0;
+                        }
+
+                        // Hit Marker
                         showHitMarker();
 
                         if (e.userData.hp <= 0) {
                             killEnemy(e);
-                            
-                            // Grenade Kill Effect
-                            if (typeof elGrenadeKill !== 'undefined' && elGrenadeKill) {
-                                elGrenadeKill.classList.add('active');
-                                setTimeout(() => {
-                                    if(elGrenadeKill) elGrenadeKill.classList.remove('active');
-                                }, 800);
-                            }
+                            showGrenadeKillMessage(); // [FIX] Show Big Text
                         } else {
-                            // Hit feedback (flash red)
+                            // [FIX] Hit feedback (Flash Red & Restore)
                             e.traverse(c => {
                                 if (c.isMesh && c.material && c.material.emissive) {
-                                    const old = c.material.emissive.getHex();
+                                    // Force Red
                                     c.material.emissive.setHex(0xff0000);
-                                    setTimeout(() => {
-                                        if (c && c.material) c.material.emissive.setHex(old);
+                                    
+                                    // Clear existing timer if any to prevent flicker
+                                    if (c.userData.flashTimeout) clearTimeout(c.userData.flashTimeout);
+                                    
+                                    // Restore to Black (assuming default is black)
+                                    c.userData.flashTimeout = setTimeout(() => {
+                                        if (c && c.material) c.material.emissive.setHex(0x000000);
                                     }, 100);
                                 }
                             });
