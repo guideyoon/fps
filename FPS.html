@@ -1952,14 +1952,15 @@
     <div id="game-container"></div>
     <div id="vignette"></div>
     <div id="damage-overlay"></div>
-    <div id="mobile-player-name"></div> <!-- Mobile Player Name -->
-    <button id="chat-toggle-btn"><i class="fas fa-comment"></i></button> <!-- Chat Toggle -->
+    <div id="mobile-player-name"></div>
+    <button id="chat-toggle-btn"><i class="fas fa-comment"></i></button>
     <div id="scope-overlay">
         <div id="scope-line-h"></div>
         <div id="scope-line-v"></div>
         <div id="scope-dot"></div>
     </div>
     <div id="headshot-msg">HEADSHOT!</div>
+    <div id="grenade-kill-msg">BOOM!</div>
     <div id="hit-marker"></div>
 
     <div id="game-over">
@@ -1967,11 +1968,8 @@
         <button id="restart-btn" onclick="restartGame()">TRY AGAIN</button>
     </div>
 
-    <!-- Duplicate pause overlay removed -->
-
     <!-- 모드 선택 화면 -->
     <div id="mode-selection">
-        <!-- Logo Image (User Request) -->
         <img src="background.png" alt="DELULU Logo"
             style="max-width: 80%; max-height: 200px; margin-bottom: 30px; object-fit: contain;">
         <button class="mode-btn" id="btn-single-player">혼자하기</button>
@@ -1997,7 +1995,6 @@
             <button class="cancel" id="btn-back-to-mode-from-room"><i class="fas fa-arrow-left"></i> 뒤로가기</button>
         </div>
         <div id="room-list-container">
-            <!-- 방 목록이 여기에 표시됨 -->
             <div class="no-rooms-message">생성된 방이 없습니다.</div>
         </div>
     </div>
@@ -2030,9 +2027,6 @@
                 <select id="new-room-map">
                     <option value="factory" selected>창고 (Factory)</option>
                     <option value="hotel">호텔 (Hotel)</option>
-                    <!-- 향후 맵 추가 예시 -->
-                    <!-- <option value="urban">도시 (Urban)</option> -->
-                    <!-- <option value="desert">사막 (Desert)</option> -->
                 </select>
             </div>
             <div class="modal-actions">
@@ -2153,27 +2147,22 @@
 
     <!-- Left Side: Vertical Weapon List -->
     <div id="weapon-list-left">
-        <!-- 1. Rifle -->
         <div class="weapon-item" id="weapon-item-0">
             <div class="key-hint">1</div>
             <div class="icon-box"><i class="fas fa-person-rifle"></i></div>
         </div>
-        <!-- 2. Pistol -->
         <div class="weapon-item" id="weapon-item-1">
             <div class="key-hint">2</div>
             <div class="icon-box"><i class="fas fa-gun"></i></div>
         </div>
-        <!-- 3. Sniper -->
         <div class="weapon-item" id="weapon-item-2">
             <div class="key-hint">3</div>
             <div class="icon-box"><i class="fas fa-crosshairs"></i></div>
         </div>
-        <!-- 4. Knife -->
         <div class="weapon-item" id="weapon-item-3">
             <div class="key-hint">4</div>
             <div class="icon-box"><i class="fas fa-gavel"></i></div>
         </div>
-        <!-- 5. Grenade -->
         <div class="weapon-item" id="weapon-item-4">
             <div class="key-hint">5</div>
             <div class="icon-box"><i class="fas fa-bomb"></i></div>
@@ -2275,6 +2264,17 @@
         // 스폰 위치 수정: (0, 1.7, 5)는 안전하지만, (25, 1.7, 0) 등은 위험할 수 있음.
         // 중앙 안전 구역으로 고정: (0, 1.7, 10)
         let position = new THREE.Vector3(0, 1.7, 10);
+        
+        // Single Player Spawn Points (Global for restartGame)
+        const SINGLE_PLAYER_SPAWN_POINTS = [
+            { x: 0, y: 1.7, z: 10 },
+            { x: 25, y: 1.7, z: 25 },
+            { x: -25, y: 1.7, z: -25 },
+            { x: 40, y: 1.7, z: 0 },
+            { x: -40, y: 1.7, z: 0 },
+            { x: 0, y: 1.7, z: -40 }
+        ];
+
         let rotation = { x: 0, y: 0 };
         let velocityY = 0;
         let isGrounded = false;
@@ -3153,8 +3153,8 @@
             
             // Map Legacy UI variables to new HUD elements for compatibility
             elPlayTime = elTimer;
-            // elKillCount maps to nothing specific in new HUD, but we prevent errors
-            // Use dummy object if element missing to prevent null pointer
+            // elKillCount maps to new HUD element if it exists
+            elKillCount = document.getElementById('hud-kill-count');
             if (!elKillCount) elKillCount = { innerText: '' }; 
 
             elGameOver = document.getElementById('game-over');
@@ -3168,6 +3168,12 @@
                 if (typeof window.restartGame === 'function') window.restartGame();
                 else if (typeof restartGame === 'function') restartGame();
             });
+
+            // Ensure Crosshair is visible by default
+            if(elCrosshair) {
+                elCrosshair.style.display = 'block';
+                elCrosshair.style.zIndex = '100'; // Force on top
+            }
 
             // --- Load User Sounds ---
             SoundGen.loadAudioFile('uak.mp3', 'damage').catch(e => console.log('Damage sound (uak.mp3) not found or failed to load:', e));
@@ -3192,6 +3198,11 @@
                 enterFullscreen();
 
                 resetAmmo();
+                
+                // 랜덤 스폰 포인트 설정 (혼자하기)
+                const randomSpawn = SINGLE_PLAYER_SPAWN_POINTS[Math.floor(Math.random() * SINGLE_PLAYER_SPAWN_POINTS.length)];
+                position.set(randomSpawn.x, randomSpawn.y, randomSpawn.z);
+                
                 startGame();
 
                 // Show exit button in single player (zombie mode)
@@ -4294,9 +4305,12 @@
                     healthPills = [];
                 }
 
-                // 탄약 및 위치 리셋 (안전한 스폰 위치)
+                // 탄약 및 위치 리셋 (안전한 스폰 위치 - Random)
                 if (typeof resetAmmo === 'function') resetAmmo();
-                if (typeof position !== 'undefined') position.set(25, 1.7, 0);
+                if (typeof position !== 'undefined') {
+                    const randomSpawn = SINGLE_PLAYER_SPAWN_POINTS[Math.floor(Math.random() * SINGLE_PLAYER_SPAWN_POINTS.length)];
+                    position.set(randomSpawn.x, randomSpawn.y, randomSpawn.z);
+                }
 
                 // 게임 통계 리셋
                 gameStartTime = performance.now();
@@ -5529,8 +5543,6 @@
             const wData = WEAPONS[idx];
             if (wData.type === 'RIFLE') buildRifle();
             else if (wData.type === 'PISTOL') buildPistol();
-            else if (wData.type === 'KNIFE') buildKnife();
-            else if (wData.type === 'KNIFE') buildKnife();
             else if (wData.type === 'SNIPER') buildSniper();
             else if (wData.type === 'GRENADE') buildGrenade();
 
@@ -6323,39 +6335,38 @@
                     const dmg = Math.floor(MAX_DAMAGE * (1 - dist / EXPLOSION_RADIUS));
                     if (dmg > 0 && e.userData.hp > 0) {
                         e.userData.hp -= dmg;
-
-                        // Flash red
-                        e.children.forEach(c => {
-                            if (c.isMesh && c.material && c.material.emissive) {
-                                c.material.emissive.setHex(0xff0000);
-                                c.material.emissiveIntensity = 1.5;
-                            }
-                        });
-                        e.userData.flashTimer = 0.2;
+                        
+                        // Hit Marker for Grenade
+                        showHitMarker();
 
                         if (e.userData.hp <= 0) {
-                            // Kill logic (simplified copy from generic logic)
-                            e.userData.isDead = true;
-                            scene.remove(e);
-                            const idx = enemies.indexOf(e);
-                            if (idx > -1) enemies.splice(idx, 1);
-                            killCount++;
-                            if (elKillCount) elKillCount.innerText = `Kills: ${killCount}`;
-
-                            // Drop Items
-                            const enemyPos = e.position.clone();
-                            if (Math.random() < 0.3) {
-                                createHealthPill(enemyPos);
-                            } else if (Math.random() < 0.2) {
-                                createGrenadeDrop(enemyPos);
+                            killEnemy(e);
+                            
+                            // Grenade Kill Effect
+                            if (typeof elGrenadeKill !== 'undefined' && elGrenadeKill) {
+                                elGrenadeKill.classList.add('active');
+                                setTimeout(() => {
+                                    if(elGrenadeKill) elGrenadeKill.classList.remove('active');
+                                }, 800);
                             }
+                        } else {
+                            // Hit feedback (flash red)
+                            e.traverse(c => {
+                                if (c.isMesh && c.material && c.material.emissive) {
+                                    const old = c.material.emissive.getHex();
+                                    c.material.emissive.setHex(0xff0000);
+                                    setTimeout(() => {
+                                        if (c && c.material) c.material.emissive.setHex(old);
+                                    }, 100);
+                                }
+                            });
                         }
                     }
                 }
             });
 
             // 4. Local Player Damage (Self Damage)
-            const distToPlayer = position.distanceTo(pos);
+            const distToPlayer = playerGroup.position.distanceTo(pos);
             if (distToPlayer < EXPLOSION_RADIUS) {
                 const dmg = Math.floor(MAX_DAMAGE * (1 - distToPlayer / EXPLOSION_RADIUS));
                 if (dmg > 0) damagePlayer(dmg);
@@ -6886,8 +6897,10 @@
                 if (k === 'shift') keys.shift = true;
                 if (k === 'control') keys.ctrl = true;
                 if (k === ' ') {
-                    if (!keys.space && isGrounded) {
-                        velocityY = 15.0; // Increased to 15.0
+                    // Check if grounded (using raycast logic state)
+                    // But also allow "bunny hopping" if timed perfectly
+                    if (!keys.space && (isGrounded || position.y < (keys.ctrl ? 1.0 : 1.7) + 0.5)) {
+                        velocityY = 12.0; // Adjusted jump force
                         isGrounded = false;
                         SoundGen.playJump(false);
                     }
@@ -7084,8 +7097,8 @@
                 btnJump.addEventListener('touchstart', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    if (!keys.space && isGrounded) {
-                        velocityY = 15.0;
+                    if (!keys.space && (isGrounded || position.y < 2.5)) { // Allow jump if near ground
+                        velocityY = 12.0;
                         isGrounded = false;
                         SoundGen.playJump(false);
                     }
@@ -8061,16 +8074,72 @@
             if (!isDead && !isPaused && isGameStarted) {
                 handleShooting(dt);
 
-                const targetHeight = keys.ctrl ? 1.0 : 1.7;
-                let nextY = position.y + (targetHeight - position.y) * 10 * dt;
-                velocityY -= 20.0 * dt;
-                if (nextY < targetHeight && velocityY < 0) {
-                    if (!isGrounded) SoundGen.playJump(true);
-                    nextY = targetHeight; velocityY = 0; isGrounded = true;
-                } else if (!isGrounded) {
-                    nextY += velocityY * dt;
+                // --- Improved Physics with Raycasting (Fix for Jumping on Objects) ---
+                const eyeHeight = keys.ctrl ? 1.0 : 1.7; // 1.7 is standard eye level
+                
+                // Raycast down to find "ground"
+                let groundY = 0.5; // Base floor level
+                
+                // Only cast ray if mapGroup exists
+                if (mapGroup) {
+                    const rayOrigin = position.clone();
+                    rayOrigin.y += 0.5; // Start slightly above current foot position to detect very close ground
+                    const downRay = new THREE.Raycaster(rayOrigin, new THREE.Vector3(0, -1, 0), 0, 10);
+                    // Intersect with map objects (collidable)
+                    // Note: We need to traverse mapGroup to find meshes, or use a known list. 
+                    // mapGroup.children contains meshes.
+                    const intersects = downRay.intersectObjects(mapGroup.children, true);
+                    
+                    if (intersects.length > 0) {
+                        // Find highest intersection below player
+                        // Raycaster sorts by distance, so first one is closest.
+                        // We need to ensure we don't pick something *above* our feet if we are jumping up through it?
+                        // But ray starts at position (eye level) and goes down.
+                        // Actually position is eye level.
+                        
+                        // Let's adjust: Ray starts at (x, y, z).
+                        // If y is 1.7, and we hit a box at height 1.5, distance is 0.2.
+                        // Ground Height = y - distance.
+                        
+                        // Filter out things that are "walls" if possible (dot product of normal?)
+                        // For now, simpler: closest hit is ground.
+                        const hit = intersects[0];
+                        // If the normal is somewhat up-facing
+                        if (hit.face && hit.face.normal.y > 0.5) {
+                             // Adjust for ray origin offset if any
+                             // We used position (eye) + 0.5? No, we used position + 0.5
+                             // Ray origin y = position.y + 0.5
+                             // Hit point y = rayOrigin.y - hit.distance
+                             // groundY = hit.point.y
+                             groundY = Math.max(groundY, hit.point.y);
+                        }
+                    }
                 }
-                position.y = nextY;
+
+                const targetY = groundY + eyeHeight;
+                
+                // Apply Gravity
+                velocityY -= 30.0 * dt; // Stronger gravity for snappier feel
+                let nextY = position.y + velocityY * dt;
+
+                // Ground Collision / Landing
+                // We allow a small tolerance to "snap" to ground
+                if (velocityY < 0 && nextY <= targetY) {
+                    // Landed
+                    position.y = targetY;
+                    velocityY = 0;
+                    isGrounded = true;
+                    if (!keys.space) { 
+                        // Play land sound only if we were falling significantly?
+                        // SoundGen.playLand(); // Maybe too spammy?
+                    }
+                } else {
+                    position.y = nextY;
+                    isGrounded = false;
+                }
+                
+                // Head Collision (Ceiling) - Optional, simplified
+                // ...
 
                 const w = WEAPONS[curWeaponIdx];
                 let speed = 9.0; // Default: RUN (User Request)
@@ -8090,10 +8159,38 @@
                     const rgt = new THREE.Vector3(1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), rotation.y);
                     const moveDir = fwd.multiplyScalar(-dy).add(rgt.multiplyScalar(dx)).normalize();
                     const moveStep = moveDir.multiplyScalar(speed * dt);
-                    let nextPos = position.clone(); nextPos.x += moveStep.x;
-                    if (!checkCollision(nextPos)) position.x = nextPos.x;
-                    nextPos = position.clone(); nextPos.z += moveStep.z;
-                    if (!checkCollision(nextPos)) position.z = nextPos.z;
+                    
+                    const stepHeight = 0.6; // 등반 가능한 최대 높이 (계단 등)
+                    
+                    // X축 이동 및 Step Climbing
+                    let nextPosX = position.clone();
+                    nextPosX.x += moveStep.x;
+                    if (!checkCollision(nextPosX)) {
+                        position.x = nextPosX.x;
+                    } else {
+                        // 장애물 발견 시 위쪽 공간 체크
+                        let stepUpPos = nextPosX.clone();
+                        stepUpPos.y += stepHeight;
+                        if (!checkCollision(stepUpPos)) {
+                            position.x = nextPosX.x;
+                            position.y += 0.1; // 살짝 들어올려줌 (부드러운 등반)
+                        }
+                    }
+
+                    // Z축 이동 및 Step Climbing
+                    let nextPosZ = position.clone();
+                    nextPosZ.z += moveStep.z;
+                    if (!checkCollision(nextPosZ)) {
+                        position.z = nextPosZ.z;
+                    } else {
+                        // 장애물 발견 시 위쪽 공간 체크
+                        let stepUpPos = nextPosZ.clone();
+                        stepUpPos.y += stepHeight;
+                        if (!checkCollision(stepUpPos)) {
+                            position.z = nextPosZ.z;
+                            position.y += 0.1; // 살짝 들어올려줌
+                        }
+                    }
 
                     if (!isAiming) {
                         if (isGrounded) {
