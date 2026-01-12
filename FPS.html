@@ -128,11 +128,71 @@
         .feed-item .killer { color: var(--neon-cyan); font-weight: bold; }
         .feed-item .victim { color: var(--neon-red); }
 
-        /* Center: Crosshair */
-        .crosshair {
+
+        /* Vertical Weapon List (Left Side) */
+        #weapon-list-left {
             position: absolute;
+            left: 20px;
             top: 50%;
-            left: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            pointer-events: none; /* Just for display */
+        }
+        .weapon-item {
+            display: flex;
+            align-items: center;
+            opacity: 0.4;
+            transition: all 0.2s ease-out;
+            transform: translateX(-10px);
+        }
+        .weapon-item.active {
+            opacity: 1;
+            transform: translateX(0) scale(1.1);
+        }
+        .weapon-item .key-hint {
+            width: 20px;
+            height: 20px;
+            background: rgba(0,0,0,0.5);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .weapon-item.active .key-hint {
+            background: var(--neon-cyan);
+            border-color: var(--neon-cyan);
+            color: #000;
+        }
+        .weapon-item .icon-box {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 5px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .weapon-item.active .icon-box {
+            border-color: var(--neon-cyan);
+            background: rgba(0,255,255,0.1);
+            box-shadow: 0 0 10px rgba(0,255,255,0.3);
+        }
+        .weapon-item i {
+            font-size: 24px;
+            color: #fff;
+        }
+        .weapon-item.active i {
+            color: var(--neon-cyan);
+        }
+
             transform: translate(-50%, -50%);
             display: flex;
             align-items: center;
@@ -219,12 +279,9 @@
             font-size: 1.5rem;
             color: #aaa;
         }
-        .weapon-selector {
-            display: flex;
-            gap: 5px;
-            margin-bottom: 10px;
-            transform: skewX(10deg);
-        }
+            .weapon-selector {
+                display: none; /* Hide old selector */
+            }
         .weapon-slot {
             width: 30px;
             height: 6px;
@@ -2093,16 +2150,36 @@
         <div id="joystick-handle"></div>
     </div>
 
-    <!-- 수직 무기 선택기 (왼쪽 가운데) -->
-    <div id="weapon-selector-vertical">
-        <div class="weapon-select-btn" data-idx="0"><i class="fas fa-person-rifle"></i></div>
-        <!-- Rifle: person-rifle icon -->
-        <div class="weapon-select-btn" data-idx="1"><i class="fas fa-gun"></i></div>
-        <!-- Pistol: changed to fa-gun (simpler pistol icon) -->
-        <div class="weapon-select-btn" data-idx="2"><i class="fas fa-crosshairs"></i></div> <!-- Sniper -->
-        <div class="weapon-select-btn" data-idx="3"><i class="fas fa-gavel"></i></div> <!-- Knife -->
-        <div class="weapon-select-btn" data-idx="4"><i class="fas fa-bomb"></i></div> <!-- Grenade -->
+
+    <!-- Left Side: Vertical Weapon List -->
+    <div id="weapon-list-left">
+        <!-- 1. Rifle -->
+        <div class="weapon-item" id="weapon-item-0">
+            <div class="key-hint">1</div>
+            <div class="icon-box"><i class="fas fa-person-rifle"></i></div>
+        </div>
+        <!-- 2. Pistol -->
+        <div class="weapon-item" id="weapon-item-1">
+            <div class="key-hint">2</div>
+            <div class="icon-box"><i class="fas fa-gun"></i></div>
+        </div>
+        <!-- 3. Sniper -->
+        <div class="weapon-item" id="weapon-item-2">
+            <div class="key-hint">3</div>
+            <div class="icon-box"><i class="fas fa-crosshairs"></i></div>
+        </div>
+        <!-- 4. Knife -->
+        <div class="weapon-item" id="weapon-item-3">
+            <div class="key-hint">4</div>
+            <div class="icon-box"><i class="fas fa-gavel"></i></div>
+        </div>
+        <!-- 5. Grenade -->
+        <div class="weapon-item" id="weapon-item-4">
+            <div class="key-hint">5</div>
+            <div class="icon-box"><i class="fas fa-bomb"></i></div>
+        </div>
     </div>
+
 
     <button class="mobile-btn" id="btn-shoot"><i class="fas fa-crosshairs"></i></button>
     <button class="mobile-btn" id="btn-aim"><i class="fas fa-eye"></i></button>
@@ -2195,7 +2272,9 @@
         // Player State - 안전한 스폰 위치 (구조물 사이 빈 공간)
         // Factory 맵 분석: 중앙(0,0) 근처 및 ±22 근처는 비교적 빈 공간
         // 구조물: 컨테이너(±70,±70), 플랫폼(±60,±60), 크레이트(여러 위치), 커버월 등
-        let position = new THREE.Vector3(25, 1.7, 0);
+        // 스폰 위치 수정: (0, 1.7, 5)는 안전하지만, (25, 1.7, 0) 등은 위험할 수 있음.
+        // 중앙 안전 구역으로 고정: (0, 1.7, 10)
+        let position = new THREE.Vector3(0, 1.7, 10);
         let rotation = { x: 0, y: 0 };
         let velocityY = 0;
         let isGrounded = false;
@@ -4117,7 +4196,8 @@
 
         // Global restartGame handler is already attached above
 
-        // 조명 토글 버튼 이벤트
+        // 조명 토글 버튼 이벤트 - 삭제됨 (사용자 요청)
+        /*
         const lightToggleBtn = document.getElementById('light-toggle-btn');
         if (lightToggleBtn) {
             const toggleLight = () => {
@@ -4140,6 +4220,7 @@
                 toggleLight();
             });
         }
+        */
 
         // setupControls와 animate는 startGame()에서 호출됨
 
@@ -6015,120 +6096,128 @@
         function createEnemyAI() {
             const enemy = new THREE.Group();
 
+
             // FIX: Clone Materials to prevent shared color change
             const mClothes = matZombieClothes.clone();
             const mSkin = matZombieSkin.clone();
+            
+            // 색상 랜덤화 (좀비마다 약간씩 다른 느낌)
+            mClothes.color.setHSL(0.1 + Math.random() * 0.1, 0.4, 0.2 + Math.random() * 0.2); // 썩은 옷 색깔
+            mSkin.color.setHSL(0.3 + Math.random() * 0.1, 0.4, 0.4 + Math.random() * 0.2);   // 썩은 피부 (녹색 계열)
 
-            // 몸통 (Body) - 더 상세하게
-            const body = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.7, 0.25), mClothes);
-            body.position.y = 1.1; body.name = 'body'; enemy.add(body);
+            // 좀비 그룹 스케일 랜덤화 (키 차이)
+            const scale = 0.9 + Math.random() * 0.2;
+            enemy.scale.set(scale, scale, scale);
 
-            // 가슴 부분 디테일
-            const chest = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.3, 0.22), mClothes);
-            chest.position.set(0, 1.25, 0.01);
-            enemy.add(chest);
+            // 1. 몸통 (Torso) - 갈비뼈 느낌의 텍스처(단순화된 형태) 대신 구부정한 자세 표현
+            const bodyGeo = new THREE.BoxGeometry(0.45, 0.6, 0.25);
+            // 상체 굽히기
+            bodyGeo.applyMatrix4(new THREE.Matrix4().makeTranslation(0, 0.3, 0));
+            bodyGeo.applyMatrix4(new THREE.Matrix4().makeRotationX(0.2)); 
+            const body = new THREE.Mesh(bodyGeo, mClothes);
+            body.position.y = 0.8; 
+            body.name = 'body'; 
+            enemy.add(body);
 
-            // 어깨 (Shoulders)
-            const lShoulder = new THREE.Mesh(new THREE.SphereGeometry(0.08, 8, 8), mClothes);
-            lShoulder.position.set(-0.25, 1.4, 0);
-            enemy.add(lShoulder);
-            const rShoulder = new THREE.Mesh(new THREE.SphereGeometry(0.08, 8, 8), mClothes);
-            rShoulder.position.set(0.25, 1.4, 0);
-            enemy.add(rShoulder);
+            // 2. 머리 (Head) - 턱이 빠진 듯한 느낌 + 퀭한 눈
+            const headGroup = new THREE.Group();
+            
+            // 두개골
+            const skull = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.22, 0.24), mSkin);
+            skull.position.y = 0.05;
+            headGroup.add(skull);
 
-            // 머리 (Head) - 더 상세하게
-            const head = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.25, 0.25), mSkin);
-            head.position.y = 1.6; head.name = 'head'; enemy.add(head);
-
-            // 머리 형태 개선 (약간 구형으로)
-            const headShape = new THREE.Mesh(new THREE.SphereGeometry(0.13, 8, 8), mSkin);
-            headShape.position.set(0, 1.6, 0);
-            enemy.add(headShape);
-
-            // 눈 (Eyes) - 빨간색으로
+            // 턱 (Jaw) - 약간 벌어진 입
+            const jaw = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.08, 0.20), mSkin);
+            jaw.position.set(0, -0.12, 0.02);
+            jaw.rotation.x = 0.3; // 입 벌림
+            headGroup.add(jaw);
+            
+            // 눈 (Eyes) - 비대칭 및 붉은 안광
             const eyeMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-            const lEye = new THREE.Mesh(new THREE.SphereGeometry(0.015, 6, 6), eyeMat);
-            lEye.position.set(-0.05, 1.62, 0.12);
-            enemy.add(lEye);
+            // 왼쪽 눈
+            const lEye = new THREE.Mesh(new THREE.SphereGeometry(0.02, 6, 6), eyeMat);
+            lEye.position.set(-0.06, 0.08, 0.12);
+            headGroup.add(lEye);
+            // 오른쪽 눈 (약간 튀어나오거나 위치 다르게)
             const rEye = new THREE.Mesh(new THREE.SphereGeometry(0.015, 6, 6), eyeMat);
-            rEye.position.set(0.05, 1.62, 0.12);
-            enemy.add(rEye);
+            rEye.position.set(0.06, 0.07, 0.11);
+            headGroup.add(rEye);
 
-            // 목 (Neck)
-            const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.1, 0.15, 8), mSkin);
-            neck.rotation.z = Math.PI / 2;
-            neck.position.set(0, 1.45, 0);
-            enemy.add(neck);
+            headGroup.position.set(0, 1.55, 0.1); // 몸보다 약간 앞으로 나온 머리 (거북목)
+            headGroup.rotation.x = 0.1;
+            headGroup.name = 'head';
+            enemy.add(headGroup);
 
-            // 오른팔 (Right Arm) - 더 상세하게
-            const rUpperArm = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.1, 0.3, 8), mClothes);
-            rUpperArm.rotation.z = Math.PI / 2;
-            rUpperArm.position.set(0.3, 1.3, 0.2);
-            rUpperArm.rotation.x = -1.2;
-            rUpperArm.name = 'limb';
-            enemy.add(rUpperArm);
+            // 3. 팔 (Arms) - 좀비 특유의 앞으로 뻗은 팔 (비대칭)
+            
+            // 왼팔
+            const lArmGroup = new THREE.Group();
+            const lUpperArm = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.06, 0.35, 6), mClothes);
+            lUpperArm.position.y = -0.15;
+            lArmGroup.add(lUpperArm);
+            
+            const lForeArm = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.05, 0.35, 6), mSkin); // 팔뚝은 살이 드러남
+            lForeArm.position.y = -0.5;
+            lArmGroup.add(lForeArm);
 
-            const rForearm = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.08, 0.25, 8), mClothes);
-            rForearm.rotation.z = Math.PI / 2;
-            rForearm.position.set(0.35, 1.15, 0.4);
-            rForearm.rotation.x = -1.8;
-            rForearm.name = 'limb';
-            enemy.add(rForearm);
-            enemy.userData.rArm = rForearm;
+            lArmGroup.position.set(-0.28, 1.45, 0.05);
+            lArmGroup.rotation.x = -1.4; // 앞으로 뻗음
+            lArmGroup.rotation.z = 0.2;  // 약간 벌림
+            enemy.add(lArmGroup);
+            enemy.userData.lArm = lArmGroup; // 애니메이션용
 
-            // 왼팔 (Left Arm) - 더 상세하게
-            const lUpperArm = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.1, 0.3, 8), mClothes);
-            lUpperArm.rotation.z = Math.PI / 2;
-            lUpperArm.position.set(-0.3, 1.3, 0.2);
-            lUpperArm.rotation.x = -1.2;
-            lUpperArm.name = 'limb';
-            enemy.add(lUpperArm);
+            // 오른팔 (약간 더 내려가거나 꺾임)
+            const rArmGroup = new THREE.Group();
+            const rUpperArm = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.06, 0.35, 6), mClothes);
+            rUpperArm.position.y = -0.15;
+            rArmGroup.add(rUpperArm);
+            
+            const rForeArm = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.05, 0.35, 6), mSkin);
+            rForeArm.position.y = -0.5;
+            rArmGroup.add(rForeArm);
 
-            const lForearm = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.08, 0.25, 8), mClothes);
-            lForearm.rotation.z = Math.PI / 2;
-            lForearm.position.set(-0.35, 1.15, 0.4);
-            lForearm.rotation.x = -1.8;
-            lForearm.name = 'limb';
-            enemy.add(lForearm);
-            enemy.userData.lArm = lForearm;
+            rArmGroup.position.set(0.28, 1.45, 0.05);
+            rArmGroup.rotation.x = -1.3;
+            rArmGroup.rotation.z = -0.2;
+            enemy.add(rArmGroup);
+            enemy.userData.rArm = rArmGroup;
 
-            // 손 (Hands)
-            const rHand = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.08), mSkin);
-            rHand.position.set(0.4, 1.05, 0.5);
-            enemy.add(rHand);
-            const lHand = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.08), mSkin);
-            lHand.position.set(-0.4, 1.05, 0.5);
-            enemy.add(lHand);
+            // 4. 다리 (Legs) - 뒤틀린 걸음걸이를 위한 분리
+            
+            // 왼쪽 다리
+            const lLegGroup = new THREE.Group();
+            const lThigh = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.08, 0.45, 6), mClothes);
+            lThigh.position.y = -0.2;
+            lLegGroup.add(lThigh);
+            
+            const lCalf = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.07, 0.45, 6), mClothes); // 바지 입음
+            lCalf.position.y = -0.65;
+            lLegGroup.add(lCalf);
+            
+            const lFoot = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.1, 0.22), mClothes);
+            lFoot.position.set(0, -0.9, 0.05);
+            lLegGroup.add(lFoot);
 
-            // 왼다리 (Left Leg) - 더 상세하게
-            const lThigh = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.15, 0.4, 8), mClothes);
-            lThigh.position.set(-0.15, 0.55, 0);
-            lThigh.name = 'limb';
-            enemy.add(lThigh);
+            lLegGroup.position.set(-0.15, 0.8, 0);
+            enemy.add(lLegGroup);
 
-            const lShin = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.12, 0.35, 8), mClothes);
-            lShin.position.set(-0.15, 0.175, 0);
-            lShin.name = 'limb';
-            enemy.add(lShin);
+            // 오른쪽 다리
+            const rLegGroup = new THREE.Group();
+            const rThigh = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.08, 0.45, 6), mClothes);
+            rThigh.position.y = -0.2;
+            rLegGroup.add(rThigh);
+            
+            const rCalf = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.07, 0.45, 6), mClothes);
+            rCalf.position.y = -0.65;
+            rLegGroup.add(rCalf);
 
-            // 오른다리 (Right Leg) - 더 상세하게
-            const rThigh = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.15, 0.4, 8), mClothes);
-            rThigh.position.set(0.15, 0.55, 0);
-            rThigh.name = 'limb';
-            enemy.add(rThigh);
+            const rFoot = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.1, 0.22), mClothes);
+            rFoot.position.set(0, -0.9, 0.05);
+            rLegGroup.add(rFoot);
 
-            const rShin = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.12, 0.35, 8), mClothes);
-            rShin.position.set(0.15, 0.175, 0);
-            rShin.name = 'limb';
-            enemy.add(rShin);
-
-            // 발 (Feet)
-            const lFoot = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.08, 0.2), mClothes);
-            lFoot.position.set(-0.15, 0, 0.1);
-            enemy.add(lFoot);
-            const rFoot = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.08, 0.2), mClothes);
-            rFoot.position.set(0.15, 0, 0.1);
-            enemy.add(rFoot);
+            rLegGroup.position.set(0.15, 0.8, 0);
+            enemy.add(rLegGroup);
 
             // HP Bar (Billboard)
             const hpGroup = new THREE.Group();
@@ -7163,11 +7252,15 @@
                 SoundGen.playSwitch();
             }
 
-            // Update Weapon Selector UI
-            document.querySelectorAll('.weapon-slot').forEach(slot => slot.classList.remove('active'));
-            // New HTML uses data-slot
-            const activeSlot = document.querySelector(`.weapon-slot[data-slot="${idx}"]`);
-            if (activeSlot) activeSlot.classList.add('active');
+            // Update Weapon Selector UI (Bottom Right) - DEPRECATED / HIDDEN
+            // document.querySelectorAll('.weapon-slot').forEach(slot => slot.classList.remove('active'));
+            // const activeSlot = document.querySelector(`.weapon-slot[data-slot="${idx}"]`);
+            // if (activeSlot) activeSlot.classList.add('active');
+
+            // Update New Left Weapon List
+            document.querySelectorAll('.weapon-item').forEach(item => item.classList.remove('active'));
+            const activeItem = document.getElementById(`weapon-item-${idx}`);
+            if (activeItem) activeItem.classList.add('active');
 
             updateUI();
         }
