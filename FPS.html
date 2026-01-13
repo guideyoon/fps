@@ -3594,7 +3594,7 @@
             addSafeListener(document.getElementById('exit-game-btn'), exitGameHandler);
 
             // 2. Name Setup
-            document.getElementById('btn-back-to-mode').addEventListener('click', () => {
+            addSafeListener(document.getElementById('btn-back-to-mode'), () => {
                 nameSetup.style.display = 'none';
                 modeSelection.style.display = 'flex';
             });
@@ -3627,7 +3627,7 @@
             }
 
             // Back button to return to mode selection from room menu
-            document.getElementById('btn-back-to-mode-from-room').addEventListener('click', () => {
+            addSafeListener(document.getElementById('btn-back-to-mode-from-room'), () => {
                 roomMenu.style.display = 'none';
                 modeSelection.style.display = 'flex';
                 document.body.classList.remove('game-active');
