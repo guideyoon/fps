@@ -3345,6 +3345,14 @@
         }
 
         function init() {
+            // [TASK] Automatic Fullscreen on Interaction
+            // Trigger fullscreen request on any body click/touch if not already active
+            const autoEnterFullscreen = () => {
+                enterFullscreen();
+            };
+            document.body.addEventListener('click', autoEnterFullscreen);
+            document.body.addEventListener('touchstart', autoEnterFullscreen, { passive: true });
+
             // UI References
             const modeSelection = document.getElementById('mode-selection');
             const nameSetup = document.getElementById('name-setup');
