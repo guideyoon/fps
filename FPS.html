@@ -1878,11 +1878,11 @@
                 display: none !important;
             }
 
-            /* ===== 조이스틱 - 왼쪽, 위로 이동 ===== */
+            /* ===== 조이스틱 - 오른쪽으로 20% 이동 ===== */
             #joystick-zone {
                 display: block;
                 bottom: 60px;
-                left: 20px;
+                left: 20%;
                 width: 90px;
                 height: 90px;
             }
@@ -2153,15 +2153,16 @@
                 opacity: 0;
             }
 
-            /* Adjust ammo display */
+            /* HP/Ammo - 상단에 표시되도록 강제 (충돌 방지) */
             #ammo-info {
-                bottom: 15px;
-                right: 15px;
+                bottom: auto !important;
+                top: 3px !important;
+                right: 60px !important;
             }
 
-            /* Adjust HP bar */
             #hp-container {
-                bottom: 15px;
+                bottom: auto !important;
+                top: 3px !important;
             }
 
             /* Make other UI elements more compact */
