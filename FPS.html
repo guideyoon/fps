@@ -4506,8 +4506,9 @@
             if (elHpBar) {
                 elHpBar.style.width = '100%';
                 elHpBar.style.background = '#4caf50'; // Reset color
-                elHpText.innerText = "HP";
+                if (elHpText) elHpText.innerText = Math.floor(playerHP);
             }
+
 
             // 1. 엔진 초기화
             initGame();
@@ -4515,8 +4516,13 @@
             // Show light toggle button during gameplay
             const lightToggleBtn = document.getElementById('light-toggle-btn');
             if (lightToggleBtn) {
-                lightToggleBtn.style.display = 'flex';
+                if (gameMode === 'single' && !isMobile) {
+                    lightToggleBtn.style.display = 'none';
+                } else {
+                    lightToggleBtn.style.display = 'flex';
+                }
             }
+
 
             // 1.5. 멀티플레이어 맵 생성 (currentMap은 gameStart 이벤트에서 설정됨)
             if (gameMode === 'multi') {
@@ -7783,7 +7789,7 @@
 
                     if (playerHP !== oldHP) { // 실제로 회복된 경우에만
                         elHpBar.style.width = playerHP + '%';
-                        elHpText.innerText = "HP";
+                        if (elHpText) elHpText.innerText = Math.floor(playerHP);
                         if (playerHP > 50) elHpBar.style.background = "#4caf50";
                         else if (playerHP > 20) elHpBar.style.background = "#ff9800";
                         else elHpBar.style.background = "#f44336";
