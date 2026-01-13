@@ -112,6 +112,20 @@
         .score.ally { color: var(--neon-cyan); }
         .score.enemy { color: var(--neon-red); }
 
+        /* Single Player HUD Overrides */
+        body.single-player #hud-score-ally,
+        body.single-player #hud-score-enemy {
+            display: none;
+        }
+        body.single-player #hud-kill-count {
+            display: block;
+        }
+        #hud-kill-count {
+            display: none;
+            color: #ffaa00;
+            transform: skewX(10deg);
+        }
+
         /* Top Right: Kill Feed */
         .kill-feed {
             position: absolute;
@@ -1035,6 +1049,32 @@
             pointer-events: auto;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        #exit-to-menu-btn {
+            margin-top: 15px;
+            padding: 10px 30px;
+            font-size: 20px;
+            font-weight: bold;
+            background: rgba(50, 0, 0, 0.8);
+            border: 2px solid #ff3333;
+            color: #ff3333;
+            cursor: pointer;
+            z-index: 2000;
+            pointer-events: auto;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        #exit-to-menu-btn:hover {
+            background: rgba(255, 51, 51, 0.2);
+            color: white;
+            transform: scale(1.05);
+        }
+        #game-over-stats {
+            font-size: 32px;
+            color: white;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(255,255,255,0.5);
         }
 
         #stats-info {
@@ -1987,8 +2027,10 @@
     <div id="hit-marker"></div>
 
     <div id="game-over">
-        YOU DIED
+        <div id="game-over-title">YOU DIED</div>
+        <div id="game-over-stats">Kills: <span id="final-kill-count">0</span></div>
         <button id="restart-btn" onclick="restartGame()">TRY AGAIN</button>
+        <button id="exit-to-menu-btn" onclick="location.reload()">EXIT</button>
     </div>
 
     <!-- 모드 선택 화면 -->
@@ -2094,6 +2136,7 @@
             <div class="score ally" id="hud-score-ally">0</div>
             <div class="timer" id="hud-timer">10:00</div>
             <div class="score enemy" id="hud-score-enemy">0</div>
+            <div id="hud-kill-count">Kills: 0</div>
         </div>
 
         <!-- Top Right: Kill Feed -->
@@ -2335,6 +2378,8 @@
         let playersList = [];
         let countdownTimer = null;
         let currentRoomTimeLeft = 600; // Track match time for UI sync
+        let singlePlayerTimeLeft = 600;
+
 
         // Multiplayer Socket
         let socket = null;
@@ -4490,17 +4535,24 @@
             gameStartTime = performance.now();
             killCount = 0;
             playTime = 0;
+            const gameOverTitle = document.getElementById('game-over-title');
+            if (gameOverTitle) gameOverTitle.innerText = 'YOU DIED';
+            const gameOverKills = document.getElementById('final-kill-count');
+            if (gameOverKills) gameOverKills.innerText = killCount;
 
             // [User Request] 멀티플레이어 매치 타이머 초기값 표시
+
             if (gameMode === 'multi') {
                 // 서버 연동 시에는 서버에서 받은 timeLeft를 보여줌
                 // timeLeft가 있으면 즉시 UI 업데이트, 없으면 10분 기본값
                 const initialTime = (typeof currentRoomTimeLeft !== 'undefined') ? currentRoomTimeLeft : 600;
                 updateTimerUI(initialTime);
             } else {
-                if (elPlayTime) elPlayTime.innerText = "Time: 00:00";
+                singlePlayerTimeLeft = 600;
+                updateTimerUI(singlePlayerTimeLeft);
             }
-            if (elKillCount) elKillCount.innerText = "Kills: 0";
+            if (elKillCount) elKillCount.innerText = `Kills: ${killCount}`;
+
 
             // HP Bar Reset
             if (elHpBar) {
@@ -6870,6 +6922,10 @@
             if (playerHP <= 0) {
                 isDead = true;
                 if (gameMode === 'single') {
+                    const gameOverTitle = document.getElementById('game-over-title');
+                    if (gameOverTitle) gameOverTitle.innerText = 'YOU DIED';
+                    const gameOverKills = document.getElementById('final-kill-count');
+                    if (gameOverKills) gameOverKills.innerText = killCount;
                     if (elGameOver) elGameOver.style.display = 'flex';
                 }
                 if (!isMobile && document.pointerLockElement === document.body) {
@@ -7535,6 +7591,10 @@
             if (playerHP <= 0) {
                 isDead = true;
                 if (gameMode === 'single') {
+                    const gameOverTitle = document.getElementById('game-over-title');
+                    if (gameOverTitle) gameOverTitle.innerText = 'YOU DIED';
+                    const gameOverKills = document.getElementById('final-kill-count');
+                    if (gameOverKills) gameOverKills.innerText = killCount;
                     if (elGameOver) elGameOver.style.display = 'flex';
                 }
                 if (!isMobile && document.pointerLockElement === document.body) {
@@ -8289,13 +8349,24 @@
             // 플레이 시간 업데이트 (싱글플레이어 전용)
             // 멀티플레이어 매치 타이머는 timerSync 소켓 이벤트가 담당함
             if (!isDead && !isPaused && gameStartTime > 0 && gameMode === 'single') {
-                playTime = Math.floor((time - gameStartTime) / 1000);
-                const minutes = Math.floor(playTime / 60);
-                const seconds = playTime % 60;
-                if (elPlayTime) {
-                    elPlayTime.innerText = `Time: ${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                singlePlayerTimeLeft = Math.max(0, singlePlayerTimeLeft - dt);
+                updateTimerUI(Math.ceil(singlePlayerTimeLeft));
+                if (singlePlayerTimeLeft <= 0) {
+                    isGameStarted = false;
+                    isDead = true;
+                    const gameOverTitle = document.getElementById('game-over-title');
+                    if (gameOverTitle) gameOverTitle.innerText = 'TIME OVER';
+                    const gameOverKills = document.getElementById('final-kill-count');
+                    if (gameOverKills) gameOverKills.innerText = killCount;
+                    if (elGameOver) elGameOver.style.display = 'flex';
+                    const exitBtn = document.getElementById('exit-game-btn');
+                    if (exitBtn) exitBtn.style.display = 'none';
+                    if (!isMobile && document.pointerLockElement === document.body) {
+                        document.exitPointerLock();
+                    }
                 }
             }
+
 
             // Spectator Camera (Killcam) - Follow killer's position and rotation
             if (isSpectating && spectatingPlayerId && gameMode === 'multi') {
