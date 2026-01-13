@@ -21,6 +21,8 @@
     <!-- Favicon fix to prevent 404 -->
     <link rel="icon" href="data:,">
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&display=swap');
+
         * {
             box-sizing: border-box;
         }
@@ -51,13 +53,19 @@
             html,
             body {
                 height: 100vh;
-                height: -webkit-fill-available;
+            }
+
+            @supports (height: -webkit-fill-available) {
+                html,
+                body {
+                    height: -webkit-fill-available;
+                }
             }
         }
 
-        /* --- NEON TACTICAL HUD CSS --- */
-        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&display=swap');
 
+        /* --- NEON TACTICAL HUD CSS --- */
+        
         :root {
             --neon-cyan: #00f3ff;
             --neon-red: #ff003c;
@@ -1404,7 +1412,7 @@
         #btn-weapon2,
         #btn-weapon3,
         #btn-weapon4 {
-            display: none !important;
+            display: none;
         }
 
         /* 크런커 스타일 클러스터 배치 */
@@ -1586,7 +1594,7 @@
             #btn-weapon3,
             #btn-weapon4,
             #btn-weapon-cycle {
-                display: none !important;
+                display: none;
             }
 
             /* 무기 선택기 표시 */
@@ -1603,11 +1611,11 @@
         /* 가로 모드 - 모바일 스타일 적용 (User Request: Like Portrait Mode) */
         @media (orientation: landscape) and (max-width: 1024px) {
             #controls-guide {
-                display: none !important;
+                display: none;
             }
 
             #weapon-label {
-                display: none !important;
+                display: none;
             }
 
             /* 버튼 숨김 -> 수직 선택기 사용 */
@@ -1615,7 +1623,7 @@
             #btn-weapon2,
             #btn-weapon3,
             #btn-weapon4 {
-                display: none !important;
+                display: none;
             }
 
             #weapon-selector-vertical {
@@ -1657,7 +1665,7 @@
 
             /* 버튼 위치 조정 */
             .mobile-btn {
-                display: flex !important;
+                display: flex;
                 width: 50px;
                 height: 50px;
                 font-size: 16px;
@@ -1735,18 +1743,18 @@
 
         @media (max-width: 1024px) {
             #light-toggle-btn {
-                top: 15px !important;
-                right: 15px !important;
-                width: 45px !important;
-                height: 45px !important;
-                font-size: 22px !important;
+                top: 15px;
+                right: 15px;
+                width: 45px;
+                height: 45px;
+                font-size: 22px;
             }
 
             .exit-game-btn {
-                top: 15px !important;
-                right: 70px !important;
-                width: 45px !important;
-                height: 45px !important;
+                top: 15px;
+                right: 70px;
+                width: 45px;
+                height: 45px;
             }
         }
 
@@ -1754,7 +1762,7 @@
 
             #controls,
             .mobile-btn {
-                display: none !important;
+                display: none;
             }
         }
 
@@ -1828,7 +1836,7 @@
             #joystick-zone,
             #weapon-selector-vertical,
             #chat-toggle-btn {
-                display: none !important;
+                display: none;
             }
         }
 
@@ -1838,13 +1846,13 @@
             }
 
             body.game-active.multi-player #chat-toggle-btn {
-                display: flex !important;
+                display: flex;
                 /* Force show on mobile during multiplayer gameplay */
             }
 
             #chat-container {
                 /* Initially hidden on mobile or small helper mode */
-                display: none !important;
+                display: none;
                 /* Managed by JS toggle */
                 width: 60%;
                 height: 150px;
@@ -1854,19 +1862,19 @@
             }
 
             #chat-container.visible {
-                display: flex !important;
+                display: flex;
             }
 
             /* Show icon-based weapon selector on mobile during gameplay */
             body.game-active #weapon-selector-vertical {
-                display: flex !important;
+                display: flex;
             }
 
             /* Hide text-based weapon inventory on mobile - FORCE */
             body #weapon-inventory {
-                display: none !important;
-                visibility: hidden !important;
-                opacity: 0 !important;
+                display: none;
+                visibility: hidden;
+                opacity: 0;
             }
         }
 
@@ -1875,26 +1883,26 @@
 
             /* Ensure mode selection isn't visible during gameplay */
             #mode-selection {
-                display: none !important;
+                display: none;
             }
 
             /* Scale down logo and buttons when mode selection is shown */
             #mode-selection img {
-                max-height: 100px !important;
-                margin-bottom: 15px !important;
+                max-height: 100px;
+                margin-bottom: 15px;
             }
 
             .mode-btn {
-                padding: 10px 20px !important;
-                font-size: 16px !important;
-                margin: 10px !important;
+                padding: 10px 20px;
+                font-size: 16px;
+                margin: 10px;
             }
 
             /* Hide text-based weapon inventory in landscape too - FORCE */
             body #weapon-inventory {
-                display: none !important;
-                visibility: hidden !important;
-                opacity: 0 !important;
+                display: none;
+                visibility: hidden;
+                opacity: 0;
             }
 
             /* Adjust ammo display */
@@ -1923,20 +1931,20 @@
 
             /* Explicitly show weapon selector in landscape during gameplay */
             body.game-active #weapon-selector-vertical {
-                display: flex !important;
-                top: 18% !important;
+                display: flex;
+                top: 18%;
                 /* Slightly higher in landscape */
-                z-index: 1000 !important;
-                pointer-events: auto !important;
+                z-index: 1000;
+                pointer-events: auto;
             }
 
             #exit-game-btn {
-                top: 15px !important;
-                right: 70px !important;
-                width: 45px !important;
-                height: 45px !important;
-                font-size: 22px !important;
-                display: flex !important;
+                top: 15px;
+                right: 70px;
+                width: 45px;
+                height: 45px;
+                font-size: 22px;
+                display: flex;
             }
         }
 
@@ -1946,18 +1954,18 @@
         body.game-active #room-menu,
         body.game-active #create-room-modal,
         body.game-active #room-waiting {
-            display: none !important;
-            opacity: 0 !important;
-            pointer-events: none !important;
-            visibility: hidden !important;
+            display: none;
+            opacity: 0;
+            pointer-events: none;
+            visibility: hidden;
         }
         /* Multiplayer HUD Adjustments */
         @media (min-width: 769px) {
             body.multi-player #chat-container {
-                bottom: 120px !important;
+                bottom: 120px;
             }
             body.multi-player #weapon-selector-vertical {
-                top: 25% !important;
+                top: 25%;
             }
         }
     </style>
