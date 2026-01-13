@@ -3219,7 +3219,7 @@
             // 1. Mode Selection
             modeSelection.style.display = 'flex';
 
-            document.getElementById('btn-single-player').addEventListener('click', () => {
+            addSafeListener(document.getElementById('btn-single-player'), () => {
                 gameMode = 'single';
                 modeSelection.style.display = 'none';
                 document.body.classList.remove('multi-player');
@@ -3256,7 +3256,7 @@
                 }
             });
 
-            document.getElementById('btn-multi-player').addEventListener('click', () => {
+            addSafeListener(document.getElementById('btn-multi-player'), () => {
                 const serverAddr = 'https://murphy-highs-cradle-acting.trycloudflare.com';
                 gameMode = 'multi';
                 modeSelection.style.display = 'none';
