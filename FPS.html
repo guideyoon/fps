@@ -1773,198 +1773,110 @@
                 display: none;
             }
 
-            /* ===== HP & AMMO 상단에 표시 ===== */
+            /* ===== HP & AMMO 상단에 표시 (수정됨) ===== */
             .vitals-panel {
-                display: none !important;
+                display: flex !important;
+                flex-direction: row;
+                align-items: center;
+                bottom: auto !important;
+                top: 10px;
+                left: 60px;
+                width: auto;
+                padding: 5px 15px;
+                background: rgba(0, 0, 0, 0.6);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                border-left: 4px solid var(--neon-cyan);
+                transform: none;
+                border-radius: 4px;
+                z-index: 90;
+            }
+            .vitals-panel .value-group {
+                transform: none;
+                margin-right: 15px;
+                gap: 5px;
+            }
+            .vitals-panel .label {
+                font-size: 12px;
+                color: #aaa;
+            }
+            .vitals-panel .health-text {
+                font-size: 24px;
+                line-height: 1;
+            }
+            .vitals-panel .bar-container {
+                width: 120px;
+                height: 10px;
+                margin-top: 0;
+                transform: none;
+                background: rgba(0,0,0,0.5);
             }
 
             .weapon-panel {
-                display: none !important;
-            }
-
-            /* HP - 화면 맨 상단 왼쪽 */
-            #hp-container {
-                display: block !important;
-                width: 100px;
-                height: 8px;
-                bottom: auto;
-                top: 3px;
-                left: 60px;
-                background: rgba(0, 0, 0, 0.8);
-                border-radius: 4px;
-                z-index: 9999;
-                position: fixed;
-            }
-
-            #hp-text {
-                display: block !important;
-                font-size: 11px;
-                left: -40px;
-                top: 50%;
-                transform: translateY(-50%);
-                bottom: auto;
-                z-index: 9999;
-                position: absolute;
-            }
-
-            /* 탄창 - 화면 맨 상단 오른쪽 */
-            #ammo-info {
-                display: block !important;
-                bottom: auto;
-                top: 3px;
-                right: 60px;
-                font-size: 14px;
-                text-align: right;
-                background: rgba(0, 0, 0, 0.7);
-                padding: 3px 8px;
-                border-radius: 4px;
-                z-index: 9999;
-                position: fixed;
-            }
-
-            #ammo-val {
-                font-size: 16px;
-            }
-
-            /* Fix: Mode Selection Scaling to prevent clipping */
-            #mode-selection {
-                height: 100dvh;
-            }
-            #mode-selection h1 {
-                font-size: 2rem;
-                margin-bottom: 15px;
-            }
-            #mode-selection img {
-                max-height: 100px !important;
-                margin-bottom: 10px !important;
-            }
-            #mode-selection .mode-btn {
-                padding: 12px 30px;
-                margin: 8px;
-                font-size: 1rem;
-                min-width: 180px;
-            }
-
-            /* ===== 무기 선택기 (weapon-list-left) - Fix: Only show in game ===== */
-            #weapon-list-left {
-                display: none !important;
-            }
-            body.game-active #weapon-list-left {
                 display: flex !important;
-                position: fixed;
-                top: 30px;
-                left: 5px;
+                flex-direction: column;
+                bottom: auto !important;
+                top: 10px;
+                right: 140px; /* exit button(80px) 왼쪽 */
+                padding: 5px 15px;
+                background: rgba(0, 0, 0, 0.6);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                border-right: 4px solid white;
                 transform: none;
-                gap: 8px;
-                pointer-events: auto;
-                z-index: 9999;
+                border-radius: 4px;
+                align-items: flex-end;
+                z-index: 90;
             }
-
-            #weapon-list-left .weapon-item {
-                opacity: 0.7;
-                transform: none;
-                cursor: pointer;
-            }
-
-            #weapon-list-left .weapon-item.active {
-                opacity: 1;
+            .weapon-panel .ammo-group {
                 transform: none;
             }
-
-            /* 숫자 힌트 숨기기 */
-            #weapon-list-left .key-hint {
-                display: none;
+            .weapon-panel .ammo-current {
+                font-size: 24px;
+                line-height: 1;
             }
-
-            /* 아이콘 박스 크기 두 배 (24px -> 48px) */
-            #weapon-list-left .icon-box {
-                width: 48px;
-                height: 48px;
-                border-radius: 6px;
-                background: rgba(0, 0, 0, 0.7);
-                border: 2px solid rgba(255, 255, 255, 0.3);
+            .weapon-panel .ammo-reserve {
+                font-size: 14px;
             }
-
-            #weapon-list-left .weapon-item.active .icon-box {
-                border-color: #00f3ff;
-                background: rgba(0, 255, 255, 0.2);
-                box-shadow: 0 0 8px rgba(0, 255, 255, 0.5);
-            }
-
-            #weapon-list-left i {
-                font-size: 20px;
-            }
-
-            #weapon-inventory {
+            /* Hide unnecessary elements in landscape */
+            #hud-weapon-selector, 
+            #hud-weapon-name,
+            #hp-container, 
+            #hp-text, 
+            #ammo-info {
                 display: none !important;
             }
 
-            #weapon-selector-vertical {
-                display: none !important;
-            }
-
-            /* ===== 조이스틱 - 오른쪽으로 20% 이동 ===== */
-            #joystick-zone {
-                display: block;
-                bottom: 60px;
-                left: 20%;
-                width: 90px;
-                height: 90px;
-            }
-
-            #joystick-bg {
-                width: 90px;
-                height: 90px;
-            }
-
-            #joystick-handle {
-                width: 36px;
-                height: 36px;
-            }
-
-            /* ===== 버튼들 - 오른쪽, 위로 이동, 일관된 크기 ===== */
+            /* ===== 버튼들 - 크기 통일 및 왼쪽 이동 ===== */
             .mobile-btn {
                 display: flex;
-                width: 50px;
-                height: 50px;
-                font-size: 16px;
+                width: 60px;  /* 크기 통일 */
+                height: 60px; /* 크기 통일 */
+                font-size: 20px;
             }
 
-            /* 발사 버튼 - 가장 큼 */
+            /* 발사 버튼 */
             #btn-shoot {
-                bottom: 80px;
-                right: 70px;
-                width: 60px;
-                height: 60px;
-                font-size: 20px;
-                background: rgba(255, 50, 50, 0.3);
-                border-color: rgba(255, 100, 100, 0.6);
+                bottom: 90px;
+                right: 120px; /* 70px -> 120px */
             }
 
             /* 점프 버튼 */
             #btn-jump {
-                bottom: 40px;
-                right: 10px;
-                width: 50px;
-                height: 50px;
+                bottom: 50px;
+                right: 50px; /* 10px -> 50px */
             }
 
             /* 재장전 버튼 */
             #btn-reload {
-                bottom: 100px;
-                right: 10px;
-                width: 50px;
-                height: 50px;
-                font-size: 14px;
+                bottom: 130px;
+                right: 50px; /* 10px -> 50px */
             }
 
             /* 조준 버튼 */
             #btn-aim {
-                bottom: 40px;
-                right: 140px;
-                width: 50px;
-                height: 50px;
+                bottom: 50px;
+                right: 200px; /* 140px -> 200px */
             }
+
 
             /* 채팅 숨기기 */
             #chat-container {
