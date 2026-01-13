@@ -4402,6 +4402,11 @@
                 gameStartTime = performance.now();
                 killCount = 0;
                 playTime = 0;
+                playerHP = 100;
+                isDead = false;
+                isSpectating = false;
+                spectatingPlayerId = null;
+
                 const elPlayTime = document.getElementById('play-time');
                 const elKillCount = document.getElementById('kill-count');
                 if (elPlayTime) elPlayTime.innerText = "Time: 00:00";
@@ -4815,6 +4820,7 @@
             particles = [];
             shells = [];
             healthPills = [];
+            grenadeDrops = [];
         }
 
         // --- 텍스처 시스템 초기화 ---
@@ -7725,6 +7731,12 @@
             healthPills.push(pillGroup);
         }
 
+        function getPlayerPickupPosition() {
+            if (!position) return null;
+            const eyeHeight = keys.ctrl ? 1.0 : 1.7;
+            return new THREE.Vector3(position.x, position.y - eyeHeight, position.z);
+        }
+
         function updateHealthPills(dt) {
             for (let i = healthPills.length - 1; i >= 0; i--) {
                 const pill = healthPills[i];
@@ -7746,8 +7758,12 @@
                 pill.userData.floatTime += dt;
                 pill.position.y = pill.userData.baseY + Math.sin(pill.userData.floatTime * 3) * 0.1;
 
+                if (isDead || (isSpectating && gameMode === 'multi')) continue;
+
+                const playerPos = getPlayerPickupPosition();
+                if (!playerPos) continue;
+
                 // 플레이어와의 거리 체크 (3D 거리)
-                const playerPos = (camera && camera.position) ? camera.position : position;
                 const dist = pill.position.distanceTo(playerPos);
                 if (dist < 1.2) {
                     // HP가 이미 100이면 먹지 않음
@@ -7773,6 +7789,7 @@
                 }
             }
         }
+
 
         // --- Grenade Drops System ---
         let grenadeDrops = [];
@@ -7823,7 +7840,9 @@
                 drop.position.y = drop.userData.baseY + Math.sin(drop.userData.floatTime * 2) * 0.1;
 
                 // Pickup
-                const playerPos = (camera && camera.position) ? camera.position : position;
+                if (isDead || (isSpectating && gameMode === 'multi')) continue;
+                const playerPos = getPlayerPickupPosition();
+                if (!playerPos) continue;
                 const dist = drop.position.distanceTo(playerPos);
                 if (dist < 1.5) {
                     if (drop.userData.claimed) continue;
@@ -8285,8 +8304,8 @@
                     }
                 }
                 // Skip normal player control during spectating
-                return;
             }
+
 
             if (!isDead && !isPaused && isGameStarted) {
                 handleShooting(dt);
