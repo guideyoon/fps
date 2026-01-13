@@ -2062,25 +2062,28 @@
             }
         }
 
-        /* Landscape Orientation Fixes for Mobile */
-        @media (max-width: 768px) and (orientation: landscape) {
+            /* Landscape Orientation Fixes for Mobile - Scaled Down Initial Screen */
+            @media (max-width: 768px) and (orientation: landscape) {
 
-            /* Ensure mode selection isn't visible during gameplay */
-            #mode-selection {
-                display: none;
-            }
+                /* Ensure mode selection isn't visible during gameplay */
+                #mode-selection {
+                    display: none;
+                }
 
-            /* Scale down logo and buttons when mode selection is shown */
-            #mode-selection img {
-                max-height: 100px;
-                margin-bottom: 15px;
-            }
+                /* Scale down logo and buttons when mode selection is shown */
+                #mode-selection img {
+                    max-height: 50px !important;
+                    max-width: 50% !important;
+                    margin-bottom: 5px !important;
+                }
 
-            .mode-btn {
-                padding: 10px 20px;
-                font-size: 16px;
-                margin: 10px;
-            }
+                .mode-btn {
+                    padding: 5px 12px;
+                    font-size: 14px;
+                    margin: 5px;
+                    min-width: 120px;
+                }
+
 
             /* Hide text-based weapon inventory in landscape too - FORCE */
             body #weapon-inventory {
