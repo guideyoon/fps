@@ -2063,25 +2063,29 @@
         }
 
             /* Landscape Orientation Fixes for Mobile - Scaled Down Initial Screen */
-            @media (max-width: 768px) and (orientation: landscape) {
+            @media (orientation: landscape) {
 
-                /* Ensure mode selection isn't visible during gameplay */
-                #mode-selection {
-                    display: none;
+                /* Ensure mode selection is visible but compact when game is NOT active */
+                body:not(.game-active) #mode-selection {
+                    display: flex !important;
+                    flex-direction: column;
+                    justify-content: center;
+                    align-items: center;
+                    padding: 10px;
                 }
 
                 /* Scale down logo and buttons when mode selection is shown */
                 #mode-selection img {
-                    max-height: 35px !important; /* 50px -> 35px */
-                    max-width: 40% !important;  /* 50% -> 40% */
-                    margin-bottom: 4px !important;
+                    max-height: 40px !important; 
+                    max-width: 40% !important;
+                    margin-bottom: 5px !important;
                 }
 
                 .mode-btn {
-                    padding: 4px 10px; /* 5px 12px -> 4px 10px */
-                    font-size: 12px;   /* 14px -> 12px */
-                    margin: 3px;       /* 5px -> 3px */
-                    min-width: 100px;  /* 120px -> 100px */
+                    padding: 5px 15px !important;
+                    font-size: 13px !important;
+                    margin: 4px !important;
+                    min-width: 110px !important;
                 }
 
 
