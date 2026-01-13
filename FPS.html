@@ -1770,85 +1770,144 @@
                 display: none;
             }
 
-            #weapon-selector-vertical {
-                display: flex;
-                top: 50%;
-                left: 20px;
-                transform: translateY(-50%);
+            /* ===== HP & AMMO 매우 간소화 (겹침 방지) ===== */
+            /* 왼쪽 하단 vitals-panel 숨기기 */
+            .vitals-panel {
+                display: none !important;
             }
 
-            /* HP Bar & Ammo - Compact Style like Portrait */
+            /* 간단한 HP 컨테이너 - 화면 상단 왼쪽으로 이동 */
             #hp-container {
-                width: 150px;
-                /* Compact */
-                height: 10px;
-                bottom: 20px;
-                left: 45px;
-                background: rgba(0, 0, 0, 0.6);
+                width: 100px;
+                height: 8px;
+                bottom: auto;
+                top: 10px;
+                left: 80px;
+                background: rgba(0, 0, 0, 0.7);
+                border-radius: 4px;
             }
 
             #hp-text {
                 display: block;
-                font-size: 14px;
-                left: -35px;
-                bottom: -3px;
+                font-size: 11px;
+                left: -30px;
+                top: 50%;
+                transform: translateY(-50%);
+                bottom: auto;
             }
 
+            /* 오른쪽 탄창 패널 숨기기 */
+            .weapon-panel {
+                display: none !important;
+            }
+
+            /* 간단한 탄창 표시 - 화면 상단 오른쪽으로 이동 */
             #ammo-info {
-                bottom: 20px;
-                right: 90px;
-                /* Move left of buttons */
-                font-size: 16px;
-                /* Smaller font */
+                bottom: auto;
+                top: 5px;
+                right: 80px;
+                font-size: 14px;
                 text-align: right;
+                background: rgba(0, 0, 0, 0.5);
+                padding: 3px 8px;
+                border-radius: 4px;
             }
 
             #ammo-val {
-                font-size: 20px;
-            }
-
-            /* 버튼 위치 조정 */
-            .mobile-btn {
-                display: flex;
-                width: 50px;
-                height: 50px;
                 font-size: 16px;
             }
 
-            #btn-jump {
-                bottom: 20px;
-                right: 20px;
-                width: 60px;
-                height: 60px;
-                font-size: 20px;
+            /* ===== 무기 선택기 - 작게 만들고 상단 왼쪽으로 ===== */
+            #weapon-selector-vertical {
+                display: flex;
+                top: 50px;
+                left: 5px;
+                transform: none;
+                gap: 8px;
             }
 
-            #btn-reload {
-                bottom: 90px;
-                right: 20px;
-                width: 50px;
-                height: 50px;
+            .weapon-select-btn {
+                width: 28px;
+                height: 28px;
+                font-size: 12px;
+                border-radius: 5px;
+                border-width: 1px;
+                background: rgba(0, 0, 0, 0.6);
             }
 
-            #btn-aim {
-                bottom: 25px;
-                right: 150px;
-                /* 탄약 정보 왼쪽 */
-                width: 50px;
-                height: 50px;
+            #weapon-inventory {
+                display: none !important;
+            }
+
+            /* ===== 조이스틱 - 왼쪽 하단 유지 ===== */
+            #joystick-zone {
+                display: block;
+                bottom: 30px;
+                left: 30px;
+                width: 90px;
+                height: 90px;
+            }
+
+            #joystick-bg {
+                width: 90px;
+                height: 90px;
+            }
+
+            #joystick-handle {
+                width: 35px;
+                height: 35px;
+            }
+
+            /* ===== 버튼들 - 오른쪽 하단 클러스터 ===== */
+            .mobile-btn {
+                display: flex;
+                width: 45px;
+                height: 45px;
+                font-size: 14px;
             }
 
             #btn-shoot {
-                bottom: 90px;
-                right: 80px;
-                width: 60px;
-                height: 60px;
+                bottom: 60px;
+                right: 60px;
+                width: 55px;
+                height: 55px;
+                font-size: 18px;
             }
 
-            #joystick-zone {
-                display: block;
-                bottom: 40px;
-                left: 40px;
+            #btn-jump {
+                bottom: 15px;
+                right: 15px;
+                width: 50px;
+                height: 50px;
+            }
+
+            #btn-reload {
+                bottom: 70px;
+                right: 15px;
+                width: 40px;
+                height: 40px;
+                font-size: 12px;
+            }
+
+            #btn-aim {
+                bottom: 15px;
+                right: 130px;
+                width: 45px;
+                height: 45px;
+            }
+
+            /* 채팅 숨기기 (게임 중) */
+            body.game-active #chat-container {
+                display: none;
+            }
+
+            /* 조명 버튼 위치 조정 */
+            #light-toggle-btn {
+                top: 5px;
+                right: 5px;
+                width: 35px;
+                height: 35px;
+                font-size: 16px;
             }
         }
 
