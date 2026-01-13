@@ -56,6 +56,7 @@
             }
 
             @supports (height: -webkit-fill-available) {
+
                 html,
                 body {
                     height: -webkit-fill-available;
@@ -65,7 +66,7 @@
 
 
         /* --- NEON TACTICAL HUD CSS --- */
-        
+
         :root {
             --neon-cyan: #00f3ff;
             --neon-red: #ff003c;
@@ -87,7 +88,9 @@
         }
 
         /* Glassmorphism Panels */
-        .vitals-panel, .weapon-panel, .scoreboard-mini {
+        .vitals-panel,
+        .weapon-panel,
+        .scoreboard-mini {
             background: var(--dark-bg);
             backdrop-filter: blur(8px);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -108,18 +111,29 @@
             font-size: 1.5rem;
             font-weight: 700;
         }
-        .scoreboard-mini > div { transform: skewX(10deg); }
-        .score.ally { color: var(--neon-cyan); }
-        .score.enemy { color: var(--neon-red); }
+
+        .scoreboard-mini>div {
+            transform: skewX(10deg);
+        }
+
+        .score.ally {
+            color: var(--neon-cyan);
+        }
+
+        .score.enemy {
+            color: var(--neon-red);
+        }
 
         /* Single Player HUD Overrides */
         body.single-player #hud-score-ally,
         body.single-player #hud-score-enemy {
             display: none;
         }
+
         body.single-player #hud-kill-count {
             display: block;
         }
+
         #hud-kill-count {
             display: none;
             color: #ffaa00;
@@ -129,7 +143,8 @@
         /* Top Right: Kill Feed */
         .kill-feed {
             position: absolute;
-            top: 5rem; /* Below scoreboard */
+            top: 5rem;
+            /* Below scoreboard */
             right: 2rem;
             display: flex;
             flex-direction: column;
@@ -137,8 +152,9 @@
             text-align: right;
             align-items: flex-end;
         }
+
         .feed-item {
-            background: linear-gradient(90deg, transparent, rgba(0,0,0,0.8));
+            background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.8));
             padding: 5px 10px;
             border-right: 2px solid var(--neon-red);
             font-size: 0.9rem;
@@ -147,8 +163,15 @@
             color: white;
             animation: slideIn 0.3s ease-out;
         }
-        .feed-item .killer { color: var(--neon-cyan); font-weight: bold; }
-        .feed-item .victim { color: var(--neon-red); }
+
+        .feed-item .killer {
+            color: var(--neon-cyan);
+            font-weight: bold;
+        }
+
+        .feed-item .victim {
+            color: var(--neon-red);
+        }
 
 
         /* Vertical Weapon List (Left Side) */
@@ -160,8 +183,10 @@
             display: flex;
             flex-direction: column;
             gap: 15px;
-            pointer-events: none; /* Just for display */
+            pointer-events: none;
+            /* Just for display */
         }
+
         .weapon-item {
             display: flex;
             align-items: center;
@@ -169,16 +194,18 @@
             transition: all 0.2s ease-out;
             transform: translateX(-10px);
         }
+
         .weapon-item.active {
             opacity: 1;
             transform: translateX(0) scale(1.1);
         }
+
         .weapon-item .key-hint {
             width: 20px;
             height: 20px;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0, 0, 0, 0.5);
             color: #fff;
-            border: 1px solid rgba(255,255,255,0.3);
+            border: 1px solid rgba(255, 255, 255, 0.3);
             border-radius: 4px;
             display: flex;
             align-items: center;
@@ -187,30 +214,35 @@
             font-weight: bold;
             margin-right: 10px;
         }
+
         .weapon-item.active .key-hint {
             background: var(--neon-cyan);
             border-color: var(--neon-cyan);
             color: #000;
         }
+
         .weapon-item .icon-box {
             width: 50px;
             height: 50px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: rgba(0,0,0,0.3);
+            background: rgba(0, 0, 0, 0.3);
             border-radius: 5px;
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
+
         .weapon-item.active .icon-box {
             border-color: var(--neon-cyan);
-            background: rgba(0,255,255,0.1);
-            box-shadow: 0 0 10px rgba(0,255,255,0.3);
+            background: rgba(0, 255, 255, 0.1);
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
         }
+
         .weapon-item i {
             font-size: 24px;
             color: #fff;
         }
+
         .weapon-item.active i {
             color: var(--neon-cyan);
         }
@@ -226,6 +258,7 @@
             pointer-events: none;
             z-index: 20;
         }
+
         .crosshair .line {
             background: rgba(255, 255, 255, 0.8);
             position: absolute;
@@ -235,12 +268,38 @@
             transition: all 0.1s ease-out;
             box-shadow: 0 0 2px black;
         }
-        .crosshair .horizontal { width: 20px; height: 2px; }
-        .crosshair .vertical { width: 2px; height: 20px; }
-        .crosshair .dot { width: 4px; height: 4px; background: var(--neon-red); border-radius: 50%; }
-        .crosshair.firing .horizontal { width: 35px; opacity: 0.5; }
-        .crosshair.firing .vertical { height: 35px; opacity: 0.5; }
-        .crosshair.enemy-detected .line { background: var(--neon-red); box-shadow: 0 0 5px red; }
+
+        .crosshair .horizontal {
+            width: 20px;
+            height: 2px;
+        }
+
+        .crosshair .vertical {
+            width: 2px;
+            height: 20px;
+        }
+
+        .crosshair .dot {
+            width: 4px;
+            height: 4px;
+            background: var(--neon-red);
+            border-radius: 50%;
+        }
+
+        .crosshair.firing .horizontal {
+            width: 35px;
+            opacity: 0.5;
+        }
+
+        .crosshair.firing .vertical {
+            height: 35px;
+            opacity: 0.5;
+        }
+
+        .crosshair.enemy-detected .line {
+            background: var(--neon-red);
+            box-shadow: 0 0 5px red;
+        }
 
         /* Bottom Left: Vitals */
         .vitals-panel {
@@ -249,26 +308,30 @@
             width: 300px;
             border-left: 4px solid var(--neon-cyan);
         }
+
         .value-group {
             display: flex;
             align-items: baseline;
             gap: 10px;
             transform: skewX(10deg);
         }
+
         .health-text {
             font-size: 3rem;
             font-weight: 700;
             line-height: 0.8;
             text-shadow: 0 0 10px var(--neon-cyan);
         }
+
         .bar-container {
             margin-top: 10px;
             height: 8px;
-            background: rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.1);
             position: relative;
             transform: skewX(10deg);
             overflow: hidden;
         }
+
         .health-bar {
             height: 100%;
             background: var(--neon-cyan);
@@ -277,6 +340,7 @@
             z-index: 2;
             position: relative;
         }
+
         .health-bar-ghost {
             position: absolute;
             top: 0;
@@ -297,27 +361,37 @@
             flex-direction: column;
             align-items: flex-end;
         }
-        .ammo-group { transform: skewX(10deg); }
+
+        .ammo-group {
+            transform: skewX(10deg);
+        }
+
         .ammo-current {
             font-size: 4rem;
             font-weight: 700;
             line-height: 0.8;
         }
+
         .ammo-reserve {
             font-size: 1.5rem;
             color: #aaa;
         }
-            .weapon-selector {
-                display: none; /* Hide old selector */
-            }
+
+        .weapon-selector {
+            display: none;
+            /* Hide old selector */
+        }
+
         .weapon-slot {
             width: 30px;
             height: 6px;
-            background: rgba(255,255,255,0.2);
+            background: rgba(255, 255, 255, 0.2);
             transition: all 0.2s;
-            color: transparent; /* Hide number */
+            color: transparent;
+            /* Hide number */
             font-size: 0;
         }
+
         .weapon-slot.active {
             background: white;
             box-shadow: 0 0 10px white;
@@ -337,17 +411,45 @@
         }
 
         @keyframes slideIn {
-            from { transform: translateX(20px); opacity: 0; }
-            to { transform: translateX(0); opacity: 0.9; }
+            from {
+                transform: translateX(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 0.9;
+            }
         }
 
         /* Mobile Adjustments */
         @media (max-width: 768px) {
-            .vitals-panel { width: 200px; bottom: 1rem; left: 1rem; padding: 0.5rem; }
-            .health-text { font-size: 2rem; }
-            .weapon-panel { bottom: 1rem; right: 1rem; padding: 0.5rem; }
-            .ammo-current { font-size: 2.5rem; }
-            .scoreboard-mini { top: 0.5rem; font-size: 1rem; }
+            .vitals-panel {
+                width: 200px;
+                bottom: 1rem;
+                left: 1rem;
+                padding: 0.5rem;
+            }
+
+            .health-text {
+                font-size: 2rem;
+            }
+
+            .weapon-panel {
+                bottom: 1rem;
+                right: 1rem;
+                padding: 0.5rem;
+            }
+
+            .ammo-current {
+                font-size: 2.5rem;
+            }
+
+            .scoreboard-mini {
+                top: 0.5rem;
+                font-size: 1rem;
+            }
+
             /* Hide crosshair lines on mobile if needed, but keeping for now */
         }
 
@@ -1065,16 +1167,18 @@
             border-radius: 8px;
             transition: all 0.2s;
         }
+
         #exit-to-menu-btn:hover {
             background: rgba(255, 51, 51, 0.2);
             color: white;
             transform: scale(1.05);
         }
+
         #game-over-stats {
             font-size: 32px;
             color: white;
             margin-bottom: 10px;
-            text-shadow: 0 0 10px rgba(255,255,255,0.5);
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
         }
 
         #stats-info {
@@ -1999,11 +2103,13 @@
             pointer-events: none;
             visibility: hidden;
         }
+
         /* Multiplayer HUD Adjustments */
         @media (min-width: 769px) {
             body.multi-player #chat-container {
                 bottom: 120px;
             }
+
             body.multi-player #weapon-selector-vertical {
                 top: 25%;
             }
@@ -2023,7 +2129,9 @@
         <div id="scope-dot"></div>
     </div>
     <div id="headshot-msg">HEADSHOT!</div>
-    <div id="grenade-kill-msg" style="display: none; position: fixed; top: 35%; left: 50%; transform: translate(-50%, -50%); color: #ff6600; font-size: 60px; font-weight: 900; text-shadow: 0 0 20px #ff0000; z-index: 100; pointer-events: none; font-style: italic;">GRENADE KILL!</div>
+    <div id="grenade-kill-msg"
+        style="display: none; position: fixed; top: 35%; left: 50%; transform: translate(-50%, -50%); color: #ff6600; font-size: 60px; font-weight: 900; text-shadow: 0 0 20px #ff0000; z-index: 100; pointer-events: none; font-style: italic;">
+        GRENADE KILL!</div>
     <div id="hit-marker"></div>
 
     <div id="game-over">
@@ -2174,7 +2282,8 @@
                 <span class="ammo-current" id="hud-ammo-current">30</span>
                 <span class="ammo-reserve" id="hud-ammo-reserve">/ 120</span>
             </div>
-            <div class="weapon-name" id="hud-weapon-name" style="font-size: 1rem; color: #facc15; margin-top:5px; transform: skewX(10deg);">RIFLE</div>
+            <div class="weapon-name" id="hud-weapon-name"
+                style="font-size: 1rem; color: #facc15; margin-top:5px; transform: skewX(10deg);">RIFLE</div>
         </div>
 
         <!-- Damage Overlay (Vignette) -->
@@ -2290,9 +2399,9 @@
         - Added Cache-Control Headers
         */
         console.log('=== FPS.html VERSION: 2026-01-13-FIX-HITMARKER ==='); // VERSION CHECK
-        
+
         // [FIX] Ensure showHitMarker is globally available
-        window.showHitMarker = function() {
+        window.showHitMarker = function () {
             const el = document.getElementById('hit-marker');
             if (el) {
                 el.style.opacity = '1';
@@ -2346,7 +2455,7 @@
         // 스폰 위치 수정: (0, 1.7, 5)는 안전하지만, (25, 1.7, 0) 등은 위험할 수 있음.
         // 중앙 안전 구역으로 고정: (0, 1.7, 10)
         let position = new THREE.Vector3(0, 1.7, 10);
-        
+
         // Single Player Spawn Points (Global for restartGame)
         const SINGLE_PLAYER_SPAWN_POINTS = [
             { x: 0, y: 1.7, z: 10 },
@@ -2365,11 +2474,11 @@
         let isPaused = false;
         let isGameStarted = false; // New flag to block input/updates during countdown
         let gameMode = null; // 'single' or 'multi'
-        
+
         // UI Globals (Legacy/Compatibility)
         let elPlayTime = null;
         let elKillCount = null;
-        
+
         let currentGameMode = 'ffa'; // 'ffa' or 'tdm'
         let currentMap = 'factory'; // 선택된 맵 (기본값: factory)
         let isRoomHost = false;
@@ -3207,7 +3316,7 @@
             elAmmoReserve = document.getElementById('hud-ammo-reserve');
             elWeaponName = document.getElementById('hud-weapon-name');
             elCrosshair = document.getElementById('hud-crosshair');
-            
+
             elVignette = document.getElementById('vignette');
             if (!elVignette) {
                 elVignette = document.createElement('div');
@@ -3229,17 +3338,17 @@
             elHpGhost = document.getElementById('hud-hp-bar-ghost');
             elHpText = document.getElementById('hud-hp-text');
             elDamage = document.getElementById('hud-damage-vignette');
-            
+
             elTimer = document.getElementById('hud-timer');
             elScoreAlly = document.getElementById('hud-score-ally');
             elScoreEnemy = document.getElementById('hud-score-enemy');
             elKillFeed = document.getElementById('hud-kill-feed');
-            
+
             // Map Legacy UI variables to new HUD elements for compatibility
             elPlayTime = elTimer;
             // elKillCount maps to new HUD element if it exists
             elKillCount = document.getElementById('hud-kill-count');
-            if (!elKillCount) elKillCount = { innerText: '' }; 
+            if (!elKillCount) elKillCount = { innerText: '' };
 
             elGameOver = document.getElementById('game-over');
             elPauseOverlay = document.getElementById('pause-overlay');
@@ -3255,7 +3364,7 @@
             });
 
             // Ensure Crosshair is visible by default
-            if(elCrosshair) {
+            if (elCrosshair) {
                 elCrosshair.style.display = 'block';
                 elCrosshair.style.zIndex = '100'; // Force on top
             }
@@ -3283,11 +3392,11 @@
                 enterFullscreen();
 
                 resetAmmo();
-                
+
                 // 랜덤 스폰 포인트 설정 (혼자하기)
                 const randomSpawn = SINGLE_PLAYER_SPAWN_POINTS[Math.floor(Math.random() * SINGLE_PLAYER_SPAWN_POINTS.length)];
                 position.set(randomSpawn.x, randomSpawn.y, randomSpawn.z);
-                
+
                 startGame();
 
                 // Show exit button in single player (zombie mode)
@@ -3420,7 +3529,7 @@
             // Weapon Inventory Click Handler (for both PC and mobile)
             // Use 'hud-weapon-selector' for new UI, fallback to 'weapon-inventory' if old exists
             const weaponSelector = document.getElementById('hud-weapon-selector') || document.getElementById('weapon-inventory');
-            
+
             if (weaponSelector) {
                 weaponSelector.addEventListener('click', (e) => {
                     const weaponSlot = e.target.closest('.weapon-slot');
@@ -3430,7 +3539,7 @@
                         if (isNaN(weaponId)) {
                             weaponId = parseInt(weaponSlot.dataset.weaponId);
                         }
-                        
+
                         if (!isNaN(weaponId)) {
                             switchWeaponTo(weaponId);
                         }
@@ -4135,12 +4244,12 @@
             function createLeg(x, zRot) {
                 const leg = new THREE.Group();
                 leg.position.set(x, 0.95, 0);
-                
+
                 // Thigh
                 const thigh = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.09, 0.45, 8), matUniform);
                 thigh.position.y = -0.22;
                 leg.add(thigh);
-                
+
                 // Knee Pad
                 const knee = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.12, 0.12), matPad);
                 knee.position.set(0, -0.45, 0.02);
@@ -4229,7 +4338,7 @@
                 lowerGrp.position.set(side * 0.08, -0.35, 0);
                 lowerGrp.rotation.x = -0.6; // Raise forward
                 lowerGrp.rotation.z = side * -0.6; // Angle inward
-                
+
                 const lower = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.05, 0.3, 8), matSkin);
                 lower.position.y = -0.15;
                 lowerGrp.add(lower);
@@ -4247,13 +4356,13 @@
 
             // --- 5. Weapon ---
             const weapon = new THREE.Group();
-            weapon.position.set(0, 1.25, 0.4); 
+            weapon.position.set(0, 1.25, 0.4);
 
             // Gun Body
             weapon.add(new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.1, 0.5), matWeapon));
             // Barrel
             const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.25, 8), matWeapon);
-            barrel.rotation.x = Math.PI/2;
+            barrel.rotation.x = Math.PI / 2;
             barrel.position.z = -0.35;
             weapon.add(barrel);
             // Mag
@@ -4262,7 +4371,7 @@
             weapon.add(mag);
             // Scope
             const scope = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.03, 0.15, 8), matWeapon);
-            scope.rotation.x = Math.PI/2;
+            scope.rotation.x = Math.PI / 2;
             scope.position.y = 0.08;
             weapon.add(scope);
 
@@ -4289,7 +4398,7 @@
                 // Adjust scale and position to match gameplay physics
                 group.scale.set(0.9, 0.9, 0.9);
                 group.position.set(p.position.x, p.position.y - 1.7, p.position.z);
-                
+
                 scene.add(group);
                 otherPlayersMap[p.id] = group;
                 if (typeof otherPlayers !== 'undefined') otherPlayers.push(group);
@@ -6074,7 +6183,8 @@
             guard.position.set(0, 0, 0.01);
             knifeGroup.add(guard);
 
-            const blade = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.01, 0.32), matBlade);
+            // Sharpened Blade: Thinner and slightly wider for visual impact
+            const blade = new THREE.Mesh(new THREE.BoxGeometry(0.025, 0.002, 0.32), matBlade);
             blade.position.set(0, 0.01, -0.17);
             knifeGroup.add(blade);
 
@@ -6097,8 +6207,12 @@
             // Right hand grips the knife
             createArm(0.18, -0.22, -0.35, 0.05, -0.2, 0.15, false);
 
-            // Left hand open (idle/ready) - CS Style Lower Left
-            const leftArm = createArm(-0.28, -0.25, -0.38, 0.1, 0.4, 0.05, false);
+            // Left hand (Mirrored & Symmetrical)
+            // Original Right: x=0.18, y=-0.22, z=-0.35, rot=(0.05, -0.2, 0.15)
+            // Mirrored Left: x=-0.18, y=-0.22, z=-0.35, rot=(0.05, 0.2, -0.15)
+            const leftArm = createArm(-0.18, -0.22, -0.35, 0.05, 0.2, -0.15, false);
+
+            // Adjust left hand fingers to look natural (open ready stance)
             const baseHand = leftArm.children[1];
             if (baseHand) leftArm.remove(baseHand);
 
@@ -6110,7 +6224,7 @@
             for (let i = 0; i < 4; i++) {
                 const finger = new THREE.Mesh(new THREE.BoxGeometry(0.017, 0.017, 0.08), matSkin);
                 finger.position.set((i - 1.5) * 0.023, 0.015, -0.15);
-                finger.rotation.x = -0.12; // Slight natural curl
+                finger.rotation.x = -0.12;
                 leftArm.add(finger);
             }
 
@@ -6124,10 +6238,12 @@
 
         function createArm(x, y, z, rotX, rotY, rotZ, isTrigger) {
             const grp = new THREE.Group();
-            const sleeve = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.06, 0.5, 12), matSleeve);
+            // Increased arm thickness (radius 0.045->0.065, 0.06->0.085)
+            const sleeve = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.085, 0.5, 12), matSleeve);
             sleeve.rotation.x = Math.PI / 2; sleeve.position.z = 0.25;
             grp.add(sleeve);
-            const hand = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.04, 0.08), matGlove);
+            // Increased hand size to match arm
+            const hand = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.05, 0.1), matGlove);
             hand.position.z = -0.05;
             grp.add(hand);
 
@@ -6230,7 +6346,7 @@
             // FIX: Clone Materials to prevent shared color change
             const mClothes = matZombieClothes.clone();
             const mSkin = matZombieSkin.clone();
-            
+
             // 색상 랜덤화 (좀비마다 약간씩 다른 느낌)
             mClothes.color.setHSL(0.1 + Math.random() * 0.1, 0.4, 0.2 + Math.random() * 0.2); // 썩은 옷 색깔
             mSkin.color.setHSL(0.3 + Math.random() * 0.1, 0.4, 0.4 + Math.random() * 0.2);   // 썩은 피부 (녹색 계열)
@@ -6243,15 +6359,15 @@
             const bodyGeo = new THREE.BoxGeometry(0.45, 0.6, 0.25);
             // 상체 굽히기
             bodyGeo.applyMatrix4(new THREE.Matrix4().makeTranslation(0, 0.3, 0));
-            bodyGeo.applyMatrix4(new THREE.Matrix4().makeRotationX(0.2)); 
+            bodyGeo.applyMatrix4(new THREE.Matrix4().makeRotationX(0.2));
             const body = new THREE.Mesh(bodyGeo, mClothes);
-            body.position.y = 0.8; 
-            body.name = 'body'; 
+            body.position.y = 0.8;
+            body.name = 'body';
             enemy.add(body);
 
             // 2. 머리 (Head) - 턱이 빠진 듯한 느낌 + 퀭한 눈
             const headGroup = new THREE.Group();
-            
+
             // 두개골
             const skull = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.22, 0.24), mSkin);
             skull.position.y = 0.05;
@@ -6262,7 +6378,7 @@
             jaw.position.set(0, -0.12, 0.02);
             jaw.rotation.x = 0.3; // 입 벌림
             headGroup.add(jaw);
-            
+
             // 눈 (Eyes) - 비대칭 및 붉은 안광
             const eyeMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
             // 왼쪽 눈
@@ -6280,13 +6396,13 @@
             enemy.add(headGroup);
 
             // 3. 팔 (Arms) - 좀비 특유의 앞으로 뻗은 팔 (비대칭)
-            
+
             // 왼팔
             const lArmGroup = new THREE.Group();
             const lUpperArm = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.06, 0.35, 6), mClothes);
             lUpperArm.position.y = -0.15;
             lArmGroup.add(lUpperArm);
-            
+
             const lForeArm = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.05, 0.35, 6), mSkin); // 팔뚝은 살이 드러남
             lForeArm.position.y = -0.5;
             lArmGroup.add(lForeArm);
@@ -6302,7 +6418,7 @@
             const rUpperArm = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.06, 0.35, 6), mClothes);
             rUpperArm.position.y = -0.15;
             rArmGroup.add(rUpperArm);
-            
+
             const rForeArm = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.05, 0.35, 6), mSkin);
             rForeArm.position.y = -0.5;
             rArmGroup.add(rForeArm);
@@ -6314,17 +6430,17 @@
             enemy.userData.rArm = rArmGroup;
 
             // 4. 다리 (Legs) - 뒤틀린 걸음걸이를 위한 분리
-            
+
             // 왼쪽 다리
             const lLegGroup = new THREE.Group();
             const lThigh = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.08, 0.45, 6), mClothes);
             lThigh.position.y = -0.2;
             lLegGroup.add(lThigh);
-            
+
             const lCalf = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.07, 0.45, 6), mClothes); // 바지 입음
             lCalf.position.y = -0.65;
             lLegGroup.add(lCalf);
-            
+
             const lFoot = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.1, 0.22), mClothes);
             lFoot.position.set(0, -0.9, 0.05);
             lLegGroup.add(lFoot);
@@ -6337,7 +6453,7 @@
             const rThigh = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.08, 0.45, 6), mClothes);
             rThigh.position.y = -0.2;
             rLegGroup.add(rThigh);
-            
+
             const rCalf = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.07, 0.45, 6), mClothes);
             rCalf.position.y = -0.65;
             rLegGroup.add(rCalf);
@@ -6420,7 +6536,7 @@
         function showHitMarker() {
             // Ensure global availability
             if (!window.showHitMarker) window.showHitMarker = showHitMarker;
-            
+
             if (elHitMarker) {
                 elHitMarker.style.opacity = '1';
                 elHitMarker.style.transform = 'translate(-50%, -50%) scale(1.2)';
@@ -6440,7 +6556,7 @@
                 elGrenadeKill.style.display = 'block';
                 elGrenadeKill.style.opacity = '1';
                 elGrenadeKill.style.transform = 'translate(-50%, -50%) scale(1.5)';
-                
+
                 // Animation
                 setTimeout(() => {
                     if (elGrenadeKill) elGrenadeKill.style.transform = 'translate(-50%, -50%) scale(1.0)';
@@ -6486,7 +6602,7 @@
                     const dmg = Math.floor(MAX_DAMAGE * (1 - dist / EXPLOSION_RADIUS));
                     if (dmg > 0 && e.userData.hp > 0) {
                         e.userData.hp -= dmg;
-                        
+
                         // [FIX] Update Health Bar UI
                         if (e.userData.hpBar) {
                             const hpPercent = Math.max(0, e.userData.hp / e.userData.maxHp);
@@ -6506,10 +6622,10 @@
                                 if (c.isMesh && c.material && c.material.emissive) {
                                     // Force Red
                                     c.material.emissive.setHex(0xff0000);
-                                    
+
                                     // Clear existing timer if any to prevent flicker
                                     if (c.userData.flashTimeout) clearTimeout(c.userData.flashTimeout);
-                                    
+
                                     // Restore to Black (assuming default is black)
                                     c.userData.flashTimeout = setTimeout(() => {
                                         if (c && c.material) c.material.emissive.setHex(0x000000);
@@ -7399,7 +7515,7 @@
             if (curWeaponIdx === idx) return;
             isReloading = false;
             const w = WEAPONS[idx];
-            
+
             // 모바일에서 권총으로 변경 시 자동으로 조준 모드 활성화
             if (isMobile && w.type === 'PISTOL') {
                 isAiming = true;
@@ -7408,7 +7524,7 @@
             }
             curWeaponIdx = idx;
             buildWeapon(curWeaponIdx);
-            
+
             // 무기 전환 시 초기 위치 설정
             if (w.type !== 'KNIFE') {
                 weaponModel.position.set(0, -0.5, 0);
@@ -7441,10 +7557,10 @@
 
         function updateUI() {
             if (!elWeaponName || !elAmmoCurrent) return;
-            
+
             const w = WEAPONS[curWeaponIdx];
             elWeaponName.innerText = w.name;
-            
+
             if (w.type === 'KNIFE') {
                 elAmmoCurrent.innerText = "-";
                 elAmmoReserve.innerText = "";
@@ -7455,7 +7571,7 @@
                 elAmmoCurrent.innerText = w.ammo;
                 elAmmoReserve.innerText = "/ " + w.maxAmmo;
             }
-            
+
             // Reload Warning
             if (w.ammo <= w.maxAmmo * 0.3 && w.type !== 'KNIFE') {
                 elAmmoCurrent.style.color = '#ff003c'; // Red
@@ -7479,7 +7595,7 @@
                 // Ghost bar stays at old width momentarily
                 elHpGhost.style.width = oldHP + '%';
                 elHpGhost.style.transition = 'none'; // Reset transition
-                
+
                 // Then shrinks
                 setTimeout(() => {
                     elHpGhost.style.transition = 'width 0.5s ease-out';
@@ -7521,7 +7637,7 @@
         function killEnemy(e) {
             e.userData.isDead = true;
             createBlood(e.position);
-            
+
             // Death Animation (Simple Fall)
             e.rotation.x = -Math.PI / 2;
             e.position.y = 0.2;
@@ -7541,7 +7657,7 @@
             // Update Kill Count
             killCount++;
             if (elKillCount) elKillCount.innerText = "Kills: " + killCount;
-            
+
             // Add Kill Feed (Local)
             addKillFeed("You", "Zombie", false);
         }
@@ -7550,7 +7666,7 @@
             const w = WEAPONS[curWeaponIdx];
             if (w.type === 'KNIFE' || w.type === 'GRENADE') return;
             isReloading = true;
-            
+
             // 저격총은 c-rifle.mp3 사용, 다른 무기는 기존 재장전 소리
             if (w.type === 'SNIPER' && SoundGen.audioBuffers['c-rifle']) {
                 SoundGen.playAudioFile('c-rifle', 0.8);
@@ -7559,7 +7675,7 @@
             }
 
             if (elWeaponName) elWeaponName.innerText = "RELOADING...";
-            
+
             // Animation
             if (weaponModel) {
                 weaponModel.rotation.z = 0.5;
@@ -8104,16 +8220,16 @@
                 }
 
                 // 다른 플레이어에게 데미지
-                    if (isOtherPlayer && p.userData.hp > 0) {
-                        let dmg = w.damage;
-                        if (isHitPart(h.object, 'head')) {
-                            dmg *= 3;
-                            elHeadshot.classList.add('active');
-                            setTimeout(() => elHeadshot.classList.remove('active'), 500);
-                            SoundGen.playHeadshot();
-                        } else if (isHitPart(h.object, 'limb')) {
-                            dmg *= 0.7;
-                        }
+                if (isOtherPlayer && p.userData.hp > 0) {
+                    let dmg = w.damage;
+                    if (isHitPart(h.object, 'head')) {
+                        dmg *= 3;
+                        elHeadshot.classList.add('active');
+                        setTimeout(() => elHeadshot.classList.remove('active'), 500);
+                        SoundGen.playHeadshot();
+                    } else if (isHitPart(h.object, 'limb')) {
+                        dmg *= 0.7;
+                    }
 
 
                     // 서버에 데미지 이벤트 전송
@@ -8206,7 +8322,7 @@
             const playerMin = new THREE.Vector3(newPos.x - PLAYER_RADIUS, newPos.y - 1.7, newPos.z - PLAYER_RADIUS);
             const playerMax = new THREE.Vector3(newPos.x + PLAYER_RADIUS, newPos.y + 0.3, newPos.z + PLAYER_RADIUS);
             const playerBox = new THREE.Box3(playerMin, playerMax);
-            
+
             // Spatial Grid Optimization
             const nearby = spatialGrid.query(playerBox);
             for (const collider of nearby) {
@@ -8307,10 +8423,10 @@
 
                 // --- Improved Physics with Raycasting (Fix for Jumping on Objects) ---
                 const eyeHeight = keys.ctrl ? 1.0 : 1.7; // 1.7 is standard eye level
-                
+
                 // Raycast down to find "ground"
                 let groundY = 0.5; // Base floor level
-                
+
                 // Only cast ray if mapGroup exists
                 if (mapGroup) {
                     const rayOrigin = position.clone();
@@ -8320,35 +8436,35 @@
                     // Note: We need to traverse mapGroup to find meshes, or use a known list. 
                     // mapGroup.children contains meshes.
                     const intersects = downRay.intersectObjects(mapGroup.children, true);
-                    
+
                     if (intersects.length > 0) {
                         // Find highest intersection below player
                         // Raycaster sorts by distance, so first one is closest.
                         // We need to ensure we don't pick something *above* our feet if we are jumping up through it?
                         // But ray starts at position (eye level) and goes down.
                         // Actually position is eye level.
-                        
+
                         // Let's adjust: Ray starts at (x, y, z).
                         // If y is 1.7, and we hit a box at height 1.5, distance is 0.2.
                         // Ground Height = y - distance.
-                        
+
                         // Filter out things that are "walls" if possible (dot product of normal?)
                         // For now, simpler: closest hit is ground.
                         const hit = intersects[0];
                         // If the normal is somewhat up-facing
                         if (hit.face && hit.face.normal.y > 0.5) {
-                             // Adjust for ray origin offset if any
-                             // We used position (eye) + 0.5? No, we used position + 0.5
-                             // Ray origin y = position.y + 0.5
-                             // Hit point y = rayOrigin.y - hit.distance
-                             // groundY = hit.point.y
-                             groundY = Math.max(groundY, hit.point.y);
+                            // Adjust for ray origin offset if any
+                            // We used position (eye) + 0.5? No, we used position + 0.5
+                            // Ray origin y = position.y + 0.5
+                            // Hit point y = rayOrigin.y - hit.distance
+                            // groundY = hit.point.y
+                            groundY = Math.max(groundY, hit.point.y);
                         }
                     }
                 }
 
                 const targetY = groundY + eyeHeight;
-                
+
                 // Apply Gravity
                 velocityY -= 30.0 * dt; // Stronger gravity for snappier feel
                 let nextY = position.y + velocityY * dt;
@@ -8360,7 +8476,7 @@
                     position.y = targetY;
                     velocityY = 0;
                     isGrounded = true;
-                    if (!keys.space) { 
+                    if (!keys.space) {
                         // Play land sound only if we were falling significantly?
                         // SoundGen.playLand(); // Maybe too spammy?
                     }
@@ -8368,7 +8484,7 @@
                     position.y = nextY;
                     isGrounded = false;
                 }
-                
+
                 // Head Collision (Ceiling) - Optional, simplified
                 // ...
 
@@ -8390,9 +8506,9 @@
                     const rgt = new THREE.Vector3(1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), rotation.y);
                     const moveDir = fwd.multiplyScalar(-dy).add(rgt.multiplyScalar(dx)).normalize();
                     const moveStep = moveDir.multiplyScalar(speed * dt);
-                    
+
                     const stepHeight = 0.6; // 등반 가능한 최대 높이 (계단 등)
-                    
+
                     // X축 이동 및 Step Climbing
                     let nextPosX = position.clone();
                     nextPosX.x += moveStep.x;
