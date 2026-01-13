@@ -2158,6 +2158,64 @@
                 top: 25%;
             }
         }
+
+        /* --- TASK: Hide Game UI by Default --- */
+        /* Initially hide all game HUD/UI elements */
+        .hud-container,
+        .crosshair,
+        #mobile-player-name,
+        #chat-toggle-btn,
+        #weapon-list-left,
+        #controls,
+        #light-toggle-btn {
+            display: none !important;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        /* Show HUD elements when game is active */
+        body.game-active .hud-container {
+            display: block !important;
+            opacity: 1;
+        }
+        
+        body.game-active .crosshair {
+            display: flex !important;
+            opacity: 1;
+        }
+
+        body.game-active #light-toggle-btn {
+             display: flex !important;
+             opacity: 1;
+        }
+
+        /* Weapon list - visible on all platforms if active */
+        body.game-active #weapon-list-left {
+            display: flex !important;
+            opacity: 1;
+        }
+
+        /* Mobile specific controls */
+        @media (max-width: 1024px) {
+             body.game-active #controls {
+                 display: flex !important;
+                 opacity: 1;
+             }
+             
+             body.game-active #mobile-player-name {
+                 display: block !important;
+                 opacity: 1;
+             }
+        }
+        
+        /* Chat toggle - mobile only and respecting multi-player */
+        @media (max-width: 768px) {
+             body.game-active.multi-player #chat-toggle-btn {
+                 display: flex !important;
+                 opacity: 1;
+             }
+        }
+
     </style>
 </head>
 
