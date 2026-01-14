@@ -5107,9 +5107,28 @@
                 if (elPauseOverlay) {
                     elPauseOverlay.style.display = isPaused ? 'flex' : 'none';
                     if (isPaused) {
+                        // Reset all key states when paused to prevent continuous movement
+                        keys.w = 0;
+                        keys.a = 0;
+                        keys.s = 0;
+                        keys.d = 0;
+                        keys.shift = false;
+                        keys.ctrl = false;
+                        keys.space = false;
                         if (typeof setupSensitivityControl === 'function') setupSensitivityControl();
                     }
                 }
+            });
+
+            // Reset keys when window loses focus (Alt+Tab, etc.)
+            window.addEventListener('blur', () => {
+                keys.w = 0;
+                keys.a = 0;
+                keys.s = 0;
+                keys.d = 0;
+                keys.shift = false;
+                keys.ctrl = false;
+                keys.space = false;
             });
 
             window.addEventListener('resize', onResize, false);
