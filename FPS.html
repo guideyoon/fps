@@ -2653,6 +2653,14 @@
         // === 전역 변수 ===
         const keys = { w: 0, a: 0, s: 0, d: 0, shift: false, ctrl: false, space: false };
 
+        // MAP EDITOR GLOBALS
+        let isEditorActive = false;
+        let editorObjects = []; // Array of placed objects
+        let editorCurrentObjectType = 'crate';
+        let editorObjectTypes = ['crate', 'smallCrate', 'coverWall', 'platform', 'pillar', 'container'];
+        let editorGhostMesh = null; // Preview mesh
+        let editorSelectedIndex = 0;
+
         // --- Physics Optimization: Spatial Hash Grid ---
         class SpatialHash {
             constructor(cellSize) {
@@ -5267,6 +5275,188 @@
         // END DATA-DRIVEN MAP SYSTEM
         // ========================================
 
+        // ========================================
+        // MAP EDITOR MODE
+        // ========================================
+
+        /**
+         * Starts the map editor mode (developer console access only)
+         */
+        function startEditor() {
+            if (isGameStarted || gameMode === 'multi') {
+                console.warn('Cannot start editor while game is running or in multiplayer');
+                return;
+            }
+
+            isEditorActive = true;
+            editorObjects = [];
+            editorSelectedIndex = 0;
+            editorCurrentObjectType = editorObjectTypes[0];
+
+            console.log('%c[MAP EDITOR] Started', 'color: #00ff00; font-weight: bold');
+            console.log('Controls:');
+            console.log('  Left Click: Place object');
+            console.log('  Right Click: Delete object under cursor');
+            console.log('  Mouse Wheel: Cycle object types');
+            console.log('  R Key: Rotate ghost object');
+            console.log('  Call exportMap() to get JSON data');
+
+            // Initialize scene if not already
+            if (!scene) {
+                initGame();
+            }
+
+            // Clear existing map and load empty floor
+            if (mapGroup) {
+                mapGroup.clear();
+            }
+            colliders = [];
+            spatialGrid.clear();
+
+            // Add floor
+            const floorData = [{ type: 'floor', pos: [0, 0, 0], size: [200, 200] }];
+            createCustomMap(floorData);
+
+            // Start game loop if not running
+            if (!isGameStarted) {
+                isGameStarted = true;
+                gameMode = 'single';
+                position.set(0, 1.7, 5);
+                camera.position.copy(position);
+                if (!window.animateRunning) animate();
+            }
+
+            // Create ghost mesh
+            updateEditorGhostMesh();
+
+            // Show editor UI hint
+            showEditorHint();
+        }
+
+        /**
+         * Updates the ghost mesh based on current object type
+         */
+        function updateEditorGhostMesh() {
+            if (editorGhostMesh) {
+                scene.remove(editorGhostMesh);
+            }
+
+            const objDef = {
+                type: editorCurrentObjectType,
+                pos: [0, 1, 0],
+                rot: [0, 0, 0]
+            };
+
+            const materials = {
+                matConcrete: new THREE.MeshBasicMaterial({ color: 0x00ff00, transparent: true, opacity: 0.5 }),
+                matMetal: new THREE.MeshBasicMaterial({ color: 0x00ff00, transparent: true, opacity: 0.5 }),
+                matRust: new THREE.MeshBasicMaterial({ color: 0x00ff00, transparent: true, opacity: 0.5 }),
+                matWall: new THREE.MeshBasicMaterial({ color: 0x00ff00, transparent: true, opacity: 0.5 })
+            };
+
+            editorGhostMesh = createMapObject(objDef, materials);
+            editorGhostMesh.userData.isGhost = true;
+            scene.add(editorGhostMesh);
+        }
+
+        /**
+         * Places object at raycast hit point
+         */
+        function placeEditorObject(hitPoint) {
+            const objDef = {
+                type: editorCurrentObjectType,
+                pos: [Math.round(hitPoint.x), hitPoint.y, Math.round(hitPoint.z)],
+                rot: editorGhostMesh ? [0, editorGhostMesh.rotation.y, 0] : [0, 0, 0],
+                size: getSizeForType(editorCurrentObjectType)
+            };
+
+            editorObjects.push(objDef);
+
+            // Create actual mesh
+            const materials = {
+                matConcrete: new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.9 }),
+                matMetal: new THREE.MeshStandardMaterial({ color: 0x556677, roughness: 0.4, metalness: 0.7 }),
+                matRust: new THREE.MeshStandardMaterial({ color: 0x885544, roughness: 0.8, metalness: 0.2 }),
+                matWall: new THREE.MeshStandardMaterial({ color: 0x20252a, roughness: 0.9 })
+            };
+
+            const mesh = createMapObject(objDef, materials);
+            mesh.userData.editorIndex = editorObjects.length - 1;
+            mapGroup.add(mesh);
+
+            const box = new THREE.Box3().setFromObject(mesh);
+            colliders.push(box);
+            spatialGrid.insert(box);
+
+            console.log(`Placed ${editorCurrentObjectType} at (${objDef.pos[0]}, ${objDef.pos[1]}, ${objDef.pos[2]})`);
+        }
+
+        /**
+         * Deletes object at raycast hit
+         */
+        function deleteEditorObject(hitMesh) {
+            if (hitMesh && hitMesh.userData.editorIndex !== undefined) {
+                const index = hitMesh.userData.editorIndex;
+                editorObjects.splice(index, 1);
+                mapGroup.remove(hitMesh);
+
+                // Update indices
+                mapGroup.children.forEach((child, i) => {
+                    if (child.userData.editorIndex !== undefined && child.userData.editorIndex > index) {
+                        child.userData.editorIndex--;
+                    }
+                });
+
+                console.log(`Deleted object at index ${index}`);
+            }
+        }
+
+        /**
+         * Exports current map to JSON
+         */
+        function exportMap() {
+            const mapDataWithFloor = [
+                { type: 'floor', pos: [0, 0, 0], size: [200, 200] },
+                ...editorObjects
+            ];
+            const jsonStr = JSON.stringify(mapDataWithFloor, null, 2);
+            console.log('%c[MAP EXPORT]', 'color: #ffaa00; font-weight: bold');
+            console.log(jsonStr);
+            console.log('Copy the above JSON and save it to use with createCustomMap()');
+            return mapDataWithFloor;
+        }
+
+        /**
+         * Helper to get default size for object type
+         */
+        function getSizeForType(type) {
+            const sizes = {
+                'crate': [3, 3, 3],
+                'smallCrate': [1.5, 1.5, 1.5],
+                'coverWall': [6, 1.5, 0.3],
+                'platform': [8, 0.5, 8],
+                'pillar': [2, 6, 2],
+                'container': [6, 4, 3],
+                'wall': [200, 20, 1]
+            };
+            return sizes[type] || [1, 1, 1];
+        }
+
+        /**
+         * Shows editor hint in console
+         */
+        function showEditorHint() {
+            console.log('%c[MAP EDITOR]', 'color: #00ffff; font-weight: bold',
+                `Current object: ${editorCurrentObjectType}`);
+        }
+
+        // Make editor functions globally accessible
+        window.startEditor = startEditor;
+        window.exportMap = exportMap;
+
+        // ========================================
+        // END MAP EDITOR MODE
+        // ========================================
 
         function createMap() {
             // 바닥
@@ -7436,6 +7626,28 @@
                 // (이벤트 리스너는 initGame에서 통합 관리됨)
 
                 document.body.addEventListener('mousedown', (e) => {
+                    // EDITOR MODE: Handle placing/deleting objects
+                    if (isEditorActive) {
+                        e.preventDefault();
+                        const raycaster = new THREE.Raycaster();
+                        raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
+                        const intersects = raycaster.intersectObjects(mapGroup.children, true);
+
+                        if (e.button === 0) { // Left click: Place object
+                            if (intersects.length > 0) {
+                                const hitPoint = intersects[0].point;
+                                placeEditorObject(hitPoint);
+                            }
+                        } else if (e.button === 2) { // Right click: Delete object
+                            if (intersects.length > 0) {
+                                const hitMesh = intersects[0].object;
+                                deleteEditorObject(hitMesh);
+                            }
+                        }
+                        return;
+                    }
+
+                    // Normal game mode
                     if (document.pointerLockElement !== document.body && !isDead && !isPaused) {
                         const promise = document.body.requestPointerLock();
                         if (promise) promise.catch(err => { });
@@ -7510,6 +7722,16 @@
                     return false;
                 }
                 const k = e.key.toLowerCase();
+
+                // EDITOR MODE: Handle R key for rotation
+                if (isEditorActive && k === 'r') {
+                    if (editorGhostMesh) {
+                        editorGhostMesh.rotation.y += Math.PI / 4; // Rotate 45 degrees
+                        console.log(`Rotated ghost mesh to ${(editorGhostMesh.rotation.y * 180 / Math.PI).toFixed(1)}°`);
+                    }
+                    return;
+                }
+
                 if (isDead || isPaused) return;
                 if (k === 'w') keys.w = 1;
                 if (k === 's') keys.s = 1;
@@ -7535,6 +7757,21 @@
                 if (k === 'tab') { e.preventDefault(); switchWeaponTo((curWeaponIdx + 1) % 5); }
                 if (k === 'r') doReload();
             });
+
+            // EDITOR MODE: Mouse wheel to cycle object types
+            window.addEventListener('wheel', (e) => {
+                if (isEditorActive) {
+                    e.preventDefault();
+                    if (e.deltaY > 0) {
+                        editorSelectedIndex = (editorSelectedIndex + 1) % editorObjectTypes.length;
+                    } else {
+                        editorSelectedIndex = (editorSelectedIndex - 1 + editorObjectTypes.length) % editorObjectTypes.length;
+                    }
+                    editorCurrentObjectType = editorObjectTypes[editorSelectedIndex];
+                    updateEditorGhostMesh();
+                    showEditorHint();
+                }
+            }, { passive: false });
 
             window.addEventListener('keyup', e => {
                 const k = e.key.toLowerCase();
