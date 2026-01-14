@@ -8582,28 +8582,16 @@
                     const intersects = downRay.intersectObjects(mapGroup.children, true);
 
                     if (intersects.length > 0) {
-                        // Find highest intersection below player
-                        // Raycaster sorts by distance, so first one is closest.
-                        // We need to ensure we don't pick something *above* our feet if we are jumping up through it?
-                        // But ray starts at position (eye level) and goes down.
-                        // Actually position is eye level.
-
-                        // Let's adjust: Ray starts at (x, y, z).
-                        // If y is 1.7, and we hit a box at height 1.5, distance is 0.2.
-                        // Ground Height = y - distance.
-
-                        // Filter out things that are "walls" if possible (dot product of normal?)
-                        // For now, simpler: closest hit is ground.
-                        const hit = intersects[0];
-                        // If the normal is somewhat up-facing
-                        if (hit.face && hit.face.normal.y > 0.5) {
-                            // Adjust for ray origin offset if any
-                            // We used position (eye) + 0.5? No, we used position + 0.5
-                            // Ray origin y = position.y + 0.5
-                            // Hit point y = rayOrigin.y - hit.distance
-                            // groundY = hit.point.y
-                            groundY = Math.max(groundY, hit.point.y);
+                        // Find highest valid intersection below player
+                        let bestGroundY = groundY;
+                        for (const hit of intersects) {
+                            if (!hit.face) continue;
+                            const worldNormal = hit.face.normal.clone().transformDirection(hit.object.matrixWorld);
+                            if (worldNormal.y > 0.3) {
+                                bestGroundY = Math.max(bestGroundY, hit.point.y);
+                            }
                         }
+                        groundY = bestGroundY;
                     }
                 }
 
