@@ -1789,25 +1789,29 @@
                 border-radius: 4px;
                 z-index: 90;
             }
+
             .vitals-panel .value-group {
                 transform: none;
                 margin-right: 15px;
                 gap: 5px;
             }
+
             .vitals-panel .label {
                 font-size: 12px;
                 color: #aaa;
             }
+
             .vitals-panel .health-text {
                 font-size: 24px;
                 line-height: 1;
             }
+
             .vitals-panel .bar-container {
                 width: 120px;
                 height: 10px;
                 margin-top: 0;
                 transform: none;
-                background: rgba(0,0,0,0.5);
+                background: rgba(0, 0, 0, 0.5);
             }
 
             .weapon-panel {
@@ -1815,7 +1819,8 @@
                 flex-direction: column;
                 bottom: auto !important;
                 top: 10px;
-                right: 140px; /* exit button(80px) 왼쪽 */
+                right: 140px;
+                /* exit button(80px) 왼쪽 */
                 padding: 5px 15px;
                 background: rgba(0, 0, 0, 0.6);
                 border: 1px solid rgba(255, 255, 255, 0.2);
@@ -1825,21 +1830,25 @@
                 align-items: flex-end;
                 z-index: 90;
             }
+
             .weapon-panel .ammo-group {
                 transform: none;
             }
+
             .weapon-panel .ammo-current {
                 font-size: 24px;
                 line-height: 1;
             }
+
             .weapon-panel .ammo-reserve {
                 font-size: 14px;
             }
+
             /* Hide unnecessary elements in landscape */
-            #hud-weapon-selector, 
+            #hud-weapon-selector,
             #hud-weapon-name,
-            #hp-container, 
-            #hp-text, 
+            #hp-container,
+            #hp-text,
             #ammo-info {
                 display: none !important;
             }
@@ -1847,33 +1856,41 @@
             /* ===== 버튼들 - 크기 통일 및 왼쪽 이동 ===== */
             .mobile-btn {
                 display: flex;
-                width: 50px;  /* 60px -> 50px (축소) */
-                height: 50px; /* 60px -> 50px (축소) */
-                font-size: 18px; /* 20px -> 18px */
+                width: 50px;
+                /* 60px -> 50px (축소) */
+                height: 50px;
+                /* 60px -> 50px (축소) */
+                font-size: 18px;
+                /* 20px -> 18px */
             }
 
             /* 발사 버튼 */
             #btn-shoot {
-                bottom: 80px; /* 90px -> 80px */
+                bottom: 80px;
+                /* 90px -> 80px */
                 right: 120px;
             }
 
             /* 점프 버튼 */
             #btn-jump {
-                bottom: 40px; /* 50px -> 40px */
+                bottom: 40px;
+                /* 50px -> 40px */
                 right: 50px;
             }
 
             /* 재장전 버튼 */
             #btn-reload {
-                bottom: 110px; /* 130px -> 110px */
+                bottom: 110px;
+                /* 130px -> 110px */
                 right: 50px;
             }
 
             /* 조준 버튼 */
             #btn-aim {
-                bottom: 40px; /* 50px -> 40px */
-                right: 190px; /* 200px -> 190px */
+                bottom: 40px;
+                /* 50px -> 40px */
+                right: 190px;
+                /* 200px -> 190px */
             }
 
 
@@ -2062,31 +2079,31 @@
             }
         }
 
-            /* Landscape Orientation Fixes for Mobile - Scaled Down Initial Screen */
-            @media (orientation: landscape) {
+        /* Landscape Orientation Fixes for Mobile - Scaled Down Initial Screen */
+        @media (orientation: landscape) {
 
-                /* Ensure mode selection is visible but compact when game is NOT active */
-                body:not(.game-active) #mode-selection {
-                    display: flex !important;
-                    flex-direction: column;
-                    justify-content: center;
-                    align-items: center;
-                    padding: 10px;
-                }
+            /* Ensure mode selection is visible but compact when game is NOT active */
+            body:not(.game-active) #mode-selection {
+                display: flex !important;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                padding: 10px;
+            }
 
-                /* Scale down logo and buttons when mode selection is shown */
-                #mode-selection img {
-                    max-height: 100px !important; 
-                    max-width: 80% !important;
-                    margin-bottom: 15px !important;
-                }
+            /* Scale down logo and buttons when mode selection is shown */
+            #mode-selection img {
+                max-height: 100px !important;
+                max-width: 80% !important;
+                margin-bottom: 15px !important;
+            }
 
-                .mode-btn {
-                    padding: 12px 35px !important;
-                    font-size: 18px !important;
-                    margin: 8px !important;
-                    min-width: 200px !important;
-                }
+            .mode-btn {
+                padding: 12px 35px !important;
+                font-size: 18px !important;
+                margin: 8px !important;
+                min-width: 200px !important;
+            }
 
 
             /* Hide text-based weapon inventory in landscape too - FORCE */
@@ -2182,15 +2199,15 @@
             display: block !important;
             opacity: 1;
         }
-        
+
         body.game-active .crosshair {
             display: flex !important;
             opacity: 1;
         }
 
         body.game-active #light-toggle-btn {
-             display: flex !important;
-             opacity: 1;
+            display: flex !important;
+            opacity: 1;
         }
 
         /* Weapon list - visible on all platforms if active */
@@ -2201,25 +2218,24 @@
 
         /* Mobile specific controls */
         @media (max-width: 1024px) {
-             body.game-active #controls {
-                 display: flex !important;
-                 opacity: 1;
-             }
-             
-             body.game-active #mobile-player-name {
-                 display: block !important;
-                 opacity: 1;
-             }
-        }
-        
-        /* Chat toggle - mobile only and respecting multi-player */
-        @media (max-width: 768px) {
-             body.game-active.multi-player #chat-toggle-btn {
-                 display: flex !important;
-                 opacity: 1;
-             }
+            body.game-active #controls {
+                display: flex !important;
+                opacity: 1;
+            }
+
+            body.game-active #mobile-player-name {
+                display: block !important;
+                opacity: 1;
+            }
         }
 
+        /* Chat toggle - mobile only and respecting multi-player */
+        @media (max-width: 768px) {
+            body.game-active.multi-player #chat-toggle-btn {
+                display: flex !important;
+                opacity: 1;
+            }
+        }
     </style>
 </head>
 
@@ -3948,6 +3964,38 @@
                         if (window.scene) scene.remove(mesh);
                         delete otherPlayersMap[playerId];
                     }
+                });
+
+                // Handle player numbers being reassigned after someone leaves
+                socket.on('playersUpdated', (players) => {
+                    roomPlayersState = players;
+                    updatePlayersList();
+
+                    // Update remote player name labels in 3D scene
+                    Object.values(players).forEach(p => {
+                        const mesh = otherPlayersMap[p.id];
+                        if (mesh && mesh.userData.nameSprite) {
+                            const canvas = document.createElement('canvas');
+                            canvas.width = 256;
+                            canvas.height = 64;
+                            const ctx = canvas.getContext('2d');
+                            ctx.font = 'bold 32px Arial';
+                            ctx.fillStyle = 'white';
+                            ctx.textAlign = 'center';
+                            ctx.fillText(p.name, 128, 40);
+                            mesh.userData.nameSprite.material.map.dispose();
+                            mesh.userData.nameSprite.material.map = new THREE.CanvasTexture(canvas);
+                            mesh.userData.nameSprite.material.needsUpdate = true;
+                        }
+                    });
+
+                    // Update own name display on mobile
+                    if (myId && players[myId]) {
+                        const elMobileName = document.getElementById('mobile-player-name');
+                        if (elMobileName) elMobileName.innerText = 'ID: ' + players[myId].name;
+                    }
+
+                    addChatMessage('System', '플레이어 번호가 재정렬되었습니다.', true);
                 });
 
                 socket.on('timerSync', (data) => {

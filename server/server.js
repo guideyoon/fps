@@ -20,7 +20,32 @@ const io = new Server(server, {
 // Room and Player Management
 const rooms = {};
 const playerRoomMap = {}; // socket.id -> roomId
-let globalPlayerCounter = 1; // Global counter for assigning "Player 1", "Player 2", etc.
+
+// Helper function to get the next available player number in a room
+function getNextPlayerNumber(room) {
+    const usedNumbers = new Set();
+    for (const playerId in room.players) {
+        const match = room.players[playerId].name.match(/^Player (\d+)$/);
+        if (match) {
+            usedNumbers.add(parseInt(match[1]));
+        }
+    }
+    // Find the lowest available number starting from 1
+    let num = 1;
+    while (usedNumbers.has(num)) {
+        num++;
+    }
+    return num;
+}
+
+// Helper function to reassign player numbers in order after someone leaves
+function reassignPlayerNumbers(room) {
+    const playerIds = Object.keys(room.players);
+    playerIds.forEach((playerId, index) => {
+        const newNumber = index + 1;
+        room.players[playerId].name = `Player ${newNumber}`;
+    });
+}
 
 function generateRoomId() {
     return Math.random().toString(36).substr(2, 6).toUpperCase();
@@ -31,14 +56,10 @@ io.on('connection', (socket) => {
 
     // 1. Initial Identity Setup (Lobby Join)
     socket.on('setIdentity', (data) => {
-        // User Request: Auto-assign "Player N" in order using global counter
-        // Use data.name ONLY if it's explicitly set (unlikely with this change), otherwise default to counter
-        // Actually, user wants "Player 1, 2..." forced.
-        const name = `Player ${globalPlayerCounter++}`;
-
+        // Player number will be assigned when joining a room
         socket.userData = {
             id: socket.id,
-            name: name,
+            name: null, // Will be set when joining a room
             hp: 100,
             isDead: false
         };
@@ -320,6 +341,10 @@ function joinRoom(socket, roomId) {
     const room = rooms[roomId];
     if (!room) return;
 
+    // Assign player number when joining the room
+    const playerNumber = getNextPlayerNumber(room);
+    socket.userData.name = `Player ${playerNumber}`;
+
     // Initialize Player State for Game
     // Use current player count as index for unique spawn position
     const playerIndex = Object.keys(room.players).length;
@@ -374,12 +399,14 @@ function leaveRoom(socket) {
         socket.leave(roomId);
         delete playerRoomMap[socket.id];
 
-        // If room empty, delete room
         // If room empty, delete room & timer
         if (Object.keys(room.players).length === 0) {
             if (room.timerId) clearInterval(room.timerId);
             delete rooms[roomId];
         } else {
+            // Reassign player numbers in order (Player 1, 2, 3...)
+            reassignPlayerNumbers(room);
+
             // If host left, assign new host
             if (room.host === socket.id) {
                 const remainingIds = Object.keys(room.players);
@@ -387,6 +414,9 @@ function leaveRoom(socket) {
                 io.to(roomId).emit('hostChanged', room.host);
             }
             io.to(roomId).emit('playerLeft', socket.id);
+
+            // Notify all players in the room about updated player names
+            io.to(roomId).emit('playersUpdated', room.players);
         }
     }
 
