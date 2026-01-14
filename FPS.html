@@ -7384,9 +7384,9 @@
                 if (k === 'shift') keys.shift = true;
                 if (k === 'control') keys.ctrl = true;
                 if (k === ' ') {
-                    // Check if grounded (using raycast logic state)
-                    // But also allow "bunny hopping" if timed perfectly
-                    if (!keys.space && (isGrounded || position.y < (keys.ctrl ? 1.0 : 1.7) + 0.5)) {
+                    // Check if grounded or velocity is nearly zero (standing on surface)
+                    // Allow jump if grounded OR if falling/rising velocity is very small (just landed)
+                    if (!keys.space && (isGrounded || Math.abs(velocityY) < 0.5)) {
                         velocityY = 12.0; // Adjusted jump force
                         isGrounded = false;
                         SoundGen.playJump(false);
@@ -7584,7 +7584,8 @@
                 btnJump.addEventListener('touchstart', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    if (!keys.space && (isGrounded || position.y < 2.5)) { // Allow jump if near ground
+                    // Allow jump if grounded OR if velocity is nearly zero (standing on surface)
+                    if (!keys.space && (isGrounded || Math.abs(velocityY) < 0.5)) {
                         velocityY = 12.0;
                         isGrounded = false;
                         SoundGen.playJump(false);
