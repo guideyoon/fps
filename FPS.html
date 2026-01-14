@@ -5271,6 +5271,68 @@
             console.log(`Custom map loaded: ${mapData.length} objects created`);
         }
 
+        /**
+         * Extracts current map objects to JSON data for use in the map editor
+         */
+        function extractMapData() {
+            if (!mapGroup || mapGroup.children.length === 0) {
+                console.warn('Map group is empty. Load a map first.');
+                return;
+            }
+
+            const data = [];
+            let unknownCount = 0;
+
+            mapGroup.children.forEach(mesh => {
+                // Skip if not a mesh or is a ghost/temp object
+                if (!mesh.isMesh || mesh.userData.isGhost) return;
+
+                // Determine dimensions
+                let size = [1, 1, 1];
+                if (mesh.geometry.parameters) {
+                    const p = mesh.geometry.parameters;
+                    size = [p.width, p.height, p.depth || 1]; // Plane has no depth property sometimes
+                } else if (mesh.geometry.type === 'BoxGeometry') {
+                    // Fallback if parameters are missing
+                }
+
+                // Determine type based on size
+                let type = 'crate'; // Default type
+                const [w, h, d] = size;
+
+                if (mesh.geometry.type === 'PlaneGeometry' && w >= 100) type = 'floor';
+                else if (w >= 100 && h >= 10) type = 'wall';
+                else if (Math.abs(w - 6) < 0.1 && Math.abs(h - 1.5) < 0.1) type = 'coverWall';
+                else if (Math.abs(w - 8) < 0.1 && Math.abs(h - 0.5) < 0.1) type = 'platform';
+                else if (Math.abs(w - 3) < 0.1 && Math.abs(h - 3) < 0.1) type = 'crate';
+                else if (Math.abs(w - 1.5) < 0.1 && Math.abs(h - 1.5) < 0.1) type = 'smallCrate';
+                else if (Math.abs(w - 2) < 0.1 && Math.abs(h - 6) < 0.1) type = 'pillar';
+                else if (Math.abs(w - 6) < 0.1 && Math.abs(h - 4) < 0.1) type = 'container';
+                else {
+                    // Helper logic for non-standard objects (like platform supports)
+                    if (h > w * 2) type = 'pillar'; // Tall -> pillar-like
+                    else if (w > h * 4) type = 'platform'; // Flat -> platform-like
+                    else type = 'crate'; // Blocky -> crate-like
+                    unknownCount++;
+                }
+
+                data.push({
+                    type: type,
+                    pos: [Number(mesh.position.x.toFixed(2)), Number(mesh.position.y.toFixed(2)), Number(mesh.position.z.toFixed(2))],
+                    rot: [Number(mesh.rotation.x.toFixed(2)), Number(mesh.rotation.y.toFixed(2)), Number(mesh.rotation.z.toFixed(2))],
+                    size: size
+                });
+            });
+
+            console.log(`%c[MAP EXTRACT] Extracted ${data.length} objects (${unknownCount} approximated)`, 'color: #00ff00; font-weight: bold');
+            console.log(JSON.stringify(data, null, 2));
+            console.log('%cCopy the JSON above and save to a file (e.g. factory.json) to import in the editor.', 'font-weight: bold');
+
+            return data;
+        }
+
+        window.extractMapData = extractMapData;
+
         // ========================================
         // END DATA-DRIVEN MAP SYSTEM
         // ========================================
