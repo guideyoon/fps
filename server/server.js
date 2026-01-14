@@ -70,7 +70,8 @@ io.on('connection', (socket) => {
     // 2. Room Creation
     socket.on('createRoom', (data) => {
         const roomId = generateRoomId();
-        const roomName = data.name || `${socket.userData.name}'s Room`;
+        const hostName = (socket.userData && socket.userData.name) || 'Player';
+        const roomName = data.name || `${hostName}'s Room`;
         const maxPlayers = parseInt(data.maxPlayers) || 4;
         const mapName = data.map || 'factory'; // 기본값 factory
 
@@ -340,6 +341,16 @@ function joinRoom(socket, roomId) {
 
     const room = rooms[roomId];
     if (!room) return;
+
+    // Ensure userData exists
+    if (!socket.userData) {
+        socket.userData = {
+            id: socket.id,
+            name: null,
+            hp: 100,
+            isDead: false
+        };
+    }
 
     // Assign player number when joining the room
     const playerNumber = getNextPlayerNumber(room);
