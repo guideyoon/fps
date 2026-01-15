@@ -7045,27 +7045,26 @@
         }
 
         function buildKnife() {
-            // === KRUNKER-STYLE KNIFE: Centered blade, two hands on sides ===
+            // === KRUNKER-STYLE KNIFE: Centered blade, held by right hand ===
             const knifeGroup = new THREE.Group();
 
             // --- KNIFE BLADE (centered, pointing forward) ---
-            // Main blade - longer and more prominent
             const blade = new THREE.Mesh(
-                new THREE.BoxGeometry(0.02, 0.008, 0.35),
+                new THREE.BoxGeometry(0.025, 0.008, 0.35),
                 new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0.9, roughness: 0.2 })
             );
             blade.position.set(0, 0, -0.18);
             knifeGroup.add(blade);
 
-            // Blade edge (sharp side) - thin bevel
+            // Blade edge
             const bladeEdge = new THREE.Mesh(
-                new THREE.BoxGeometry(0.022, 0.003, 0.33),
-                new THREE.MeshStandardMaterial({ color: 0xeeeeee, metalness: 1.0, roughness: 0.1 })
+                new THREE.BoxGeometry(0.025, 0.002, 0.33),
+                new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 1.0, roughness: 0.1 })
             );
             bladeEdge.position.set(0, -0.004, -0.17);
             knifeGroup.add(bladeEdge);
 
-            // Blade tip
+            // Tip
             const tip = new THREE.Mesh(
                 new THREE.ConeGeometry(0.008, 0.04, 4),
                 new THREE.MeshStandardMaterial({ color: 0xdddddd, metalness: 0.9, roughness: 0.2 })
@@ -7074,128 +7073,99 @@
             tip.position.set(0, 0, -0.37);
             knifeGroup.add(tip);
 
-            // Guard (crossguard)
+            // Guard
             const guard = new THREE.Mesh(
-                new THREE.BoxGeometry(0.06, 0.015, 0.015),
-                new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.7, roughness: 0.3 })
+                new THREE.BoxGeometry(0.08, 0.02, 0.02),
+                new THREE.MeshStandardMaterial({ color: 0x222222, metalness: 0.8, roughness: 0.5 })
             );
             guard.position.set(0, 0, 0);
             knifeGroup.add(guard);
 
             // Handle
             const handle = new THREE.Mesh(
-                new THREE.BoxGeometry(0.028, 0.025, 0.12),
-                new THREE.MeshStandardMaterial({ color: 0x228844, metalness: 0.1, roughness: 0.8 })
+                new THREE.BoxGeometry(0.035, 0.035, 0.12),
+                new THREE.MeshStandardMaterial({ color: 0x1a1a1a, metalness: 0.2, roughness: 0.9 }) // Dark grip
             );
             handle.position.set(0, 0, 0.07);
             knifeGroup.add(handle);
 
-            // Handle grip lines
-            for (let i = 0; i < 5; i++) {
-                const gripLine = new THREE.Mesh(
-                    new THREE.BoxGeometry(0.03, 0.003, 0.008),
-                    new THREE.MeshStandardMaterial({ color: 0x115522 })
-                );
-                gripLine.position.set(0, 0.014, 0.03 + i * 0.02);
-                knifeGroup.add(gripLine);
-            }
-
-            // Position knife in center-bottom of screen
-            knifeGroup.position.set(0, -0.15, -0.45);
-            knifeGroup.rotation.set(0.1, 0, 0); // Slight tilt
+            // Position knife in center-bottom
+            knifeGroup.position.set(0, -0.12, -0.4);
+            knifeGroup.rotation.set(0.15, 0, 0); // Slight tilt
             weaponModel.add(knifeGroup);
 
-            // --- RIGHT HAND (holding knife, right side) ---
+            // --- RIGHT ARM (Holding the knife) ---
             const rightArm = new THREE.Group();
 
-            // Arm/Sleeve (gray/dark color like Krunker)
-            const rightSleeve = new THREE.Mesh(
-                new THREE.BoxGeometry(0.09, 0.07, 0.35),
-                new THREE.MeshStandardMaterial({ color: 0x555555, roughness: 0.9 })
-            );
-            rightSleeve.position.set(0, 0, 0.15);
+            // Sleeve (Use global materials)
+            const rightSleeve = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.45), matSleeve);
+            rightSleeve.position.set(0, 0, 0.2); // Extend backward
             rightArm.add(rightSleeve);
 
-            // Wrist band (orange/brown like Krunker)
-            const rightWrist = new THREE.Mesh(
-                new THREE.BoxGeometry(0.085, 0.065, 0.05),
-                new THREE.MeshStandardMaterial({ color: 0xcc6633, roughness: 0.7 })
-            );
-            rightWrist.position.set(0, 0, -0.02);
-            rightArm.add(rightWrist);
-
-            // Hand (skin color)
-            const rightHand = new THREE.Mesh(
-                new THREE.BoxGeometry(0.08, 0.05, 0.1),
-                new THREE.MeshStandardMaterial({ color: 0xddaa88, roughness: 0.8 })
-            );
-            rightHand.position.set(0, -0.01, -0.08);
+            // Hand (Glove)
+            const rightHand = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.08, 0.12), matGlove);
+            rightHand.position.set(0, 0, -0.05); // At the wrist
             rightArm.add(rightHand);
 
-            // Fingers (gripping position)
-            for (let i = 0; i < 4; i++) {
-                const finger = new THREE.Mesh(
-                    new THREE.BoxGeometry(0.015, 0.015, 0.05),
-                    new THREE.MeshStandardMaterial({ color: 0xddaa88, roughness: 0.8 })
-                );
-                finger.position.set(-0.025 + i * 0.017, -0.025, -0.12);
-                finger.rotation.x = 0.3;
-                rightArm.add(finger);
-            }
+            // Fingers (Gripping the handle)
+            // Thumb wrapping around
+            const rThumb = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.03, 0.08), matSkin);
+            rThumb.position.set(-0.04, 0.02, -0.05);
+            rThumb.rotation.set(0, 0, -0.5);
+            rightArm.add(rThumb);
 
-            rightArm.position.set(0.22, -0.28, -0.25);
-            rightArm.rotation.set(0.4, -0.3, 0.15);
+            // Fingers wrapping around handle
+            const rFingers = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.07, 0.04), matSkin);
+            rFingers.position.set(0.02, -0.01, -0.12);
+            rightArm.add(rFingers);
+
+            // Position Right Arm to connect with Handle
+            // Knife Handle is at (0, -0.12, -0.4) + (0, 0, 0.07) = (0, -0.12, -0.33)
+            // Arm origin is wrist/hand center.
+            rightArm.position.set(0.18, -0.2, -0.25);
+            rightArm.rotation.set(0.2, -0.4, 0.1); // Angled inward
+            // The visual hand should align with the handle.
+
+            // Let's adjust position securely
+            rightArm.position.set(0.12, -0.15, -0.15);
+            rightArm.rotation.set(0, -0.1, 0);
+
+            // Re-adjust to match Krunker holding style (right hand holds, arm comes from right-bottom)
+            rightArm.position.set(0.25, -0.25, -0.15);
+            rightArm.rotation.set(0.2, -0.3, 0.1);
+
+            // But user said "Arm doesn't look like it's holding it".
+            // So we need to position the Arm's HAND mesh exactly at the Knife Handle position.
+            // Knife Handle World ~ (0, -0.12, -0.33).
+            // If RightArm is at (0.25, -0.25, -0.15), Hand is at local (0,0,-0.05).
+            // We need to move the arm closer.
+            rightArm.position.set(0.12, -0.16, -0.25);
+            rightArm.rotation.set(0.1, -0.2, 0);
+
             weaponModel.add(rightArm);
 
-            // --- LEFT HAND (supporting, left side) ---
+            // --- LEFT ARM (Supporting/Ready) ---
             const leftArm = new THREE.Group();
 
-            // Arm/Sleeve
-            const leftSleeve = new THREE.Mesh(
-                new THREE.BoxGeometry(0.09, 0.07, 0.35),
-                new THREE.MeshStandardMaterial({ color: 0x555555, roughness: 0.9 })
-            );
-            leftSleeve.position.set(0, 0, 0.15);
+            // Sleeve
+            const leftSleeve = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.45), matSleeve);
+            leftSleeve.position.set(0, 0, 0.2);
             leftArm.add(leftSleeve);
 
-            // Wrist band
-            const leftWrist = new THREE.Mesh(
-                new THREE.BoxGeometry(0.085, 0.065, 0.05),
-                new THREE.MeshStandardMaterial({ color: 0xcc6633, roughness: 0.7 })
-            );
-            leftWrist.position.set(0, 0, -0.02);
-            leftArm.add(leftWrist);
-
-            // Hand
-            const leftHand = new THREE.Mesh(
-                new THREE.BoxGeometry(0.08, 0.05, 0.1),
-                new THREE.MeshStandardMaterial({ color: 0xddaa88, roughness: 0.8 })
-            );
-            leftHand.position.set(0, -0.01, -0.08);
+            // Hand (Glove)
+            const leftHand = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.08, 0.12), matGlove);
+            leftHand.position.set(0, 0, -0.05);
             leftArm.add(leftHand);
 
-            // Fingers (open/ready position)
-            for (let i = 0; i < 4; i++) {
-                const finger = new THREE.Mesh(
-                    new THREE.BoxGeometry(0.015, 0.015, 0.05),
-                    new THREE.MeshStandardMaterial({ color: 0xddaa88, roughness: 0.8 })
-                );
-                finger.position.set(-0.025 + i * 0.017, -0.025, -0.12);
-                finger.rotation.x = 0.2;
-                leftArm.add(finger);
-            }
+            // Fingers (Fist/Ready)
+            const lFingers = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.07, 0.05), matSkin);
+            lFingers.position.set(0, -0.01, -0.12);
+            leftArm.add(lFingers);
 
-            // Thumb
-            const leftThumb = new THREE.Mesh(
-                new THREE.BoxGeometry(0.015, 0.015, 0.04),
-                new THREE.MeshStandardMaterial({ color: 0xddaa88, roughness: 0.8 })
-            );
-            leftThumb.position.set(0.045, -0.01, -0.1);
-            leftThumb.rotation.set(0, 0.4, -0.3);
-            leftArm.add(leftThumb);
+            // Position Left Arm on the left side
+            leftArm.position.set(-0.25, -0.25, -0.25);
+            leftArm.rotation.set(0.2, 0.2, -0.1);
 
-            leftArm.position.set(-0.22, -0.28, -0.25);
-            leftArm.rotation.set(0.4, 0.3, -0.15);
             weaponModel.add(leftArm);
         }
 
