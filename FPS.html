@@ -4023,7 +4023,6 @@
                     // 서버에서 받은 맵 정보로 설정
                     if (data && data.map) {
                         currentMap = data.map;
-                        currentMap = data.map;
                         currentGameMode = data.gameMode || 'ffa';
                         gameMode = 'multi'; // CRITICAL: Sync global gameMode
                         updateTimerUI(data.timeLeft || 600);
@@ -4902,17 +4901,23 @@
                 if (currentMap === 'hotel') {
                     createHotelMap();
                 } else if (currentMap === 'test') {
-                    // Load custom test map from c.json
-                    fetch('map/c.json')
-                        .then(response => response.json())
-                        .then(mapData => {
+                    // Load custom test map from c.json synchronously using XMLHttpRequest
+                    try {
+                        const xhr = new XMLHttpRequest();
+                        xhr.open('GET', 'map/c.json', false); // false = synchronous
+                        xhr.send(null);
+                        if (xhr.status === 200) {
+                            const mapData = JSON.parse(xhr.responseText);
                             createCustomMap(mapData);
                             console.log('Test map loaded successfully');
-                        })
-                        .catch(err => {
-                            console.error('Failed to load test map:', err);
-                            createFactoryMap(); // Fallback to factory
-                        });
+                        } else {
+                            console.error('Failed to load test map, using factory');
+                            createFactoryMap();
+                        }
+                    } catch (err) {
+                        console.error('Failed to load test map:', err);
+                        createFactoryMap(); // Fallback to factory
+                    }
                 } else {
                     createFactoryMap(); // 기본값
                 }
