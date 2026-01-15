@@ -5875,6 +5875,14 @@
             shells = [];
             healthPills = [];
             grenadeDrops = [];
+
+            // Shell casing geometry and material
+            shellGeo = new THREE.CylinderGeometry(0.004, 0.004, 0.015, 8);
+            shellMat = new THREE.MeshStandardMaterial({
+                color: 0xd4af37, // Brass color
+                metalness: 0.8,
+                roughness: 0.3
+            });
         }
 
         // --- 텍스처 시스템 초기화 ---
@@ -7038,10 +7046,13 @@
             magPlate.position.set(0, -0.12, 0.05);
             weaponModel.add(magPlate);
 
-            const lArm = createArm(-0.05, -0.15, 0.1, 0.1, 0.8, -0.1, false);
-            lArm.rotation.y = -0.1;
-            const rArm = createArm(0.05, -0.15, 0.1, 0.1, -0.8, 0.1, true);
-            rArm.rotation.y = 0.1;
+
+            // Arms (Krunker Style - visible at bottom of screen)
+            // Right arm (trigger hand) - comes from bottom-right
+            const rArm = createArm(0.18, -0.22, -0.2, 0.15, -0.4, 0.1, true);
+
+            // Left arm (support) - comes from bottom-left
+            const lArm = createArm(-0.22, -0.25, -0.15, 0.1, 0.3, -0.1, false);
         }
 
         function buildKnife() {
