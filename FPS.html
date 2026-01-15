@@ -2322,6 +2322,7 @@
                 <select id="new-room-map">
                     <option value="factory" selected>창고 (Factory)</option>
                     <option value="hotel">호텔 (Hotel)</option>
+                    <option value="test">Test</option>
                 </select>
             </div>
             <div class="modal-actions">
@@ -4900,6 +4901,18 @@
 
                 if (currentMap === 'hotel') {
                     createHotelMap();
+                } else if (currentMap === 'test') {
+                    // Load custom test map from c.json
+                    fetch('map/c.json')
+                        .then(response => response.json())
+                        .then(mapData => {
+                            createCustomMap(mapData);
+                            console.log('Test map loaded successfully');
+                        })
+                        .catch(err => {
+                            console.error('Failed to load test map:', err);
+                            createFactoryMap(); // Fallback to factory
+                        });
                 } else {
                     createFactoryMap(); // 기본값
                 }
