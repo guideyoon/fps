@@ -2613,6 +2613,7 @@
         let playerHP = 100;
         let isDead = false;
         let isPaused = false;
+        let usePointerLock = true;
         let isGameStarted = false; // New flag to block input/updates during countdown
         let gameMode = null; // 'single' or 'multi'
 
@@ -2751,8 +2752,8 @@
                 id: 1, name: "TACTICAL PISTOL",
                 type: 'PISTOL', maxAmmo: 10, ammo: 10, automatic: false,
                 posHip: new THREE.Vector3(0.2, -0.2, -0.45),
-                // Pistol ADS: Centered and slightly raised
-                posAds: new THREE.Vector3(0, -0.118, -0.35),
+                // Pistol ADS: Centered and aligned to sights
+                posAds: new THREE.Vector3(0, -0.048, -0.35),
                 fovAds: 55, fireRate: 0.15, recoil: 0.1, damage: 20,
                 switchSound: 'c-gun'
             },
@@ -2815,6 +2816,8 @@
         let shellGeo, shellMat;
         let bloodParticles = [];
         let decals = [];
+        let sparkParticles = [];
+        let smokeParticles = [];
         let healthPills = [];
         const matHealthPill = new THREE.MeshStandardMaterial({ color: 0xff00ff, roughness: 0.2, metalness: 0.8, emissive: 0xff00ff, emissiveIntensity: 0.5 });
 
@@ -2865,6 +2868,9 @@
         const matHandle = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.9 });
         const matLens = new THREE.MeshStandardMaterial({ color: 0x2244aa, roughness: 0.1, metalness: 0.9 });
         const matDecal = new THREE.MeshBasicMaterial({ color: 0x000000, polygonOffset: true, polygonOffsetFactor: -1 });
+        const matSpark = new THREE.MeshBasicMaterial({ color: 0xffdd55, transparent: true, opacity: 1 });
+        const matSmoke = new THREE.MeshBasicMaterial({ color: 0x888888, transparent: true, opacity: 0.4, depthWrite: false });
+
 
         const matZombieSkin = new THREE.MeshStandardMaterial({ color: 0x5e7052, roughness: 0.8 });
         const matZombieClothes = new THREE.MeshStandardMaterial({ color: 0x4a3b2a, roughness: 0.9 });
@@ -5187,6 +5193,7 @@
             // 9) 마우스 락 이벤트 연결
             document.addEventListener('pointerlockchange', () => {
                 if (isDead) return;
+                if (!usePointerLock) return;
                 isPaused = !document.pointerLockElement;
                 const elPauseOverlay = document.getElementById('pause-overlay');
                 if (elPauseOverlay) {
@@ -7076,12 +7083,12 @@
             weaponModel.add(magPlate);
 
 
-            // Arms (Krunker Style - Adjusted for visibility & forward aim)
-            // Right arm (trigger hand) - closer to centerline
-            const rArm = createArm(0.12, -0.1, -0.2, 0.15, -0.1, 0.1, true);
+            // Arms (Krunker Style - Adjusted for grip alignment)
+            // Right arm (trigger hand) - aligned with pistol grip
+            const rArm = createArm(0.05, -0.06, 0.12, 0.1, 0, 0.05, true);
 
-            // Left arm (support) - closer to centerline
-            const lArm = createArm(-0.12, -0.1, -0.15, 0.1, 0.1, -0.1, false);
+            // Left arm (support) - cupping the grip
+            const lArm = createArm(-0.05, -0.06, 0.12, 0.1, 0, -0.05, false);
         }
 
         function buildKnife() {
@@ -8043,6 +8050,8 @@
                 (navigator.maxTouchPoints > 0) ||
                 (window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
 
+            usePointerLock = !isMobileDevice;
+
             if (isMobileDevice) {
                 setupMobileControls();
                 console.log('Mobile controls enabled');
@@ -8705,6 +8714,7 @@
 
         function createDecal(pos, normal) {
             if (!normal) return;
+            createImpactSmoke(pos, normal.clone());
             const size = 0.1 + Math.random() * 0.05;
             const geo = new THREE.PlaneGeometry(size, size);
             const decal = new THREE.Mesh(geo, matDecal);
@@ -8716,6 +8726,79 @@
             if (decals.length > 50) {
                 const old = decals.shift();
                 scene.remove(old);
+            }
+        }
+
+        function createSparks(pos, dir) {
+            const count = 6;
+            const geo = new THREE.BoxGeometry(0.01, 0.01, 0.04);
+
+            for (let i = 0; i < count; i++) {
+                const spark = new THREE.Mesh(geo, matSpark);
+                spark.position.copy(pos);
+
+                const spread = 0.3;
+                const velocity = dir.clone().add(new THREE.Vector3(
+                    (Math.random() - 0.5) * spread,
+                    (Math.random() - 0.5) * spread,
+                    (Math.random() - 0.5) * spread
+                )).normalize().multiplyScalar(5 + Math.random() * 5);
+
+                spark.lookAt(spark.position.clone().add(velocity));
+                scene.add(spark);
+
+                sparkParticles.push({
+                    mesh: spark,
+                    velocity: velocity,
+                    life: 0.1 + Math.random() * 0.1
+                });
+            }
+        }
+
+        function updateSparks(dt) {
+            for (let i = sparkParticles.length - 1; i >= 0; i--) {
+                const s = sparkParticles[i];
+                s.life -= dt;
+                if (s.life <= 0) {
+                    scene.remove(s.mesh);
+                    sparkParticles.splice(i, 1);
+                    continue;
+                }
+                s.mesh.position.addScaledVector(s.velocity, dt);
+            }
+        }
+
+        function createImpactSmoke(pos, normal) {
+            const geo = new THREE.DodecahedronGeometry(0.15, 0);
+            const smoke = new THREE.Mesh(geo, matSmoke.clone());
+            smoke.position.copy(pos).add(normal.multiplyScalar(0.1));
+            smoke.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+            scene.add(smoke);
+
+            smokeParticles.push({
+                mesh: smoke,
+                life: 0.4,
+                maxLife: 0.4,
+                scaleSpeed: 1.5
+            });
+        }
+
+        function updateSmoke(dt) {
+            for (let i = smokeParticles.length - 1; i >= 0; i--) {
+                const s = smokeParticles[i];
+                s.life -= dt;
+
+                if (s.life <= 0) {
+                    scene.remove(s.mesh);
+                    smokeParticles.splice(i, 1);
+                    continue;
+                }
+
+                const progress = 1 - (s.life / s.maxLife);
+                const scale = 1 + progress * s.scaleSpeed;
+                s.mesh.scale.set(scale, scale, scale);
+                s.mesh.material.opacity = 0.4 * (1 - progress);
+                s.mesh.position.y += 0.2 * dt;
             }
         }
 
@@ -8745,12 +8828,10 @@
             // Velocity: Always to the RIGHT of the gun (movement-independent)
             const right = new THREE.Vector3(1, 0, 0).applyQuaternion(weaponQuat);
             const up = new THREE.Vector3(0, 1, 0).applyQuaternion(weaponQuat);
-            const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(weaponQuat);
 
             const worldVel = new THREE.Vector3();
-            worldVel.addScaledVector(right, 1.5 + Math.random() * 0.5);
-            worldVel.addScaledVector(up, 1.0 + Math.random() * 0.5);
-            worldVel.addScaledVector(forward, (Math.random() - 0.5) * 0.3);
+            worldVel.addScaledVector(right, 1.8 + Math.random() * 0.4);
+            worldVel.addScaledVector(up, 0.8 + Math.random() * 0.4);
 
             scene.add(shell);
 
@@ -9158,8 +9239,15 @@
                     const s = 1.0 + Math.random() * 0.5;
                     muzzleFlash.scale.set(s, s, s);
                     muzzleFlash.rotation.z = Math.random() * 6;
+
+                    const muzzlePos = new THREE.Vector3();
+                    muzzleFlash.getWorldPosition(muzzlePos);
+                    const shootDir = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+                    createSparks(muzzlePos, shootDir);
+
                     setTimeout(() => muzzleFlash.visible = false, 40);
                 }
+
 
                 if (w.type === 'SNIPER') {
                     // PC 모드에서만 재장전 제스처 추가
@@ -9744,6 +9832,8 @@
 
             updateShells(dt);
             updateParticles(dt);
+            updateSparks(dt);
+            updateSmoke(dt);
             updateGrenades(dt); // Grenade Physics
             if (!isPaused) {
                 updateHealthPills(dt);
