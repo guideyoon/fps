@@ -5219,7 +5219,8 @@
             back.receiveShadow = true;
             group.add(back);
 
-            group.position.set(obj.pos[0], obj.pos[1], obj.pos[2]);
+            // Fix floating: Adjust Y to match bottom-pivot (Editor uses center-pivot)
+            group.position.set(obj.pos[0], obj.pos[1] - h / 2, obj.pos[2]);
             if (obj.rot) group.rotation.set(obj.rot[0] || 0, obj.rot[1] || 0, obj.rot[2] || 0);
             return group;
         }
@@ -5257,9 +5258,14 @@
             const wGeo = new THREE.CylinderGeometry(r, r, w * 0.2, 16);
             wGeo.rotateZ(Math.PI / 2);
 
+            // Move wheels slightly outward to avoid Z-fighting (w*0.4 -> w*0.45)
+            // Wheel width is w*0.2 (0.8). Center at 0.45w (1.8). Range: 1.4 ~ 2.2.
+            // Body width is w (4). Range: -2.0 ~ 2.0.
+            // Overlap: 1.4 ~ 2.0. Protrusion: 2.0 ~ 2.2. Good.
+            const wx = w * 0.42;
             const wheels = [
-                [w * 0.4, r, d * 0.3], [-w * 0.4, r, d * 0.3],
-                [w * 0.4, r, -d * 0.3], [-w * 0.4, r, -d * 0.3]
+                [wx, r, d * 0.3], [-wx, r, d * 0.3],
+                [wx, r, -d * 0.3], [-wx, r, -d * 0.3]
             ];
             wheels.forEach(p => {
                 const wh = new THREE.Mesh(wGeo, matWheel);
@@ -5268,7 +5274,8 @@
                 group.add(wh);
             });
 
-            group.position.set(obj.pos[0], obj.pos[1], obj.pos[2]);
+            // Fix floating: Adjust Y to match bottom-pivot
+            group.position.set(obj.pos[0], obj.pos[1] - h / 2, obj.pos[2]);
             if (obj.rot) group.rotation.set(obj.rot[0] || 0, obj.rot[1] || 0, obj.rot[2] || 0);
             return group;
         }
@@ -5296,7 +5303,8 @@
             slot.position.set(0, h * 0.15, d / 2 + 0.01);
             group.add(slot);
 
-            group.position.set(obj.pos[0], obj.pos[1], obj.pos[2]);
+            // Fix floating
+            group.position.set(obj.pos[0], obj.pos[1] - h / 2, obj.pos[2]);
             if (obj.rot) group.rotation.set(obj.rot[0] || 0, obj.rot[1] || 0, obj.rot[2] || 0);
             return group;
         }
@@ -5326,7 +5334,8 @@
             ring2.position.y = h * 0.3;
             group.add(ring2);
 
-            group.position.set(obj.pos[0], obj.pos[1], obj.pos[2]);
+            // Fix floating
+            group.position.set(obj.pos[0], obj.pos[1] - h / 2, obj.pos[2]);
             if (obj.rot) group.rotation.set(obj.rot[0] || 0, obj.rot[1] || 0, obj.rot[2] || 0);
             return group;
         }
@@ -5369,7 +5378,8 @@
                 group.add(picket);
             }
 
-            group.position.set(obj.pos[0], obj.pos[1], obj.pos[2]);
+            // Fix floating
+            group.position.set(obj.pos[0], obj.pos[1] - h / 2, obj.pos[2]);
             if (obj.rot) group.rotation.set(obj.rot[0] || 0, obj.rot[1] || 0, obj.rot[2] || 0);
             return group;
         }
