@@ -1034,7 +1034,7 @@
             gap: 8px;
             pointer-events: auto;
             /* HP 바 위, 무기 인벤토리 아래에 배치 */
-            bottom: 55px;
+            bottom: 150px;
         }
 
         #chat-messages {
@@ -4047,17 +4047,17 @@
                     // This ensures scene is initialized first.
 
                     try {
-                        console.log('About to call startCountdown...'); // DEBUG
+                        console.log('Starting game and countdown...'); // DEBUG
+
+                        // Start game logic first (Initialize scene, player, weapon)
+                        startGame();
+
+                        // Then start countdown overlay
                         startCountdown();
-                        console.log('startCountdown finished (or started async)'); // DEBUG
                     } catch (e) {
                         console.error('ERROR in startCountdown:', e);
-                        // Fallback in case countdown fails
                         isGameStarted = true;
                     }
-
-                    // Start game logic
-                    startGame();
                 });
 
 
@@ -4815,19 +4815,48 @@
                 count--;
                 if (count > 0) {
                     countdownEl.innerText = count;
-                    SoundGen.playBeep(); // Optional: Add beep sound
+                    SoundGen.playBeep();
                 } else {
                     clearInterval(interval);
-                    countdownEl.style.display = 'none';
-                    if (gameMode === 'multi') {
-                        isGameStarted = true; // Unlock game loop
-                        console.log('Multiplayer Match Started!');
-                    } else if (gameMode === 'single') {
-                        isGameStarted = true;
-                    }
+
+                    // Show GO!
+                    countdownEl.innerText = "GO!";
+                    SoundGen.playBeep(); // Option: Different pitch for GO? 
+
+                    setTimeout(() => {
+                        countdownEl.style.display = 'none';
+                        if (gameMode === 'multi') {
+                            isGameStarted = true; // Unlock game loop
+                            console.log('Multiplayer Match Started!');
+                        } else if (gameMode === 'single') {
+                            isGameStarted = true;
+                        }
+                    }, 1000); // 1 second delay while showing GO!
                 }
             }, 1000);
         }
+
+        // Enter key to open chat
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Enter') {
+                const chatInput = document.getElementById('chat-input');
+                // Only if not already typing and in multiplayer game
+                if (document.activeElement !== chatInput) {
+                    // Check if game is running (multiplayer)
+                    const chatContainer = document.getElementById('chat-container');
+                    const isVisible = chatContainer && chatContainer.style.display !== 'none';
+
+                    // Allow opening chat if we are in multiplayer mode
+                    if (gameMode === 'multi') {
+                        e.preventDefault();
+                        if (document.pointerLockElement) {
+                            document.exitPointerLock();
+                        }
+                        chatInput.focus();
+                    }
+                }
+            }
+        });
 
         // --- 게임 시작 함수 ---
         function startGame() {
