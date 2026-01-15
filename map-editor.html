@@ -673,6 +673,27 @@
 
                     updateObjectList();
                     document.getElementById('property-editor').classList.add('hidden');
+
+                    // Auto-adjust camera to fit all objects
+                    if (placedObjects.length > 0) {
+                        const bbox = new THREE.Box3();
+                        placedObjects.forEach(obj => {
+                            bbox.expandByObject(obj.mesh);
+                        });
+
+                        const center = bbox.getCenter(new THREE.Vector3());
+                        const size = bbox.getSize(new THREE.Vector3());
+                        const maxDim = Math.max(size.x, size.y, size.z);
+                        const fov = camera.fov * (Math.PI / 180);
+                        let cameraZ = Math.abs(maxDim / 2 / Math.tan(fov / 2));
+                        cameraZ *= 1.5; // Zoom out a bit more for margin
+
+                        camera.position.set(center.x, cameraZ, center.z);
+                        camera.lookAt(center);
+                        controls.target.copy(center);
+                        controls.update();
+                    }
+
                     console.log('맵 불러오기 완료:', placedObjects.length, '오브젝트');
 
                 } catch (err) {
