@@ -2210,6 +2210,11 @@
             opacity: 1;
         }
 
+        /* Hide light toggle in multiplayer (user request) */
+        body.game-active.multi-player #light-toggle-btn {
+            display: none !important;
+        }
+
         /* Weapon list - visible on all platforms if active */
         body.game-active #weapon-list-left {
             display: flex !important;
