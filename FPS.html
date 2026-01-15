@@ -4039,8 +4039,9 @@
                         position = new THREE.Vector3(0, 1.7, 0);
                     }
 
-                    camera.position.copy(position);
-                    console.log('Game started at position:', position);
+                    // Camera position will be set after scene initialization in startGame()
+                    // Store position for later use
+                    console.log('Game will start at position:', position);
 
                     // Actual mesh creation is handled in startGame() -> createRemotePlayer
                     // This ensures scene is initialized first.
