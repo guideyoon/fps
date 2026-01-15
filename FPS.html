@@ -9326,25 +9326,32 @@
             }
 
 
-            // Spectator Camera (Killcam) - Follow killer's position and rotation
+
+            // Spectator Camera (Killcam) - 3rd Person Follow Camera
             if (isSpectating && spectatingPlayerId && gameMode === 'multi') {
                 const killerMesh = otherPlayersMap[spectatingPlayerId];
                 if (killerMesh) {
-                    // Position camera at killer's head position
-                    camera.position.set(
+                    // Get killer's rotation (Y-axis = horizontal facing direction)
+                    const killerRotY = killerMesh.rotation.y || 0;
+
+                    // Camera offset: 5m behind, 3m above the killer
+                    const offsetDistance = 5;
+                    const offsetHeight = 3;
+
+                    // Calculate camera position behind the killer
+                    const camX = killerMesh.position.x - Math.sin(killerRotY) * offsetDistance;
+                    const camY = killerMesh.position.y + offsetHeight;
+                    const camZ = killerMesh.position.z - Math.cos(killerRotY) * offsetDistance;
+
+                    // Smoothly interpolate camera position for smoother following
+                    camera.position.lerp(new THREE.Vector3(camX, camY, camZ), 0.1);
+
+                    // Make camera look at the killer
+                    camera.lookAt(
                         killerMesh.position.x,
-                        killerMesh.position.y + 1.7, // Eye height
+                        killerMesh.position.y + 1.0, // Look at chest/head level
                         killerMesh.position.z
                     );
-
-                    // Match killer's rotation if available from server state
-                    if (roomPlayersState[spectatingPlayerId] && roomPlayersState[spectatingPlayerId].rotation) {
-                        rotation.x = roomPlayersState[spectatingPlayerId].rotation.x;
-                        rotation.y = roomPlayersState[spectatingPlayerId].rotation.y;
-                        const q = new THREE.Quaternion();
-                        q.setFromEuler(new THREE.Euler(rotation.x, rotation.y, 0, 'YXZ'));
-                        camera.quaternion.copy(q);
-                    }
                 }
                 // Skip normal player control during spectating
             }
