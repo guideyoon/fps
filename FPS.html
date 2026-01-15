@@ -4235,8 +4235,8 @@
 
                         killerNameEl.innerText = data.killerName || 'Unknown';
 
-                        // 10-second countdown
-                        let countdown = 10;
+                        // 3-second countdown (User requested 10s -> 3s)
+                        let countdown = 3;
                         respawnTimerEl.innerText = countdown;
 
                         const countdownInterval = setInterval(() => {

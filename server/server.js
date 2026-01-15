@@ -200,9 +200,9 @@ io.on('connection', (socket) => {
         const player = room && room.players[socket.id];
 
         if (player && player.isDead) {
-            // Enforce minimum respawn delay (Client has 10s timer, so server uses 8s to be safe against lag/race conditions)
+            // Enforce minimum respawn delay (Client has 3s timer, so server uses 2s/2.5s to be safe)
             const timeSinceDeath = Date.now() - (player.deathTime || 0);
-            const MIN_RESPAWN_DELAY = 8000; // 8 seconds (Client waits 10s)
+            const MIN_RESPAWN_DELAY = 2500; // 2.5 seconds (Client waits 3s)
 
             console.log(`[Respawn Request] Player: ${player.name} (${socket.id}), TimeSinceDeath: ${timeSinceDeath}ms`);
 
