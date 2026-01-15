@@ -6784,7 +6784,7 @@
 
 
             if (wData.type !== 'KNIFE' && wData.type !== 'GRENADE') {
-                const fGeo = new THREE.PlaneGeometry(0.5, 0.5);
+                const fGeo = new THREE.PlaneGeometry(0.7, 0.5);
                 const fMat = new THREE.MeshBasicMaterial({ color: 0xffdd88, transparent: true, opacity: 0, side: THREE.DoubleSide });
                 muzzleFlash = new THREE.Mesh(fGeo, fMat);
                 muzzleFlash.visible = false;
@@ -8737,12 +8737,12 @@
                 const spark = new THREE.Mesh(geo, matSpark);
                 spark.position.copy(pos);
 
-                const spread = 0.3;
+                const spread = 0.8;
                 const velocity = dir.clone().add(new THREE.Vector3(
                     (Math.random() - 0.5) * spread,
                     (Math.random() - 0.5) * spread,
                     (Math.random() - 0.5) * spread
-                )).normalize().multiplyScalar(5 + Math.random() * 5);
+                )).normalize().multiplyScalar(2.5 + Math.random() * 2.0);
 
                 spark.lookAt(spark.position.clone().add(velocity));
                 scene.add(spark);
@@ -8750,7 +8750,7 @@
                 sparkParticles.push({
                     mesh: spark,
                     velocity: velocity,
-                    life: 0.1 + Math.random() * 0.1
+                    life: 0.06 + Math.random() * 0.06
                 });
             }
         }
@@ -8856,6 +8856,7 @@
 
                 s.velocity.y -= 9.8 * dt;
                 s.mesh.position.addScaledVector(s.velocity, dt);
+                s.velocity.multiplyScalar(0.8);
 
                 s.mesh.rotation.x += s.rotVel.x * dt;
                 s.mesh.rotation.y += s.rotVel.y * dt;
@@ -9236,8 +9237,8 @@
                 if (muzzleFlash) {
                     muzzleFlash.visible = true;
                     // Random scale for more dynamic flash
-                    const s = 1.0 + Math.random() * 0.5;
-                    muzzleFlash.scale.set(s, s, s);
+                    const s = 1.4 + Math.random() * 0.4;
+                    muzzleFlash.scale.set(s * 1.6, s, 1);
                     muzzleFlash.rotation.z = Math.random() * 6;
 
                     const muzzlePos = new THREE.Vector3();
@@ -9245,7 +9246,7 @@
                     const shootDir = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
                     createSparks(muzzlePos, shootDir);
 
-                    setTimeout(() => muzzleFlash.visible = false, 40);
+                    setTimeout(() => muzzleFlash.visible = false, 30);
                 }
 
 
