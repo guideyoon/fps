@@ -263,6 +263,13 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.150.0/examples/js/controls/OrbitControls.js"></script>
 
     <script>
+        // Fix for OrbitControls in newer Three.js versions
+        if (typeof THREE !== 'undefined' && !THREE.OrbitControls && typeof OrbitControls !== 'undefined') {
+            THREE.OrbitControls = OrbitControls;
+        }
+    </script>
+
+    <script>
         // Global variables
         let scene, camera, renderer, controls;
         let placedObjects = [];
