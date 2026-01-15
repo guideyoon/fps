@@ -631,9 +631,9 @@
             if (!file) return;
 
             const reader = new FileReader();
-            reader.onload = (e) => {
+            reader.onload = () => {
                 try {
-                    const mapData = JSON.parse(e.target.result);
+                    const mapData = JSON.parse(reader.result);
 
                     // Clear current map
                     placedObjects.forEach(obj => scene.remove(obj.mesh));
