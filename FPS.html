@@ -5171,6 +5171,209 @@
          * @param {Object} materials - Material library (matConcrete, matMetal, matRust, matWall)
          * @returns {THREE.Mesh} Created mesh
          */
+        // --- Detailed Object Creators ---
+        function createOpenContainer(obj, materials) {
+            const group = new THREE.Group();
+            group.userData.complexCollision = true;
+            const w = obj.size[0], h = obj.size[1], d = obj.size[2];
+            const t = 0.2; // thickness
+
+            const mat = materials.matMetal.clone();
+            mat.color.setHex(0x446688);
+            mat.side = THREE.DoubleSide;
+
+            // Floor
+            const floor = new THREE.Mesh(new THREE.BoxGeometry(w, t, d), mat);
+            floor.position.y = t / 2;
+            floor.receiveShadow = true;
+            group.add(floor);
+
+            // Ceiling
+            const ceil = new THREE.Mesh(new THREE.BoxGeometry(w, t, d), mat);
+            ceil.position.y = h - t / 2;
+            ceil.castShadow = true;
+            group.add(ceil);
+
+            // Walls (Left, Right, Back) - Opening at +Z
+            // Left (-X)
+            const left = new THREE.Mesh(new THREE.BoxGeometry(t, h, d), mat);
+            left.position.x = -w / 2 + t / 2;
+            left.position.y = h / 2;
+            left.castShadow = true;
+            left.receiveShadow = true;
+            group.add(left);
+
+            // Right (+X)
+            const right = new THREE.Mesh(new THREE.BoxGeometry(t, h, d), mat);
+            right.position.x = w / 2 - t / 2;
+            right.position.y = h / 2;
+            right.castShadow = true;
+            right.receiveShadow = true;
+            group.add(right);
+
+            // Back (-Z)
+            const back = new THREE.Mesh(new THREE.BoxGeometry(w, h, t), mat);
+            back.position.z = -d / 2 + t / 2;
+            back.position.y = h / 2;
+            back.castShadow = true;
+            back.receiveShadow = true;
+            group.add(back);
+
+            group.position.set(obj.pos[0], obj.pos[1], obj.pos[2]);
+            if (obj.rot) group.rotation.set(obj.rot[0] || 0, obj.rot[1] || 0, obj.rot[2] || 0);
+            return group;
+        }
+
+        function createVehicle(obj, materials) {
+            const group = new THREE.Group();
+            group.userData.complexCollision = true;
+            const w = obj.size[0], h = obj.size[1], d = obj.size[2];
+
+            const matBody = new THREE.MeshStandardMaterial({ color: 0x2244aa, roughness: 0.4, metalness: 0.6 });
+            const matGlass = new THREE.MeshStandardMaterial({ color: 0x88ccff, roughness: 0.1, metalness: 0.9, transparent: true, opacity: 0.7 });
+            const matWheel = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.9 });
+
+            // Body (Lower part)
+            const body = new THREE.Mesh(new THREE.BoxGeometry(w, h * 0.4, d), matBody);
+            body.position.y = h * 0.4; // Wheels take bottom space
+            body.castShadow = true;
+            group.add(body);
+
+            // Cabin (Upper part, slightly set back)
+            const cabin = new THREE.Mesh(new THREE.BoxGeometry(w * 0.9, h * 0.4, d * 0.5), matBody);
+            cabin.position.y = h * 0.8;
+            cabin.position.z = -d * 0.1;
+            cabin.castShadow = true;
+            group.add(cabin);
+
+            // Windshield
+            const glass = new THREE.Mesh(new THREE.BoxGeometry(w * 0.85, h * 0.3, d * 0.05), matGlass);
+            glass.position.y = h * 0.8;
+            glass.position.z = d * 0.15 + 0.01;
+            group.add(glass);
+
+            // Wheels
+            const r = h * 0.25;
+            const wGeo = new THREE.CylinderGeometry(r, r, w * 0.2, 16);
+            wGeo.rotateZ(Math.PI / 2);
+
+            const wheels = [
+                [w * 0.4, r, d * 0.3], [-w * 0.4, r, d * 0.3],
+                [w * 0.4, r, -d * 0.3], [-w * 0.4, r, -d * 0.3]
+            ];
+            wheels.forEach(p => {
+                const wh = new THREE.Mesh(wGeo, matWheel);
+                wh.position.set(...p);
+                wh.castShadow = true;
+                group.add(wh);
+            });
+
+            group.position.set(obj.pos[0], obj.pos[1], obj.pos[2]);
+            if (obj.rot) group.rotation.set(obj.rot[0] || 0, obj.rot[1] || 0, obj.rot[2] || 0);
+            return group;
+        }
+
+        function createVendingMachine(obj, materials) {
+            const group = new THREE.Group();
+            const w = obj.size[0], h = obj.size[1], d = obj.size[2];
+
+            // Main Body
+            const body = new THREE.Mesh(new THREE.BoxGeometry(w, h, d),
+                new THREE.MeshStandardMaterial({ color: 0xcc4444, roughness: 0.3, metalness: 0.4 }));
+            body.position.y = h / 2;
+            body.castShadow = true;
+            group.add(body);
+
+            // Glass Panel
+            const glass = new THREE.Mesh(new THREE.PlaneGeometry(w * 0.8, h * 0.6),
+                new THREE.MeshStandardMaterial({ color: 0x88ccff, emissive: 0x224466, roughness: 0.1 }));
+            glass.position.set(0, h * 0.6, d / 2 + 0.01);
+            group.add(glass);
+
+            // Dispenser
+            const slot = new THREE.Mesh(new THREE.PlaneGeometry(w * 0.8, h * 0.15),
+                new THREE.MeshStandardMaterial({ color: 0x111111 }));
+            slot.position.set(0, h * 0.15, d / 2 + 0.01);
+            group.add(slot);
+
+            group.position.set(obj.pos[0], obj.pos[1], obj.pos[2]);
+            if (obj.rot) group.rotation.set(obj.rot[0] || 0, obj.rot[1] || 0, obj.rot[2] || 0);
+            return group;
+        }
+
+        function createBarrel(obj, materials) {
+            const group = new THREE.Group();
+            const r = obj.size[0] / 2;
+            const h = obj.size[1];
+
+            const matRust = materials.matRust.clone();
+
+            const barrel = new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, 16), matRust);
+            barrel.position.y = h / 2;
+            barrel.castShadow = true;
+            barrel.receiveShadow = true;
+            group.add(barrel);
+
+            // Rings
+            const matDark = new THREE.MeshStandardMaterial({ color: 0x332211, roughness: 1 });
+            const ringGeo = new THREE.CylinderGeometry(r * 1.02, r * 1.02, h * 0.05, 16);
+
+            const ring1 = new THREE.Mesh(ringGeo, matDark);
+            ring1.position.y = h * 0.7;
+            group.add(ring1);
+
+            const ring2 = new THREE.Mesh(ringGeo, matDark);
+            ring2.position.y = h * 0.3;
+            group.add(ring2);
+
+            group.position.set(obj.pos[0], obj.pos[1], obj.pos[2]);
+            if (obj.rot) group.rotation.set(obj.rot[0] || 0, obj.rot[1] || 0, obj.rot[2] || 0);
+            return group;
+        }
+
+        function createFence(obj, materials) {
+            const group = new THREE.Group();
+            group.userData.complexCollision = true;
+            const w = obj.size[0], h = obj.size[1];
+            const mat = new THREE.MeshStandardMaterial({ color: 0x555555, roughness: 0.7, metalness: 0.5 });
+
+            // Posts at ends
+            const postGeo = new THREE.BoxGeometry(0.2, h, 0.2);
+
+            const post1 = new THREE.Mesh(postGeo, mat);
+            post1.position.set(-w / 2 + 0.1, h / 2, 0);
+            post1.castShadow = true;
+            group.add(post1);
+
+            const post2 = new THREE.Mesh(postGeo, mat);
+            post2.position.set(w / 2 - 0.1, h / 2, 0);
+            post2.castShadow = true;
+            group.add(post2);
+
+            // Rails
+            const railGeo = new THREE.BoxGeometry(w, 0.1, 0.1);
+            const rail1 = new THREE.Mesh(railGeo, mat);
+            rail1.position.y = h * 0.8;
+            group.add(rail1);
+
+            const rail2 = new THREE.Mesh(railGeo, mat);
+            rail2.position.y = h * 0.4;
+            group.add(rail2);
+
+            // Pickets (Vertical bars)
+            const picketGeo = new THREE.BoxGeometry(0.1, h * 0.8, 0.05);
+            const count = Math.floor(w / 0.5);
+            for (let i = 1; i < count; i++) {
+                const picket = new THREE.Mesh(picketGeo, mat);
+                picket.position.set(-w / 2 + i * 0.5, h / 2, 0);
+                group.add(picket);
+            }
+
+            group.position.set(obj.pos[0], obj.pos[1], obj.pos[2]);
+            if (obj.rot) group.rotation.set(obj.rot[0] || 0, obj.rot[1] || 0, obj.rot[2] || 0);
+            return group;
+        }
+
         function createMapObject(obj, materials) {
             let geometry, material;
 
@@ -5205,25 +5408,15 @@
                     material = materials.matMetal;
                     break;
                 case 'openContainer':
-                    geometry = new THREE.BoxGeometry(obj.size[0] || 6, obj.size[1] || 4, obj.size[2] || 6);
-                    material = materials.matMetal;
-                    break;
+                    return createOpenContainer(obj, materials);
                 case 'vehicle':
-                    geometry = new THREE.BoxGeometry(obj.size[0] || 4, obj.size[1] || 2, obj.size[2] || 8);
-                    material = new THREE.MeshStandardMaterial({ color: 0x2244aa, roughness: 0.5, metalness: 0.6 });
-                    break;
+                    return createVehicle(obj, materials);
                 case 'vendingMachine':
-                    geometry = new THREE.BoxGeometry(obj.size[0] || 1.5, obj.size[1] || 3, obj.size[2] || 1);
-                    material = new THREE.MeshStandardMaterial({ color: 0xcc4444, roughness: 0.3, metalness: 0.5 });
-                    break;
+                    return createVendingMachine(obj, materials);
                 case 'barrel':
-                    geometry = new THREE.BoxGeometry(obj.size[0] || 1.5, obj.size[1] || 2, obj.size[2] || 1.5);
-                    material = materials.matRust;
-                    break;
+                    return createBarrel(obj, materials);
                 case 'fence':
-                    geometry = new THREE.BoxGeometry(obj.size[0] || 8, obj.size[1] || 2, obj.size[2] || 0.2);
-                    material = materials.matMetal;
-                    break;
+                    return createFence(obj, materials);
                 case 'floor':
                     geometry = new THREE.PlaneGeometry(obj.size[0] || 200, obj.size[1] || 200);
                     material = materials.matConcrete;
@@ -5291,9 +5484,20 @@
 
             // Helper function to add collider
             function addBoxCollider(mesh) {
-                const box = new THREE.Box3().setFromObject(mesh);
-                colliders.push(box);
-                spatialGrid.insert(box);
+                if (mesh.userData.complexCollision) {
+                    mesh.updateMatrixWorld(true);
+                    mesh.traverse((child) => {
+                        if (child.isMesh) {
+                            const box = new THREE.Box3().setFromObject(child);
+                            colliders.push(box);
+                            spatialGrid.insert(box);
+                        }
+                    });
+                } else {
+                    const box = new THREE.Box3().setFromObject(mesh);
+                    colliders.push(box);
+                    spatialGrid.insert(box);
+                }
             }
 
             // Create all objects from data
