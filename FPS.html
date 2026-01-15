@@ -2750,9 +2750,9 @@
             {
                 id: 1, name: "TACTICAL PISTOL",
                 type: 'PISTOL', maxAmmo: 10, ammo: 10, automatic: false,
-                posHip: new THREE.Vector3(0.18, -0.28, -0.4),
-                // Pistol ADS: Slight zoom only (not too close)
-                posAds: new THREE.Vector3(0.08, -0.15, -0.38),
+                posHip: new THREE.Vector3(0.2, -0.2, -0.45),
+                // Pistol ADS: Centered and slightly raised
+                posAds: new THREE.Vector3(0, -0.118, -0.35),
                 fovAds: 55, fireRate: 0.15, recoil: 0.1, damage: 20,
                 switchSound: 'c-gun'
             },
@@ -2787,7 +2787,9 @@
         let currentPos = WEAPONS[0].posHip.clone();
 
         let isAiming = false;
-        let cameraShake = { x: 0, y: 0 }; // 화면 반동/흔들림 변수
+        let cameraRecoil = { x: 0, y: 0 };
+        let cameraRecoilVel = { x: 0, y: 0 };
+        let cameraRecoilApplied = { x: 0, y: 0 };
         let isFiring = false;
         let hasFiredSemi = false;
         let isReloading = false;
@@ -2798,6 +2800,14 @@
         let fireCooldown = 0;
 
         let recoil = { x: 0, z: 0 };
+        let recoilVel = { x: 0, z: 0 };
+        const RECOIL_SPRING = 80;
+        const RECOIL_DAMPING = 14;
+        const RECOIL_MAX = 0.6;
+        const RECOIL_POS_MAX = 0.35;
+        const CAM_RECOIL_SPRING = 90;
+        const CAM_RECOIL_DAMPING = 16;
+        const CAM_RECOIL_MAX = 0.35;
         let muzzleFlash;
         let hitShake = { x: 0, y: 0, intensity: 0 }; // 피격 시 화면 흔들림
 
@@ -7066,12 +7076,12 @@
             weaponModel.add(magPlate);
 
 
-            // Arms (Krunker Style - visible at bottom of screen)
-            // Right arm (trigger hand) - comes from bottom-right
-            const rArm = createArm(0.18, -0.22, -0.2, 0.15, -0.4, 0.1, true);
+            // Arms (Krunker Style - Adjusted for visibility & forward aim)
+            // Right arm (trigger hand) - closer to centerline
+            const rArm = createArm(0.12, -0.1, -0.2, 0.15, -0.1, 0.1, true);
 
-            // Left arm (support) - comes from bottom-left
-            const lArm = createArm(-0.22, -0.25, -0.15, 0.1, 0.3, -0.1, false);
+            // Left arm (support) - closer to centerline
+            const lArm = createArm(-0.12, -0.1, -0.15, 0.1, 0.1, -0.1, false);
         }
 
         function buildKnife() {
@@ -8732,22 +8742,21 @@
             // Random rotation for realism
             shell.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
 
-            // Velocity: Always to the RIGHT of the gun
-            // Local velocity vector: Right (+x) + Up (+y) + slight random Back/Forward
-            const localVel = new THREE.Vector3(
-                1.5 + Math.random() * 0.5,  // Right force (strong)
-                1.0 + Math.random() * 0.5,  // Up force
-                (Math.random() - 0.5) * 0.5 // Random spread forward/back
-            );
+            // Velocity: Always to the RIGHT of the gun (movement-independent)
+            const right = new THREE.Vector3(1, 0, 0).applyQuaternion(weaponQuat);
+            const up = new THREE.Vector3(0, 1, 0).applyQuaternion(weaponQuat);
+            const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(weaponQuat);
 
-            // Apply gun's rotation to the local velocity
-            localVel.applyQuaternion(weaponQuat);
+            const worldVel = new THREE.Vector3();
+            worldVel.addScaledVector(right, 1.5 + Math.random() * 0.5);
+            worldVel.addScaledVector(up, 1.0 + Math.random() * 0.5);
+            worldVel.addScaledVector(forward, (Math.random() - 0.5) * 0.3);
 
             scene.add(shell);
 
             shells.push({
                 mesh: shell,
-                velocity: localVel,
+                velocity: worldVel,
                 rotVel: new THREE.Vector3(Math.random() * 10, Math.random() * 10, Math.random() * 10),
                 life: 1.5 // Short life
             });
@@ -9126,20 +9135,15 @@
                 w.ammo--;
                 updateUI();
                 const kick = isAiming ? w.recoil * 0.3 : w.recoil;
-                recoil.x += kick; recoil.z += kick;
+                const rotImpulse = kick * 18;
+                const posImpulse = kick * 12;
+                recoilVel.x += rotImpulse;
+                recoilVel.z += posImpulse;
 
-                // Screen Shake (Subtle Vertical Recoil)
-                // x is pitch (up/down), y is yaw (left/right) in rotation
-                // We want mostly pitch up (negative x rotation usually looks up, but let's check coord system)
-                // In Three.js, rotation.x > 0 looks down, < 0 looks up. 
-                // We want the gun to kick UP, so view goes UP. Actually recoil usually makes view go UP.
+                const yawImpulse = (Math.random() - 0.5) * kick * 6;
+                cameraRecoilVel.x += kick * 12;
+                cameraRecoilVel.y += yawImpulse;
 
-                // Reduced intensity significantly (0.5 -> 0.05 range)
-                // Mostly vertical (rotation.x), very little horizontal (rotation.y)
-                cameraShake.x = (Math.random() * 0.02 + 0.01) * kick; // Slight pitch up
-                cameraShake.y = (Math.random() - 0.5) * 0.01 * kick;  // Tiny horizontal jitter
-
-                // Apply a bit of random roll for "imperfect" hold feeling? Nah, keep it simple as requested.
 
                 // Subtle Screen Flash
                 const flashEl = document.getElementById('shoot-flash');
@@ -9707,7 +9711,16 @@
                     weaponContainer.translateZ(currentPos.z);
                 }
 
-                recoil.x *= (1 - 10 * dt); recoil.z *= (1 - 10 * dt);
+                const recoilAccelX = -RECOIL_SPRING * recoil.x - RECOIL_DAMPING * recoilVel.x;
+                recoilVel.x += recoilAccelX * dt;
+                recoil.x += recoilVel.x * dt;
+                recoil.x = THREE.MathUtils.clamp(recoil.x, -RECOIL_MAX, RECOIL_MAX);
+
+                const recoilAccelZ = -RECOIL_SPRING * recoil.z - RECOIL_DAMPING * recoilVel.z;
+                recoilVel.z += recoilAccelZ * dt;
+                recoil.z += recoilVel.z * dt;
+                recoil.z = THREE.MathUtils.clamp(recoil.z, -RECOIL_POS_MAX, RECOIL_POS_MAX);
+
 
                 // 나이프일 때만 특별한 위치/회전 처리
                 if (w.type === 'KNIFE') {
@@ -9760,19 +9773,22 @@
             }
 
             if (!isPaused) {
-                // Apply Camera Shake
-                if (Math.abs(cameraShake.x) > 0.001 || Math.abs(cameraShake.y) > 0.001) {
-                    camera.rotation.x += cameraShake.x;
-                    camera.rotation.y += cameraShake.y;
+                const camAccelX = -CAM_RECOIL_SPRING * cameraRecoil.x - CAM_RECOIL_DAMPING * cameraRecoilVel.x;
+                cameraRecoilVel.x += camAccelX * dt;
+                cameraRecoil.x += cameraRecoilVel.x * dt;
+                cameraRecoil.x = THREE.MathUtils.clamp(cameraRecoil.x, -CAM_RECOIL_MAX, CAM_RECOIL_MAX);
 
-                    // Shake decay (spring back)
-                    cameraShake.x *= -0.4;
-                    cameraShake.y *= -0.4;
+                const camAccelY = -CAM_RECOIL_SPRING * cameraRecoil.y - CAM_RECOIL_DAMPING * cameraRecoilVel.y;
+                cameraRecoilVel.y += camAccelY * dt;
+                cameraRecoil.y += cameraRecoilVel.y * dt;
+                cameraRecoil.y = THREE.MathUtils.clamp(cameraRecoil.y, -CAM_RECOIL_MAX, CAM_RECOIL_MAX);
 
-                    // Stop if very small
-                    if (Math.abs(cameraShake.x) < 0.0001) cameraShake.x = 0;
-                    if (Math.abs(cameraShake.y) < 0.0001) cameraShake.y = 0;
-                }
+                const deltaX = cameraRecoil.x - cameraRecoilApplied.x;
+                const deltaY = cameraRecoil.y - cameraRecoilApplied.y;
+                camera.rotation.x += deltaX;
+                camera.rotation.y += deltaY;
+                cameraRecoilApplied.x = cameraRecoil.x;
+                cameraRecoilApplied.y = cameraRecoil.y;
 
                 // 렌더링
                 renderer.render(scene, camera);
