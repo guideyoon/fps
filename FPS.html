@@ -9405,18 +9405,25 @@
 
                 // Ground Collision / Landing
                 // We allow a small tolerance to "snap" to ground
+                const groundTolerance = 0.15; // Allow small height difference for grounded state
+
                 if (velocityY < 0 && nextY <= targetY) {
                     // Landed
                     position.y = targetY;
                     velocityY = 0;
                     isGrounded = true;
-                    if (!keys.space) {
-                        // Play land sound only if we were falling significantly?
-                        // SoundGen.playLand(); // Maybe too spammy?
-                    }
+                } else if (Math.abs(position.y - targetY) < groundTolerance && velocityY <= 0) {
+                    // Very close to ground (within tolerance) - still considered grounded
+                    // This helps with walking on uneven surfaces or objects
+                    position.y = targetY;
+                    velocityY = 0;
+                    isGrounded = true;
                 } else {
                     position.y = nextY;
-                    isGrounded = false;
+                    // Only set isGrounded to false if we're actually above ground by more than tolerance
+                    if (position.y > targetY + groundTolerance) {
+                        isGrounded = false;
+                    }
                 }
 
                 // Head Collision (Ceiling) - Optional, simplified
