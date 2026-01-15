@@ -5204,6 +5204,26 @@
                     geometry = new THREE.BoxGeometry(obj.size[0] || 6, obj.size[1] || 4, obj.size[2] || 3);
                     material = materials.matMetal;
                     break;
+                case 'openContainer':
+                    geometry = new THREE.BoxGeometry(obj.size[0] || 6, obj.size[1] || 4, obj.size[2] || 6);
+                    material = materials.matMetal;
+                    break;
+                case 'vehicle':
+                    geometry = new THREE.BoxGeometry(obj.size[0] || 4, obj.size[1] || 2, obj.size[2] || 8);
+                    material = new THREE.MeshStandardMaterial({ color: 0x2244aa, roughness: 0.5, metalness: 0.6 });
+                    break;
+                case 'vendingMachine':
+                    geometry = new THREE.BoxGeometry(obj.size[0] || 1.5, obj.size[1] || 3, obj.size[2] || 1);
+                    material = new THREE.MeshStandardMaterial({ color: 0xcc4444, roughness: 0.3, metalness: 0.5 });
+                    break;
+                case 'barrel':
+                    geometry = new THREE.BoxGeometry(obj.size[0] || 1.5, obj.size[1] || 2, obj.size[2] || 1.5);
+                    material = materials.matRust;
+                    break;
+                case 'fence':
+                    geometry = new THREE.BoxGeometry(obj.size[0] || 8, obj.size[1] || 2, obj.size[2] || 0.2);
+                    material = materials.matMetal;
+                    break;
                 case 'floor':
                     geometry = new THREE.PlaneGeometry(obj.size[0] || 200, obj.size[1] || 200);
                     material = materials.matConcrete;
