@@ -2236,10 +2236,28 @@
                 opacity: 1;
             }
         }
+
+        #shoot-flash {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 50;
+            transition: opacity 0.05s ease-out;
+            mix-blend-mode: overlay;
+        }
     </style>
 </head>
 
 <body>
+    <div id="shoot-flash"></div>
+    <div id="loading-screen">
+        <div class="glitch-wrapper"></div>
+    </div>
     <div id="game-container"></div>
     <div id="vignette"></div>
     <div id="damage-overlay"></div>
@@ -2724,18 +2742,18 @@
                 id: 0, name: "ASSAULT RIFLE",
                 type: 'RIFLE', maxAmmo: 30, ammo: 30, automatic: true,
                 posHip: new THREE.Vector3(0.2, -0.25, -0.45),
-                // ADS 위치: Y=-0.062로 정렬 유지, 클리핑 방지를 위해 Z=-0.35로 거리 조정
-                posAds: new THREE.Vector3(0, -0.062, -0.35),
-                fovAds: 20, fireRate: 0.08, recoil: 0.06, damage: 30,
+                // ADS: Z더 멀리 (-0.45), FOV 약간 증가 (25) for smaller appearance
+                posAds: new THREE.Vector3(0, -0.062, -0.45),
+                fovAds: 25, fireRate: 0.08, recoil: 0.06, damage: 30,
                 switchSound: 'c-sochong'
             },
             {
                 id: 1, name: "TACTICAL PISTOL",
                 type: 'PISTOL', maxAmmo: 10, ammo: 10, automatic: false,
-                posHip: new THREE.Vector3(0.15, -0.2, -0.35),
-                // 수정: ADS 좌표 정밀 보정 (가늠자 높이와 일치)
-                posAds: new THREE.Vector3(0, -0.0482, -0.35),
-                fovAds: 35, fireRate: 0.15, recoil: 0.1, damage: 20,
+                posHip: new THREE.Vector3(0.18, -0.28, -0.4),
+                // Pistol ADS: Slight zoom only (not too close)
+                posAds: new THREE.Vector3(0.08, -0.15, -0.38),
+                fovAds: 55, fireRate: 0.15, recoil: 0.1, damage: 20,
                 switchSound: 'c-gun'
             },
             {
@@ -2769,6 +2787,7 @@
         let currentPos = WEAPONS[0].posHip.clone();
 
         let isAiming = false;
+        let cameraShake = { x: 0, y: 0 }; // 화면 반동/흔들림 변수
         let isFiring = false;
         let hasFiredSemi = false;
         let isReloading = false;
@@ -8691,7 +8710,11 @@
         }
 
         function spawnShell() {
+            if (!shellGeo || !shellMat) return; // Safety check
+
             const shell = new THREE.Mesh(shellGeo, shellMat);
+
+            // Start at weapon position
             const weaponPos = new THREE.Vector3();
             weaponModel.getWorldPosition(weaponPos);
             const weaponQuat = new THREE.Quaternion();
@@ -8700,22 +8723,33 @@
             shell.position.copy(weaponPos);
             shell.quaternion.copy(weaponQuat);
 
-            shell.translateX(0.05);
-            shell.translateY(0.08);
-            shell.translateZ(-0.02);
+            // Offset to ejection port (Right side of gun)
+            // Local offset: Right (+x), Up (+y), Back (-z)
+            shell.translateX(0.08);
+            shell.translateY(0.05);
+            shell.translateZ(0);
 
-            const force = 3.0 + Math.random();
-            const vel = new THREE.Vector3(1.0, 0.5 + Math.random() * 0.5, (Math.random() - 0.5) * 0.5);
-            vel.normalize().multiplyScalar(force);
-            vel.applyQuaternion(shell.quaternion);
+            // Random rotation for realism
+            shell.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+
+            // Velocity: Always to the RIGHT of the gun
+            // Local velocity vector: Right (+x) + Up (+y) + slight random Back/Forward
+            const localVel = new THREE.Vector3(
+                1.5 + Math.random() * 0.5,  // Right force (strong)
+                1.0 + Math.random() * 0.5,  // Up force
+                (Math.random() - 0.5) * 0.5 // Random spread forward/back
+            );
+
+            // Apply gun's rotation to the local velocity
+            localVel.applyQuaternion(weaponQuat);
 
             scene.add(shell);
 
             shells.push({
                 mesh: shell,
-                velocity: vel,
-                rotVel: new THREE.Vector3(Math.random(), Math.random(), Math.random()).multiplyScalar(10),
-                life: 2.0
+                velocity: localVel,
+                rotVel: new THREE.Vector3(Math.random() * 10, Math.random() * 10, Math.random() * 10),
+                life: 1.5 // Short life
             });
         }
 
@@ -9087,214 +9121,227 @@
                 return; // Stop here, no raycast for grenades
             }
 
-            if (w.type !== 'KNIFE') {
-                w.ammo--;
-                updateUI();
-                const kick = isAiming ? w.recoil * 0.3 : w.recoil;
-                recoil.x += kick; recoil.z += kick;
+            w.ammo--;
+            updateUI();
+            const kick = isAiming ? w.recoil * 0.3 : w.recoil;
+            recoil.x += kick; recoil.z += kick;
 
-                if (muzzleFlash) {
-                    muzzleFlash.visible = true;
-                    muzzleFlash.rotation.z = Math.random() * 6;
-                    setTimeout(() => muzzleFlash.visible = false, 30);
-                }
+            // Screen Shake (Randomized recoil effect)
+            cameraShake.x = (Math.random() - 0.5) * kick * 2.0;
+            cameraShake.y = (Math.random() - 0.5) * kick * 2.0;
 
-                if (w.type === 'SNIPER') {
-                    // PC 모드에서만 재장전 제스처 추가
-                    if (!isMobile) {
-                        setTimeout(() => {
-                            SoundGen.playBoltAction();
-                            sniperReloadGesture = true;
-                            // 재장전 제스처: bolt를 당기고 다시 밀어넣기
-                            const originalRotZ = weaponModel.rotation.z;
-                            const originalPosZ = weaponModel.position.z;
-                            const originalPosY = weaponModel.position.y;
-
-                            // bolt를 뒤로 당기기
-                            weaponModel.rotation.z = originalRotZ + 0.4;
-                            weaponModel.position.z = originalPosZ - 0.08;
-                            weaponModel.position.y = originalPosY - 0.04;
-                            setTimeout(() => {
-                                // bolt를 앞으로 밀어넣기
-                                weaponModel.rotation.z = originalRotZ + 0.15;
-                                setTimeout(() => {
-                                    // 원래 위치로 복귀
-                                    weaponModel.rotation.z = originalRotZ;
-                                    weaponModel.position.z = originalPosZ;
-                                    weaponModel.position.y = originalPosY;
-                                    sniperReloadGesture = false;
-                                }, 150);
-                            }, 250);
-                        }, 600);
-                    } else {
-                        // 모바일에서는 기존 로직 유지
-                        setTimeout(() => {
-                            SoundGen.playBoltAction();
-                            weaponModel.rotation.z = 0.2;
-                            setTimeout(() => weaponModel.rotation.z = 0, 200);
-                        }, 600);
-                    }
-                }
-
-                // FIXED: REMOVED THE BUGGY EMISSIVE FLASH CODE HERE
-
-                spawnShell();
-                SoundGen.playShoot(w.type);
-            } else {
-                knifeSwing = 1.0;
-                SoundGen.playKnife();
+            // Subtle Screen Flash
+            const flashEl = document.getElementById('shoot-flash');
+            if (flashEl) {
+                flashEl.style.opacity = '0.08'; // Very subtle flash
+                setTimeout(() => flashEl.style.opacity = '0', 50);
             }
 
-
-            const ray = new THREE.Raycaster();
-            ray.setFromCamera(new THREE.Vector2(0, 0), camera);
-            if (!isAiming && w.type !== 'KNIFE') {
-                ray.ray.direction.x += (Math.random() - 0.5) * 0.05;
-                ray.ray.direction.y += (Math.random() - 0.5) * 0.05;
+            if (muzzleFlash) {
+                muzzleFlash.visible = true;
+                // Random scale for more dynamic flash
+                const s = 1.0 + Math.random() * 0.5;
+                muzzleFlash.scale.set(s, s, s);
+                muzzleFlash.rotation.z = Math.random() * 6;
+                setTimeout(() => muzzleFlash.visible = false, 40);
             }
-            const range = (w.type === 'KNIFE') ? 3.0 : 100;
 
-            const targets = scene.children.filter(obj => obj !== weaponContainer);
-            const hits = ray.intersectObjects(targets, true);
-
-            for (let h of hits) {
-                if (h.distance > range) continue;
-
-                let isEnemy = false;
-                let isOtherPlayer = false;
-                let p = h.object;
-
-                // Fix: Find parent with userData.hp
-                while (p) {
-                    if (p.userData && p.userData.hp !== undefined) {
-                        // 다른 플레이어인지 확인 (playerId가 있으면 다른 플레이어)
-                        if (gameMode === 'multi' && p.userData.playerId !== undefined) {
-                            isOtherPlayer = true;
-                        } else {
-                            isEnemy = true;
-                        }
-                        break;
-                    }
-                    if (p.parent === scene || !p.parent) break;
-                    p = p.parent;
-                }
-
-                if (!isEnemy && !isOtherPlayer) {
-                    // 맵 구조물(mapGroup)인지 확인
-                    let isMap = false;
-                    let curr = h.object;
-                    while (curr) {
-                        if (curr === mapGroup) { isMap = true; break; }
-                        if (curr.parent === scene || !curr.parent) break;
-                        curr = curr.parent;
-                    }
-
-                    if (isMap) {
-                        if (w.type !== 'KNIFE' && h.object.geometry && h.face) {
-                            createDecal(h.point, h.face.normal);
-                        }
-                        break; // 맵에 맞으면 탄흔 생성하고 총알 멈춤
-                    }
-
-                    // 맵도 아니고 적도 아니면(탄피, 이펙트 등) 통과
-                    continue;
-                }
-
-                // 다른 플레이어에게 데미지
-                if (isOtherPlayer && p.userData.hp > 0) {
-                    let dmg = w.damage;
-                    if (isHitPart(h.object, 'head')) {
-                        dmg *= 3;
-                        elHeadshot.classList.add('active');
-                        setTimeout(() => elHeadshot.classList.remove('active'), 500);
-                        SoundGen.playHeadshot();
-                    } else if (isHitPart(h.object, 'limb')) {
-                        dmg *= 0.7;
-                    }
-
-
-                    // 서버에 데미지 이벤트 전송
-                    if (socket && socket.connected) {
-                        socket.emit('damagePlayer', {
-                            targetId: p.userData.playerId,
-                            damage: dmg
-                        });
-                    }
-
-                    // 히트마커 등은 로컬에서 즉시 표시
-                    elHitMarker.style.opacity = 1;
-                    setTimeout(() => elHitMarker.style.opacity = 0, 100);
-                    SoundGen.playHit();
-                    createBlood(h.point);
-                    break;
-                }
-
-                if (isEnemy && p.userData.hp > 0) {
-                    // 강한 히트마커 효과
-                    elHitMarker.style.opacity = 1;
-                    elHitMarker.style.transform = "translate(-50%, -50%) rotate(45deg) scale(1.5)";
-                    elHitMarker.style.filter = "brightness(1.5) drop-shadow(0 0 8px red)";
+            if (w.type === 'SNIPER') {
+                // PC 모드에서만 재장전 제스처 추가
+                if (!isMobile) {
                     setTimeout(() => {
-                        elHitMarker.style.opacity = 0;
-                        elHitMarker.style.transform = "translate(-50%, -50%) rotate(45deg) scale(1)";
-                        elHitMarker.style.filter = "brightness(1) drop-shadow(0 0 4px red)";
-                    }, 150);
+                        SoundGen.playBoltAction();
+                        sniperReloadGesture = true;
+                        // 재장전 제스처: bolt를 당기고 다시 밀어넣기
+                        const originalRotZ = weaponModel.rotation.z;
+                        const originalPosZ = weaponModel.position.z;
+                        const originalPosY = weaponModel.position.y;
 
-                    // 피격 사운드 효과
-                    SoundGen.playHit();
+                        // bolt를 뒤로 당기기
+                        weaponModel.rotation.z = originalRotZ + 0.4;
+                        weaponModel.position.z = originalPosZ - 0.08;
+                        weaponModel.position.y = originalPosY - 0.04;
+                        setTimeout(() => {
+                            // bolt를 앞으로 밀어넣기
+                            weaponModel.rotation.z = originalRotZ + 0.15;
+                            setTimeout(() => {
+                                // 원래 위치로 복귀
+                                weaponModel.rotation.z = originalRotZ;
+                                weaponModel.position.z = originalPosZ;
+                                weaponModel.position.y = originalPosY;
+                                sniperReloadGesture = false;
+                            }, 150);
+                        }, 250);
+                    }, 600);
+                } else {
+                    // 모바일에서는 기존 로직 유지
+                    setTimeout(() => {
+                        SoundGen.playBoltAction();
+                        weaponModel.rotation.z = 0.2;
+                        setTimeout(() => weaponModel.rotation.z = 0, 200);
+                    }, 600);
+                }
+            }
 
-                    createBlood(h.point);
+            // FIXED: REMOVED THE BUGGY EMISSIVE FLASH CODE HERE
 
-                    let dmg = w.damage;
-                    if (isHitPart(h.object, 'head')) {
-                        dmg *= 3;
-                        elHeadshot.classList.add('active');
-                        setTimeout(() => elHeadshot.classList.remove('active'), 500);
-                        SoundGen.playHeadshot();
-                    } else if (isHitPart(h.object, 'limb')) {
-                        dmg *= 0.7;
-                    }
+            spawnShell();
+            SoundGen.playShoot(w.type);
+        } else {
+            knifeSwing = 1.0;
+            SoundGen.playKnife();
+        }
 
-                    // Flash Red - 더 강하게
-                    p.children.forEach(c => {
-                        if (c.isMesh && c.material && c.material.emissive) {
-                            c.material.emissive.setHex(0xff0000);
-                            c.material.emissiveIntensity = 1.5; // 더 밝게
-                        }
-                    });
-                    p.userData.flashTimer = 0.15; // 더 오래 지속 
 
-                    p.userData.hp -= dmg;
-                    const hpPercent = Math.max(0, p.userData.hp / p.userData.maxHp);
-                    p.userData.hpBar.scale.x = hpPercent;
+        const ray = new THREE.Raycaster();
+        ray.setFromCamera(new THREE.Vector2(0, 0), camera);
+        if (!isAiming && w.type !== 'KNIFE') {
+            ray.ray.direction.x += (Math.random() - 0.5) * 0.05;
+            ray.ray.direction.y += (Math.random() - 0.5) * 0.05;
+        }
+        const range = (w.type === 'KNIFE') ? 3.0 : 100;
 
-                    if (p.userData.hp <= 0) {
-                        p.userData.isDead = true;
-                        const enemyPos = p.position.clone();
-                        scene.remove(p);
-                        const index = enemies.indexOf(p);
-                        if (index > -1) enemies.splice(index, 1);
+        const targets = scene.children.filter(obj => obj !== weaponContainer);
+        const hits = ray.intersectObjects(targets, true);
 
-                        // Kill 카운트 증가
-                        killCount++;
-                        if (elKillCount) {
-                            elKillCount.innerText = `Kills: ${killCount}`;
-                        }
+        for (let h of hits) {
+            if (h.distance > range) continue;
 
-                        // 30% 확률로 HP 회복 알약 드랍
-                        if (Math.random() < 0.3) {
-                            createHealthPill(enemyPos);
-                        } else if (Math.random() < 0.2) { // 20% Chance for Grenade (if no pill)
-                            createGrenadeDrop(enemyPos);
-                        }
+            let isEnemy = false;
+            let isOtherPlayer = false;
+            let p = h.object;
 
-                        // setTimeout 제거 - spawnTimer 시스템이 처리함
+            // Fix: Find parent with userData.hp
+            while (p) {
+                if (p.userData && p.userData.hp !== undefined) {
+                    // 다른 플레이어인지 확인 (playerId가 있으면 다른 플레이어)
+                    if (gameMode === 'multi' && p.userData.playerId !== undefined) {
+                        isOtherPlayer = true;
+                    } else {
+                        isEnemy = true;
                     }
                     break;
                 }
-
-                // 관통 (break 제거)
+                if (p.parent === scene || !p.parent) break;
+                p = p.parent;
             }
+
+            if (!isEnemy && !isOtherPlayer) {
+                // 맵 구조물(mapGroup)인지 확인
+                let isMap = false;
+                let curr = h.object;
+                while (curr) {
+                    if (curr === mapGroup) { isMap = true; break; }
+                    if (curr.parent === scene || !curr.parent) break;
+                    curr = curr.parent;
+                }
+
+                if (isMap) {
+                    if (w.type !== 'KNIFE' && h.object.geometry && h.face) {
+                        createDecal(h.point, h.face.normal);
+                    }
+                    break; // 맵에 맞으면 탄흔 생성하고 총알 멈춤
+                }
+
+                // 맵도 아니고 적도 아니면(탄피, 이펙트 등) 통과
+                continue;
+            }
+
+            // 다른 플레이어에게 데미지
+            if (isOtherPlayer && p.userData.hp > 0) {
+                let dmg = w.damage;
+                if (isHitPart(h.object, 'head')) {
+                    dmg *= 3;
+                    elHeadshot.classList.add('active');
+                    setTimeout(() => elHeadshot.classList.remove('active'), 500);
+                    SoundGen.playHeadshot();
+                } else if (isHitPart(h.object, 'limb')) {
+                    dmg *= 0.7;
+                }
+
+
+                // 서버에 데미지 이벤트 전송
+                if (socket && socket.connected) {
+                    socket.emit('damagePlayer', {
+                        targetId: p.userData.playerId,
+                        damage: dmg
+                    });
+                }
+
+                // 히트마커 등은 로컬에서 즉시 표시
+                elHitMarker.style.opacity = 1;
+                setTimeout(() => elHitMarker.style.opacity = 0, 100);
+                SoundGen.playHit();
+                createBlood(h.point);
+                break;
+            }
+
+            if (isEnemy && p.userData.hp > 0) {
+                // 강한 히트마커 효과
+                elHitMarker.style.opacity = 1;
+                elHitMarker.style.transform = "translate(-50%, -50%) rotate(45deg) scale(1.5)";
+                elHitMarker.style.filter = "brightness(1.5) drop-shadow(0 0 8px red)";
+                setTimeout(() => {
+                    elHitMarker.style.opacity = 0;
+                    elHitMarker.style.transform = "translate(-50%, -50%) rotate(45deg) scale(1)";
+                    elHitMarker.style.filter = "brightness(1) drop-shadow(0 0 4px red)";
+                }, 150);
+
+                // 피격 사운드 효과
+                SoundGen.playHit();
+
+                createBlood(h.point);
+
+                let dmg = w.damage;
+                if (isHitPart(h.object, 'head')) {
+                    dmg *= 3;
+                    elHeadshot.classList.add('active');
+                    setTimeout(() => elHeadshot.classList.remove('active'), 500);
+                    SoundGen.playHeadshot();
+                } else if (isHitPart(h.object, 'limb')) {
+                    dmg *= 0.7;
+                }
+
+                // Flash Red - 더 강하게
+                p.children.forEach(c => {
+                    if (c.isMesh && c.material && c.material.emissive) {
+                        c.material.emissive.setHex(0xff0000);
+                        c.material.emissiveIntensity = 1.5; // 더 밝게
+                    }
+                });
+                p.userData.flashTimer = 0.15; // 더 오래 지속 
+
+                p.userData.hp -= dmg;
+                const hpPercent = Math.max(0, p.userData.hp / p.userData.maxHp);
+                p.userData.hpBar.scale.x = hpPercent;
+
+                if (p.userData.hp <= 0) {
+                    p.userData.isDead = true;
+                    const enemyPos = p.position.clone();
+                    scene.remove(p);
+                    const index = enemies.indexOf(p);
+                    if (index > -1) enemies.splice(index, 1);
+
+                    // Kill 카운트 증가
+                    killCount++;
+                    if (elKillCount) {
+                        elKillCount.innerText = `Kills: ${killCount}`;
+                    }
+
+                    // 30% 확률로 HP 회복 알약 드랍
+                    if (Math.random() < 0.3) {
+                        createHealthPill(enemyPos);
+                    } else if (Math.random() < 0.2) { // 20% Chance for Grenade (if no pill)
+                        createGrenadeDrop(enemyPos);
+                    }
+
+                    // setTimeout 제거 - spawnTimer 시스템이 처리함
+                }
+                break;
+            }
+
+            // 관통 (break 제거)
+        }
         }
 
         function checkCollision(newPos) {
@@ -9701,10 +9748,24 @@
                 updatePhysics(dt);
             }
 
-            // 렌더링
-            renderer.render(scene, camera);
+            if (!isPaused) {
+                // Apply Camera Shake
+                if (Math.abs(cameraShake.x) > 0.001 || Math.abs(cameraShake.y) > 0.001) {
+                    camera.rotation.x += cameraShake.x;
+                    camera.rotation.y += cameraShake.y;
 
-            // 후처리 효과 적용 (렌더링 후)
+                    // Shake decay (spring back)
+                    cameraShake.x *= -0.4;
+                    cameraShake.y *= -0.4;
+
+                    // Stop if very small
+                    if (Math.abs(cameraShake.x) < 0.0001) cameraShake.x = 0;
+                    if (Math.abs(cameraShake.y) < 0.0001) cameraShake.y = 0;
+                }
+
+                // 렌더링
+                renderer.render(scene, camera);
+            }  // 후처리 효과 적용 (렌더링 후)
             if (usePostProcessing && postProcessingEnabled) {
                 applyPostProcessing();
             }
