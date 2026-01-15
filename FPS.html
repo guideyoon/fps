@@ -6784,9 +6784,9 @@
 
 
             if (wData.type !== 'KNIFE' && wData.type !== 'GRENADE') {
-                const fGeo = new THREE.PlaneGeometry(0.25, 0.25);
+                const fGeo = new THREE.PlaneGeometry(0.16, 0.16);
                 const fMat = new THREE.MeshBasicMaterial({
-                    color: 0xffe066,
+                    color: 0xffbb77,
                     transparent: true,
                     opacity: 0,
                     side: THREE.DoubleSide,
@@ -9244,12 +9244,12 @@
                 if (muzzleFlash) {
                     muzzleFlash.visible = true;
                     // Bright, brief flash
-                    const s = 0.5 + Math.random() * 0.2;
-                    muzzleFlash.scale.set(s * 1.1, s * 1.1, 1);
+                    const s = 0.28 + Math.random() * 0.1;
+                    muzzleFlash.scale.set(s, s, 1);
                     muzzleFlash.rotation.z = Math.random() * Math.PI * 2;
 
                     if (muzzleFlash.material) {
-                        muzzleFlash.material.opacity = 1;
+                        muzzleFlash.material.opacity = 0.55;
                     }
 
                     setTimeout(() => {
@@ -9257,7 +9257,7 @@
                             muzzleFlash.material.opacity = 0;
                         }
                         muzzleFlash.visible = false;
-                    }, 18);
+                    }, 35);
                 }
 
 
