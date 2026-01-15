@@ -225,7 +225,12 @@
             <button class="object-btn" onclick="selectObjectType('platform')">Platform (플랫폼)</button>
             <button class="object-btn" onclick="selectObjectType('pillar')">Pillar (기둥)</button>
             <button class="object-btn" onclick="selectObjectType('container')">Container (컨테이너)</button>
+            <button class="object-btn" onclick="selectObjectType('openContainer')">Open Container (열린 컨테이너)</button>
             <button class="object-btn" onclick="selectObjectType('wall')">Wall (벽)</button>
+            <button class="object-btn" onclick="selectObjectType('vehicle')">Vehicle (차량)</button>
+            <button class="object-btn" onclick="selectObjectType('vendingMachine')">Vending Machine (자판기)</button>
+            <button class="object-btn" onclick="selectObjectType('barrel')">Barrel (드럼통)</button>
+            <button class="object-btn" onclick="selectObjectType('fence')">Fence (울타리)</button>
         </div>
 
         <div id="canvas-container"></div>
@@ -272,6 +277,8 @@
         let gridHelper, floor;
         let isDragging = false;
         let dragPlane;
+        let undoStack = []; // Undo history
+        const MAX_UNDO = 50;
 
         // Object type definitions
         const objectTypes = {
@@ -281,7 +288,12 @@
             'platform': { size: [8, 0.5, 8], color: 0x556677, name: 'Platform' },
             'pillar': { size: [2, 6, 2], color: 0x333333, name: 'Pillar' },
             'container': { size: [6, 4, 3], color: 0x556677, name: 'Container' },
-            'wall': { size: [20, 4, 1], color: 0x20252a, name: 'Wall' }
+            'openContainer': { size: [6, 4, 6], color: 0x446688, name: 'Open Container' },
+            'wall': { size: [20, 4, 1], color: 0x20252a, name: 'Wall' },
+            'vehicle': { size: [4, 2, 8], color: 0x2244aa, name: 'Vehicle' },
+            'vendingMachine': { size: [1.5, 3, 1], color: 0xcc4444, name: 'Vending Machine' },
+            'barrel': { size: [1.5, 2, 1.5], color: 0x664422, name: 'Barrel' },
+            'fence': { size: [8, 2, 0.2], color: 0x555555, name: 'Fence' }
         };
 
         init();
@@ -360,6 +372,7 @@
             renderer.domElement.addEventListener('mousedown', onMouseDown);
             renderer.domElement.addEventListener('mousemove', onMouseMove);
             renderer.domElement.addEventListener('mouseup', onMouseUp);
+            renderer.domElement.addEventListener('contextmenu', onRightClick); // Right-click delete
             window.addEventListener('keydown', onKeyDown);
             window.addEventListener('resize', onResize);
 
@@ -453,10 +466,92 @@
                 }
             } else if (event.key === 'Delete') {
                 deleteSelected();
+            } else if (event.ctrlKey && (event.key === 'z' || event.key === 'Z')) {
+                event.preventDefault();
+                undo();
             }
         }
 
+        function onRightClick(event) {
+            event.preventDefault();
+
+            const rect = renderer.domElement.getBoundingClientRect();
+            mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+            const objectMeshes = placedObjects.map(obj => obj.mesh);
+            const intersects = raycaster.intersectObjects(objectMeshes);
+
+            if (intersects.length > 0) {
+                const objData = intersects[0].object.userData.objectData;
+                selectObject(objData);
+                deleteSelected();
+            }
+        }
+
+        function saveState() {
+            const state = placedObjects.map(obj => ({
+                type: obj.type,
+                pos: [...obj.pos],
+                rot: [...obj.rot],
+                size: [...obj.size]
+            }));
+            undoStack.push(JSON.stringify(state));
+            if (undoStack.length > MAX_UNDO) {
+                undoStack.shift();
+            }
+        }
+
+        function undo() {
+            if (undoStack.length === 0) {
+                console.log('실행 취소할 내용이 없습니다.');
+                return;
+            }
+
+            const state = JSON.parse(undoStack.pop());
+
+            // Clear current objects
+            placedObjects.forEach(obj => scene.remove(obj.mesh));
+            placedObjects = [];
+            selectedObject = null;
+
+            // Restore from state
+            state.forEach(objData => {
+                const typeData = objectTypes[objData.type];
+                if (!typeData) return;
+
+                const geometry = new THREE.BoxGeometry(...objData.size);
+                const material = new THREE.MeshStandardMaterial({
+                    color: typeData.color,
+                    roughness: 0.8
+                });
+                const mesh = new THREE.Mesh(geometry, material);
+                mesh.position.set(...objData.pos);
+                mesh.rotation.set(...objData.rot);
+                mesh.castShadow = true;
+                mesh.receiveShadow = true;
+
+                const newObjData = {
+                    type: objData.type,
+                    pos: objData.pos,
+                    rot: objData.rot,
+                    size: objData.size,
+                    mesh: mesh
+                };
+
+                mesh.userData.objectData = newObjData;
+                placedObjects.push(newObjData);
+                scene.add(mesh);
+            });
+
+            updateObjectList();
+            document.getElementById('property-editor').classList.add('hidden');
+            console.log('실행 취소 완료');
+        }
+
         function placeObject(point) {
+            saveState(); // Save state for undo
             const typeData = objectTypes[currentObjectType];
 
             // Snap to grid
@@ -525,6 +620,7 @@
 
         function deleteSelected() {
             if (!selectedObject) return;
+            saveState(); // Save state for undo
 
             scene.remove(selectedObject.mesh);
             const index = placedObjects.indexOf(selectedObject);
