@@ -2025,6 +2025,12 @@
             transition: all 0.3s;
         }
 
+        body.paused #exit-game-btn {
+            display: flex !important;
+            opacity: 1;
+            pointer-events: auto;
+        }
+
         .exit-game-btn:hover {
             background: rgba(244, 67, 54, 0.7);
             transform: scale(1.1);
@@ -2153,7 +2159,6 @@
                 width: 45px;
                 height: 45px;
                 font-size: 22px;
-                display: flex;
             }
         }
 
@@ -2214,6 +2219,7 @@
         body.game-active #weapon-list-left {
             display: flex !important;
             opacity: 1;
+            pointer-events: auto;
         }
 
         /* Mobile specific controls */
@@ -2250,11 +2256,29 @@
             transition: opacity 0.05s ease-out;
             mix-blend-mode: overlay;
         }
+
+        #reload-overlay {
+            position: fixed;
+            left: 50%;
+            bottom: 28px;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            display: none;
+            z-index: 1001;
+            pointer-events: none;
+        }
     </style>
 </head>
 
 <body>
     <div id="shoot-flash"></div>
+    <div id="reload-overlay">RELOADING</div>
     <div id="loading-screen">
         <div class="glitch-wrapper"></div>
     </div>
@@ -3573,9 +3597,9 @@
 
                 startGame();
 
-                // Show exit button in single player (zombie mode)
+                // Exit button only on pause
                 const exitBtn = document.getElementById('exit-game-btn');
-                if (exitBtn) exitBtn.style.display = 'flex';
+                if (exitBtn) exitBtn.style.display = 'none';
 
                 // Hide chat toggle in single player
                 const chatToggle = document.getElementById('chat-toggle-btn');
@@ -3733,7 +3757,18 @@
                         }
                     }
                 });
+                weaponSelectorVertical.addEventListener('touchend', (e) => {
+                    const btn = e.target.closest('.weapon-select-btn');
+                    if (btn) {
+                        e.preventDefault();
+                        const idx = parseInt(btn.dataset.idx);
+                        if (!isNaN(idx)) {
+                            switchWeaponTo(idx);
+                        }
+                    }
+                });
             }
+
 
             // NEW: Weapon List Left (Icons) Touch/Click Handler for Mobile
             const weaponListLeft = document.getElementById('weapon-list-left');
@@ -3765,12 +3800,12 @@
                 });
             }
 
-            document.getElementById('btn-show-create-room').addEventListener('click', () => {
+            addSafeListener(document.getElementById('btn-show-create-room'), () => {
                 createRoomModal.style.display = 'flex';
                 document.getElementById('new-room-name').focus();
             });
 
-            document.getElementById('btn-refresh-rooms').addEventListener('click', () => {
+            addSafeListener(document.getElementById('btn-refresh-rooms'), () => {
                 // Server sends updates automatically, but could request manual refresh if needed
                 if (socket) socket.emit('setIdentity', { name: socket.userData ? socket.userData.name : 'Player' });
             });
@@ -3779,11 +3814,11 @@
             document.addEventListener('contextmenu', e => e.preventDefault());
 
             // 4. Create Room Modal
-            document.getElementById('btn-create-cancel').addEventListener('click', () => {
+            addSafeListener(document.getElementById('btn-create-cancel'), () => {
                 createRoomModal.style.display = 'none';
             });
 
-            document.getElementById('btn-create-confirm').addEventListener('click', () => {
+            addSafeListener(document.getElementById('btn-create-confirm'), () => {
                 const roomName = document.getElementById('new-room-name').value || '새 방';
                 const maxPlayers = document.getElementById('new-room-max').value;
                 const mapName = document.getElementById('new-room-map').value; // 맵 정보 가져오기
@@ -3801,7 +3836,7 @@
             });
 
             // 5. Room Waiting
-            document.getElementById('btn-leave-room').addEventListener('click', () => {
+            addSafeListener(document.getElementById('btn-leave-room'), () => {
                 if (socket && socket.connected) {
                     socket.emit('leaveRoom');
                 }
@@ -3810,7 +3845,7 @@
                 roomMenu.style.display = 'flex';
             });
 
-            document.getElementById('btn-start-game').addEventListener('click', () => {
+            addSafeListener(document.getElementById('btn-start-game'), () => {
                 if (socket && socket.connected) {
                     socket.emit('requestStart');
                 }
@@ -3825,7 +3860,7 @@
                     chatInput.value = '';
                 }
             };
-            document.getElementById('btn-send-chat').addEventListener('click', sendChat);
+            addSafeListener(document.getElementById('btn-send-chat'), sendChat);
             chatInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendChat(); });
 
             // Force ammo reset on load to ensure correct values
@@ -5195,6 +5230,7 @@
                 if (isDead) return;
                 if (!usePointerLock) return;
                 isPaused = !document.pointerLockElement;
+                document.body.classList.toggle('paused', isPaused);
                 const elPauseOverlay = document.getElementById('pause-overlay');
                 if (elPauseOverlay) {
                     elPauseOverlay.style.display = isPaused ? 'flex' : 'none';
@@ -6784,7 +6820,21 @@
 
 
             if (wData.type !== 'KNIFE' && wData.type !== 'GRENADE') {
-                const fGeo = new THREE.PlaneGeometry(0.16, 0.16);
+                const muzzleShape = new THREE.Shape();
+                const points = 4;
+                const outerRadius = 0.08;
+                const innerRadius = 0.035;
+                for (let i = 0; i < points * 2; i++) {
+                    const r = (i % 2 === 0) ? outerRadius : innerRadius;
+                    const theta = (i / (points * 2)) * Math.PI * 2;
+                    const x = Math.cos(theta) * r;
+                    const y = Math.sin(theta) * r;
+                    if (i === 0) muzzleShape.moveTo(x, y);
+                    else muzzleShape.lineTo(x, y);
+                }
+                muzzleShape.closePath();
+
+                const fGeo = new THREE.ShapeGeometry(muzzleShape);
                 const fMat = new THREE.MeshBasicMaterial({
                     color: 0xffbb77,
                     transparent: true,
@@ -7093,9 +7143,11 @@
             // Arms (Krunker Style - Adjusted for grip alignment)
             // Right arm (trigger hand) - aligned with pistol grip
             const rArm = createArm(0.05, -0.06, 0.12, 0.1, 0, 0.05, true);
+            rArm.scale.set(0.7, 0.7, 0.7);
 
             // Left arm (support) - cupping the grip
             const lArm = createArm(-0.05, -0.06, 0.12, 0.1, 0, -0.05, false);
+            lArm.scale.set(0.7, 0.7, 0.7);
         }
 
         function buildKnife() {
@@ -7182,6 +7234,7 @@
             // Refined connection: Move closer to center to grip the handle
             rightArm.position.set(0.1, -0.14, -0.28);
             rightArm.rotation.set(0, -0.15, 0.05);
+            rightArm.scale.set(3, 3, 1);
 
             weaponModel.add(rightArm);
 
@@ -7206,6 +7259,7 @@
             // Position Left Arm FARTHER to the left (Wider Stance)
             leftArm.position.set(-0.35, -0.3, -0.2); // Moved x from -0.25 to -0.35
             leftArm.rotation.set(0.2, 0.3, -0.15);
+            leftArm.scale.set(3, 3, 1);
 
             weaponModel.add(leftArm);
         }
@@ -8150,12 +8204,14 @@
                         } else {
                             // 포인터 락이 없는 상태(모바일 등)에서의 강제 일시정지 처리
                             isPaused = true;
+                            document.body.classList.add('paused');
                             const overlay = document.getElementById('pause-overlay');
                             if (overlay) overlay.style.display = 'flex';
                         }
                     } else {
                         // 일시정지 상태면 재개
                         isPaused = false;
+                        document.body.classList.remove('paused');
                         const overlay = document.getElementById('pause-overlay');
                         if (overlay) overlay.style.display = 'none';
                         if (document.body.requestPointerLock) {
@@ -8692,6 +8748,16 @@
             const w = WEAPONS[curWeaponIdx];
             if (w.type === 'KNIFE' || w.type === 'GRENADE') return;
             isReloading = true;
+
+            const reloadOverlay = document.getElementById('reload-overlay');
+            if (reloadOverlay) {
+                reloadOverlay.style.display = 'flex';
+                reloadOverlay.style.opacity = '1';
+                setTimeout(() => {
+                    reloadOverlay.style.opacity = '0';
+                    reloadOverlay.style.display = 'none';
+                }, 600);
+            }
 
             // 저격총은 c-rifle.mp3 사용, 다른 무기는 기존 재장전 소리
             if (w.type === 'SNIPER' && SoundGen.audioBuffers['c-rifle']) {
@@ -9249,7 +9315,7 @@
                     muzzleFlash.rotation.z = Math.random() * Math.PI * 2;
 
                     if (muzzleFlash.material) {
-                        muzzleFlash.material.opacity = 0.55;
+                        muzzleFlash.material.opacity = 0.35;
                     }
 
                     setTimeout(() => {
@@ -9257,7 +9323,7 @@
                             muzzleFlash.material.opacity = 0;
                         }
                         muzzleFlash.visible = false;
-                    }, 35);
+                    }, 30);
                 }
 
 
@@ -9831,9 +9897,10 @@
                     }
                 } else {
                     // 다른 무기들은 원래대로 (recoil만 적용)
+                    const recoilScale = (isAiming && w.type === 'RIFLE') ? 0.35 : 1;
                     weaponModel.position.y = THREE.MathUtils.lerp(weaponModel.position.y, 0, 10 * dt);
-                    weaponModel.rotation.x = recoil.x + (isReloading ? 0.5 : 0);
-                    weaponModel.position.z = recoil.z;
+                    weaponModel.rotation.x = recoil.x * recoilScale + (isReloading ? 0.5 : 0);
+                    weaponModel.position.z = recoil.z * recoilScale;
                     // 재장전 제스처 중이 아닐 때만 rotation.z 초기화
                     if (!sniperReloadGesture) {
                         weaponModel.rotation.z = 0;
