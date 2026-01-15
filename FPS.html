@@ -7050,7 +7050,7 @@
 
             // --- KNIFE BLADE (centered, pointing forward) ---
             const blade = new THREE.Mesh(
-                new THREE.BoxGeometry(0.025, 0.008, 0.35),
+                new THREE.BoxGeometry(0.03, 0.01, 0.45), // Blade longer/thicker
                 new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0.9, roughness: 0.2 })
             );
             blade.position.set(0, 0, -0.18);
@@ -7058,113 +7058,100 @@
 
             // Blade edge
             const bladeEdge = new THREE.Mesh(
-                new THREE.BoxGeometry(0.025, 0.002, 0.33),
+                new THREE.BoxGeometry(0.032, 0.003, 0.43),
                 new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 1.0, roughness: 0.1 })
             );
-            bladeEdge.position.set(0, -0.004, -0.17);
+            bladeEdge.position.set(0, -0.005, -0.17);
             knifeGroup.add(bladeEdge);
 
             // Tip
             const tip = new THREE.Mesh(
-                new THREE.ConeGeometry(0.008, 0.04, 4),
+                new THREE.ConeGeometry(0.01, 0.05, 4),
                 new THREE.MeshStandardMaterial({ color: 0xdddddd, metalness: 0.9, roughness: 0.2 })
             );
             tip.rotation.x = Math.PI / 2;
-            tip.position.set(0, 0, -0.37);
+            tip.position.set(0, 0, -0.42);
             knifeGroup.add(tip);
 
             // Guard
             const guard = new THREE.Mesh(
-                new THREE.BoxGeometry(0.08, 0.02, 0.02),
+                new THREE.BoxGeometry(0.1, 0.025, 0.025),
                 new THREE.MeshStandardMaterial({ color: 0x222222, metalness: 0.8, roughness: 0.5 })
             );
-            guard.position.set(0, 0, 0);
+            guard.position.set(0, 0, 0.05);
             knifeGroup.add(guard);
 
             // Handle
             const handle = new THREE.Mesh(
-                new THREE.BoxGeometry(0.035, 0.035, 0.12),
-                new THREE.MeshStandardMaterial({ color: 0x1a1a1a, metalness: 0.2, roughness: 0.9 }) // Dark grip
+                new THREE.BoxGeometry(0.04, 0.04, 0.14),
+                new THREE.MeshStandardMaterial({ color: 0x1a1a1a, metalness: 0.2, roughness: 0.9 })
             );
-            handle.position.set(0, 0, 0.07);
+            handle.position.set(0, 0, 0.13); // Centered on grip
             knifeGroup.add(handle);
 
             // Position knife in center-bottom
-            knifeGroup.position.set(0, -0.12, -0.4);
-            knifeGroup.rotation.set(0.15, 0, 0); // Slight tilt
+            knifeGroup.position.set(0, -0.15, -0.45);
+            knifeGroup.rotation.set(0.2, 0, 0); // Slight tilt up
             weaponModel.add(knifeGroup);
 
             // --- RIGHT ARM (Holding the knife) ---
             const rightArm = new THREE.Group();
 
-            // Sleeve (Use global materials)
-            const rightSleeve = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.45), matSleeve);
-            rightSleeve.position.set(0, 0, 0.2); // Extend backward
+            // Sleeve (Thicker)
+            const rightSleeve = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.14, 0.55), matSleeve);
+            rightSleeve.position.set(0, 0, 0.25);
             rightArm.add(rightSleeve);
 
-            // Hand (Glove)
-            const rightHand = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.08, 0.12), matGlove);
-            rightHand.position.set(0, 0, -0.05); // At the wrist
+            // Hand (Thicker)
+            const rightHand = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.1, 0.14), matGlove);
+            rightHand.position.set(0, 0, -0.05);
             rightArm.add(rightHand);
 
-            // Fingers (Gripping the handle)
-            // Thumb wrapping around
-            const rThumb = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.03, 0.08), matSkin);
-            rThumb.position.set(-0.04, 0.02, -0.05);
-            rThumb.rotation.set(0, 0, -0.5);
+            // Fingers (Gripping firmly)
+            // Thumb
+            const rThumb = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.04, 0.1), matSkin);
+            rThumb.position.set(-0.05, 0.03, -0.06);
+            rThumb.rotation.set(0, 0, -0.6);
             rightArm.add(rThumb);
 
-            // Fingers wrapping around handle
-            const rFingers = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.07, 0.04), matSkin);
-            rFingers.position.set(0.02, -0.01, -0.12);
+            // Fingers block
+            const rFingers = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.09, 0.05), matSkin);
+            rFingers.position.set(0.03, -0.015, -0.13);
             rightArm.add(rFingers);
 
             // Position Right Arm to connect with Handle
-            // Knife Handle is at (0, -0.12, -0.4) + (0, 0, 0.07) = (0, -0.12, -0.33)
-            // Arm origin is wrist/hand center.
-            rightArm.position.set(0.18, -0.2, -0.25);
-            rightArm.rotation.set(0.2, -0.4, 0.1); // Angled inward
-            // The visual hand should align with the handle.
+            // We align the hand position to the knife handle position visually
+            // Arm comes from bottom right corner
+            rightArm.position.set(0.15, -0.22, -0.2);
+            rightArm.rotation.set(0.1, -0.25, 0.1);
 
-            // Let's adjust position securely
-            rightArm.position.set(0.12, -0.15, -0.15);
-            rightArm.rotation.set(0, -0.1, 0);
-
-            // Re-adjust to match Krunker holding style (right hand holds, arm comes from right-bottom)
-            rightArm.position.set(0.25, -0.25, -0.15);
-            rightArm.rotation.set(0.2, -0.3, 0.1);
-
-            // But user said "Arm doesn't look like it's holding it".
-            // So we need to position the Arm's HAND mesh exactly at the Knife Handle position.
-            // Knife Handle World ~ (0, -0.12, -0.33).
-            // If RightArm is at (0.25, -0.25, -0.15), Hand is at local (0,0,-0.05).
-            // We need to move the arm closer.
-            rightArm.position.set(0.12, -0.16, -0.25);
-            rightArm.rotation.set(0.1, -0.2, 0);
+            // Refined connection: Move closer to center to grip the handle
+            rightArm.position.set(0.1, -0.14, -0.28);
+            rightArm.rotation.set(0, -0.15, 0.05);
 
             weaponModel.add(rightArm);
 
-            // --- LEFT ARM (Supporting/Ready) ---
+            // --- LEFT ARM (Supporting/Ready - WIDER APART) ---
             const leftArm = new THREE.Group();
 
-            // Sleeve
-            const leftSleeve = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.45), matSleeve);
-            leftSleeve.position.set(0, 0, 0.2);
+            // Sleeve (Thicker)
+            const leftSleeve = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.14, 0.55), matSleeve);
+            leftSleeve.position.set(0, 0, 0.25);
             leftArm.add(leftSleeve);
 
-            // Hand (Glove)
-            const leftHand = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.08, 0.12), matGlove);
+            // Hand (Thicker)
+            const leftHand = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.1, 0.14), matGlove);
             leftHand.position.set(0, 0, -0.05);
             leftArm.add(leftHand);
 
             // Fingers (Fist/Ready)
-            const lFingers = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.07, 0.05), matSkin);
-            lFingers.position.set(0, -0.01, -0.12);
+            const lFingers = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.09, 0.06), matSkin);
+            lFingers.position.set(0, -0.015, -0.13);
             leftArm.add(lFingers);
 
-            // Position Left Arm on the left side
-            leftArm.position.set(-0.25, -0.25, -0.25);
-            leftArm.rotation.set(0.2, 0.2, -0.1);
+            // Position Left Arm FARTHER to the left (Wider Stance)
+            leftArm.position.set(-0.35, -0.3, -0.2); // Moved x from -0.25 to -0.35
+            leftArm.rotation.set(0.2, 0.3, -0.15);
 
             weaponModel.add(leftArm);
         }
