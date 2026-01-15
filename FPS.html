@@ -2205,13 +2205,8 @@
             opacity: 1;
         }
 
+        /* Hide light toggle in all game modes (user request) */
         body.game-active #light-toggle-btn {
-            display: flex !important;
-            opacity: 1;
-        }
-
-        /* Hide light toggle in multiplayer (user request) */
-        body.game-active.multi-player #light-toggle-btn {
             display: none !important;
         }
 
