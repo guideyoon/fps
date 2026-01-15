@@ -212,6 +212,10 @@
         <button class="toolbar-btn" onclick="exportMap()">맵 내보내기</button>
         <button class="toolbar-btn" onclick="document.getElementById('importFile').click()">맵 불러오기</button>
         <input type="file" id="importFile" accept=".json" onchange="importMap(event)">
+        <span style="color: #aaa; margin-left: 20px;">맵 크기:</span>
+        <input type="number" id="mapSizeInput" value="200" min="50" max="500" step="50"
+            style="width: 60px; padding: 4px; background: #333; border: 1px solid #555; color: white; border-radius: 3px;">
+        <button class="toolbar-btn" onclick="setMapSize()">적용</button>
         <div style="flex: 1"></div>
         <button class="toolbar-btn danger" onclick="deleteSelected()">삭제 (Del)</button>
     </div>
@@ -279,6 +283,9 @@
         let dragPlane;
         let undoStack = []; // Undo history
         const MAX_UNDO = 50;
+        let ghostMesh = null; // Preview mesh
+        let mapSize = 200; // Current map size
+        let isPlaceMode = true; // true = place mode, false = select/drag mode
 
         // Object type definitions
         const objectTypes = {
@@ -351,8 +358,11 @@
             scene.add(floor);
 
             // Grid
-            gridHelper = new THREE.GridHelper(200, 40, 0x888888, 0x444444);
+            gridHelper = new THREE.GridHelper(mapSize, mapSize / 5, 0x888888, 0x444444);
             scene.add(gridHelper);
+
+            // Ghost preview mesh
+            createGhostMesh();
 
             // Raycaster
             raycaster = new THREE.Raycaster();
@@ -391,10 +401,35 @@
 
         function selectObjectType(type) {
             currentObjectType = type;
+            isPlaceMode = true;
+            selectedObject = null;
             document.querySelectorAll('.object-btn').forEach(btn => {
                 btn.classList.remove('selected');
             });
             event.target.classList.add('selected');
+            document.getElementById('property-editor').classList.add('hidden');
+
+            // Update ghost mesh
+            createGhostMesh();
+        }
+
+        function createGhostMesh() {
+            // Remove old ghost
+            if (ghostMesh) {
+                scene.remove(ghostMesh);
+            }
+
+            const typeData = objectTypes[currentObjectType];
+            const geometry = new THREE.BoxGeometry(...typeData.size);
+            const material = new THREE.MeshBasicMaterial({
+                color: 0xff0000,
+                transparent: true,
+                opacity: 0.5,
+                wireframe: false
+            });
+            ghostMesh = new THREE.Mesh(geometry, material);
+            ghostMesh.visible = false;
+            scene.add(ghostMesh);
         }
 
         function onClick(event) {
@@ -406,19 +441,32 @@
 
             raycaster.setFromCamera(mouse, camera);
 
-            // Check if clicking on existing object
+            // Check if clicking on existing object first
             const objectMeshes = placedObjects.map(obj => obj.mesh);
             const intersects = raycaster.intersectObjects(objectMeshes);
 
             if (intersects.length > 0) {
-                // Select existing object
+                // Select existing object and switch to select mode
+                isPlaceMode = false;
+                if (ghostMesh) ghostMesh.visible = false;
                 selectObject(intersects[0].object.userData.objectData);
-            } else {
-                // Place new object on floor
+            } else if (isPlaceMode && ghostMesh && ghostMesh.visible) {
+                // Place new object at ghost position
                 const floorIntersects = raycaster.intersectObject(floor);
                 if (floorIntersects.length > 0) {
                     placeObject(floorIntersects[0].point);
                 }
+            } else {
+                // Deselect and return to place mode
+                if (selectedObject) {
+                    if (selectedObject.mesh.material.emissive) {
+                        selectedObject.mesh.material.emissive.setHex(0x000000);
+                    }
+                    selectedObject = null;
+                    document.getElementById('property-editor').classList.add('hidden');
+                    updateObjectList();
+                }
+                isPlaceMode = true;
             }
         }
 
@@ -430,28 +478,47 @@
         }
 
         function onMouseMove(event) {
-            if (!isDragging || !selectedObject) return;
-
             const rect = renderer.domElement.getBoundingClientRect();
             mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
             mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
             raycaster.setFromCamera(mouse, camera);
-            const intersects = raycaster.intersectObject(dragPlane);
 
-            if (intersects.length > 0) {
-                const point = intersects[0].point;
-                // Snap to grid
-                const snappedX = Math.round(point.x / 0.5) * 0.5;
-                const snappedZ = Math.round(point.z / 0.5) * 0.5;
+            // Ghost preview in place mode
+            if (isPlaceMode && ghostMesh) {
+                const floorIntersects = raycaster.intersectObject(floor);
+                if (floorIntersects.length > 0) {
+                    const point = floorIntersects[0].point;
+                    const snappedX = Math.round(point.x / 0.5) * 0.5;
+                    const snappedZ = Math.round(point.z / 0.5) * 0.5;
+                    const typeData = objectTypes[currentObjectType];
+                    const y = typeData.size[1] / 2;
 
-                selectedObject.mesh.position.x = snappedX;
-                selectedObject.mesh.position.z = snappedZ;
-                selectedObject.pos[0] = snappedX;
-                selectedObject.pos[2] = snappedZ;
+                    ghostMesh.position.set(snappedX, y, snappedZ);
+                    ghostMesh.visible = true;
+                } else {
+                    ghostMesh.visible = false;
+                }
+            }
 
-                updatePropertyInputs();
-                updateObjectList();
+            // Drag selected object
+            if (isDragging && selectedObject) {
+                const intersects = raycaster.intersectObject(dragPlane);
+
+                if (intersects.length > 0) {
+                    const point = intersects[0].point;
+                    // Snap to grid
+                    const snappedX = Math.round(point.x / 0.5) * 0.5;
+                    const snappedZ = Math.round(point.z / 0.5) * 0.5;
+
+                    selectedObject.mesh.position.x = snappedX;
+                    selectedObject.mesh.position.z = snappedZ;
+                    selectedObject.pos[0] = snappedX;
+                    selectedObject.pos[2] = snappedZ;
+
+                    updatePropertyInputs();
+                    updateObjectList();
+                }
             }
         }
 
@@ -463,13 +530,60 @@
             if (event.key === 'r' || event.key === 'R') {
                 if (selectedObject) {
                     rotateSelected();
+                } else if (isPlaceMode && ghostMesh) {
+                    // Rotate ghost mesh preview
+                    ghostMesh.rotation.y += Math.PI / 2;
                 }
             } else if (event.key === 'Delete') {
                 deleteSelected();
             } else if (event.ctrlKey && (event.key === 'z' || event.key === 'Z')) {
                 event.preventDefault();
                 undo();
+            } else if (event.key === 'Escape') {
+                // Deselect and return to place mode
+                if (selectedObject) {
+                    if (selectedObject.mesh.material.emissive) {
+                        selectedObject.mesh.material.emissive.setHex(0x000000);
+                    }
+                    selectedObject = null;
+                    document.getElementById('property-editor').classList.add('hidden');
+                    updateObjectList();
+                }
+                isPlaceMode = true;
             }
+        }
+
+        function setMapSize() {
+            const newSize = parseInt(document.getElementById('mapSizeInput').value);
+            if (isNaN(newSize) || newSize < 50 || newSize > 500) {
+                alert('맵 크기는 50 ~ 500 사이여야 합니다.');
+                return;
+            }
+
+            mapSize = newSize;
+
+            // Update floor
+            scene.remove(floor);
+            const floorGeometry = new THREE.PlaneGeometry(mapSize, mapSize);
+            const floorMaterial = new THREE.MeshStandardMaterial({
+                color: 0x444444,
+                roughness: 0.8
+            });
+            floor = new THREE.Mesh(floorGeometry, floorMaterial);
+            floor.rotation.x = -Math.PI / 2;
+            floor.receiveShadow = true;
+            scene.add(floor);
+
+            // Update grid
+            scene.remove(gridHelper);
+            gridHelper = new THREE.GridHelper(mapSize, mapSize / 5, 0x888888, 0x444444);
+            scene.add(gridHelper);
+
+            // Update camera position
+            camera.position.set(0, mapSize / 2, 0);
+            controls.update();
+
+            console.log('맵 크기가 ' + mapSize + 'x' + mapSize + '로 변경되었습니다.');
         }
 
         function onRightClick(event) {
