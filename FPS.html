@@ -9327,8 +9327,12 @@
 
 
 
+
             // Spectator Camera (Killcam) - 3rd Person Follow Camera
             if (isSpectating && spectatingPlayerId && gameMode === 'multi') {
+                // Hide 1st person weapon model during 3rd person killcam
+                if (weaponContainer) weaponContainer.visible = false;
+
                 const killerMesh = otherPlayersMap[spectatingPlayerId];
                 if (killerMesh) {
                     // Get killer's rotation (Y-axis = horizontal facing direction)
@@ -9354,6 +9358,9 @@
                     );
                 }
                 // Skip normal player control during spectating
+            } else {
+                // Not spectating - ensure weapon is visible (if alive)
+                if (weaponContainer && !isDead) weaponContainer.visible = true;
             }
 
 
