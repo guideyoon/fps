@@ -9128,9 +9128,18 @@
                 const kick = isAiming ? w.recoil * 0.3 : w.recoil;
                 recoil.x += kick; recoil.z += kick;
 
-                // Screen Shake (Randomized recoil effect)
-                cameraShake.x = (Math.random() - 0.5) * kick * 2.0;
-                cameraShake.y = (Math.random() - 0.5) * kick * 2.0;
+                // Screen Shake (Subtle Vertical Recoil)
+                // x is pitch (up/down), y is yaw (left/right) in rotation
+                // We want mostly pitch up (negative x rotation usually looks up, but let's check coord system)
+                // In Three.js, rotation.x > 0 looks down, < 0 looks up. 
+                // We want the gun to kick UP, so view goes UP. Actually recoil usually makes view go UP.
+
+                // Reduced intensity significantly (0.5 -> 0.05 range)
+                // Mostly vertical (rotation.x), very little horizontal (rotation.y)
+                cameraShake.x = (Math.random() * 0.02 + 0.01) * kick; // Slight pitch up
+                cameraShake.y = (Math.random() - 0.5) * 0.01 * kick;  // Tiny horizontal jitter
+
+                // Apply a bit of random roll for "imperfect" hold feeling? Nah, keep it simple as requested.
 
                 // Subtle Screen Flash
                 const flashEl = document.getElementById('shoot-flash');
