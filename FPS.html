@@ -6848,7 +6848,7 @@
                 muzzleFlash = new THREE.Mesh(fGeo, fMat);
                 muzzleFlash.visible = false;
                 let zPos = -0.65;
-                if (wData.type === 'PISTOL') zPos = -0.15; // 권총 총구 위치에 맞게 조정
+                if (wData.type === 'PISTOL') zPos = -0.08; // 권총 총구에 더 가깝게
                 if (wData.type === 'SNIPER') zPos = -0.85;
                 const yPos = (wData.type === 'PISTOL') ? 0.045 : 0.02;
                 muzzleFlash.position.set(0, yPos, zPos);
