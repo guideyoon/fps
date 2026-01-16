@@ -7236,7 +7236,7 @@
             // Refined connection: Move closer to center to grip the handle
             rightArm.position.set(0.1, -0.14, -0.28);
             rightArm.rotation.set(0, -0.15, 0.05);
-            rightArm.scale.set(3, 3, 1);
+            rightArm.scale.set(1.2, 1.2, 1);
 
             weaponModel.add(rightArm);
 
@@ -7261,7 +7261,7 @@
             // Position Left Arm FARTHER to the left (Wider Stance)
             leftArm.position.set(-0.35, -0.3, -0.2); // Moved x from -0.25 to -0.35
             leftArm.rotation.set(0.2, 0.3, -0.15);
-            leftArm.scale.set(3, 3, 1);
+            leftArm.scale.set(1.2, 1.2, 1);
 
             weaponModel.add(leftArm);
         }
@@ -9683,10 +9683,12 @@
                 }
 
                 const targetY = groundY + eyeHeight;
+                const prevPosition = position.clone();
 
                 // Apply Gravity
                 velocityY -= 30.0 * dt; // Stronger gravity for snappier feel
                 let nextY = position.y + velocityY * dt;
+
 
                 // Ground Collision / Landing
                 // We allow a small tolerance to "snap" to ground
@@ -9731,7 +9733,6 @@
                     const fwd = new THREE.Vector3(0, 0, -1).applyAxisAngle(new THREE.Vector3(0, 1, 0), rotation.y);
                     const rgt = new THREE.Vector3(1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), rotation.y);
                     const moveDir = fwd.multiplyScalar(-dy).add(rgt.multiplyScalar(dx)).normalize();
-                    playerVelocity.copy(moveDir).multiplyScalar(speed);
                     const moveStep = moveDir.clone().multiplyScalar(speed * dt);
 
 
@@ -9786,8 +9787,11 @@
 
 
 
+                playerVelocity.copy(position).sub(prevPosition).multiplyScalar(1 / dt);
+
                 const isSniperAiming = isAiming && w.type === 'SNIPER';
                 if (isSniperAiming) {
+
                     weaponContainer.visible = false;
                     elScope.style.display = 'block';
                     if (isMobile) {
