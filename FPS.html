@@ -8907,12 +8907,10 @@
             shell.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
 
             // Velocity: Always to the RIGHT of the camera (movement-independent)
-
-
+            // playerVelocity를 추가하지 않아서 이동 방향과 관계없이 항상 오른쪽으로 탄피 배출
             const worldVel = new THREE.Vector3();
             worldVel.addScaledVector(right, 1.8 + Math.random() * 0.4);
             worldVel.addScaledVector(up, 0.8 + Math.random() * 0.4);
-            worldVel.add(playerVelocity);
 
             scene.add(shell);
 
