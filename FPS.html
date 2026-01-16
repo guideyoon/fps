@@ -8893,8 +8893,11 @@
 
             // Offset to ejection port (Camera-right side)
             // Local offset: Right (+x), Up (+y)
-            const right = new THREE.Vector3(1, 0, 0).applyQuaternion(cameraQuat);
-            const up = new THREE.Vector3(0, 1, 0).applyQuaternion(cameraQuat);
+            const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(cameraQuat);
+            forward.y = 0;
+            forward.normalize();
+            const right = new THREE.Vector3().crossVectors(forward, new THREE.Vector3(0, 1, 0)).normalize();
+            const up = new THREE.Vector3(0, 1, 0);
             shell.position.addScaledVector(right, 0.08);
             shell.position.addScaledVector(up, 0.05);
 
