@@ -2634,7 +2634,9 @@
         let rotation = { x: 0, y: 0 };
         let velocityY = 0;
         let isGrounded = false;
+        let playerVelocity = new THREE.Vector3();
         let playerHP = 100;
+
         let isDead = false;
         let isPaused = false;
         let usePointerLock = true;
@@ -8910,6 +8912,7 @@
             const worldVel = new THREE.Vector3();
             worldVel.addScaledVector(right, 1.8 + Math.random() * 0.4);
             worldVel.addScaledVector(up, 0.8 + Math.random() * 0.4);
+            worldVel.add(playerVelocity);
 
             scene.add(shell);
 
@@ -9728,7 +9731,9 @@
                     const fwd = new THREE.Vector3(0, 0, -1).applyAxisAngle(new THREE.Vector3(0, 1, 0), rotation.y);
                     const rgt = new THREE.Vector3(1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), rotation.y);
                     const moveDir = fwd.multiplyScalar(-dy).add(rgt.multiplyScalar(dx)).normalize();
-                    const moveStep = moveDir.multiplyScalar(speed * dt);
+                    playerVelocity.copy(moveDir).multiplyScalar(speed);
+                    const moveStep = moveDir.clone().multiplyScalar(speed * dt);
+
 
                     const stepHeight = 0.6; // 등반 가능한 최대 높이 (계단 등)
 
@@ -9775,7 +9780,11 @@
                         weaponContainer.position.y += Math.sin(time * 0.001 * bobFreq) * bobAmp;
                         weaponContainer.position.x += Math.cos(time * 0.001 * (bobFreq / 2)) * bobAmp;
                     }
+                } else {
+                    playerVelocity.set(0, 0, 0);
                 }
+
+
 
                 const isSniperAiming = isAiming && w.type === 'SNIPER';
                 if (isSniperAiming) {
