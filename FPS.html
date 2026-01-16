@@ -7188,17 +7188,19 @@
 
             // --- KNIFE BLADE (centered, pointing forward) ---
             const blade = new THREE.Mesh(
-                new THREE.BoxGeometry(0.03, 0.01, 0.45), // Blade longer/thicker
-                new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0.9, roughness: 0.2 })
+                new THREE.BoxGeometry(0.05, 0.01, 0.45), // Blade wider
+                new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.2, roughness: 0.6 })
             );
+
             blade.position.set(0, 0, -0.18);
             knifeGroup.add(blade);
 
             // Blade edge
             const bladeEdge = new THREE.Mesh(
-                new THREE.BoxGeometry(0.032, 0.003, 0.43),
-                new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 1.0, roughness: 0.1 })
+                new THREE.BoxGeometry(0.052, 0.003, 0.43),
+                new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.2, roughness: 0.4 })
             );
+
             bladeEdge.position.set(0, -0.005, -0.17);
             knifeGroup.add(bladeEdge);
 
@@ -7340,18 +7342,20 @@
             const grp = new THREE.Group();
 
             // Grenade Body
-            const body = new THREE.Mesh(new THREE.SphereGeometry(0.1, 16, 16), matGrenade);
+            const body = new THREE.Mesh(new THREE.SphereGeometry(0.08, 16, 16), matGrenade);
+            body.position.set(0.02, 0.0, 0.0);
             grp.add(body);
 
             // Pin/Handle
-            const pin = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.1, 8), matSilver);
-            pin.position.y = 0.1;
+            const pin = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.08, 8), matSilver);
+            pin.position.set(0.02, 0.08, 0.0);
             grp.add(pin);
 
-            // Hand
-            const hand = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.1), matGlove);
-            hand.position.set(0.05, -0.05, 0.05);
+            // Hand (Grip)
+            const hand = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.11, 0.11), matGlove);
+            hand.position.set(0.0, -0.03, 0.02);
             grp.add(hand);
+
 
             weaponModel.add(grp);
             return grp;
