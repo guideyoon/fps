@@ -7174,11 +7174,11 @@
             // Arms (Krunker Style - Adjusted for grip alignment)
             // Right arm (trigger hand) - aligned with pistol grip
             const rArm = createArm(0.05, -0.06, 0.12, 0.1, 0, 0.05, true);
-            rArm.scale.set(0.7, 0.7, 0.7);
+            // rArm.scale.set(0.7, 0.7, 0.7); // Removed to match global scale
 
             // Left arm (support) - cupping the grip
             const lArm = createArm(-0.05, -0.06, 0.12, 0.1, 0, -0.05, false);
-            lArm.scale.set(0.7, 0.7, 0.7);
+            // lArm.scale.set(0.7, 0.7, 0.7); // Removed to match global scale
         }
 
         function buildKnife() {
@@ -7300,81 +7300,37 @@
 
         function createArm(x, y, z, rotX, rotY, rotZ, isTrigger) {
             const grp = new THREE.Group();
-            // 권총용 팔 - 더 얇게 조정 (radius 0.035, 0.045)
-            const sleeve = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.045, 0.5, 12), matSleeve);
-            sleeve.rotation.x = Math.PI / 2; sleeve.position.z = 0.25;
+            
+            // [TASK] Updated Arm Geometry to match Knife Style (Thicker/Larger)
+            
+            // Sleeve: BoxGeometry matching knife arm dimensions
+            const sleeve = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.14, 0.55), matSleeve);
+            sleeve.position.set(0, 0, 0.25);
             grp.add(sleeve);
-            // 손 크기도 팔에 맞게 줄임
-            const hand = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.035, 0.07), matGlove);
-            hand.position.z = -0.05;
+
+            // Hand: BoxGeometry matching knife hand dimensions
+            const hand = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.1, 0.14), matGlove);
+            hand.position.set(0, 0, -0.05);
             grp.add(hand);
 
             if (isTrigger) {
-                const finger = new THREE.Mesh(new THREE.BoxGeometry(0.015, 0.015, 0.05), matSkin);
-                finger.position.set(0.01, 0.01, -0.1);
+                // Trigger Finger - Thicker and adjusted position
+                const finger = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.03, 0.08), matSkin);
+                finger.position.set(0.04, 0.02, -0.12);
                 grp.add(finger);
             } else {
-                // 나이프를 쥐는 손인 경우 손가락을 더 명확하게
-                if (grp.userData && grp.userData.isKnifeHand) {
-                    // 손 본체 - 나이프 손잡이를 감싸는 형태
-                    const handSize = 0.14;
-                    const handMesh = new THREE.Mesh(
-                        new THREE.BoxGeometry(handSize, 0.07, handSize * 0.8),
-                        matGlove
-                    );
-                    handMesh.position.z = -0.04;
-                    grp.add(handMesh);
-
-                    // 나이프를 쥐는 손가락들 - 더 자연스러운 위치와 각도
-                    for (let i = 0; i < 4; i++) {
-                        const finger = new THREE.Mesh(
-                            new THREE.BoxGeometry(0.02, 0.02, 0.07),
-                            matSkin
-                        );
-                        // 손가락이 나이프 손잡이를 감싸는 형태로 배치
-                        finger.position.set((i - 1.5) * 0.022, 0.025, -0.13);
-                        finger.rotation.x = 0.1; // 약간 구부린 형태
-                        grp.add(finger);
-                    }
-                    // 엄지 - 나이프 반대편에 위치
-                    const thumb = new THREE.Mesh(
-                        new THREE.BoxGeometry(0.018, 0.018, 0.06),
-                        matSkin
-                    );
-                    thumb.position.set(0.06, 0.025, -0.1);
-                    thumb.rotation.z = 0.4; // 더 구부린 형태
-                    thumb.rotation.x = 0.2;
-                    grp.add(thumb);
-                } else if (grp.userData && grp.userData.isLeftHand) {
-                    // Left Hand (Open Palm - CS Style)
-                    const handSize = 0.1;
-                    const handMesh = new THREE.Mesh(new THREE.BoxGeometry(handSize, 0.03, handSize), matGlove);
-                    handMesh.position.z = -0.05;
-                    handMesh.rotation.x = -0.4; // Palm facing somewhat forward
-                    grp.add(handMesh);
-
-                    // Fingers (Extended)
-                    for (let i = 0; i < 4; i++) {
-                        const finger = new THREE.Mesh(new THREE.BoxGeometry(0.018, 0.015, 0.09), matSkin);
-                        finger.position.set((i - 1.5) * 0.024, 0.02, -0.12);
-                        finger.rotation.x = -0.2; // Slight curve
-                        grp.add(finger);
-                    }
-                    // Thumb (Extended)
-                    const thumb = new THREE.Mesh(new THREE.BoxGeometry(0.018, 0.018, 0.07), matSkin);
-                    thumb.position.set(0.06, 0.02, -0.06);
-                    thumb.rotation.y = -0.6;
-                    thumb.rotation.x = -0.1;
-                    grp.add(thumb);
-                } else {
-                    const fist = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.04, 0.04), matGlove);
-                    fist.position.set(0, -0.02, -0.08);
-                    grp.add(fist);
-                }
+                // Supporting Hand Fingers (Fist-like block)
+                const fingers = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.09, 0.06), matSkin);
+                fingers.position.set(0, -0.015, -0.13);
+                grp.add(fingers);
             }
 
             grp.position.set(x, y, z);
             grp.rotation.set(rotX, rotY, rotZ);
+            
+            // [TASK] Apply Uniform Scale (Matches Knife Arm Scale)
+            grp.scale.set(1.8, 1.8, 1.5); 
+
             weaponModel.add(grp);
             return grp;
         }
