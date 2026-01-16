@@ -8885,22 +8885,24 @@
             weaponModel.getWorldPosition(weaponPos);
             const weaponQuat = new THREE.Quaternion();
             weaponModel.getWorldQuaternion(weaponQuat);
+            const cameraQuat = new THREE.Quaternion();
+            camera.getWorldQuaternion(cameraQuat);
 
             shell.position.copy(weaponPos);
             shell.quaternion.copy(weaponQuat);
 
-            // Offset to ejection port (Right side of gun)
-            // Local offset: Right (+x), Up (+y), Back (-z)
-            shell.translateX(0.08);
-            shell.translateY(0.05);
-            shell.translateZ(0);
+            // Offset to ejection port (Camera-right side)
+            // Local offset: Right (+x), Up (+y)
+            const right = new THREE.Vector3(1, 0, 0).applyQuaternion(cameraQuat);
+            const up = new THREE.Vector3(0, 1, 0).applyQuaternion(cameraQuat);
+            shell.position.addScaledVector(right, 0.08);
+            shell.position.addScaledVector(up, 0.05);
 
             // Random rotation for realism
             shell.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
 
-            // Velocity: Always to the RIGHT of the gun (movement-independent)
-            const right = new THREE.Vector3(1, 0, 0).applyQuaternion(weaponQuat);
-            const up = new THREE.Vector3(0, 1, 0).applyQuaternion(weaponQuat);
+            // Velocity: Always to the RIGHT of the camera (movement-independent)
+
 
             const worldVel = new THREE.Vector3();
             worldVel.addScaledVector(right, 1.8 + Math.random() * 0.4);
