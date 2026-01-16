@@ -2078,8 +2078,9 @@
             }
 
             /* Hide text-based weapon inventory on mobile - FORCE */
-            body #weapon-inventory {
-                display: none;
+            body #weapon-inventory,
+            body #weapon-list-left {
+                display: none !important;
                 visibility: hidden;
                 opacity: 0;
             }
@@ -2113,8 +2114,9 @@
 
 
             /* Hide text-based weapon inventory in landscape too - FORCE */
-            body #weapon-inventory {
-                display: none;
+            body #weapon-inventory,
+            body #weapon-list-left {
+                display: none !important;
                 visibility: hidden;
                 opacity: 0;
             }
