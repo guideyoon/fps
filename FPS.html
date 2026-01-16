@@ -2635,6 +2635,8 @@
         // 스폰 위치 수정: (0, 1.7, 5)는 안전하지만, (25, 1.7, 0) 등은 위험할 수 있음.
         // 중앙 안전 구역으로 고정: (0, 1.7, 10)
         let position = new THREE.Vector3(0, 1.7, 10);
+        let lastPlayerPosition = position.clone();
+
 
         // Single Player Spawn Points (Global for restartGame)
         const SINGLE_PLAYER_SPAWN_POINTS = [
@@ -2651,6 +2653,8 @@
         let isGrounded = false;
         let playerVelocity = new THREE.Vector3();
         let playerHP = 100;
+        let debugShellVelocity = false;
+
 
         let isDead = false;
         let isPaused = false;
@@ -2713,6 +2717,14 @@
 
         // === 전역 변수 ===
         const keys = { w: 0, a: 0, s: 0, d: 0, shift: false, ctrl: false, space: false };
+
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'KeyV') {
+                debugShellVelocity = !debugShellVelocity;
+                console.log('[ShellDebug] enabled:', debugShellVelocity);
+            }
+        });
+
 
         // MAP EDITOR GLOBALS
         let isEditorActive = false;
@@ -8927,7 +8939,14 @@
             const worldVel = new THREE.Vector3();
             worldVel.addScaledVector(right, 1.8 + Math.random() * 0.4);
             worldVel.addScaledVector(up, 0.8 + Math.random() * 0.4);
-            worldVel.add(playerVelocity); // 플레이어 속도 추가로 상대적 위치 유지
+            const horizontalVel = playerVelocity.clone();
+            horizontalVel.y = 0;
+            worldVel.add(horizontalVel); // 플레이어 속도 추가로 상대적 위치 유지
+
+            if (debugShellVelocity) {
+                console.log('[ShellDebug] playerVelocity', playerVelocity.clone(), 'worldVel', worldVel.clone());
+            }
+
 
             scene.add(shell);
 
@@ -9698,11 +9717,12 @@
                 }
 
                 const targetY = groundY + eyeHeight;
-                const prevPosition = position.clone();
+                playerVelocity.copy(position).sub(lastPlayerPosition).multiplyScalar(1 / dt);
 
                 // Apply Gravity
                 velocityY -= 30.0 * dt; // Stronger gravity for snappier feel
                 let nextY = position.y + velocityY * dt;
+
 
 
                 // Ground Collision / Landing
@@ -9802,9 +9822,10 @@
 
 
 
-                playerVelocity.copy(position).sub(prevPosition).multiplyScalar(1 / dt);
+                lastPlayerPosition.copy(position);
 
                 const isSniperAiming = isAiming && w.type === 'SNIPER';
+
                 if (isSniperAiming) {
 
                     weaponContainer.visible = false;
