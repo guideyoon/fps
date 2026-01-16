@@ -7270,12 +7270,12 @@
 
         function createArm(x, y, z, rotX, rotY, rotZ, isTrigger) {
             const grp = new THREE.Group();
-            // Increased arm thickness (radius 0.045->0.065, 0.06->0.085)
-            const sleeve = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.085, 0.5, 12), matSleeve);
+            // 권총용 팔 - 더 얇게 조정 (radius 0.035, 0.045)
+            const sleeve = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.045, 0.5, 12), matSleeve);
             sleeve.rotation.x = Math.PI / 2; sleeve.position.z = 0.25;
             grp.add(sleeve);
-            // Increased hand size to match arm
-            const hand = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.05, 0.1), matGlove);
+            // 손 크기도 팔에 맞게 줄임
+            const hand = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.035, 0.07), matGlove);
             hand.position.z = -0.05;
             grp.add(hand);
 
