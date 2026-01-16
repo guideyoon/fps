@@ -8907,11 +8907,12 @@
             // Random rotation for realism
             shell.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
 
-            // Velocity: Always to the RIGHT of the camera (movement-independent)
-            // playerVelocity를 추가하지 않아서 이동 방향과 관계없이 항상 오른쪽으로 탄피 배출
+            // Velocity: 플레이어 시점에서 항상 오른쪽으로 보이도록 playerVelocity 추가
+            // 탄피가 플레이어와 함께 이동하면서 오른쪽으로 배출되는 효과
             const worldVel = new THREE.Vector3();
             worldVel.addScaledVector(right, 1.8 + Math.random() * 0.4);
             worldVel.addScaledVector(up, 0.8 + Math.random() * 0.4);
+            worldVel.add(playerVelocity); // 플레이어 속도 추가로 상대적 위치 유지
 
             scene.add(shell);
 
