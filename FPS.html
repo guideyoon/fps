@@ -7328,8 +7328,8 @@
             grp.position.set(x, y, z);
             grp.rotation.set(rotX, rotY, rotZ);
             
-            // [TASK] Apply Uniform Scale (Matches Knife Arm Scale)
-            grp.scale.set(1.3, 1.3, 1.3); // Reduced scale from 1.8
+            // [TASK] Apply Uniform Scale (Non-knife arms at half size)
+            grp.scale.set(0.65, 0.65, 0.65);
 
             weaponModel.add(grp);
             return grp;
