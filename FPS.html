@@ -7335,12 +7335,12 @@
 
             xMinus.addEventListener('click', () => {
                 const step = parseFloat(xStep.value);
-                x.value = (parseFloat(x.value) - step).toFixed(2);
+                x.value = (parseFloat(x.value) - step).toFixed(3);
                 apply();
             });
             xPlus.addEventListener('click', () => {
                 const step = parseFloat(xStep.value);
-                x.value = (parseFloat(x.value) + step).toFixed(2);
+                x.value = (parseFloat(x.value) + step).toFixed(3);
                 apply();
             });
 
