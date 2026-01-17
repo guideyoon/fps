@@ -428,6 +428,18 @@
             cursor: pointer;
         }
 
+        #rifle-debug-panel #rifle-x-minus,
+        #rifle-debug-panel #rifle-x-plus {
+            width: 34px;
+            height: 24px;
+            padding: 0;
+            background: #2b2b2b;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
 
         .weapon-slot {
             width: 30px;
@@ -2708,6 +2720,19 @@
             <label for="rifle-x">X</label>
             <input id="rifle-x" type="range" min="-1" max="1" step="0.01" value="0.2">
             <span id="rifle-x-val">0.20</span>
+        </div>
+        <div class="panel-row">
+            <label for="rifle-x-step">XS</label>
+            <input id="rifle-x-step" type="range" min="0.001" max="0.05" step="0.001" value="0.01">
+            <span id="rifle-x-step-val">0.010</span>
+        </div>
+        <div class="panel-row">
+            <label for="rifle-x-nudge">X±</label>
+            <div style="display:flex;gap:6px;align-items:center;">
+                <button id="rifle-x-minus" type="button">-</button>
+                <button id="rifle-x-plus" type="button">+</button>
+            </div>
+            <span id="rifle-x-nudge-val">0.01</span>
         </div>
         <div class="panel-row">
             <label for="rifle-y">Y</label>
@@ -7267,6 +7292,9 @@
             const rx = document.getElementById('rifle-rx');
             const ry = document.getElementById('rifle-ry');
             const rz = document.getElementById('rifle-rz');
+            const xStep = document.getElementById('rifle-x-step');
+            const xMinus = document.getElementById('rifle-x-minus');
+            const xPlus = document.getElementById('rifle-x-plus');
             const xVal = document.getElementById('rifle-x-val');
             const yVal = document.getElementById('rifle-y-val');
             const zVal = document.getElementById('rifle-z-val');
@@ -7274,6 +7302,8 @@
             const rxVal = document.getElementById('rifle-rx-val');
             const ryVal = document.getElementById('rifle-ry-val');
             const rzVal = document.getElementById('rifle-rz-val');
+            const xStepVal = document.getElementById('rifle-x-step-val');
+            const xNudgeVal = document.getElementById('rifle-x-nudge-val');
             const copy = document.getElementById('rifle-copy');
 
             const apply = () => {
@@ -7295,10 +7325,23 @@
                 rxVal.textContent = rxv.toFixed(2);
                 ryVal.textContent = ryv.toFixed(2);
                 rzVal.textContent = rzv.toFixed(2);
+                if (xStepVal) xStepVal.textContent = parseFloat(xStep.value).toFixed(3);
+                if (xNudgeVal) xNudgeVal.textContent = parseFloat(xStep.value).toFixed(3);
             };
 
-            [x, y, z, s, rx, ry, rz].forEach(el => {
+            [x, y, z, s, rx, ry, rz, xStep].forEach(el => {
                 el.addEventListener('input', apply);
+            });
+
+            xMinus.addEventListener('click', () => {
+                const step = parseFloat(xStep.value);
+                x.value = (parseFloat(x.value) - step).toFixed(2);
+                apply();
+            });
+            xPlus.addEventListener('click', () => {
+                const step = parseFloat(xStep.value);
+                x.value = (parseFloat(x.value) + step).toFixed(2);
+                apply();
             });
 
             copy.addEventListener('click', () => {
