@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Rifle GLB Transform Tool</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #111;
+      color: #e8e8e8;
+      font-family: ui-monospace, Menlo, Consolas, monospace;
+    }
+    #canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    #panel {
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      background: rgba(0, 0, 0, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+      padding: 12px;
+      z-index: 10;
+      width: 320px;
+    }
+    #panel h1 {
+      font-size: 14px;
+      margin: 0 0 8px 0;
+      color: #9eff9e;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 18px 1fr 54px;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .row label {
+      color: #9eff9e;
+      font-size: 12px;
+    }
+    .row input[type="range"] {
+      width: 100%;
+    }
+    .row span {
+      text-align: right;
+      font-size: 12px;
+    }
+    #actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    button {
+      flex: 1;
+      background: #1f8f4a;
+      color: #fff;
+      border: none;
+      padding: 8px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    #output {
+      margin-top: 8px;
+      font-size: 12px;
+      white-space: pre;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 8px;
+      border-radius: 6px;
+      max-height: 120px;
+      overflow: auto;
+    }
+  </style>
+</head>
+<body>
+  <div id="panel">
+    <h1>Rifle GLB Transform Tool</h1>
+    <div class="row"><label>X</label><input id="posX" type="range" min="-2" max="2" step="0.01" value="0.2"><span id="posXVal">0.20</span></div>
+    <div class="row"><label>Y</label><input id="posY" type="range" min="-2" max="2" step="0.01" value="-0.2"><span id="posYVal">-0.20</span></div>
+    <div class="row"><label>Z</label><input id="posZ" type="range" min="-2" max="2" step="0.01" value="-0.2"><span id="posZVal">-0.20</span></div>
+    <div class="row"><label>S</label><input id="scale" type="range" min="0.05" max="1.0" step="0.01" value="0.22"><span id="scaleVal">0.22</span></div>
+    <div class="row"><label>RX</label><input id="rotX" type="range" min="-3.14" max="3.14" step="0.01" value="0.00"><span id="rotXVal">0.00</span></div>
+    <div class="row"><label>RY</label><input id="rotY" type="range" min="-3.14" max="3.14" step="0.01" value="4.71"><span id="rotYVal">4.71</span></div>
+    <div class="row"><label>RZ</label><input id="rotZ" type="range" min="-3.14" max="3.14" step="0.01" value="0.00"><span id="rotZVal">0.00</span></div>
+    <div id="actions">
+      <button id="copy">Copy Values</button>
+      <button id="reset">Reset</button>
+    </div>
+    <div id="output"></div>
+  </div>
+  <canvas id="canvas"></canvas>
+
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+  <script>
+    const canvas = document.getElementById('canvas');
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio || 1);
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x111111);
+
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.01, 100);
+    camera.position.set(0, 0.2, 1.2);
+
+    const light = new THREE.HemisphereLight(0xffffff, 0x222222, 1.2);
+    scene.add(light);
+
+    const dir = new THREE.DirectionalLight(0xffffff, 0.8);
+    dir.position.set(2, 3, 4);
+    scene.add(dir);
+
+    const grid = new THREE.GridHelper(4, 16, 0x444444, 0x222222);
+    grid.position.y = -0.4;
+    scene.add(grid);
+
+    let rifleModel = null;
+
+    const loader = new THREE.GLTFLoader();
+    loader.load('gun/Assault Rifle.glb', (gltf) => {
+      rifleModel = gltf.scene;
+      rifleModel.traverse((child) => {
+        if (child.isMesh) {
+          child.castShadow = true;
+          child.receiveShadow = true;
+        }
+      });
+      scene.add(rifleModel);
+      applyTransform();
+    }, undefined, (err) => {
+      console.error('GLB load failed', err);
+    });
+
+    const fields = {
+      posX: document.getElementById('posX'),
+      posY: document.getElementById('posY'),
+      posZ: document.getElementById('posZ'),
+      scale: document.getElementById('scale'),
+      rotX: document.getElementById('rotX'),
+      rotY: document.getElementById('rotY'),
+      rotZ: document.getElementById('rotZ')
+    };
+
+    const labels = {
+      posXVal: document.getElementById('posXVal'),
+      posYVal: document.getElementById('posYVal'),
+      posZVal: document.getElementById('posZVal'),
+      scaleVal: document.getElementById('scaleVal'),
+      rotXVal: document.getElementById('rotXVal'),
+      rotYVal: document.getElementById('rotYVal'),
+      rotZVal: document.getElementById('rotZVal')
+    };
+
+    function updateLabel(key, val) {
+      labels[key].textContent = Number(val).toFixed(2);
+    }
+
+    function applyTransform() {
+      if (!rifleModel) return;
+      const px = parseFloat(fields.posX.value);
+      const py = parseFloat(fields.posY.value);
+      const pz = parseFloat(fields.posZ.value);
+      const s = parseFloat(fields.scale.value);
+      const rx = parseFloat(fields.rotX.value);
+      const ry = parseFloat(fields.rotY.value);
+      const rz = parseFloat(fields.rotZ.value);
+      rifleModel.position.set(px, py, pz);
+      rifleModel.scale.set(s, s, s);
+      rifleModel.rotation.set(rx, ry, rz);
+
+      updateLabel('posXVal', px);
+      updateLabel('posYVal', py);
+      updateLabel('posZVal', pz);
+      updateLabel('scaleVal', s);
+      updateLabel('rotXVal', rx);
+      updateLabel('rotYVal', ry);
+      updateLabel('rotZVal', rz);
+
+      const out =
+        `model.position.set(${px.toFixed(2)}, ${py.toFixed(2)}, ${pz.toFixed(2)});\n` +
+        `model.scale.set(${s.toFixed(2)}, ${s.toFixed(2)}, ${s.toFixed(2)});\n` +
+        `model.rotation.set(${rx.toFixed(2)}, ${ry.toFixed(2)}, ${rz.toFixed(2)});`;
+      document.getElementById('output').textContent = out;
+    }
+
+    Object.values(fields).forEach((el) => {
+      el.addEventListener('input', applyTransform);
+    });
+
+    document.getElementById('copy').addEventListener('click', () => {
+      const out = document.getElementById('output').textContent;
+      console.log('[Rifle GLB Transform]\n' + out);
+      navigator.clipboard.writeText(out).catch(() => {});
+    });
+
+    document.getElementById('reset').addEventListener('click', () => {
+      fields.posX.value = 0.2;
+      fields.posY.value = -0.2;
+      fields.posZ.value = -0.2;
+      fields.scale.value = 0.22;
+      fields.rotX.value = 0;
+      fields.rotY.value = 4.71;
+      fields.rotZ.value = 0;
+      applyTransform();
+    });
+
+    function animate() {
+      requestAnimationFrame(animate);
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>
