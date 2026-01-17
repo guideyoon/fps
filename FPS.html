@@ -9310,26 +9310,26 @@
                 const swingEase = 0.5 - 0.5 * Math.cos(swingPhase * Math.PI); // 0.0 -> 1.0 (부드러운 S자 곡선)
                 const swingEaseOut = Math.sin(swingPhase * Math.PI); // 0.0 -> 1.0 -> 0.0
 
-                // 왼쪽에서 오른쪽으로 크게 휘두르기 - 범위 확대
-                const startX = -0.7;
-                const endX = 0.7;
+                // 왼쪽에서 오른쪽으로 크게 휘두르기 - 범위 확대 (더 크게)
+                const startX = -1.5; // -0.7 -> -1.5 (Much wider start)
+                const endX = 1.5;    // 0.7 -> 1.5 (Much wider end)
                 weaponModel.position.x = startX + (endX - startX) * swingEase;
 
-                // 손목 회전 (Y축) - 더 넓은 범위로 휘두르기
-                const rotationY = -2.5 + (2.5 - (-2.5)) * swingEase;
+                // 손목 회전 (Y축) - 더 넓은 범위로 휘두르기 (360도에 가깝게)
+                const rotationY = -3.5 + (3.5 - (-3.5)) * swingEase; // -2.5~2.5 -> -3.5~3.5
                 weaponModel.rotation.y = rotationY;
 
-                // 손목 회전 (Z축) - 자연스러운 휘두름
-                weaponModel.rotation.z = -0.15 + swingEaseOut * 0.7;
+                // 손목 회전 (Z축) - 자연스러운 휘두름 (롤링 대폭 증가)
+                weaponModel.rotation.z = -0.15 + swingEaseOut * 1.5; // 0.7 -> 1.5
 
-                // 손목 회전 (X축) - 위아래 움직임
-                weaponModel.rotation.x = 0.25 + swingEaseOut * 0.3;
+                // 손목 회전 (X축) - 위아래 움직임 (피치 대폭 증가)
+                weaponModel.rotation.x = 0.25 + swingEaseOut * 0.8; // 0.3 -> 0.8
 
-                // 앞뒤 이동 - 더 큰 범위
-                weaponModel.position.z = -0.3 + swingEaseOut * 0.3;
+                // 앞뒤 이동 - 더 큰 범위 (찌르는 느낌 추가)
+                weaponModel.position.z = -0.3 + swingEaseOut * 0.8; // 0.3 -> 0.8
 
-                // 위아래 움직임 - 더 자연스럽게
-                weaponModel.position.y = -0.2 + swingEaseOut * 0.15;
+                // 위아래 움직임 - 더 자연스럽게 (아크 형태 강조)
+                weaponModel.position.y = -0.2 - swingEaseOut * 0.3; // Dip down in middle
 
                 if (knifeSwing < 0) {
                     knifeSwing = 0;
@@ -10050,14 +10050,14 @@
                         const swingT = 1 - (window.knifeSwing / window.KNIFE_SWING_DURATION);
                         const ease = Math.sin(swingT * Math.PI);
                         weaponModel.rotation.set(
-                            -0.4 * ease,
-                            -0.9 * ease,
-                            0.6 * ease
+                            -0.8 * ease,
+                            -1.6 * ease,
+                            1.0 * ease
                         );
                         weaponModel.position.set(
-                            0.2 + (-0.35 * ease),
-                            -0.25 + (0.12 * ease),
-                            -0.4
+                            0.2 + (-0.7 * ease),
+                            -0.25 + (0.18 * ease),
+                            -0.4 + (0.15 * ease)
                         );
                     } else {
                         // CS Style Reset
