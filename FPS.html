@@ -3797,7 +3797,17 @@
             init();
         }
 
+        function addSafeListener(el, handler) {
+            if (!el) return;
+            el.addEventListener('click', handler);
+            el.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                handler(e);
+            }, { passive: false });
+        }
+
         function init() {
+
             // [TASK] Automatic Fullscreen on Interaction (disabled)
             // const autoEnterFullscreen = (e) => {
             //     const panel = document.getElementById('rifle-debug-panel');
