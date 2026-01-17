@@ -2748,6 +2748,9 @@
         let playerVelocity = new THREE.Vector3();
         let playerHP = 100;
         let debugShellVelocity = false;
+        let knifeSwing = 0;
+        const KNIFE_SWING_DURATION = 0.25;
+
 
 
         let isDead = false;
@@ -2770,6 +2773,10 @@
         let currentRoomTimeLeft = 600; // Track match time for UI sync
         let singlePlayerTimeLeft = 600;
 
+        // Movement/Enemy tuning
+        const ZOMBIE_SPEED = 2.2;
+
+
 
         // Multiplayer Socket
         let socket = null;
@@ -2777,6 +2784,11 @@
         let otherPlayersMap = {}; // id -> mesh
         let roomPlayersState = {}; // Global player data
         const PLAYER_RADIUS = 0.4;
+        const ENEMY_RADIUS = 0.4;
+        const ATTACK_RANGE = 1.6;
+        const SPAWN_INTERVAL = 2.5;
+        const ZOMBIE_DMG = 12;
+
 
         // Spectator/Killcam System
         let isSpectating = false;
@@ -9494,9 +9506,10 @@
                 // spawnShell(); // 탄피 효과 비활성화
                 SoundGen.playShoot(w.type);
             } else {
-                knifeSwing = 1.0;
+                knifeSwing = KNIFE_SWING_DURATION;
                 SoundGen.playKnife();
             }
+
 
 
             const ray = new THREE.Raycaster();
@@ -9838,9 +9851,16 @@
                 let speed = 9.0; // Default: RUN (User Request)
                 if (keys.shift) speed = 5.0; // Shift: WALK
 
+                // Weapon-based movement speed multipliers
+                if (w.type === 'KNIFE') speed *= 1.1;
+                else if (w.type === 'PISTOL') speed *= 1.05;
+                else if (w.type === 'SNIPER') speed *= 0.9;
+                else if (w.type === 'GRENADE') speed *= 0.95;
+
                 // Overrides (Crouch & Aim take priority)
                 if (keys.ctrl) speed = 2.5;
                 if (isAiming) speed = 2.0;
+
 
                 const q = new THREE.Quaternion();
                 q.setFromEuler(new THREE.Euler(rotation.x, rotation.y, 0, 'YXZ'));
@@ -10027,12 +10047,26 @@
 
                 // 나이프일 때만 특별한 위치/회전 처리
                 if (w.type === 'KNIFE') {
-                    if (knifeSwing === 0) {
+                    if (knifeSwing > 0) {
+                        const swingT = 1 - (knifeSwing / KNIFE_SWING_DURATION);
+                        const ease = Math.sin(swingT * Math.PI);
+                        weaponModel.rotation.set(
+                            -0.4 * ease,
+                            -0.9 * ease,
+                            0.6 * ease
+                        );
+                        weaponModel.position.set(
+                            0.2 + (-0.35 * ease),
+                            -0.25 + (0.12 * ease),
+                            -0.4
+                        );
+                    } else {
                         // CS Style Reset
                         weaponModel.rotation.set(0, 0, 0);
                         weaponModel.position.set(0.2, -0.25, -0.4);
                     }
                 } else {
+
                     // 다른 무기들은 원래대로 (recoil만 적용)
                     const recoilScale = (isAiming && w.type === 'RIFLE') ? 0.35 : 1;
                     weaponModel.position.y = THREE.MathUtils.lerp(weaponModel.position.y, 0, 10 * dt);
@@ -10046,7 +10080,12 @@
                 elVignette.style.opacity = (isAiming && w.type !== 'KNIFE') ? 0.5 : 0;
             }
 
+            if (knifeSwing > 0) {
+                knifeSwing = Math.max(knifeSwing - dt, 0);
+            }
+
             updateShells(dt);
+
             updateParticles(dt);
             updateSparks(dt);
             updateSmoke(dt);
