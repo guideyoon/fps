@@ -7249,13 +7249,13 @@
             if (!panel || !window.rifleModel || panel.dataset.bound === '1') return;
             panel.dataset.bound = '1';
 
-            panel.addEventListener('pointerdown', (e) => { e.stopPropagation(); e.preventDefault(); });
+            panel.addEventListener('pointerdown', (e) => { e.stopPropagation(); });
             panel.addEventListener('pointermove', (e) => { e.stopPropagation(); });
             panel.addEventListener('pointerup', (e) => { e.stopPropagation(); });
-            panel.addEventListener('wheel', (e) => { e.preventDefault(); }, { passive: false });
-            panel.addEventListener('touchstart', (e) => { e.stopPropagation(); e.preventDefault(); }, { passive: false });
-            panel.addEventListener('touchmove', (e) => { e.stopPropagation(); e.preventDefault(); }, { passive: false });
-            panel.addEventListener('touchend', (e) => { e.stopPropagation(); e.preventDefault(); }, { passive: false });
+            panel.addEventListener('wheel', (e) => { e.stopPropagation(); }, { passive: false });
+            panel.addEventListener('touchstart', (e) => { e.stopPropagation(); }, { passive: false });
+            panel.addEventListener('touchmove', (e) => { e.stopPropagation(); }, { passive: false });
+            panel.addEventListener('touchend', (e) => { e.stopPropagation(); }, { passive: false });
 
             const x = document.getElementById('rifle-x');
             const y = document.getElementById('rifle-y');
