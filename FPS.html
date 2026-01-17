@@ -3862,6 +3862,25 @@
                 if (socket) socket.emit('setIdentity', { name: socket.userData ? socket.userData.name : 'Player' });
             });
 
+            // Room list join handler (mobile-friendly)
+            const roomListContainer = document.getElementById('room-list-container');
+            if (roomListContainer) {
+                roomListContainer.addEventListener('click', (e) => {
+                    const btn = e.target.closest('.btn-join-room');
+                    if (!btn || btn.disabled) return;
+                    const roomId = btn.dataset.roomId;
+                    if (roomId) window.joinRoom(roomId);
+                });
+                roomListContainer.addEventListener('touchend', (e) => {
+                    const btn = e.target.closest('.btn-join-room');
+                    if (!btn || btn.disabled) return;
+                    e.preventDefault();
+                    const roomId = btn.dataset.roomId;
+                    if (roomId) window.joinRoom(roomId);
+                }, { passive: false });
+            }
+
+
             // 우클릭 메뉴 방지 (조준 기능과 충돌 방지)
             document.addEventListener('contextmenu', e => e.preventDefault());
 
@@ -3977,7 +3996,8 @@
                             </div>
                             <div class="room-status">
                                 <span class="status-badge ${statusClass}">${statusText}</span>
-                                <button onclick="joinRoom('${room.id}')" ${isFull ? 'disabled' : ''}>참여</button>
+                                <button class="btn-join-room" data-room-id="${room.id}" ${isFull ? 'disabled' : ''}>참여</button>
+
                             </div>
                         `;
                         roomListContainer.appendChild(roomEl);
