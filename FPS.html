@@ -10642,12 +10642,13 @@
             const style = document.createElement('style');
             style.innerHTML = `
                 @media (min-width: 800px) {
+                    /* 1. PC 모드 왼쪽 무기 아이콘 크기 조정 (3.0배 -> 1.5배로 축소) */
                     #weapon-list-left {
                         display: flex !important;
-                        transform: translateY(-50%) scale(3.0) !important;
+                        transform: translateY(-50%) scale(1.5) !important; /* 3.0은 너무 커서 1.5로 수정 */
                         transform-origin: left center !important;
-                        left: 60px !important;
-                        gap: 5px !important;
+                        left: 40px !important; /* 여백 조정 */
+                        gap: 10px !important;
                         z-index: 99999 !important;
                         opacity: 1 !important;
                         visibility: visible !important;
@@ -10670,6 +10671,20 @@
                     }
                     .weapon-item:not(.active) {
                         opacity: 0.3 !important;
+                    }
+
+                    /* 2. PC 모드에서 모바일 UI 요소 확실하게 숨기기 */
+                    #joystick-zone, 
+                    #joystick-handle,
+                    .mobile-controls,
+                    #btn-shoot, 
+                    #btn-aim, 
+                    #btn-jump, 
+                    #btn-reload,
+                    .weapon-select-btn {
+                        display: none !important;
+                        pointer-events: none !important;
+                        opacity: 0 !important;
                     }
                 }
             `;
