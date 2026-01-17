@@ -7298,15 +7298,7 @@
             };
 
             [x, y, z, s, rx, ry, rz].forEach(el => {
-                let dragging = false;
-                el.addEventListener('pointerdown', () => { dragging = true; });
-                el.addEventListener('pointerup', () => { dragging = false; });
-                el.addEventListener('pointerleave', () => { dragging = false; });
-                el.addEventListener('input', () => {
-                    if (!dragging) return;
-                    apply();
-                });
-                el.addEventListener('wheel', (e) => { e.preventDefault(); }, { passive: false });
+                el.addEventListener('input', apply);
             });
 
             copy.addEventListener('click', () => {
