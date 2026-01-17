@@ -7358,7 +7358,7 @@
 
             const apply = () => {
                 if (!window.rifleModel) return;
-                
+
                 const v = (id) => inputs[id] ? parseFloat(inputs[id].value) : 0;
                 
                 const xv = v('rifle-x');
@@ -7441,8 +7441,18 @@
                     setTimeout(() => copy.textContent = original, 1000);
                 });
             }
-
+            // Initialize sliders from current model transform (do not override)
+            if (window.rifleModel) {
+                inputs['rifle-x'].value = window.rifleModel.position.x.toFixed(3);
+                inputs['rifle-y'].value = window.rifleModel.position.y.toFixed(3);
+                inputs['rifle-z'].value = window.rifleModel.position.z.toFixed(3);
+                inputs['rifle-scale'].value = window.rifleModel.scale.x.toFixed(3);
+                inputs['rifle-rx'].value = window.rifleModel.rotation.x.toFixed(3);
+                inputs['rifle-ry'].value = window.rifleModel.rotation.y.toFixed(3);
+                inputs['rifle-rz'].value = window.rifleModel.rotation.z.toFixed(3);
+            }
             apply();
+
         }
 
         function buildSniper() {
