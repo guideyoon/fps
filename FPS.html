@@ -203,8 +203,8 @@
         }
 
         .weapon-item .key-hint {
-            width: 20px;
-            height: 20px;
+            width: 40px;
+            height: 40px;
             background: rgba(0, 0, 0, 0.5);
             color: #fff;
             border: 1px solid rgba(255, 255, 255, 0.3);
@@ -212,7 +212,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
+            font-size: 20px;
             font-weight: bold;
             margin-right: 10px;
         }
@@ -224,14 +224,14 @@
         }
 
         .weapon-item .icon-box {
-            width: 50px;
-            height: 50px;
+            width: 150px;
+            height: 150px;
             display: flex;
             align-items: center;
             justify-content: center;
             background: rgba(0, 0, 0, 0.3);
-            border-radius: 5px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
         }
 
         .weapon-item.active .icon-box {
@@ -241,7 +241,7 @@
         }
 
         .weapon-item i {
-            font-size: 24px;
+            font-size: 72px;
             color: #fff;
         }
 
@@ -957,6 +957,7 @@
 
         /* Mobile lobby: ensure buttons are clickable over overlays */
         @media (max-width: 1024px) {
+
             #room-menu,
             #create-room-modal,
             #room-waiting {
@@ -2266,80 +2267,80 @@
         }
 
 
-            /* Ensure mode selection is visible but compact when game is NOT active */
-            body:not(.game-active) #mode-selection {
-                display: flex !important;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-                padding: 10px;
-            }
+        /* Ensure mode selection is visible but compact when game is NOT active */
+        body:not(.game-active) #mode-selection {
+            display: flex !important;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
 
-            /* Scale down logo and buttons when mode selection is shown */
-            #mode-selection img {
-                max-height: 100px !important;
-                max-width: 80% !important;
-                margin-bottom: 15px !important;
-            }
+        /* Scale down logo and buttons when mode selection is shown */
+        #mode-selection img {
+            max-height: 100px !important;
+            max-width: 80% !important;
+            margin-bottom: 15px !important;
+        }
 
-            .mode-btn {
-                padding: 12px 35px !important;
-                font-size: 18px !important;
-                margin: 8px !important;
-                min-width: 200px !important;
-            }
+        .mode-btn {
+            padding: 12px 35px !important;
+            font-size: 18px !important;
+            margin: 8px !important;
+            min-width: 200px !important;
+        }
 
 
-            /* Hide text-based weapon inventory in landscape too - FORCE */
-            body #weapon-inventory,
-            body #weapon-list-left {
-                display: none !important;
-                visibility: hidden;
-                opacity: 0;
-            }
+        /* Hide text-based weapon inventory in landscape too - FORCE */
+        body #weapon-inventory,
+        body #weapon-list-left {
+            display: none !important;
+            visibility: hidden;
+            opacity: 0;
+        }
 
-            /* HP/Ammo - 하단으로 배치 */
-            #ammo-info {
-                top: auto !important;
-                bottom: 30px !important;
-                right: 20px !important;
-            }
+        /* HP/Ammo - 하단으로 배치 */
+        #ammo-info {
+            top: auto !important;
+            bottom: 30px !important;
+            right: 20px !important;
+        }
 
-            #hp-container {
-                top: auto !important;
-                bottom: 30px !important;
-                left: 20px !important;
-            }
+        #hp-container {
+            top: auto !important;
+            bottom: 30px !important;
+            left: 20px !important;
+        }
 
-            /* Make other UI elements more compact */
-            .weapon-slot {
-                padding: 6px 10px;
-            }
+        /* Make other UI elements more compact */
+        .weapon-slot {
+            padding: 6px 10px;
+        }
 
-            .weapon-number {
-                font-size: 16px;
-            }
+        .weapon-number {
+            font-size: 16px;
+        }
 
-            .weapon-name {
-                font-size: 12px;
-            }
+        .weapon-name {
+            font-size: 12px;
+        }
 
-            /* Explicitly show weapon selector in landscape during gameplay */
-            body.game-active #weapon-selector-vertical {
-                display: flex;
-                top: 40%;
-                /* 중앙보다 약간 위로 (40%) */
-                z-index: 1000;
-                pointer-events: auto;
-            }
+        /* Explicitly show weapon selector in landscape during gameplay */
+        body.game-active #weapon-selector-vertical {
+            display: flex;
+            top: 40%;
+            /* 중앙보다 약간 위로 (40%) */
+            z-index: 1000;
+            pointer-events: auto;
+        }
 
-            #exit-game-btn {
-                top: 15px;
-                right: 70px;
-                width: 45px;
-                height: 45px;
-                font-size: 22px;
-            }
+        #exit-game-btn {
+            top: 15px;
+            right: 70px;
+            width: 45px;
+            height: 45px;
+            font-size: 22px;
+        }
         }
 
         /* Force hide mode-selection when game is active */
@@ -2677,7 +2678,7 @@
 
     <!-- Left Side: Vertical Weapon List -->
     <div id="weapon-list-left">
-        <div class="weapon-item" id="weapon-item-0">
+        <div class="weapon-item active" id="weapon-item-0">
             <div class="key-hint">1</div>
             <div class="icon-box"><i class="fas fa-person-rifle"></i></div>
         </div>
@@ -7312,7 +7313,7 @@
                 loader.load('gun/Assault Rifle.glb', function (gltf) {
                     if (token !== rifleLoadToken) return;
                     const model = gltf.scene;
-                    
+
                     model.traverse(function (child) {
                         if (child.isMesh) {
                             child.castShadow = true;
@@ -7322,9 +7323,9 @@
 
                     // Scale and Position tuning
                     // Adjust these values to align with the original weapon position
-                    model.scale.set(0.50, 0.50, 0.50); 
+                    model.scale.set(0.50, 0.50, 0.50);
                     model.rotation.set(0.33, 1.64, -0.21);
-                    model.position.set(0.05, -0.46, 0.54); 
+                    model.position.set(0.05, -0.46, 0.54);
 
                     // Remove any previous GLB rifle model
                     if (window.rifleModel) {
@@ -7334,7 +7335,7 @@
                     window.rifleModel = model;
                     setupRifleDebugUI();
                     document.getElementById('rifle-debug-panel').style.display = 'block';
-                    
+
                     weaponModel.add(model);
                     weaponModel.updateMatrixWorld(true);
 
@@ -7350,8 +7351,8 @@
                 }, undefined, function (error) {
                     console.error('Rifle GLB load failed:', error);
                     // Clear weaponModel (arms + anything else) and rebuild geometry
-                    while(weaponModel.children.length > 0){ 
-                        weaponModel.remove(weaponModel.children[0]); 
+                    while (weaponModel.children.length > 0) {
+                        weaponModel.remove(weaponModel.children[0]);
                     }
                     buildRifleGeometry();
                 });
@@ -7381,7 +7382,7 @@
             const ids = ['rifle-x', 'rifle-y', 'rifle-z', 'rifle-scale', 'rifle-rx', 'rifle-ry', 'rifle-rz', 'rifle-x-step'];
             const inputs = {};
             const vals = {};
-            
+
             ids.forEach(id => {
                 inputs[id] = document.getElementById(id);
                 vals[id] = document.getElementById(id + '-val');
@@ -7396,7 +7397,7 @@
                 if (!window.rifleModel) return;
 
                 const v = (id) => inputs[id] ? parseFloat(inputs[id].value) : 0;
-                
+
                 const xv = v('rifle-x');
                 const yv = v('rifle-y');
                 const zv = v('rifle-z');
@@ -7404,11 +7405,11 @@
                 const rxv = v('rifle-rx');
                 const ryv = v('rifle-ry');
                 const rzv = v('rifle-rz');
-                
+
                 window.rifleModel.position.set(xv, yv, zv);
                 window.rifleModel.scale.set(sv, sv, sv);
                 window.rifleModel.rotation.set(rxv, ryv, rzv);
-                
+
                 // Update text displays
                 ids.forEach(id => {
                     if (vals[id] && inputs[id]) {
@@ -7417,7 +7418,7 @@
                         vals[id].textContent = parseFloat(inputs[id].value).toFixed(prec);
                     }
                 });
-                
+
                 // Special update for X-Step display on the Nudge row
                 if (xNudgeVal && inputs['rifle-x-step']) {
                     xNudgeVal.textContent = parseFloat(inputs['rifle-x-step'].value).toFixed(3);
@@ -7746,83 +7747,83 @@
             handle.position.set(0, 0, 0.13); // Centered on grip
             knifeGroup.add(handle);
 
-    // Position knife in center-bottom
-    knifeGroup.scale.set(1.3, 1.3, 1.3); // Reduced scale from 1.5
-    knifeGroup.position.set(0, -0.2, -0.5); // Adjusted position for larger size
-    knifeGroup.rotation.set(0.2, Math.PI / 2, 0); // Tip points left
-    weaponModel.add(knifeGroup);
+            // Position knife in center-bottom
+            knifeGroup.scale.set(1.3, 1.3, 1.3); // Reduced scale from 1.5
+            knifeGroup.position.set(0, -0.2, -0.5); // Adjusted position for larger size
+            knifeGroup.rotation.set(0.2, Math.PI / 2, 0); // Tip points left
+            weaponModel.add(knifeGroup);
 
-    // --- RIGHT ARM (Holding the knife) ---
-    const rightArm = new THREE.Group();
+            // --- RIGHT ARM (Holding the knife) ---
+            const rightArm = new THREE.Group();
 
-    // Sleeve (Thicker)
-    const rightSleeve = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.14, 0.55), matSleeve);
-    rightSleeve.position.set(0, 0, 0.25);
-    rightArm.add(rightSleeve);
+            // Sleeve (Thicker)
+            const rightSleeve = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.14, 0.55), matSleeve);
+            rightSleeve.position.set(0, 0, 0.25);
+            rightArm.add(rightSleeve);
 
-    // Hand (Thicker)
-    const rightHand = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.1, 0.14), matGlove);
-    rightHand.position.set(0, 0, -0.05);
-    rightArm.add(rightHand);
+            // Hand (Thicker)
+            const rightHand = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.1, 0.14), matGlove);
+            rightHand.position.set(0, 0, -0.05);
+            rightArm.add(rightHand);
 
-    // Fingers (Gripping firmly)
-    // Thumb
-    const rThumb = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.04, 0.1), matSkin);
-    rThumb.position.set(-0.05, 0.03, -0.06);
-    rThumb.rotation.set(0, 0, -0.6);
-    rightArm.add(rThumb);
+            // Fingers (Gripping firmly)
+            // Thumb
+            const rThumb = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.04, 0.1), matSkin);
+            rThumb.position.set(-0.05, 0.03, -0.06);
+            rThumb.rotation.set(0, 0, -0.6);
+            rightArm.add(rThumb);
 
-    // Fingers block
-    const rFingers = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.09, 0.05), matSkin);
-    rFingers.position.set(0.03, -0.015, -0.13);
-    rightArm.add(rFingers);
+            // Fingers block
+            const rFingers = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.09, 0.05), matSkin);
+            rFingers.position.set(0.03, -0.015, -0.13);
+            rightArm.add(rFingers);
 
-    // Position Right Arm to connect with Handle
-    // We align the hand position to the knife handle position visually
-    // Arm comes from bottom right corner
-    rightArm.position.set(0.15, -0.22, -0.2);
-    rightArm.rotation.set(0.1, -0.25, 0.1);
+            // Position Right Arm to connect with Handle
+            // We align the hand position to the knife handle position visually
+            // Arm comes from bottom right corner
+            rightArm.position.set(0.15, -0.22, -0.2);
+            rightArm.rotation.set(0.1, -0.25, 0.1);
 
-    // Refined connection: Move closer to center to grip the handle
-    rightArm.position.set(0.12, -0.2, -0.24); // Adjusted for larger size (Z closer to match handle)
-    rightArm.rotation.set(0, -0.15, 0.05);
-    rightArm.scale.set(1.3, 1.3, 1.3); // Reduced scale from 1.8
+            // Refined connection: Move closer to center to grip the handle
+            rightArm.position.set(0.12, -0.2, -0.24); // Adjusted for larger size (Z closer to match handle)
+            rightArm.rotation.set(0, -0.15, 0.05);
+            rightArm.scale.set(1.3, 1.3, 1.3); // Reduced scale from 1.8
 
-    weaponModel.add(rightArm);
+            weaponModel.add(rightArm);
 
-    // --- LEFT ARM (Supporting/Ready - WIDER APART) ---
-    const leftArm = new THREE.Group();
+            // --- LEFT ARM (Supporting/Ready - WIDER APART) ---
+            const leftArm = new THREE.Group();
 
-    // Sleeve (Thicker)
-    const leftSleeve = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.14, 0.55), matSleeve);
-    leftSleeve.position.set(0, 0, 0.25);
-    leftArm.add(leftSleeve);
+            // Sleeve (Thicker)
+            const leftSleeve = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.14, 0.55), matSleeve);
+            leftSleeve.position.set(0, 0, 0.25);
+            leftArm.add(leftSleeve);
 
-    // Hand (Thicker)
-    const leftHand = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.1, 0.14), matGlove);
-    leftHand.position.set(0, 0, -0.05);
-    leftArm.add(leftHand);
+            // Hand (Thicker)
+            const leftHand = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.1, 0.14), matGlove);
+            leftHand.position.set(0, 0, -0.05);
+            leftArm.add(leftHand);
 
-    // Fingers (Fist/Ready)
-    const lFingers = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.09, 0.06), matSkin);
-    lFingers.position.set(0, -0.015, -0.13);
-    leftArm.add(lFingers);
+            // Fingers (Fist/Ready)
+            const lFingers = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.09, 0.06), matSkin);
+            lFingers.position.set(0, -0.015, -0.13);
+            leftArm.add(lFingers);
 
-    // Position Left Arm FARTHER to the left (Wider Stance)
-    leftArm.position.set(-0.8, -0.35, -0.25); // Adjusted for larger size
-    leftArm.rotation.set(0.2, 0.3, -0.15);
-    leftArm.scale.set(1.3, 1.3, 1.3); // Reduced scale from 1.8
+            // Position Left Arm FARTHER to the left (Wider Stance)
+            leftArm.position.set(-0.8, -0.35, -0.25); // Adjusted for larger size
+            leftArm.rotation.set(0.2, 0.3, -0.15);
+            leftArm.scale.set(1.3, 1.3, 1.3); // Reduced scale from 1.8
 
-    weaponModel.add(leftArm);
+            weaponModel.add(leftArm);
         }
 
 
 
         function createArm(x, y, z, rotX, rotY, rotZ, isTrigger) {
             const grp = new THREE.Group();
-            
+
             // [TASK] Updated Arm Geometry to match Knife Style (Thicker/Larger)
-            
+
             // Sleeve: BoxGeometry matching knife arm dimensions
             const sleeve = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.14, 0.55), matSleeve);
             sleeve.position.set(0, 0, 0.25);
@@ -7847,7 +7848,7 @@
 
             grp.position.set(x, y, z);
             grp.rotation.set(rotX, rotY, rotZ);
-            
+
             // [TASK] Apply Uniform Scale (Non-knife arms at half size)
             grp.scale.set(0.65, 0.65, 0.65);
 
@@ -10473,9 +10474,9 @@
                 elVignette.style.opacity = (isAiming && w.type !== 'KNIFE') ? 0.5 : 0;
             }
 
-                if (window.knifeSwing > 0) {
-                    window.knifeSwing = Math.max(window.knifeSwing - dt, 0);
-                }
+            if (window.knifeSwing > 0) {
+                window.knifeSwing = Math.max(window.knifeSwing - dt, 0);
+            }
 
 
             updateShells(dt);
