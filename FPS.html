@@ -2454,6 +2454,44 @@
             z-index: 1001;
             pointer-events: none;
         }
+
+        /* --- USER REQUEST: PC Mode Weapon Icon Scale x3 & Active State --- */
+        @media (min-width: 1025px) {
+            #weapon-list-left {
+                transform: translateY(-50%) scale(3.0) !important;
+                transform-origin: left center !important;
+                left: 60px !important; /* Increased margin for scaled icons */
+                gap: 5px !important; /* Tighten gap due to scaling */
+            }
+
+            .weapon-item .key-hint {
+                font-size: 14px; /* Adjust font size for scaling */
+                width: 20px;
+                height: 20px;
+                line-height: 20px;
+            }
+
+            .weapon-item .icon-box {
+                /* Icons are already large, scaling container makes them massive. 
+                   Adjusting internal sizing if needed, but transform scale is easiest. */
+            }
+
+            .weapon-item.active {
+                opacity: 1 !important;
+                transform: translateX(10px) !important; /* Slide out slightly */
+            }
+
+            .weapon-item.active .icon-box {
+                border: 2px solid var(--neon-cyan) !important;
+                background: rgba(0, 243, 255, 0.3) !important;
+                box-shadow: 0 0 30px var(--neon-cyan), inset 0 0 10px var(--neon-cyan) !important;
+            }
+
+            .weapon-item:not(.active) {
+                opacity: 0.3 !important;
+                transform: translateX(0) !important;
+            }
+        }
     </style>
 </head>
 
