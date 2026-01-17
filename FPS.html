@@ -2657,6 +2657,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script>
         // Global Error Handler to debug Black Screen issues
@@ -7008,7 +7009,7 @@
             }
         }
 
-        function buildRifle() {
+        function buildRifleGeometry() {
             // 리시버 (본체)
             const receiver = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.06, 0.3), matBody);
             weaponModel.add(receiver);
@@ -7098,6 +7099,44 @@
             createArm(-0.04, -0.08, -0.32, 0.4, 0.1, -0.1, false);
             // Right Arm
             createArm(0.12, -0.15, 0.22, 0.2, -0.2, 0.4, true);
+        }
+
+        function buildRifle() {
+            if (typeof THREE.GLTFLoader !== 'undefined') {
+                // Add arms immediately so they appear while loading
+                createArm(-0.04, -0.08, -0.32, 0.4, 0.1, -0.1, false);
+                createArm(0.12, -0.15, 0.22, 0.2, -0.2, 0.4, true);
+
+                const loader = new THREE.GLTFLoader();
+                loader.load('gun/Assault Rifle.glb', function (gltf) {
+                    const model = gltf.scene;
+                    
+                    model.traverse(function (child) {
+                        if (child.isMesh) {
+                            child.castShadow = true;
+                            child.receiveShadow = true;
+                        }
+                    });
+
+                    // Scale and Position tuning
+                    // Adjust these values to align with the original weapon position
+                    model.scale.set(2, 2, 2); 
+                    model.rotation.y = Math.PI; 
+                    model.position.set(0, -0.05, 0); 
+                    
+                    weaponModel.add(model);
+                }, undefined, function (error) {
+                    console.error('Rifle GLB load failed:', error);
+                    // Clear weaponModel (arms + anything else) and rebuild geometry
+                    while(weaponModel.children.length > 0){ 
+                        weaponModel.remove(weaponModel.children[0]); 
+                    }
+                    buildRifleGeometry();
+                });
+
+            } else {
+                buildRifleGeometry();
+            }
         }
 
         function buildSniper() {
