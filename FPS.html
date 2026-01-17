@@ -10049,15 +10049,17 @@
                     if (window.knifeSwing > 0) {
                         const swingT = 1 - (window.knifeSwing / window.KNIFE_SWING_DURATION);
                         const ease = Math.sin(swingT * Math.PI);
+                        const sweep = swingT; // 0 -> 1 left to right
+                        const arc = Math.sin(swingT * Math.PI);
                         weaponModel.rotation.set(
-                            -0.8 * ease,
-                            -1.6 * ease,
-                            1.0 * ease
+                            -0.2 - 0.6 * arc,
+                            -0.9 + 1.8 * sweep,
+                            0.4 - 0.8 * arc
                         );
                         weaponModel.position.set(
-                            0.2 + (-0.7 * ease),
-                            -0.25 + (0.18 * ease),
-                            -0.4 + (0.15 * ease)
+                            -0.4 + (0.9 * sweep),
+                            -0.28 + (0.08 * arc),
+                            -0.45 + (0.12 * arc)
                         );
                     } else {
                         // CS Style Reset
