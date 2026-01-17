@@ -7249,13 +7249,16 @@
             if (!panel || !window.rifleModel || panel.dataset.bound === '1') return;
             panel.dataset.bound = '1';
 
-            panel.addEventListener('pointerdown', (e) => { e.stopPropagation(); });
-            panel.addEventListener('pointermove', (e) => { e.stopPropagation(); });
-            panel.addEventListener('pointerup', (e) => { e.stopPropagation(); });
-            panel.addEventListener('wheel', (e) => { e.stopPropagation(); }, { passive: false });
-            panel.addEventListener('touchstart', (e) => { e.stopPropagation(); }, { passive: false });
-            panel.addEventListener('touchmove', (e) => { e.stopPropagation(); }, { passive: false });
-            panel.addEventListener('touchend', (e) => { e.stopPropagation(); }, { passive: false });
+            const stop = (e) => { e.stopPropagation(); };
+            panel.addEventListener('pointerdown', stop, true);
+            panel.addEventListener('pointermove', stop, true);
+            panel.addEventListener('pointerup', stop, true);
+            panel.addEventListener('click', stop, true);
+            panel.addEventListener('mousedown', stop, true);
+            panel.addEventListener('touchstart', stop, { passive: true, capture: true });
+            panel.addEventListener('touchmove', stop, { passive: true, capture: true });
+            panel.addEventListener('touchend', stop, { passive: true, capture: true });
+            panel.addEventListener('wheel', stop, { passive: true, capture: true });
 
             const x = document.getElementById('rifle-x');
             const y = document.getElementById('rifle-y');
