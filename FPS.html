@@ -874,6 +874,29 @@
             pointer-events: auto;
         }
 
+        /* Mobile lobby: ensure buttons are clickable over overlays */
+        @media (max-width: 1024px) {
+            #room-menu,
+            #create-room-modal,
+            #room-waiting {
+                pointer-events: auto;
+            }
+
+            #room-menu button,
+            #create-room-modal button,
+            #room-waiting button {
+                pointer-events: auto;
+                touch-action: manipulation;
+            }
+
+            #room-menu .menu-actions,
+            #room-menu #room-list-container,
+            #create-room-modal .modal-content {
+                pointer-events: auto;
+            }
+        }
+
+
         #create-room-modal {
             background: rgba(0, 0, 0, 0.7);
             z-index: 202;
