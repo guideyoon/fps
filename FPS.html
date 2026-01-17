@@ -3065,6 +3065,8 @@
         const matHealthPill = new THREE.MeshStandardMaterial({ color: 0xff00ff, roughness: 0.2, metalness: 0.8, emissive: 0xff00ff, emissiveIntensity: 0.5 });
 
         let grenades = []; // Active grenades in the world
+        let rifleLoadToken = 0;
+
         const matGrenade = new THREE.MeshStandardMaterial({ color: 0x4caf50, roughness: 0.7, metalness: 0.4 });
         const GRAVITY = -3.5; // Reduced from -5.0 for even more airtime
 
@@ -7194,8 +7196,12 @@
                 createArm(-0.04, -0.08, -0.32, 0.4, 0.1, -0.1, false);
                 createArm(0.12, -0.15, 0.22, 0.2, -0.2, 0.4, true);
 
+                // Clear any previous async load results
+                const token = ++rifleLoadToken;
+
                 const loader = new THREE.GLTFLoader();
                 loader.load('gun/Assault Rifle.glb', function (gltf) {
+                    if (token !== rifleLoadToken) return;
                     const model = gltf.scene;
                     
                     model.traverse(function (child) {
@@ -7210,6 +7216,11 @@
                     model.scale.set(0.22, 0.22, 0.22); 
                     model.rotation.y = Math.PI + Math.PI / 2; // +90 degrees right
                     model.position.set(0.2, -0.2, -0.2); 
+
+                    // Remove any previous GLB rifle model
+                    if (window.rifleModel) {
+                        weaponModel.remove(window.rifleModel);
+                    }
 
                     window.rifleModel = model;
                     setupRifleDebugUI();
