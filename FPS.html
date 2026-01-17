@@ -10635,6 +10635,47 @@
                 }
             }, 500); // Slight delay to ensure everything loaded
         })();
+
+        // --- FORCE PC WEAPON ICON STYLE (JS INJECTION) ---
+        // CSS 우선순위 문제를 해결하기 위해 JS로 스타일을 직접 주입합니다.
+        (function() {
+            const style = document.createElement('style');
+            style.innerHTML = `
+                @media (min-width: 800px) {
+                    #weapon-list-left {
+                        display: flex !important;
+                        transform: translateY(-50%) scale(3.0) !important;
+                        transform-origin: left center !important;
+                        left: 60px !important;
+                        gap: 5px !important;
+                        z-index: 99999 !important;
+                        opacity: 1 !important;
+                        visibility: visible !important;
+                        position: fixed !important;
+                        top: 50% !important;
+                    }
+                    .weapon-item {
+                        display: flex !important;
+                        align-items: center;
+                        justify-content: flex-start;
+                    }
+                    .weapon-item.active {
+                        opacity: 1 !important;
+                        transform: translateX(10px) !important;
+                    }
+                    .weapon-item.active .icon-box {
+                        border: 2px solid #00f3ff !important;
+                        background: rgba(0, 243, 255, 0.3) !important;
+                        box-shadow: 0 0 30px #00f3ff, inset 0 0 10px #00f3ff !important;
+                    }
+                    .weapon-item:not(.active) {
+                        opacity: 0.3 !important;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+            console.log("Force applied PC weapon icon styles via JS");
+        })();
     </script>
 
 </body>
