@@ -2456,29 +2456,27 @@
         }
 
         /* --- USER REQUEST: PC Mode Weapon Icon Scale x3 & Active State --- */
-        @media (min-width: 1025px) {
+        /* Modified media query to cover smaller PC screens/windowed mode */
+        @media (min-width: 800px) {
             #weapon-list-left {
+                display: flex !important; /* Force display */
                 transform: translateY(-50%) scale(3.0) !important;
                 transform-origin: left center !important;
-                left: 60px !important; /* Increased margin for scaled icons */
-                gap: 5px !important; /* Tighten gap due to scaling */
+                left: 60px !important; 
+                gap: 5px !important;
+                z-index: 9999 !important; /* Ensure visibility on top */
             }
 
             .weapon-item .key-hint {
-                font-size: 14px; /* Adjust font size for scaling */
+                font-size: 14px; 
                 width: 20px;
                 height: 20px;
                 line-height: 20px;
             }
 
-            .weapon-item .icon-box {
-                /* Icons are already large, scaling container makes them massive. 
-                   Adjusting internal sizing if needed, but transform scale is easiest. */
-            }
-
             .weapon-item.active {
                 opacity: 1 !important;
-                transform: translateX(10px) !important; /* Slide out slightly */
+                transform: translateX(10px) !important; 
             }
 
             .weapon-item.active .icon-box {
