@@ -7868,22 +7868,26 @@
             // Sleeve: BoxGeometry matching knife arm dimensions
             const sleeve = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.14, 0.55), matSleeve);
             sleeve.position.set(0, 0, 0.25);
+            sleeve.castShadow = true; // [Fix] Add Shadow
             grp.add(sleeve);
 
             // Hand: BoxGeometry matching knife hand dimensions
             const hand = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.1, 0.14), matGlove);
             hand.position.set(0, 0, -0.05);
+            hand.castShadow = true; // [Fix] Add Shadow
             grp.add(hand);
 
             if (isTrigger) {
                 // Trigger Finger - Thicker and adjusted position
                 const finger = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.03, 0.08), matSkin);
                 finger.position.set(0.04, 0.02, -0.12);
+                finger.castShadow = true; // [Fix] Add Shadow
                 grp.add(finger);
             } else {
                 // Supporting Hand Fingers (Fist-like block)
                 const fingers = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.09, 0.06), matSkin);
                 fingers.position.set(0, -0.015, -0.13);
+                fingers.castShadow = true; // [Fix] Add Shadow
                 grp.add(fingers);
             }
 
