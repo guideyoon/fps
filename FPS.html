@@ -384,6 +384,51 @@
             /* Hide old selector */
         }
 
+        #rifle-debug-panel {
+            position: fixed;
+            top: 12px;
+            right: 12px;
+            z-index: 9999;
+            background: rgba(0, 0, 0, 0.75);
+            color: #9eff9e;
+            font-family: ui-monospace, Menlo, Consolas, monospace;
+            font-size: 12px;
+            padding: 10px 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            display: none;
+        }
+
+        #rifle-debug-panel .panel-title {
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #c9ffd1;
+        }
+
+        #rifle-debug-panel .panel-row {
+            display: grid;
+            grid-template-columns: 14px 110px 46px;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+
+        #rifle-debug-panel input[type="range"] {
+            width: 110px;
+        }
+
+        #rifle-debug-panel button {
+            margin-top: 6px;
+            width: 100%;
+            background: #1f8f4a;
+            color: #fff;
+            border: none;
+            padding: 6px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+
         .weapon-slot {
             width: 30px;
             height: 6px;
@@ -2655,6 +2700,33 @@
             <div class="scope-center-dot"></div>
         </div>
     </div>
+
+    <!-- Rifle GLB Debug Panel -->
+    <div id="rifle-debug-panel">
+        <div class="panel-title">Rifle GLB</div>
+        <div class="panel-row">
+            <label for="rifle-x">X</label>
+            <input id="rifle-x" type="range" min="-1" max="1" step="0.01" value="0.2">
+            <span id="rifle-x-val">0.20</span>
+        </div>
+        <div class="panel-row">
+            <label for="rifle-y">Y</label>
+            <input id="rifle-y" type="range" min="-1" max="1" step="0.01" value="-0.2">
+            <span id="rifle-y-val">-0.20</span>
+        </div>
+        <div class="panel-row">
+            <label for="rifle-z">Z</label>
+            <input id="rifle-z" type="range" min="-1" max="1" step="0.01" value="-0.2">
+            <span id="rifle-z-val">-0.20</span>
+        </div>
+        <div class="panel-row">
+            <label for="rifle-scale">S</label>
+            <input id="rifle-scale" type="range" min="0.05" max="0.5" step="0.01" value="0.22">
+            <span id="rifle-scale-val">0.22</span>
+        </div>
+        <button id="rifle-copy">Copy values</button>
+    </div>
+
 
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
@@ -7123,6 +7195,10 @@
                     model.scale.set(0.22, 0.22, 0.22); 
                     model.rotation.y = Math.PI + Math.PI / 2; // +90 degrees right
                     model.position.set(0.2, -0.2, -0.2); 
+
+                    window.rifleModel = model;
+                    setupRifleDebugUI();
+                    document.getElementById('rifle-debug-panel').style.display = 'block';
                     
                     weaponModel.add(model);
                 }, undefined, function (error) {
@@ -7139,7 +7215,48 @@
             }
         }
 
+        function setupRifleDebugUI() {
+            const panel = document.getElementById('rifle-debug-panel');
+            if (!panel || !window.rifleModel || panel.dataset.bound === '1') return;
+            panel.dataset.bound = '1';
+
+            const x = document.getElementById('rifle-x');
+            const y = document.getElementById('rifle-y');
+            const z = document.getElementById('rifle-z');
+            const s = document.getElementById('rifle-scale');
+            const xVal = document.getElementById('rifle-x-val');
+            const yVal = document.getElementById('rifle-y-val');
+            const zVal = document.getElementById('rifle-z-val');
+            const sVal = document.getElementById('rifle-scale-val');
+            const copy = document.getElementById('rifle-copy');
+
+            const apply = () => {
+                if (!window.rifleModel) return;
+                const xv = parseFloat(x.value);
+                const yv = parseFloat(y.value);
+                const zv = parseFloat(z.value);
+                const sv = parseFloat(s.value);
+                window.rifleModel.position.set(xv, yv, zv);
+                window.rifleModel.scale.set(sv, sv, sv);
+                xVal.textContent = xv.toFixed(2);
+                yVal.textContent = yv.toFixed(2);
+                zVal.textContent = zv.toFixed(2);
+                sVal.textContent = sv.toFixed(2);
+            };
+
+            [x, y, z, s].forEach(el => {
+                el.addEventListener('input', apply);
+            });
+
+            copy.addEventListener('click', () => {
+                console.log('[Rifle GLB] position:', window.rifleModel.position, 'scale:', window.rifleModel.scale.x);
+            });
+
+            apply();
+        }
+
         function buildSniper() {
+
             // 리시버 (본체)
             const receiver = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.07, 0.4), matBody);
             weaponModel.add(receiver);
