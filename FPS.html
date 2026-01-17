@@ -2917,6 +2917,8 @@
         let playerVelocity = new THREE.Vector3();
         let playerHP = 100;
         let debugShellVelocity = false;
+        let isAiming = false;
+        let aimLocked = false;
         window.knifeSwing = window.knifeSwing ?? 0;
         window.KNIFE_SWING_DURATION = window.KNIFE_SWING_DURATION ?? 0.25;
 
@@ -3809,6 +3811,16 @@
 
             // UI References
             const modeSelection = document.getElementById('mode-selection');
+
+            // Mouse wheel click to toggle aim lock (no firing)
+            document.addEventListener('auxclick', (e) => {
+                if (e.button !== 1) return;
+                aimLocked = !aimLocked;
+                isAiming = aimLocked;
+                const scope = document.getElementById('sniper-scope');
+                if (scope) scope.style.display = isAiming ? 'block' : 'none';
+            });
+
             const nameSetup = document.getElementById('name-setup');
             const roomMenu = document.getElementById('room-menu');
             const createRoomModal = document.getElementById('create-room-modal');
