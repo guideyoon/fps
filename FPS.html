@@ -7311,6 +7311,17 @@
                     document.getElementById('rifle-debug-panel').style.display = 'block';
                     
                     weaponModel.add(model);
+                    weaponModel.updateMatrixWorld(true);
+
+                    // Auto-align muzzle flash to rifle front
+                    if (muzzleFlash) {
+                        const box = new THREE.Box3().setFromObject(model);
+                        const center = new THREE.Vector3();
+                        box.getCenter(center);
+                        const muzzleWorld = new THREE.Vector3(center.x, center.y, box.min.z - 0.02);
+                        weaponModel.worldToLocal(muzzleWorld);
+                        muzzleFlash.position.copy(muzzleWorld);
+                    }
                 }, undefined, function (error) {
                     console.error('Rifle GLB load failed:', error);
                     // Clear weaponModel (arms + anything else) and rebuild geometry
