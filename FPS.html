@@ -2114,6 +2114,72 @@
         /* Landscape Orientation Fixes for Mobile - Scaled Down Initial Screen */
         @media (orientation: landscape) {
 
+            /* Lobby & Create Room compact layout */
+            #room-menu h2,
+            #create-room-modal h2 {
+                font-size: 22px;
+                margin-bottom: 16px;
+            }
+
+            #room-menu .menu-actions {
+                gap: 10px;
+                margin-bottom: 10px;
+            }
+
+            #room-menu .menu-actions button,
+            #create-room-modal button {
+                padding: 8px 18px;
+                font-size: 14px;
+                margin: 6px;
+            }
+
+            #room-list-container {
+                width: 80%;
+                height: 220px;
+                padding: 10px;
+            }
+
+            .room-item {
+                padding: 10px 12px;
+                gap: 10px;
+            }
+
+            .room-info h3 {
+                font-size: 14px;
+            }
+
+            .room-info p {
+                font-size: 12px;
+            }
+
+            .status-badge {
+                font-size: 10px;
+                padding: 4px 8px;
+            }
+
+            #create-room-modal .modal-content {
+                min-width: 300px;
+                padding: 20px;
+                gap: 12px;
+            }
+
+            #create-room-modal .input-group {
+                gap: 6px;
+            }
+
+            #create-room-modal label {
+                font-size: 12px;
+            }
+
+            #create-room-modal input[type="text"],
+            #create-room-modal select {
+                width: 240px;
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+        }
+
+
             /* Ensure mode selection is visible but compact when game is NOT active */
             body:not(.game-active) #mode-selection {
                 display: flex !important;
