@@ -7331,15 +7331,15 @@
             panel.dataset.bound = '1';
 
             const stop = (e) => { e.stopPropagation(); };
-            panel.addEventListener('pointerdown', stop, true);
-            panel.addEventListener('pointermove', stop, true);
-            panel.addEventListener('pointerup', stop, true);
-            panel.addEventListener('click', stop, true);
-            panel.addEventListener('mousedown', stop, true);
-            panel.addEventListener('touchstart', stop, { passive: true, capture: true });
-            panel.addEventListener('touchmove', stop, { passive: true, capture: true });
-            panel.addEventListener('touchend', stop, { passive: true, capture: true });
-            panel.addEventListener('wheel', stop, { passive: true, capture: true });
+            panel.addEventListener('pointerdown', stop);
+            panel.addEventListener('pointermove', stop);
+            panel.addEventListener('pointerup', stop);
+            panel.addEventListener('click', stop);
+            panel.addEventListener('mousedown', stop);
+            panel.addEventListener('touchstart', stop, { passive: true });
+            panel.addEventListener('touchmove', stop, { passive: true });
+            panel.addEventListener('touchend', stop, { passive: true });
+            panel.addEventListener('wheel', stop, { passive: true });
 
             // Elements
             const ids = ['rifle-x', 'rifle-y', 'rifle-z', 'rifle-scale', 'rifle-rx', 'rifle-ry', 'rifle-rz', 'rifle-x-step'];
