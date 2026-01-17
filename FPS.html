@@ -2748,8 +2748,8 @@
         let playerVelocity = new THREE.Vector3();
         let playerHP = 100;
         let debugShellVelocity = false;
-        let knifeSwing = 0;
-        const KNIFE_SWING_DURATION = 0.25;
+        window.knifeSwing = window.knifeSwing ?? 0;
+        window.KNIFE_SWING_DURATION = window.KNIFE_SWING_DURATION ?? 0.25;
 
 
 
@@ -9506,7 +9506,7 @@
                 // spawnShell(); // 탄피 효과 비활성화
                 SoundGen.playShoot(w.type);
             } else {
-                knifeSwing = KNIFE_SWING_DURATION;
+                window.knifeSwing = window.KNIFE_SWING_DURATION;
                 SoundGen.playKnife();
             }
 
@@ -10047,8 +10047,8 @@
 
                 // 나이프일 때만 특별한 위치/회전 처리
                 if (w.type === 'KNIFE') {
-                    if (knifeSwing > 0) {
-                        const swingT = 1 - (knifeSwing / KNIFE_SWING_DURATION);
+                    if (window.knifeSwing > 0) {
+                        const swingT = 1 - (window.knifeSwing / window.KNIFE_SWING_DURATION);
                         const ease = Math.sin(swingT * Math.PI);
                         weaponModel.rotation.set(
                             -0.4 * ease,
@@ -10080,9 +10080,10 @@
                 elVignette.style.opacity = (isAiming && w.type !== 'KNIFE') ? 0.5 : 0;
             }
 
-            if (knifeSwing > 0) {
-                knifeSwing = Math.max(knifeSwing - dt, 0);
-            }
+                if (window.knifeSwing > 0) {
+                    window.knifeSwing = Math.max(window.knifeSwing - dt, 0);
+                }
+
 
             updateShells(dt);
 
