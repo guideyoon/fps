@@ -3715,15 +3715,15 @@
         }
 
         function init() {
-            // [TASK] Automatic Fullscreen on Interaction
-            // Trigger fullscreen request on any body click/touch if not already active
-            const autoEnterFullscreen = (e) => {
-                const panel = document.getElementById('rifle-debug-panel');
-                if (panel && panel.contains(e.target)) return;
-                enterFullscreen();
-            };
-            document.body.addEventListener('click', autoEnterFullscreen);
-            document.body.addEventListener('touchstart', autoEnterFullscreen, { passive: true });
+            // [TASK] Automatic Fullscreen on Interaction (disabled)
+            // const autoEnterFullscreen = (e) => {
+            //     const panel = document.getElementById('rifle-debug-panel');
+            //     if (panel && panel.contains(e.target)) return;
+            //     enterFullscreen();
+            // };
+            // document.body.addEventListener('click', autoEnterFullscreen);
+            // document.body.addEventListener('touchstart', autoEnterFullscreen, { passive: true });
+
 
 
             // UI References
