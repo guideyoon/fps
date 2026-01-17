@@ -7337,7 +7337,8 @@
         }
 
         function buildRifle() {
-            if (typeof THREE.GLTFLoader !== 'undefined') {
+            // [USER REQUEST] Disable GLB Rifle Model temporarily
+            if (false && typeof THREE.GLTFLoader !== 'undefined') {
                 // Add arms immediately so they appear while loading
                 createArm(-0.04, -0.08, -0.32, 0.4, 0.1, -0.1, false);
                 createArm(0.12, -0.15, 0.22, 0.2, -0.2, 0.4, true);
