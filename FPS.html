@@ -407,25 +407,49 @@
 
         #rifle-debug-panel .panel-row {
             display: grid;
-            grid-template-columns: 14px 110px 46px;
+            grid-template-columns: 25px 1fr 45px;
             align-items: center;
-            gap: 8px;
+            gap: 4px;
             margin-bottom: 6px;
         }
 
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            width: 100%;
+        }
+
         #rifle-debug-panel input[type="range"] {
-            width: 110px;
+            flex: 1;
+            min-width: 0;
+            cursor: pointer;
         }
 
         #rifle-debug-panel button {
-            margin-top: 6px;
-            width: 100%;
             background: #1f8f4a;
             color: #fff;
             border: none;
             padding: 6px 8px;
             border-radius: 4px;
             cursor: pointer;
+        }
+
+        .nudge-btn {
+            width: 22px;
+            height: 22px;
+            padding: 0 !important;
+            background: #444 !important;
+            border: 1px solid rgba(255, 255, 255, 0.2) !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            line-height: 1;
+        }
+
+        .nudge-btn:hover {
+            background: #666 !important;
         }
 
         #rifle-debug-panel #rifle-x-minus,
@@ -2718,17 +2742,25 @@
         <div class="panel-title">Rifle GLB</div>
         <div class="panel-row">
             <label for="rifle-x">X</label>
-            <input id="rifle-x" type="range" min="-1" max="1" step="0.01" value="0.2">
+            <div class="slider-group">
+                <button class="nudge-btn" type="button" data-target="rifle-x" data-dir="-1">-</button>
+                <input id="rifle-x" type="range" min="-1" max="1" step="0.01" value="0.2">
+                <button class="nudge-btn" type="button" data-target="rifle-x" data-dir="1">+</button>
+            </div>
             <span id="rifle-x-val">0.20</span>
         </div>
         <div class="panel-row">
             <label for="rifle-x-step">XS</label>
-            <input id="rifle-x-step" type="range" min="0.001" max="0.05" step="0.001" value="0.01">
+            <div class="slider-group">
+                <button class="nudge-btn" type="button" data-target="rifle-x-step" data-dir="-1">-</button>
+                <input id="rifle-x-step" type="range" min="0.001" max="0.05" step="0.001" value="0.01">
+                <button class="nudge-btn" type="button" data-target="rifle-x-step" data-dir="1">+</button>
+            </div>
             <span id="rifle-x-step-val">0.010</span>
         </div>
         <div class="panel-row">
             <label for="rifle-x-nudge">X±</label>
-            <div style="display:flex;gap:6px;align-items:center;">
+            <div style="display:flex;gap:6px;align-items:center;justify-content:center;width:100%">
                 <button id="rifle-x-minus" type="button">-</button>
                 <button id="rifle-x-plus" type="button">+</button>
             </div>
@@ -2736,35 +2768,59 @@
         </div>
         <div class="panel-row">
             <label for="rifle-y">Y</label>
-            <input id="rifle-y" type="range" min="-1" max="1" step="0.01" value="-0.2">
+            <div class="slider-group">
+                <button class="nudge-btn" type="button" data-target="rifle-y" data-dir="-1">-</button>
+                <input id="rifle-y" type="range" min="-1" max="1" step="0.01" value="-0.2">
+                <button class="nudge-btn" type="button" data-target="rifle-y" data-dir="1">+</button>
+            </div>
             <span id="rifle-y-val">-0.20</span>
         </div>
         <div class="panel-row">
             <label for="rifle-z">Z</label>
-            <input id="rifle-z" type="range" min="-1" max="1" step="0.01" value="-0.2">
+            <div class="slider-group">
+                <button class="nudge-btn" type="button" data-target="rifle-z" data-dir="-1">-</button>
+                <input id="rifle-z" type="range" min="-1" max="1" step="0.01" value="-0.2">
+                <button class="nudge-btn" type="button" data-target="rifle-z" data-dir="1">+</button>
+            </div>
             <span id="rifle-z-val">-0.20</span>
         </div>
         <div class="panel-row">
             <label for="rifle-scale">S</label>
-            <input id="rifle-scale" type="range" min="0.05" max="0.5" step="0.01" value="0.22">
+            <div class="slider-group">
+                <button class="nudge-btn" type="button" data-target="rifle-scale" data-dir="-1">-</button>
+                <input id="rifle-scale" type="range" min="0.05" max="0.5" step="0.01" value="0.22">
+                <button class="nudge-btn" type="button" data-target="rifle-scale" data-dir="1">+</button>
+            </div>
             <span id="rifle-scale-val">0.22</span>
         </div>
         <div class="panel-row">
             <label for="rifle-rx">RX</label>
-            <input id="rifle-rx" type="range" min="-3.14" max="3.14" step="0.01" value="0">
+            <div class="slider-group">
+                <button class="nudge-btn" type="button" data-target="rifle-rx" data-dir="-1">-</button>
+                <input id="rifle-rx" type="range" min="-3.14" max="3.14" step="0.01" value="0">
+                <button class="nudge-btn" type="button" data-target="rifle-rx" data-dir="1">+</button>
+            </div>
             <span id="rifle-rx-val">0.00</span>
         </div>
         <div class="panel-row">
             <label for="rifle-ry">RY</label>
-            <input id="rifle-ry" type="range" min="-3.14" max="3.14" step="0.01" value="4.71">
+            <div class="slider-group">
+                <button class="nudge-btn" type="button" data-target="rifle-ry" data-dir="-1">-</button>
+                <input id="rifle-ry" type="range" min="-3.14" max="3.14" step="0.01" value="4.71">
+                <button class="nudge-btn" type="button" data-target="rifle-ry" data-dir="1">+</button>
+            </div>
             <span id="rifle-ry-val">4.71</span>
         </div>
         <div class="panel-row">
             <label for="rifle-rz">RZ</label>
-            <input id="rifle-rz" type="range" min="-3.14" max="3.14" step="0.01" value="0">
+            <div class="slider-group">
+                <button class="nudge-btn" type="button" data-target="rifle-rz" data-dir="-1">-</button>
+                <input id="rifle-rz" type="range" min="-3.14" max="3.14" step="0.01" value="0">
+                <button class="nudge-btn" type="button" data-target="rifle-rz" data-dir="1">+</button>
+            </div>
             <span id="rifle-rz-val">0.00</span>
         </div>
-        <button id="rifle-copy">Copy values</button>
+        <button id="rifle-copy" style="width:100%;margin-top:6px;">Copy values</button>
     </div>
 
 
@@ -7285,68 +7341,106 @@
             panel.addEventListener('touchend', stop, { passive: true, capture: true });
             panel.addEventListener('wheel', stop, { passive: true, capture: true });
 
-            const x = document.getElementById('rifle-x');
-            const y = document.getElementById('rifle-y');
-            const z = document.getElementById('rifle-z');
-            const s = document.getElementById('rifle-scale');
-            const rx = document.getElementById('rifle-rx');
-            const ry = document.getElementById('rifle-ry');
-            const rz = document.getElementById('rifle-rz');
-            const xStep = document.getElementById('rifle-x-step');
+            // Elements
+            const ids = ['rifle-x', 'rifle-y', 'rifle-z', 'rifle-scale', 'rifle-rx', 'rifle-ry', 'rifle-rz', 'rifle-x-step'];
+            const inputs = {};
+            const vals = {};
+            
+            ids.forEach(id => {
+                inputs[id] = document.getElementById(id);
+                vals[id] = document.getElementById(id + '-val');
+            });
+
             const xMinus = document.getElementById('rifle-x-minus');
             const xPlus = document.getElementById('rifle-x-plus');
-            const xVal = document.getElementById('rifle-x-val');
-            const yVal = document.getElementById('rifle-y-val');
-            const zVal = document.getElementById('rifle-z-val');
-            const sVal = document.getElementById('rifle-scale-val');
-            const rxVal = document.getElementById('rifle-rx-val');
-            const ryVal = document.getElementById('rifle-ry-val');
-            const rzVal = document.getElementById('rifle-rz-val');
-            const xStepVal = document.getElementById('rifle-x-step-val');
             const xNudgeVal = document.getElementById('rifle-x-nudge-val');
             const copy = document.getElementById('rifle-copy');
 
             const apply = () => {
                 if (!window.rifleModel) return;
-                const xv = parseFloat(x.value);
-                const yv = parseFloat(y.value);
-                const zv = parseFloat(z.value);
-                const sv = parseFloat(s.value);
-                const rxv = parseFloat(rx.value);
-                const ryv = parseFloat(ry.value);
-                const rzv = parseFloat(rz.value);
+                
+                const v = (id) => inputs[id] ? parseFloat(inputs[id].value) : 0;
+                
+                const xv = v('rifle-x');
+                const yv = v('rifle-y');
+                const zv = v('rifle-z');
+                const sv = v('rifle-scale');
+                const rxv = v('rifle-rx');
+                const ryv = v('rifle-ry');
+                const rzv = v('rifle-rz');
+                
                 window.rifleModel.position.set(xv, yv, zv);
                 window.rifleModel.scale.set(sv, sv, sv);
                 window.rifleModel.rotation.set(rxv, ryv, rzv);
-                xVal.textContent = xv.toFixed(2);
-                yVal.textContent = yv.toFixed(2);
-                zVal.textContent = zv.toFixed(2);
-                sVal.textContent = sv.toFixed(2);
-                rxVal.textContent = rxv.toFixed(2);
-                ryVal.textContent = ryv.toFixed(2);
-                rzVal.textContent = rzv.toFixed(2);
-                if (xStepVal) xStepVal.textContent = parseFloat(xStep.value).toFixed(3);
-                if (xNudgeVal) xNudgeVal.textContent = parseFloat(xStep.value).toFixed(3);
+                
+                // Update text displays
+                ids.forEach(id => {
+                    if (vals[id] && inputs[id]) {
+                        // Use more precision for small steps
+                        const prec = (inputs[id].step && parseFloat(inputs[id].step) < 0.01) ? 3 : 2;
+                        vals[id].textContent = parseFloat(inputs[id].value).toFixed(prec);
+                    }
+                });
+                
+                // Special update for X-Step display on the Nudge row
+                if (xNudgeVal && inputs['rifle-x-step']) {
+                    xNudgeVal.textContent = parseFloat(inputs['rifle-x-step'].value).toFixed(3);
+                }
             };
 
-            [x, y, z, s, rx, ry, rz, xStep].forEach(el => {
-                el.addEventListener('input', apply);
+            // Attach input listeners
+            ids.forEach(id => {
+                if (inputs[id]) inputs[id].addEventListener('input', apply);
             });
 
-            xMinus.addEventListener('click', () => {
-                const step = parseFloat(xStep.value);
-                x.value = (parseFloat(x.value) - step).toFixed(3);
-                apply();
-            });
-            xPlus.addEventListener('click', () => {
-                const step = parseFloat(xStep.value);
-                x.value = (parseFloat(x.value) + step).toFixed(3);
-                apply();
+            // Helper for nudge buttons (Delegation)
+            panel.addEventListener('click', (e) => {
+                const btn = e.target.closest('.nudge-btn');
+                if (!btn) return;
+                
+                const targetId = btn.dataset.target;
+                const dir = parseFloat(btn.dataset.dir || 0);
+                const input = inputs[targetId];
+                
+                if (input && dir !== 0) {
+                    const step = parseFloat(input.step) || 0.01;
+                    const val = parseFloat(input.value);
+                    
+                    // Determine precision from step
+                    const stepStr = input.step.toString();
+                    const decimals = stepStr.includes('.') ? stepStr.split('.')[1].length : 2;
+                    
+                    input.value = (val + (step * dir)).toFixed(decimals);
+                    apply();
+                }
             });
 
-            copy.addEventListener('click', () => {
-                console.log('[Rifle GLB] position:', window.rifleModel.position, 'scale:', window.rifleModel.scale.x, 'rotation:', window.rifleModel.rotation);
-            });
+            // Existing X-Nudge buttons logic
+            if (xMinus && inputs['rifle-x'] && inputs['rifle-x-step']) {
+                xMinus.addEventListener('click', () => {
+                    const step = parseFloat(inputs['rifle-x-step'].value);
+                    const x = inputs['rifle-x'];
+                    x.value = (parseFloat(x.value) - step).toFixed(3);
+                    apply();
+                });
+            }
+            if (xPlus && inputs['rifle-x'] && inputs['rifle-x-step']) {
+                xPlus.addEventListener('click', () => {
+                    const step = parseFloat(inputs['rifle-x-step'].value);
+                    const x = inputs['rifle-x'];
+                    x.value = (parseFloat(x.value) + step).toFixed(3);
+                    apply();
+                });
+            }
+
+            if (copy) {
+                copy.addEventListener('click', () => {
+                    console.log('[Rifle GLB] position:', window.rifleModel.position, 'scale:', window.rifleModel.scale.x, 'rotation:', window.rifleModel.rotation);
+                    const original = copy.textContent;
+                    copy.textContent = "Copied to Console";
+                    setTimeout(() => copy.textContent = original, 1000);
+                });
+            }
 
             apply();
         }
