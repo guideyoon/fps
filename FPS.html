@@ -2724,6 +2724,21 @@
             <input id="rifle-scale" type="range" min="0.05" max="0.5" step="0.01" value="0.22">
             <span id="rifle-scale-val">0.22</span>
         </div>
+        <div class="panel-row">
+            <label for="rifle-rx">RX</label>
+            <input id="rifle-rx" type="range" min="-3.14" max="3.14" step="0.01" value="0">
+            <span id="rifle-rx-val">0.00</span>
+        </div>
+        <div class="panel-row">
+            <label for="rifle-ry">RY</label>
+            <input id="rifle-ry" type="range" min="-3.14" max="3.14" step="0.01" value="4.71">
+            <span id="rifle-ry-val">4.71</span>
+        </div>
+        <div class="panel-row">
+            <label for="rifle-rz">RZ</label>
+            <input id="rifle-rz" type="range" min="-3.14" max="3.14" step="0.01" value="0">
+            <span id="rifle-rz-val">0.00</span>
+        </div>
         <button id="rifle-copy">Copy values</button>
     </div>
 
@@ -7224,10 +7239,16 @@
             const y = document.getElementById('rifle-y');
             const z = document.getElementById('rifle-z');
             const s = document.getElementById('rifle-scale');
+            const rx = document.getElementById('rifle-rx');
+            const ry = document.getElementById('rifle-ry');
+            const rz = document.getElementById('rifle-rz');
             const xVal = document.getElementById('rifle-x-val');
             const yVal = document.getElementById('rifle-y-val');
             const zVal = document.getElementById('rifle-z-val');
             const sVal = document.getElementById('rifle-scale-val');
+            const rxVal = document.getElementById('rifle-rx-val');
+            const ryVal = document.getElementById('rifle-ry-val');
+            const rzVal = document.getElementById('rifle-rz-val');
             const copy = document.getElementById('rifle-copy');
 
             const apply = () => {
@@ -7236,20 +7257,27 @@
                 const yv = parseFloat(y.value);
                 const zv = parseFloat(z.value);
                 const sv = parseFloat(s.value);
+                const rxv = parseFloat(rx.value);
+                const ryv = parseFloat(ry.value);
+                const rzv = parseFloat(rz.value);
                 window.rifleModel.position.set(xv, yv, zv);
                 window.rifleModel.scale.set(sv, sv, sv);
+                window.rifleModel.rotation.set(rxv, ryv, rzv);
                 xVal.textContent = xv.toFixed(2);
                 yVal.textContent = yv.toFixed(2);
                 zVal.textContent = zv.toFixed(2);
                 sVal.textContent = sv.toFixed(2);
+                rxVal.textContent = rxv.toFixed(2);
+                ryVal.textContent = ryv.toFixed(2);
+                rzVal.textContent = rzv.toFixed(2);
             };
 
-            [x, y, z, s].forEach(el => {
+            [x, y, z, s, rx, ry, rz].forEach(el => {
                 el.addEventListener('input', apply);
             });
 
             copy.addEventListener('click', () => {
-                console.log('[Rifle GLB] position:', window.rifleModel.position, 'scale:', window.rifleModel.scale.x);
+                console.log('[Rifle GLB] position:', window.rifleModel.position, 'scale:', window.rifleModel.scale.x, 'rotation:', window.rifleModel.rotation);
             });
 
             apply();
