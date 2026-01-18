@@ -3108,10 +3108,9 @@
             {
                 id: 0, name: "ASSAULT RIFLE",
                 type: 'RIFLE', maxAmmo: 30, ammo: 30, automatic: true,
-                // [User Request] Adjusted idle position/rotation based on screenshot
-                // FIX: Z must be negative to be in front of camera (-0.44)
-                posHip: new THREE.Vector3(0.23, -0.47, -0.44),
-                rotHip: new THREE.Vector3(0.43, 1.69, -0.25), // Idle Rotation
+                // [ROLLBACK] Restore working idle position, disable custom rotation for now
+                posHip: new THREE.Vector3(0.08, -0.25, -0.45),
+                rotHip: new THREE.Vector3(0, 0, 0), // Rotation disabled (was causing invisibility)
                 // ADS: Z더 멀리 (-0.45), FOV 약간 증가 (25) for smaller appearance
                 posAds: new THREE.Vector3(0, -0.062, -0.45),
                 rotAds: new THREE.Vector3(0, 0, 0), // Aim Rotation (Default)
