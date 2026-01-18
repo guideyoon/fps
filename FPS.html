@@ -7375,10 +7375,9 @@
                     }
 
                     window.rifleModel = model;
-                    // setupRifleDebugUI(); // [USER REQUEST] Hide Debug Panel
-                    // document.getElementById('rifle-debug-panel').style.display = 'block';
+                    setupRifleDebugUI(); // [USER REQUEST] Show Debug Panel
                     if (document.getElementById('rifle-debug-panel')) {
-                        document.getElementById('rifle-debug-panel').style.display = 'none';
+                        document.getElementById('rifle-debug-panel').style.display = 'block';
                     }
 
                     weaponModel.add(model);
