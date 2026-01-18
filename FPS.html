@@ -3177,6 +3177,7 @@
         const CAM_RECOIL_MAX = 0.35;
         let muzzleFlash;
         let hitShake = { x: 0, y: 0, intensity: 0 }; // 피격 시 화면 흔들림
+        let swayOffset = { x: 0, y: 0 }; // 무기 울렁임 (Idle Sway)
 
         let shells = [];
         let shellGeo, shellMat;
@@ -10358,16 +10359,16 @@
                         }
 
                         const bobFreq = keys.shift ? 15 : 8; const bobAmp = keys.shift ? 0.05 : 0.02;
-                        weaponContainer.position.y += Math.sin(time * 0.001 * bobFreq) * bobAmp;
-                        weaponContainer.position.x += Math.cos(time * 0.001 * (bobFreq / 2)) * bobAmp;
+                        swayOffset.y = Math.sin(time * 0.001 * bobFreq) * bobAmp;
+                        swayOffset.x = Math.cos(time * 0.001 * (bobFreq / 2)) * bobAmp;
                     }
                 } else {
                     playerVelocity.set(0, 0, 0);
                     // [User Request] Idle sway animation when standing still (all weapons)
                     const swayFreqX = 1.2; const swayFreqY = 0.9;
                     const swayAmpX = 0.015; const swayAmpY = 0.012;
-                    weaponContainer.position.x += Math.sin(time * 0.001 * swayFreqX) * swayAmpX;
-                    weaponContainer.position.y += Math.sin(time * 0.001 * swayFreqY) * swayAmpY;
+                    swayOffset.x = Math.sin(time * 0.001 * swayFreqX) * swayAmpX;
+                    swayOffset.y = Math.sin(time * 0.001 * swayFreqY) * swayAmpY;
                 }
 
 
@@ -10465,8 +10466,8 @@
                 if (weaponContainer.parent === camera) {
                     // 카메라의 자식일 경우: 로컬 오프셋만 설정 (카메라를 자동으로 따라감)
                     weaponContainer.position.set(
-                        currentPos.x + hitShake.x,
-                        currentPos.y + hitShake.y,
+                        currentPos.x + hitShake.x + swayOffset.x,
+                        currentPos.y + hitShake.y + swayOffset.y,
                         currentPos.z
                     );
                     weaponContainer.rotation.set(0, 0, 0); // 카메라 회전을 상속받으므로 자체 회전은 0
@@ -10476,8 +10477,8 @@
                     weaponContainer.position.x += hitShake.x;
                     weaponContainer.position.y += hitShake.y;
                     weaponContainer.quaternion.copy(camera.quaternion);
-                    weaponContainer.translateX(currentPos.x);
-                    weaponContainer.translateY(currentPos.y);
+                    weaponContainer.translateX(currentPos.x + swayOffset.x);
+                    weaponContainer.translateY(currentPos.y + swayOffset.y);
                     weaponContainer.translateZ(currentPos.z);
                 }
 
