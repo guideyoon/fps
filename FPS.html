@@ -9868,7 +9868,8 @@
             if (w.type !== 'KNIFE') {
                 w.ammo--;
                 updateUI();
-                const kick = isAiming ? w.recoil * 0.3 : w.recoil;
+                // [User Request] Increase ADS recoil for Rifle (0.3 -> 0.8)
+                const kick = isAiming ? (w.type === 'RIFLE' ? w.recoil * 0.8 : w.recoil * 0.3) : w.recoil;
                 // [User Request] Reduce weapon rotation recoil (muzzle climb) significantly, emphasize backward kick
                 const rotImpulse = kick * 1.0; // Reduced from 18 to 1.0
                 const posImpulse = kick * 12;
