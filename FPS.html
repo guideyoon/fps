@@ -9876,8 +9876,8 @@
 
                 // [User Request] Rifle ADS: Stronger weapon kick ("들썩임") without screen shake
                 if (isAiming && w.type === 'RIFLE') {
-                    rotScale = 3.0; // More pitch kick (들썩임)
-                    posScale = 25;  // Stronger backward kick
+                    rotScale = 8.0;  // Strong pitch kick (muzzle climb like pistol)
+                    posScale = 15;   // Moderate backward kick
                 }
 
                 const rotImpulse = kick * rotScale;
@@ -9900,6 +9900,18 @@
 
                 if (muzzleFlash) {
                     muzzleFlash.visible = true;
+
+                    // [User Request] Move flash to screen center during Rifle ADS
+                    if (w.type === 'RIFLE') {
+                        if (isAiming) {
+                            // Align with crosshair (Screen Center)
+                            muzzleFlash.position.set(0, 0.062, muzzleFlash.position.z);
+                        } else {
+                            // Default Hip Position
+                            muzzleFlash.position.set(0, 0.035, muzzleFlash.position.z);
+                        }
+                    }
+
                     // Bright, brief flash
                     const s = 0.28 + Math.random() * 0.1;
                     muzzleFlash.scale.set(s, s, 1);
