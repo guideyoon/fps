@@ -9868,11 +9868,20 @@
             if (w.type !== 'KNIFE') {
                 w.ammo--;
                 updateUI();
-                // [User Request] Increase ADS recoil for Rifle (0.3 -> 0.8)
-                const kick = isAiming ? (w.type === 'RIFLE' ? w.recoil * 0.8 : w.recoil * 0.3) : w.recoil;
-                // [User Request] Reduce weapon rotation recoil (muzzle climb) significantly, emphasize backward kick
-                const rotImpulse = kick * 1.0; // Reduced from 18 to 1.0
-                const posImpulse = kick * 12;
+                // [User Request] Revert base kick to 0.3 for stable camera, but boost weapon model recoil separately
+                const kick = isAiming ? w.recoil * 0.3 : w.recoil;
+
+                let rotScale = 1.0;
+                let posScale = 12;
+
+                // [User Request] Rifle ADS: Stronger weapon kick ("들썩임") without screen shake
+                if (isAiming && w.type === 'RIFLE') {
+                    rotScale = 3.0; // More pitch kick (들썩임)
+                    posScale = 25;  // Stronger backward kick
+                }
+
+                const rotImpulse = kick * rotScale;
+                const posImpulse = kick * posScale;
                 recoilVel.x += rotImpulse;
                 recoilVel.z += posImpulse;
 
