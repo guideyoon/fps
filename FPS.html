@@ -9873,7 +9873,8 @@
                 recoilVel.z += posImpulse;
 
                 const yawImpulse = (Math.random() - 0.5) * kick * 6;
-                cameraRecoilVel.x += kick * 12;
+                // [User Request] Disable vertical camera recoil (no muzzle climb)
+                // cameraRecoilVel.x += kick * 12; // DISABLED
                 cameraRecoilVel.y += yawImpulse;
 
 
@@ -10362,8 +10363,8 @@
                 } else {
                     playerVelocity.set(0, 0, 0);
                     // [User Request] Idle sway animation when standing still (all weapons)
-                    const swayFreqX = 1.5; const swayFreqY = 1.2;
-                    const swayAmpX = 0.003; const swayAmpY = 0.004;
+                    const swayFreqX = 1.2; const swayFreqY = 0.9;
+                    const swayAmpX = 0.015; const swayAmpY = 0.012;
                     weaponContainer.position.x += Math.sin(time * 0.001 * swayFreqX) * swayAmpX;
                     weaponContainer.position.y += Math.sin(time * 0.001 * swayFreqY) * swayAmpY;
                 }
