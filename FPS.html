@@ -3108,9 +3108,12 @@
             {
                 id: 0, name: "ASSAULT RIFLE",
                 type: 'RIFLE', maxAmmo: 30, ammo: 30, automatic: true,
-                posHip: new THREE.Vector3(0.08, -0.25, -0.45),
+                // [User Request] Adjusted idle position/rotation based on screenshot
+                posHip: new THREE.Vector3(0.23, -0.47, 0.44),
+                rotHip: new THREE.Vector3(0.43, 1.69, -0.25), // Idle Rotation
                 // ADS: Z더 멀리 (-0.45), FOV 약간 증가 (25) for smaller appearance
                 posAds: new THREE.Vector3(0, -0.062, -0.45),
+                rotAds: new THREE.Vector3(0, 0, 0), // Aim Rotation (Default)
                 fovAds: 25, fireRate: 0.08, recoil: 0.06, damage: 30,
                 switchSound: 'c-sochong'
             },
@@ -3152,6 +3155,7 @@
 
         let weaponContainer, weaponModel;
         let currentPos = WEAPONS[0].posHip.clone();
+        let currentRot = new THREE.Vector3(0, 0, 0); // 무기 회전 보간용 변수
 
         let isAiming = false;
         let cameraRecoil = { x: 0, y: 0 };
@@ -10466,13 +10470,21 @@
                 }
 
                 let targetPos = w.posHip; let targetFov = 70;
+                // [User Request] Rotation Interpolation
+                let targetRot = w.rotHip || new THREE.Vector3(0, 0, 0);
+
                 if (isAiming) {
                     if (w.type === 'SNIPER') targetFov = w.fovAds;
-                    else if (w.type !== 'KNIFE') { targetPos = w.posAds; targetFov = w.fovAds; }
+                    else if (w.type !== 'KNIFE') {
+                        targetPos = w.posAds;
+                        targetFov = w.fovAds;
+                        targetRot = w.rotAds || new THREE.Vector3(0, 0, 0);
+                    }
                     else targetPos = w.posAds;
                 }
 
                 currentPos.lerp(targetPos, 15 * dt);
+                currentRot.lerp(targetRot, 15 * dt); // Interpolate rotation
                 camera.fov += (targetFov - camera.fov) * 15 * dt;
                 camera.updateProjectionMatrix();
 
@@ -10500,7 +10512,8 @@
                         currentPos.y + hitShake.y + swayOffset.y,
                         currentPos.z
                     );
-                    weaponContainer.rotation.set(0, 0, 0); // 카메라 회전을 상속받으므로 자체 회전은 0
+                    // [User Request] Apply interpolated rotation to weapon container
+                    weaponContainer.rotation.set(currentRot.x, currentRot.y, currentRot.z);
                 } else {
                     // scene의 자식일 경우: 월드 좌표 직접 업데이트 (기존 로직)
                     weaponContainer.position.copy(position);
