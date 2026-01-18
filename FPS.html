@@ -7369,11 +7369,10 @@
                         }
                     });
 
-                    // Scale and Position tuning
-                    // Adjust these values to align with the original weapon position
-                    model.scale.set(0.47, 0.47, 0.47);
-                    model.rotation.set(0.34, 1.58, -0.28);
-                    model.position.set(0.02, -0.47, 0.33);
+                    // [User Request] Apply GLB transform from Debug UI screenshot
+                    model.scale.set(0.50, 0.50, 0.50);
+                    model.rotation.set(0.43, 1.69, -0.25);
+                    model.position.set(0.23, -0.47, 0.44);
 
                     // Remove any previous GLB rifle model
                     if (window.rifleModel) {
