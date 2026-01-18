@@ -2459,16 +2459,18 @@
         /* Modified media query to cover smaller PC screens/windowed mode */
         @media (min-width: 800px) {
             #weapon-list-left {
-                display: flex !important; /* Force display */
+                display: flex !important;
+                /* Force display */
                 transform: translateY(-50%) scale(3.0) !important;
                 transform-origin: left center !important;
-                left: 60px !important; 
+                left: 60px !important;
                 gap: 5px !important;
-                z-index: 9999 !important; /* Ensure visibility on top */
+                z-index: 9999 !important;
+                /* Ensure visibility on top */
             }
 
             .weapon-item .key-hint {
-                font-size: 14px; 
+                font-size: 14px;
                 width: 20px;
                 height: 20px;
                 line-height: 20px;
@@ -2476,7 +2478,7 @@
 
             .weapon-item.active {
                 opacity: 1 !important;
-                transform: translateX(10px) !important; 
+                transform: translateX(10px) !important;
             }
 
             .weapon-item.active .icon-box {
@@ -7210,8 +7212,9 @@
             if (wData.type !== 'KNIFE' && wData.type !== 'GRENADE') {
                 const muzzleShape = new THREE.Shape();
                 const points = 4;
-                const outerRadius = 0.08;
-                const innerRadius = 0.035;
+                // [User Request] 소총 섬광 크기 증가 (0.08 -> 0.16, 0.035 -> 0.07)
+                const outerRadius = (wData.type === 'RIFLE') ? 0.16 : 0.08;
+                const innerRadius = (wData.type === 'RIFLE') ? 0.07 : 0.035;
                 for (let i = 0; i < points * 2; i++) {
                     const r = (i % 2 === 0) ? outerRadius : innerRadius;
                     const theta = (i / (points * 2)) * Math.PI * 2;
@@ -7237,7 +7240,7 @@
                 if (wData.type === 'PISTOL') zPos = -0.12; // 권총 총구 바로 앞 (소총처럼)
                 if (wData.type === 'SNIPER') zPos = -0.85;
                 const yPos = (wData.type === 'PISTOL') ? 0.045 : 0.035;
-                // [User Request] Fine-tune Pistol Muzzle Flash (-0.03 -> 0.0 -> -0.01)
+                // [User Request] 소총 섬광을 화면 중앙으로 이동 (x=0)
                 const xPos = (wData.type === 'PISTOL') ? -0.01 : 0;
                 muzzleFlash.position.set(xPos, yPos, zPos);
 
@@ -7375,7 +7378,7 @@
                     // setupRifleDebugUI(); // [USER REQUEST] Hide Debug Panel
                     // document.getElementById('rifle-debug-panel').style.display = 'block';
                     if (document.getElementById('rifle-debug-panel')) {
-                         document.getElementById('rifle-debug-panel').style.display = 'none';
+                        document.getElementById('rifle-debug-panel').style.display = 'none';
                     }
 
                     weaponModel.add(model);
@@ -10648,7 +10651,7 @@
 
         // --- FORCE PC WEAPON ICON STYLE (JS INJECTION) ---
         // CSS 우선순위 문제를 해결하기 위해 JS로 스타일을 직접 주입합니다.
-        (function() {
+        (function () {
             const style = document.createElement('style');
             style.innerHTML = `
                 @media (min-width: 800px) {
