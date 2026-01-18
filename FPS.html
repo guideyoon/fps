@@ -10361,6 +10361,11 @@
                     }
                 } else {
                     playerVelocity.set(0, 0, 0);
+                    // [User Request] Idle sway animation when standing still (all weapons)
+                    const swayFreqX = 1.5; const swayFreqY = 1.2;
+                    const swayAmpX = 0.003; const swayAmpY = 0.004;
+                    weaponContainer.position.x += Math.sin(time * 0.001 * swayFreqX) * swayAmpX;
+                    weaponContainer.position.y += Math.sin(time * 0.001 * swayFreqY) * swayAmpY;
                 }
 
 
@@ -10573,7 +10578,8 @@
 
                 const deltaX = cameraRecoil.x - cameraRecoilApplied.x;
                 const deltaY = cameraRecoil.y - cameraRecoilApplied.y;
-                camera.rotation.x += deltaX;
+                // [User Request] Remove vertical camera recoil (no muzzle climb) - recoil stays on weapon only
+                // camera.rotation.x += deltaX; // DISABLED: No vertical camera movement
                 camera.rotation.y += deltaY;
                 cameraRecoilApplied.x = cameraRecoil.x;
                 cameraRecoilApplied.y = cameraRecoil.y;
