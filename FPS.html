@@ -1891,7 +1891,7 @@
         }
 
         /* 가로 모드 - 모바일 스타일 적용 (User Request: Like Portrait Mode) */
-        @media (orientation: landscape) and (max-width: 1024px) {
+        @media (orientation: landscape) and (max-width: 1024px) and (hover: none) and (pointer: coarse) {
             #controls-guide {
                 display: none;
             }
@@ -2271,7 +2271,7 @@
         }
 
         /* Landscape Orientation Fixes for Mobile - Scaled Down Initial Screen */
-        @media (orientation: landscape) {
+        @media (orientation: landscape) and (hover: none) and (pointer: coarse) {
 
             /* Lobby & Create Room compact layout */
             #room-menu h2,
@@ -2481,7 +2481,7 @@
         }
 
         /* Mobile specific controls */
-        @media (max-width: 1024px) {
+        @media (max-width: 1024px) and (pointer: coarse) {
             body.game-active #controls {
                 display: flex !important;
                 opacity: 1;
@@ -10951,9 +10951,16 @@
             document.head.appendChild(style);
 
             function updateDynamicUI() {
-                // Check Global isMobile flag or User Agent
-                const mobileCheck = (typeof isMobile !== 'undefined' && isMobile) ||
-                    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                const hasMatchMedia = typeof window.matchMedia === 'function';
+                const hasCoarsePointer = hasMatchMedia && window.matchMedia('(pointer: coarse)').matches;
+                const hasFinePointer = hasMatchMedia && window.matchMedia('(pointer: fine)').matches;
+                const canHover = hasMatchMedia && window.matchMedia('(hover: hover)').matches;
+                const uaMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                let mobileCheck = (typeof isMobile !== 'undefined' && isMobile) || uaMobile || (hasCoarsePointer && !hasFinePointer && !canHover);
+
+                if (hasFinePointer || canHover) {
+                    mobileCheck = false;
+                }
 
                 // Landscape Check
                 const isLandscape = window.innerWidth > window.innerHeight;
@@ -10961,6 +10968,7 @@
                 let css = '';
 
                 if (mobileCheck) {
+
                     // === MOBILE FORCE STYLES ===
                     console.log('Applying Mobile UI Styles (Landscape: ' + isLandscape + ')');
 
