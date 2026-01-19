@@ -7364,10 +7364,10 @@
             console.log("Attempting to load Rifle GLB...");
             if (typeof THREE.GLTFLoader !== 'undefined') {
                 // Add arms immediately so they appear while loading
-                // [User Request] Left Arm: Supporting the rifle handguard
-                createArm(0.12, -0.40, 0.15, -0.2, 0.8, 0.4, false);
-                // [User Request] Right Arm: Trigger area
-                createArm(0.24, -0.38, 0.42, 0.2, -0.2, 0.5, true);
+                // [User Request] Left Arm: Raise to -0.25 to be in view (FOV clipping fix)
+                createArm(0.12, -0.25, 0.45, -0.2, 0.8, 0.4, false);
+                // [User Request] Right Arm: Raise to -0.25
+                createArm(0.30, -0.25, 0.55, 0.2, -0.2, 0.5, true);
 
                 // Clear any previous async load results
                 const token = ++rifleLoadToken;
