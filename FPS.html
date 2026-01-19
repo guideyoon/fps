@@ -3109,8 +3109,20 @@
                 id: 0, name: "ASSAULT RIFLE",
                 type: 'RIFLE', maxAmmo: 30, ammo: 30, automatic: true,
                 // [ROLLBACK] Restore working idle position, disable custom rotation for now
+                type: 'RIFLE', maxAmmo: 30, ammo: 30, automatic: true,
                 posHip: new THREE.Vector3(0.08, -0.25, -0.45),
-                rotHip: new THREE.Vector3(0, 0, 0), // Rotation disabled (was causing invisibility)
+                // [User Request] Separate GLB transforms for Idle vs ADS
+                glbHip: {
+                    pos: new THREE.Vector3(0.23, -0.47, 0.44),
+                    rot: new THREE.Vector3(0.43, 1.69, -0.25),
+                    scale: new THREE.Vector3(0.50, 0.50, 0.50)
+                },
+                glbAds: {
+                    // Original working values for ADS (Center aligned)
+                    pos: new THREE.Vector3(0.02, -0.47, 0.33),
+                    rot: new THREE.Vector3(0.34, 1.58, -0.28),
+                    scale: new THREE.Vector3(0.47, 0.47, 0.47)
+                },
                 // ADS: Z더 멀리 (-0.45), FOV 약간 증가 (25) for smaller appearance
                 posAds: new THREE.Vector3(0, -0.062, -0.45),
                 rotAds: new THREE.Vector3(0, 0, 0), // Aim Rotation (Default)
@@ -7351,7 +7363,8 @@
             console.log("Attempting to load Rifle GLB...");
             if (typeof THREE.GLTFLoader !== 'undefined') {
                 // Add arms immediately so they appear while loading
-                createArm(-0.04, -0.08, -0.32, 0.4, 0.1, -0.1, false);
+                // [User Request] Left Arm: Angled grip from below (moved right to match rifle)
+                createArm(0.15, -0.25, -0.15, -0.2, 0.8, 0.5, false);
                 createArm(0.12, -0.15, 0.22, 0.2, -0.2, 0.4, true);
 
                 // Clear any previous async load results
@@ -10484,6 +10497,22 @@
 
                 currentPos.lerp(targetPos, 15 * dt);
                 currentRot.lerp(targetRot, 15 * dt); // Interpolate rotation
+
+                // [User Request] Dynamic GLB Transform (Idle vs ADS) for Rifle
+                if (window.rifleModel && w.type === 'RIFLE' && w.glbHip && w.glbAds) {
+                    const tPos = isAiming ? w.glbAds.pos : w.glbHip.pos;
+                    const tRot = isAiming ? w.glbAds.rot : w.glbHip.rot;
+                    const tScale = isAiming ? w.glbAds.scale : w.glbHip.scale;
+
+                    window.rifleModel.position.lerp(tPos, 15 * dt);
+                    // Manually lerp rotation euler
+                    window.rifleModel.rotation.x += (tRot.x - window.rifleModel.rotation.x) * 15 * dt;
+                    window.rifleModel.rotation.y += (tRot.y - window.rifleModel.rotation.y) * 15 * dt;
+                    window.rifleModel.rotation.z += (tRot.z - window.rifleModel.rotation.z) * 15 * dt;
+
+                    window.rifleModel.scale.lerp(tScale, 15 * dt);
+                }
+
                 camera.fov += (targetFov - camera.fov) * 15 * dt;
                 camera.updateProjectionMatrix();
 
