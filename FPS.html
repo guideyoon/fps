@@ -1916,10 +1916,19 @@
                 font-size: 10px !important;
             }
 
-            /* If PC list appears, scale it too */
-            #weapon-list-left {
-                transform: scale(0.5);
-                transform-origin: left center;
+            /* [User Request] Fixed: Hide PC Weapon List in Mobile Landscape */
+            #weapon-list-left,
+            #weapon-inventory {
+                display: none !important;
+            }
+
+            /* [User Request] Show Mobile Weapon Selector */
+            #weapon-selector-vertical {
+                display: flex !important;
+                flex-direction: column;
+                top: 40% !important;
+                /* Adjust if needed */
+                left: 20px;
             }
 
             /* 버튼 숨김 -> 수직 선택기 사용 */
