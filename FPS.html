@@ -7363,8 +7363,8 @@
             console.log("Attempting to load Rifle GLB...");
             if (typeof THREE.GLTFLoader !== 'undefined') {
                 // Add arms immediately so they appear while loading
-                // [User Request] Left Arm: Angled grip from below (moved right to match rifle)
-                createArm(0.15, -0.25, -0.15, -0.2, 0.8, 0.5, false);
+                // [User Request] Left Arm: Raise Y to be more visible (-0.10)
+                createArm(0.18, -0.10, -0.15, -0.2, 0.8, 0.5, false);
                 createArm(0.12, -0.15, 0.22, 0.2, -0.2, 0.4, true);
 
                 // Clear any previous async load results
@@ -9890,10 +9890,10 @@
                 let rotScale = 1.0;
                 let posScale = 12;
 
-                // [User Request] Rifle ADS: Stronger weapon kick ("들썩임") without screen shake
-                if (isAiming && w.type === 'RIFLE') {
-                    rotScale = 8.0;  // Strong pitch kick (muzzle climb)
-                    posScale = 350;  // EXTREME backward kick (10x from 35)
+                // [User Request] Rifle Recoil: Apply strong kick to both Idle and ADS
+                if (w.type === 'RIFLE') {
+                    rotScale = 8.0;  // Strong pitch kick
+                    posScale = 350;  // EXTREME backward kick
                 }
 
                 const rotImpulse = kick * rotScale;
@@ -9923,8 +9923,8 @@
                             // Align with crosshair (Screen Center)
                             muzzleFlash.position.set(0, 0.062, muzzleFlash.position.z);
                         } else {
-                            // Default Hip Position
-                            muzzleFlash.position.set(0, 0.035, muzzleFlash.position.z);
+                            // [User Request] Raised Hip Position Flash (slightly higher)
+                            muzzleFlash.position.set(0, 0.055, muzzleFlash.position.z);
                         }
                     }
 
