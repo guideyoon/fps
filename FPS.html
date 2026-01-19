@@ -1918,8 +1918,23 @@
 
             /* [User Request] Fixed: Hide PC Weapon List in Mobile Landscape */
             #weapon-list-left,
-            #weapon-inventory {
+            #weapon-inventory,
+            #controls-guide,
+            #weapon-label {
                 display: none !important;
+            }
+
+            /* [User Request] Force Mobile Controls Visible in Landscape */
+            #joystick-zone,
+            #fire-btn-zone,
+            #jump-btn,
+            #reload-btn,
+            #crouch-btn,
+            .mobile-controls {
+                display: block !important;
+                z-index: 9999 !important;
+                opacity: 0.8 !important;
+                pointer-events: auto !important;
             }
 
             /* [User Request] Show Mobile Weapon Selector */
@@ -7580,9 +7595,10 @@
                         }
                         buildRifleGeometry();
                     });
-                } // End if(false) for disabling GLB
-            } else {
-                buildRifleGeometry();
+                } else {
+                    // [FIX] Ensure geometry is built if GLB is disabled
+                    buildRifleGeometry();
+                }
             }
         }
 
