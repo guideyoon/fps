@@ -10922,6 +10922,13 @@
                         // sniper.name = "TAC-50 SNIPER (4)"; // Removed debug name
                         console.log("Fixed Sniper Ammo: 4");
                     }
+                    // Rifle (ID 3 - Auto)
+                    const rifle = WEAPONS.find(w => w.name.includes("RIFLE") || w.type === 'RIFLE');
+                    if (rifle) {
+                        // [User Request] Slower fire rate
+                        rifle.fireRate = 0.15; // 0.1 -> 0.15 (Slower)
+                        console.log("Fixed Rifle Fire Rate: 0.15");
+                    }
                     // Grenade (ID 4)
                     const grenade = WEAPONS.find(w => w.type === 'GRENADE');
                     if (grenade) {
