@@ -2537,12 +2537,12 @@
         /* --- USER REQUEST: PC Mode Weapon Icon Scale x3 & Active State --- */
         /* Modified media query to cover smaller PC screens/windowed mode */
         @media (min-width: 800px) {
-            #weapon-list-left {
+            body.game-active #weapon-list-left {
                 display: flex !important;
                 /* Force display */
-                transform: translateY(-50%) scale(3.0) !important;
+                transform: translateY(-50%) scale(1.0) !important;
                 transform-origin: left center !important;
-                left: 60px !important;
+                left: 20px !important;
                 gap: 5px !important;
                 z-index: 9999 !important;
                 /* Ensure visibility on top */
