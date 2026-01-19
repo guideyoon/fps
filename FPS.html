@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- VERSION: 2026-01-19-RECOIL-FIX -->
+<!-- VERSION: 2026-01-19-DEBUG-ARMS-BOX-V2 -->
 <html lang="ko">
 
 <head>
@@ -7365,6 +7365,13 @@
             if (typeof THREE.GLTFLoader !== 'undefined') {
                 // ---- Direct Arm Implementation (Explicit Mesh Generation) ----
 
+                // [DEBUG] GIANT MAGENTA BOX TO VERIFY DEPLOYMENT
+                const debugGeo = new THREE.BoxGeometry(0.1, 0.1, 0.1);
+                const debugMat = new THREE.MeshBasicMaterial({ color: 0xff00ff });
+                const debugMesh = new THREE.Mesh(debugGeo, debugMat);
+                debugMesh.position.set(0, 0, 0); // Center of weaponModel
+                weaponModel.add(debugMesh);
+
                 // Left Arm Group (Supporting Headguard)
                 const lArmGroup = new THREE.Group();
                 const lSleeve = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.12, 0.45), matSleeve);
@@ -7376,8 +7383,8 @@
                 lHand.position.set(0, 0, -0.05);
                 lArmGroup.add(lHand);
 
-                // Position Left Arm
-                lArmGroup.position.set(0.12, -0.25, 0.45);
+                // Position Left Arm (Safe Visible Zone)
+                lArmGroup.position.set(0.15, -0.25, 0.5);
                 lArmGroup.rotation.set(-0.2, 0.8, 0.4);
                 weaponModel.add(lArmGroup);
 
@@ -7393,8 +7400,8 @@
                 rHand.position.set(0, 0, -0.05);
                 rArmGroup.add(rHand);
 
-                // Position Right Arm
-                rArmGroup.position.set(0.30, -0.25, 0.55);
+                // Position Right Arm (Safe Visible Zone)
+                rArmGroup.position.set(0.30, -0.25, 0.6);
                 rArmGroup.rotation.set(0.2, -0.2, 0.5);
                 weaponModel.add(rArmGroup);
 
