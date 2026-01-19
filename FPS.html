@@ -9893,7 +9893,7 @@
                 // [User Request] Rifle ADS: Stronger weapon kick ("들썩임") without screen shake
                 if (isAiming && w.type === 'RIFLE') {
                     rotScale = 8.0;  // Strong pitch kick (muzzle climb)
-                    posScale = 35;   // Strong backward kick (increased from 15)
+                    posScale = 175;  // Very strong backward kick (5x from 35)
                 }
 
                 const rotImpulse = kick * rotScale;
