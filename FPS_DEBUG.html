@@ -687,34 +687,6 @@
             pointer-events: none;
         }
 
-        #low-health-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 1;
-            /* Behind text HUD */
-            background: radial-gradient(circle at center, transparent 40%, rgba(255, 0, 0, 0.4) 80%, rgba(255, 0, 0, 0.7) 100%);
-            opacity: 0;
-            transition: opacity 0.5s;
-        }
-
-        #low-health-overlay.active {
-            animation: lowHealthPulse 1s infinite alternate ease-in-out;
-        }
-
-        @keyframes lowHealthPulse {
-            from {
-                opacity: 0.5;
-            }
-
-            to {
-                opacity: 1;
-            }
-        }
-
         #headshot-msg {
             position: absolute;
             top: 20%;
@@ -1833,8 +1805,6 @@
                 /* 110px -> 150px */
                 /* 조이스틱도 상향 */
                 left: 40px;
-                display: block !important;
-                /* Force Visible */
             }
 
             #weapon-selector-vertical {
@@ -1898,28 +1868,6 @@
 
             #weapon-label {
                 display: none;
-            }
-
-            /* [User Request] Force Joystick Visible in Landscape */
-            #joystick-zone {
-                display: block !important;
-                bottom: 40px;
-                left: 40px;
-                z-index: 1000;
-            }
-
-            /* [User Request] Reduce Weapon Icon Size (1/2) */
-            #weapon-selector-vertical .weapon-select-btn {
-                width: 25px !important;
-                /* 35px -> 25px */
-                height: 25px !important;
-                font-size: 10px !important;
-            }
-
-            /* If PC list appears, scale it too */
-            #weapon-list-left {
-                transform: scale(0.5);
-                transform-origin: left center;
             }
 
             /* 버튼 숨김 -> 수직 선택기 사용 */
@@ -5695,9 +5643,7 @@
             document.body.appendChild(renderer.domElement);
 
             // 5) 조명 추가
-            // [User Request] Brighter on Mobile
-            const ambientInt = isMobile ? 0.9 : 0.6;
-            const ambientLight = new THREE.AmbientLight(0xffffff, ambientInt);
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
             scene.add(ambientLight);
 
             const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
@@ -7459,18 +7405,11 @@
                 // ---- Direct Arm Implementation (Refined for Rifle Grip - Pistol Style) ----
 
                 // [FIX] Define arm materials INLINE (avoid external variable issues)
-                const armSleeveMat = new THREE.MeshBasicMaterial({ color: 0x2b2b2b }); // Dark grey sleeve
-                const armGloveMat = new THREE.MeshBasicMaterial({ color: 0x1a1a1a }); // Black glove
-
-                // [FIX] Remove existing arms if any (Prevent Duplication Loop)
-                const oldLArm = weaponModel.getObjectByName('LeftArmGroup');
-                if (oldLArm) weaponModel.remove(oldLArm);
-                const oldRArm = weaponModel.getObjectByName('RightArmGroup');
-                if (oldRArm) weaponModel.remove(oldRArm);
+                const armSleeveMat = new THREE.MeshBasicMaterial({ color: 0xff0000 }); // [DEBUG] RED Sleeve
+                const armGloveMat = new THREE.MeshBasicMaterial({ color: 0x0000ff }); // [DEBUG] BLUE Glove
 
                 // Left Arm Group (Gripping Handguard)
                 const lArmGroup = new THREE.Group();
-                lArmGroup.name = 'LeftArmGroup'; // Tag for cleanup
                 const lSleeve = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.12, 0.45), armSleeveMat);
                 lSleeve.position.set(0, 0, 0.2); // Extends backward from hand
                 lArmGroup.add(lSleeve);
@@ -7480,18 +7419,17 @@
                 lHand.position.set(0, 0, -0.05); // Hand pos relative to group
                 lArmGroup.add(lHand);
 
-                // Position Left Arm (Adjusted: Centered & Higher)
-                // x=-0.15 (Closer to center), y=-0.12 (Visible), z=-0.75 (Extended)
-                // Position Left Arm (Sniper Baseline)
-                lArmGroup.position.set(-0.08, -0.12, -0.3);
-                lArmGroup.rotation.set(0.7, 0.3, -0.35);
-                lArmGroup.scale.set(0.65, 0.65, 0.65);
+                // Position Left Arm (Adjusted: Scale 0.65, Higher Y)
+                // Rifle is roughly at (0.23, -0.47, 0.44)
+                // Arms must be higher to be visible.
+                lArmGroup.position.set(0.20, -0.15, 0.45);
+                lArmGroup.rotation.set(-0.2, 0.5, 0.3);
+                lArmGroup.scale.set(0.65, 0.65, 0.65); // [FIX] Match Pistol Scale
                 weaponModel.add(lArmGroup);
 
 
                 // Right Arm Group (Trigger Finger)
                 const rArmGroup = new THREE.Group();
-                rArmGroup.name = 'RightArmGroup'; // Tag for cleanup
                 const rSleeve = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.12, 0.45), armSleeveMat);
                 rSleeve.position.set(0, 0, 0.2);
                 rArmGroup.add(rSleeve);
@@ -7501,77 +7439,64 @@
                 rHand.position.set(0, 0, -0.05);
                 rArmGroup.add(rHand);
 
-                // Position Right Arm (Adjusted: Centered & Higher)
-                // Position Right Arm (Sniper Baseline)
-                rArmGroup.position.set(0.12, -0.15, 0.25);
-                rArmGroup.rotation.set(0.2, -0.2, 0.4);
-                rArmGroup.scale.set(0.65, 0.65, 0.65);
+                // Position Right Arm (Adjusted: Scale 0.65, Higher Y)
+                rArmGroup.position.set(0.35, -0.15, 0.55);
+                rArmGroup.rotation.set(0.1, -0.1, 0.4);
+                rArmGroup.scale.set(0.65, 0.65, 0.65); // [FIX] Match Pistol Scale
                 weaponModel.add(rArmGroup);
 
                 // Clear any previous async load results
                 const token = ++rifleLoadToken;
 
-
-                // [Override] Ensure Sniper-style arms (User Request)
-                ['LeftArmGroup', 'RightArmGroup'].forEach(name => {
-                    const existing = weaponModel.getObjectByName(name);
-                    if (existing) weaponModel.remove(existing);
-                });
-                // Re-add using standard function
-                createArm(-0.06, -0.16, -0.55, 0.5, 0.3, -0.2, false); // Adjusted for Under-barrel Grip
-                createArm(0.12, -0.15, 0.25, 0.2, -0.2, 0.4, true);
-
                 const loader = new THREE.GLTFLoader();
-                // [User Request] Disable GLB Model (Use procedural manual build instead)
-                if (false) {
-                    loader.load('gun/Assault Rifle.glb', function (gltf) {
-                        if (token !== rifleLoadToken) return;
-                        const model = gltf.scene;
+                loader.load('gun/Assault Rifle.glb', function (gltf) {
+                    if (token !== rifleLoadToken) return;
+                    const model = gltf.scene;
 
-                        model.traverse(function (child) {
-                            if (child.isMesh) {
-                                child.castShadow = true;
-                                child.receiveShadow = true;
-                            }
-                        });
-
-                        // [User Request] Apply GLB transform from Debug UI screenshot
-                        model.scale.set(0.50, 0.50, 0.50);
-                        model.rotation.set(0.43, 1.69, -0.25);
-                        model.position.set(0.23, -0.47, 0.44);
-
-                        // Remove any previous GLB rifle model
-                        if (window.rifleModel) {
-                            weaponModel.remove(window.rifleModel);
+                    model.traverse(function (child) {
+                        if (child.isMesh) {
+                            child.castShadow = true;
+                            child.receiveShadow = true;
                         }
-
-                        window.rifleModel = model;
-                        setupRifleDebugUI(); // [USER REQUEST] Show Debug Panel
-                        if (document.getElementById('rifle-debug-panel')) {
-                            document.getElementById('rifle-debug-panel').style.display = 'block';
-                        }
-
-                        weaponModel.add(model);
-                        weaponModel.updateMatrixWorld(true);
-
-                        // Auto-align muzzle flash to rifle front
-                        if (muzzleFlash) {
-                            const box = new THREE.Box3().setFromObject(model);
-                            const center = new THREE.Vector3();
-                            box.getCenter(center);
-                            const muzzleWorld = new THREE.Vector3(center.x, center.y + 0.1, box.min.z - 0.02);
-                            weaponModel.worldToLocal(muzzleWorld);
-                            muzzleFlash.position.copy(muzzleWorld);
-                        }
-                    }, undefined, function (error) {
-                        console.error('Rifle GLB load failed:', error);
-                        // Clear weaponModel (arms + anything else) and rebuild geometry
-                        while (weaponModel.children.length > 0) {
-                            weaponModel.remove(weaponModel.children[0]);
-                        }
-                        buildRifleGeometry();
                     });
-                } // End if(false) for disabling GLB
+
+                    // [User Request] Apply GLB transform from Debug UI screenshot
+                    model.scale.set(0.50, 0.50, 0.50);
+                    model.rotation.set(0.43, 1.69, -0.25);
+                    model.position.set(0.23, -0.47, 0.44);
+
+                    // Remove any previous GLB rifle model
+                    if (window.rifleModel) {
+                        weaponModel.remove(window.rifleModel);
+                    }
+
+                    window.rifleModel = model;
+                    setupRifleDebugUI(); // [USER REQUEST] Show Debug Panel
+                    if (document.getElementById('rifle-debug-panel')) {
+                        document.getElementById('rifle-debug-panel').style.display = 'block';
+                    }
+
+                    weaponModel.add(model);
+                    weaponModel.updateMatrixWorld(true);
+
+                    // Auto-align muzzle flash to rifle front
+                    if (muzzleFlash) {
+                        const box = new THREE.Box3().setFromObject(model);
+                        const center = new THREE.Vector3();
+                        box.getCenter(center);
+                        const muzzleWorld = new THREE.Vector3(center.x, center.y + 0.1, box.min.z - 0.02);
+                        weaponModel.worldToLocal(muzzleWorld);
+                        muzzleFlash.position.copy(muzzleWorld);
+                    }
+                }, undefined, function (error) {
+                    console.error('Rifle GLB load failed:', error);
+                    // Clear weaponModel (arms + anything else) and rebuild geometry
+                    while (weaponModel.children.length > 0) {
+                        weaponModel.remove(weaponModel.children[0]);
+                    }
+                    buildRifleGeometry();
+                });
+
             } else {
                 buildRifleGeometry();
             }
@@ -9922,27 +9847,26 @@
                 const swingEase = 0.5 - 0.5 * Math.cos(swingPhase * Math.PI); // 0.0 -> 1.0 (부드러운 S자 곡선)
                 const swingEaseOut = Math.sin(swingPhase * Math.PI); // 0.0 -> 1.0 -> 0.0
 
-                // [User Request] Left to Upward Large Swing
-                // From Left/Low (-1.2, -0.5) to Center/High (0.0, 0.4)
-                const startX = -1.2;
-                const endX = 0.0;
+                // 왼쪽에서 오른쪽으로 크게 휘두르기 - 범위 확대 (더 크게)
+                const startX = -1.5; // -0.7 -> -1.5 (Much wider start)
+                const endX = 1.5;    // 0.7 -> 1.5 (Much wider end)
                 weaponModel.position.x = startX + (endX - startX) * swingEase;
 
-                // 손목 회전 (Y축) - Reduced range for Forward Slash
-                const rotationY = -1.2 + (1.2 - (-1.2)) * swingEase;
+                // 손목 회전 (Y축) - 더 넓은 범위로 휘두르기 (360도에 가깝게)
+                const rotationY = -3.5 + (3.5 - (-3.5)) * swingEase; // -2.5~2.5 -> -3.5~3.5
                 weaponModel.rotation.y = rotationY;
 
-                // 손목 회전 (Z축) - Unchanged
-                weaponModel.rotation.z = -0.15 + swingEaseOut * 1.5;
+                // 손목 회전 (Z축) - 자연스러운 휘두름 (롤링 대폭 증가)
+                weaponModel.rotation.z = -0.15 + swingEaseOut * 1.5; // 0.7 -> 1.5
 
-                // 손목 회전 (X축) - Pitch Up
-                weaponModel.rotation.x = 0.25 + swingEaseOut * 1.5;
+                // 손목 회전 (X축) - 위아래 움직임 (피치 대폭 증가)
+                weaponModel.rotation.x = 0.25 + swingEaseOut * 0.8; // 0.3 -> 0.8
 
-                // 앞뒤 이동 - Thrust FORWARD (Negative Z)
-                weaponModel.position.z = -0.3 - (swingEaseOut * 0.5);
+                // 앞뒤 이동 - 더 큰 범위 (찌르는 느낌 추가)
+                weaponModel.position.z = -0.3 + swingEaseOut * 0.8; // 0.3 -> 0.8
 
-                // 위아래 움직임 - Swing Up!
-                weaponModel.position.y = -0.4 + (0.7 * swingEaseOut);
+                // 위아래 움직임 - 더 자연스럽게 (아크 형태 강조)
+                weaponModel.position.y = -0.2 - swingEaseOut * 0.3; // Dip down in middle
 
                 if (knifeSwing < 0) {
                     knifeSwing = 0;
@@ -10082,14 +10006,13 @@
                             // Align with crosshair (Screen Center)
                             muzzleFlash.position.set(0, 0.062, muzzleFlash.position.z);
                         } else {
-                            // [User Request] Raised Hip Position Flash (Higher per user request)
-                            muzzleFlash.position.set(0, 0.12, muzzleFlash.position.z);
+                            // [User Request] Raised Hip Position Flash (slightly higher)
+                            muzzleFlash.position.set(0, 0.055, muzzleFlash.position.z);
                         }
                     }
 
                     // Bright, brief flash
-                    // [User Request] 2x Size (Increased from 0.28)
-                    const s = 0.6 + Math.random() * 0.2;
+                    const s = 0.28 + Math.random() * 0.1;
                     muzzleFlash.scale.set(s, s, 1);
                     muzzleFlash.rotation.z = Math.random() * Math.PI * 2;
 
@@ -10423,9 +10346,6 @@
 
             if (!isDead && !isPaused && isGameStarted) {
                 handleShooting(dt);
-
-                // Check Low Health Effect (Every Frame)
-                checkLowHealth();
 
                 // --- Improved Physics with Raycasting (Fix for Jumping on Objects) ---
                 const eyeHeight = keys.ctrl ? 1.0 : 1.7; // 1.7 is standard eye level
@@ -10829,24 +10749,6 @@
             }
         }
 
-        function checkLowHealth() {
-            const overlay = document.getElementById('low-health-overlay');
-            if (!overlay) return;
-
-            // Only show if alive and playing
-            if (isDead || !isGameStarted || isSpectating) {
-                overlay.classList.remove('active');
-                return;
-            }
-
-            const ratio = playerHP / 100; // Hardcoded max HP to fix ReferenceError
-            if (ratio < 0.2 && playerHP > 0) {
-                overlay.classList.add('active');
-            } else {
-                overlay.classList.remove('active');
-            }
-        }
-
         // 모바일 주소창 숨기기 - 페이지 로드 후 자동 스크롤
         window.addEventListener('load', function () {
             // iOS Safari와 Android 크롬에서 주소창 숨기기
@@ -10966,7 +10868,6 @@
         })();
     </script>
 
-    <div id="low-health-overlay"></div>
 </body>
 
 </html>
