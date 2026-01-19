@@ -10936,58 +10936,100 @@
 
         // --- FORCE PC WEAPON ICON STYLE (JS INJECTION) ---
         // CSS 우선순위 문제를 해결하기 위해 JS로 스타일을 직접 주입합니다.
+        // --- FORCE UI STYLE BASED ON DEVICE TYPE (JS INJECTION) ---
+        // [FIX] Replaced static viewport check with dynamic mobile check
         (function () {
             const style = document.createElement('style');
-            style.innerHTML = `
-                @media (min-width: 800px) {
-                    /* 1. PC 모드 왼쪽 무기 아이콘 크기 조정 (1.5배 -> 0.5배로 축소: 사용자 요청 2배 축소) */
-                    #weapon-list-left {
-                        display: flex !important;
-                        transform: translateY(-50%) scale(0.5) !important; /* 1.5 -> 0.5 (원래의 1/3, 현재의 1/3, 요청대로 대폭 축소) */
-                        transform-origin: left center !important;
-                        left: 20px !important; /* 여백 축소 */
-                        gap: 10px !important;
-                        z-index: 99999 !important;
-                        opacity: 1 !important;
-                        visibility: visible !important;
-                        position: fixed !important;
-                        top: 50% !important;
-                    }
-                    .weapon-item {
-                        display: flex !important;
-                        align-items: center;
-                        justify-content: flex-start;
-                    }
-                    .weapon-item.active {
-                        opacity: 1 !important;
-                        transform: translateX(10px) !important;
-                    }
-                    .weapon-item.active .icon-box {
-                        border: 2px solid #00f3ff !important;
-                        background: rgba(0, 243, 255, 0.3) !important;
-                        box-shadow: 0 0 30px #00f3ff, inset 0 0 10px #00f3ff !important;
-                    }
-                    .weapon-item:not(.active) {
-                        opacity: 0.3 !important;
-                    }
+            style.id = 'dynamic-ui-style';
+            document.head.appendChild(style);
 
-                    /* 2. PC 모드에서 모바일 UI 요소 확실하게 숨기기 */
-                    #joystick-zone, 
-                    #joystick-handle,
-                    .mobile-controls,
-                    #btn-shoot, 
-                    #btn-aim, 
-                    #btn-jump, 
-                    #btn-reload,
-                    .weapon-select-btn {
-                        display: none !important;
-                        pointer-events: none !important;
-                        opacity: 0 !important;
+            function updateDynamicUI() {
+                // Check Global isMobile flag or User Agent
+                const mobileCheck = (typeof isMobile !== 'undefined' && isMobile) ||
+                    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+                // Landscape Check
+                const isLandscape = window.innerWidth > window.innerHeight;
+
+                let css = '';
+
+                if (mobileCheck) {
+                    // === MOBILE FORCE STYLES ===
+                    console.log('Applying Mobile UI Styles (Landscape: ' + isLandscape + ')');
+
+                    // 1. Hide PC Weapon List ALWAYS on Mobile
+                    css += `
+                        #weapon-list-left, #weapon-inventory, #controls-guide, #weapon-label {
+                            display: none !important;
+                        }
+                    `;
+
+                    // 2. Mobile Controls Force Visible (Especially in Landscape)
+                    css += `
+                        #joystick-zone, 
+                        #fire-btn-zone, 
+                        #jump-btn, 
+                        #reload-btn, 
+                        #crouch-btn,
+                        .mobile-controls {
+                            display: block !important;
+                            visibility: visible !important;
+                            opacity: 0.8 !important;
+                            pointer-events: auto !important;
+                            touch-action: none;
+                            z-index: 9999 !important;
+                        }
+                    `;
+
+                    // 3. Mobile Landscape Specific Adjustments
+                    if (isLandscape) {
+                        css += `
+                            #weapon-selector-vertical {
+                                display: flex !important;
+                                flex-direction: column;
+                                top: 40% !important;
+                                left: 20px !important;
+                            }
+                            #joystick-zone {
+                                bottom: 40px !important; 
+                                left: 40px !important;
+                            }
+                            .vitals-panel { 
+                                left: 170px !important; 
+                                bottom: 20px !important;
+                            }
+                         `;
+                    }
+                } else {
+                    // === PC FORCE STYLES (Only if NOT mobile and width > 800) ===
+                    if (window.innerWidth > 800) {
+                        css += `
+                            #weapon-list-left {
+                                display: flex !important;
+                                transform: translateY(-50%) scale(0.5) !important;
+                                transform-origin: left center !important;
+                                position: fixed !important;
+                                top: 50% !important;
+                                left: 20px !important;
+                                z-index: 99999 !important;
+                                opacity: 1 !important;
+                            }
+                            /* Hide Mobile Controls on PC */
+                            #joystick-zone, 
+                            .mobile-controls,
+                            .weapon-select-btn {
+                                display: none !important;
+                            }
+                        `;
                     }
                 }
-            `;
-            document.head.appendChild(style);
-            console.log("Force applied PC weapon icon styles via JS");
+                style.innerHTML = css;
+            }
+
+            // Init and Listen
+            updateDynamicUI();
+            window.addEventListener('resize', updateDynamicUI);
+            window.addEventListener('orientationchange', () => setTimeout(updateDynamicUI, 100));
         })();
     </script>
 
