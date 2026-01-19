@@ -2369,11 +2369,13 @@
 
 
         /* Hide text-based weapon inventory in landscape too - FORCE */
-        body #weapon-inventory,
-        body #weapon-list-left {
-            display: none !important;
-            visibility: hidden;
-            opacity: 0;
+        @media (pointer: coarse), (hover: none) {
+            body #weapon-inventory,
+            body #weapon-list-left {
+                display: none !important;
+                visibility: hidden;
+                opacity: 0;
+            }
         }
 
         /* HP/Ammo - 하단으로 배치 */
