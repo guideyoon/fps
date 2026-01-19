@@ -3247,7 +3247,8 @@
         const matParts = new THREE.MeshStandardMaterial({ color: 0x050505, roughness: 0.8 });
         const matSilver = new THREE.MeshStandardMaterial({ color: 0xcccccc, roughness: 0.2, metalness: 0.9 });
         const matSkin = new THREE.MeshStandardMaterial({ color: 0xcbb093, roughness: 0.7 });
-        const matSleeve = new THREE.MeshStandardMaterial({ color: 0x1c1f1c, roughness: 1.0 });
+        // [Debug] Made sleeve brighter to check visibility (was 0x1c1f1c)
+        const matSleeve = new THREE.MeshStandardMaterial({ color: 0xaaaaaa, roughness: 1.0 });
         const matGlove = new THREE.MeshStandardMaterial({ color: 0x151515, roughness: 0.9 });
         const matSight = new THREE.MeshBasicMaterial({ color: 0xff0000 });
         const matBlade = new THREE.MeshStandardMaterial({ color: 0xdddddd, roughness: 0.1, metalness: 1.0 });
@@ -7363,8 +7364,13 @@
             console.log("Attempting to load Rifle GLB...");
             if (typeof THREE.GLTFLoader !== 'undefined') {
                 // Add arms immediately so they appear while loading
-                // [User Request] Left Arm: Move to Z=0.20 (Positive) to match rifle depth, X=0.20
-                createArm(0.20, -0.20, 0.20, -0.1, 0.5, 0.3, false);
+                // [Debug] Reset Left Arm to center (0.0) to ensure visibility
+                createArm(0.0, -0.25, -0.3, -0.1, 0.5, 0.3, false);
+
+                // [Debug] Red Box to check weaponModel visibility
+                const debugBox = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.05, 0.05), new THREE.MeshBasicMaterial({ color: 0xff0000 }));
+                debugBox.position.set(0, 0, 0);
+                weaponModel.add(debugBox);
                 createArm(0.12, -0.15, 0.22, 0.2, -0.2, 0.4, true);
 
                 // Clear any previous async load results
