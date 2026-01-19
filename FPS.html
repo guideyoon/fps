@@ -9890,10 +9890,15 @@
                 let rotScale = 1.0;
                 let posScale = 12;
 
-                // [User Request] Rifle Recoil: Apply strong kick to both Idle and ADS
+                // [User Request] Rifle Recoil: Differentiated by Aim State
                 if (w.type === 'RIFLE') {
-                    rotScale = 8.0;  // Strong pitch kick
-                    posScale = 350;  // EXTREME backward kick
+                    if (isAiming) {
+                        rotScale = 8.0;   // Strong pitch kick
+                        posScale = 350;   // EXTREME backward kick
+                    } else {
+                        rotScale = 2.0;   // Idle: 2x original (Original was 1.0)
+                        posScale = 24;    // Idle: 2x original (Original was 12)
+                    }
                 }
 
                 const rotImpulse = kick * rotScale;
