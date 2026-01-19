@@ -10925,9 +10925,9 @@
                     // Rifle (ID 3 - Auto)
                     const rifle = WEAPONS.find(w => w.name.includes("RIFLE") || w.type === 'RIFLE');
                     if (rifle) {
-                        // [User Request] Slower fire rate
-                        rifle.fireRate = 0.15; // 0.1 -> 0.15 (Slower)
-                        console.log("Fixed Rifle Fire Rate: 0.15");
+                        // [User Request] Slower fire rate (Refined: 0.15 -> 0.12)
+                        rifle.fireRate = 0.12; // Adjusted to be slightly faster
+                        console.log("Fixed Rifle Fire Rate: 0.12");
                     }
                     // Grenade (ID 4)
                     const grenade = WEAPONS.find(w => w.type === 'GRENADE');
