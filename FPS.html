@@ -7547,8 +7547,9 @@
 
                 const loader = new THREE.GLTFLoader();
                 // [User Request] Disable GLB Model (Use procedural manual build instead)
-                if (false) {
+                if (true) {
                     loader.load('gun/Assault Rifle.glb', function (gltf) {
+
                         if (token !== rifleLoadToken) return;
                         const model = gltf.scene;
 
@@ -11016,28 +11017,21 @@
                          `;
                     }
                 } else {
-                    // === PC FORCE STYLES (Only if NOT mobile and width > 800) ===
-                    if (window.innerWidth > 800) {
-                        css += `
-                            #weapon-list-left {
-                                display: flex !important;
-                                transform: translateY(-50%) scale(0.5) !important;
-                                transform-origin: left center !important;
-                                position: fixed !important;
-                                top: 50% !important;
-                                left: 20px !important;
-                                z-index: 99999 !important;
-                                opacity: 1 !important;
-                            }
-                            /* Hide Mobile Controls on PC */
-                            #joystick-zone, 
-                            .mobile-controls,
-                            .weapon-select-btn {
-                                display: none !important;
-                            }
-                        `;
-                    }
+                    // === PC FORCE STYLES (Only if NOT mobile) ===
+                    css += `
+                        #weapon-list-left {
+                            display: flex !important;
+                            opacity: 1 !important;
+                        }
+                        /* Hide Mobile Controls on PC */
+                        #joystick-zone, 
+                        .mobile-controls,
+                        .weapon-select-btn {
+                            display: none !important;
+                        }
+                    `;
                 }
+
                 style.innerHTML = css;
             }
 
