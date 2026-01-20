@@ -10802,30 +10802,38 @@ function buildKnife() {
 
                     if (window.knifeSwing > 0 && window.knifeModel && window.knifeRightArm) {
                         const swingT = 1 - (window.knifeSwing / window.KNIFE_SWING_DURATION);
-                        const ease = Math.sin(swingT * Math.PI);
-                        const sweep = swingT; // 0 -> 1 left to right
-                        const arc = Math.sin(swingT * Math.PI);
+                        // Fast horizontal slash: Left -> Right
                         
-                        // Right arm drives the swing; knife follows with small wrist motion
-                        window.knifeRightArm.rotation.set(
-                            -0.15 - 0.45 * arc,
-                            -0.15 + 0.35 * sweep,
-                            0.05 - 0.25 * arc
-                        );
+                        // Arm Sweep: Left (-0.2) to Right (0.3)
+                        const sweepX = -0.2 + (0.5 * swingT);
+                        const arcY = Math.sin(swingT * Math.PI) * 0.05;
+                        const arcZ = Math.sin(swingT * Math.PI) * 0.1; // Reduced forward bob
+
                         window.knifeRightArm.position.set(
-                            0.12 - (0.1 * sweep),
-                            -0.2 + (0.05 * arc),
-                            -0.24 - (0.12 * arc)
+                            sweepX,
+                            -0.2 + arcY,
+                            -0.24 - arcZ
                         );
-                        window.knifeModel.rotation.set(
-                            0.1 - 0.2 * arc,
-                            1.45 - 0.35 * sweep,
-                            0.05 - 0.2 * arc
+
+                        // Arm Rotation: Rotate with the sweep
+                        window.knifeRightArm.rotation.set(
+                            -0.1, // Flat pitch
+                            -0.5 + (1.0 * swingT), // Y-axis sweep (Left -> Right)
+                            0.1 + (0.2 * swingT)   // Wrist twist
                         );
+
+                        // Knife Follows Arm
                         window.knifeModel.position.set(
-                            0.04 - (0.12 * sweep),
-                            -0.16 + (0.08 * arc),
-                            -0.58 - (0.28 * arc)
+                            sweepX - 0.05, 
+                            -0.2 + arcY,
+                            -0.5 - arcZ
+                        );
+                        
+                        // Knife Rotation Aligned
+                        window.knifeModel.rotation.set(
+                            0.2,
+                            (-0.5 + (1.0 * swingT)) + 1.57, // Match arm + 90deg offset
+                            0
                         );
                     } else if (window.knifeModel) {
                         // Reset Knife Local Transform
