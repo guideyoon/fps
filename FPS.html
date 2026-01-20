@@ -3262,14 +3262,24 @@
 
         let recoil = { x: 0, z: 0 };
         let recoilVel = { x: 0, z: 0 };
-        const RECOIL_SPRING = 80;
-        const RECOIL_DAMPING = 14;
-        const RECOIL_MAX = 0.6;
-        const RECOIL_POS_MAX = 2.0; // Increased from 0.35 to allow strong kick
-        const CAM_RECOIL_SPRING = 90;
-        const CAM_RECOIL_DAMPING = 16;
-        const CAM_RECOIL_MAX = 0.35;
+        const RECOIL_SPRING = 70;
+        const RECOIL_DAMPING = 12;
+        const RECOIL_MAX = 0.8;
+        const RECOIL_POS_MAX = 2.6; // Increased from 0.35 to allow strong kick
+        const CAM_RECOIL_SPRING = 70;
+        const CAM_RECOIL_DAMPING = 12;
+        const CAM_RECOIL_MAX = 0.55;
+        const rifleShotAudio = new Audio('rifle2.MP3');
+        rifleShotAudio.preload = 'auto';
+        rifleShotAudio.volume = 0.9;
+        const playRifleShot = () => {
+            const shot = rifleShotAudio.cloneNode(true);
+            shot.volume = rifleShotAudio.volume;
+            shot.currentTime = 0;
+            shot.play().catch(() => {});
+        };
         let muzzleFlash;
+
         let hitShake = { x: 0, y: 0, intensity: 0 }; // 피격 시 화면 흔들림
         let swayOffset = { x: 0, y: 0 }; // 무기 울렁임 (Idle Sway)
 
@@ -10068,31 +10078,31 @@
                 w.ammo--;
                 updateUI();
                 // [User Request] Revert base kick to 0.3 for stable camera, but boost weapon model recoil separately
-                const kick = isAiming ? w.recoil * 0.3 : w.recoil;
+                const kick = isAiming ? w.recoil * 0.35 : w.recoil;
+ 
+                 let rotScale = 1.2;
+                 let posScale = 16;
+ 
+                 // [User Request] Rifle Recoil: Differentiated by Aim State
+                 if (w.type === 'RIFLE') {
+                     if (isAiming) {
+                         rotScale = 9.5;   // Strong pitch kick
+                         posScale = 420;   // Strong backward kick
+                     } else {
+                         rotScale = 2.6;   // Idle: stronger kick
+                         posScale = 30;    // Idle: stronger kick
+                     }
+                 }
+ 
+                 const rotImpulse = kick * rotScale;
+                 const posImpulse = kick * posScale;
+                 recoilVel.x += rotImpulse;
+                 recoilVel.z += posImpulse;
+ 
+                 const yawImpulse = (Math.random() - 0.5) * kick * 7;
+                 cameraRecoilVel.x += kick * 4;
+                 cameraRecoilVel.y += yawImpulse;
 
-                let rotScale = 1.0;
-                let posScale = 12;
-
-                // [User Request] Rifle Recoil: Differentiated by Aim State
-                if (w.type === 'RIFLE') {
-                    if (isAiming) {
-                        rotScale = 8.0;   // Strong pitch kick
-                        posScale = 350;   // EXTREME backward kick
-                    } else {
-                        rotScale = 2.0;   // Idle: 2x original (Original was 1.0)
-                        posScale = 24;    // Idle: 2x original (Original was 12)
-                    }
-                }
-
-                const rotImpulse = kick * rotScale;
-                const posImpulse = kick * posScale;
-                recoilVel.x += rotImpulse;
-                recoilVel.z += posImpulse;
-
-                const yawImpulse = (Math.random() - 0.5) * kick * 6;
-                // [User Request] Disable vertical camera recoil (no muzzle climb)
-                // cameraRecoilVel.x += kick * 12; // DISABLED
-                cameraRecoilVel.y += yawImpulse;
 
 
                 // Subtle Screen Flash
@@ -10175,11 +10185,16 @@
                 // FIXED: REMOVED THE BUGGY EMISSIVE FLASH CODE HERE
 
                 // spawnShell(); // 탄피 효과 비활성화
-                SoundGen.playShoot(w.type);
+                if (w.type === 'RIFLE') {
+                    playRifleShot();
+                } else {
+                    SoundGen.playShoot(w.type);
+                }
             } else {
                 window.knifeSwing = window.KNIFE_SWING_DURATION;
                 SoundGen.playKnife();
             }
+
 
 
 
