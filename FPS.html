@@ -8991,6 +8991,11 @@
             }
 
             window.addEventListener('keydown', e => {
+                // [FIX] Block Ctrl+W browser shortcut (closes tab) to allow crouch+forward
+                if (e.ctrlKey && (e.key === 'w' || e.key === 'W')) {
+                    e.preventDefault();
+                }
+
                 // ESC 키 처리 - key와 code 모두 체크
                 if (e.key === 'Escape' || e.key === 'Esc' || e.code === 'Escape') {
                     e.preventDefault();
