@@ -1360,7 +1360,8 @@
 
         /* PC 감도 조정 UI */
         /* PC 감도 조정 UI - Modified for Pause Menu */
-        #sensitivity-control {
+        #sensitivity-control,
+        #volume-control {
             /* Originally absolute, now static in flex container */
             background: rgba(0, 0, 0, 0.5);
             padding: 15px;
@@ -1373,18 +1374,21 @@
             justify-content: center;
         }
 
-        #sensitivity-control label {
+        #sensitivity-control label,
+        #volume-control label {
             color: white;
             font-size: 14px;
             margin-right: 10px;
         }
 
-        #sensitivity-slider {
+        #sensitivity-slider,
+        #volume-slider {
             width: 150px;
             margin-right: 10px;
         }
 
-        #sensitivity-value {
+        #sensitivity-value,
+        #volume-value {
             color: #fbbc05;
             font-weight: bold;
             font-size: 14px;
@@ -2540,7 +2544,7 @@
             body.game-active #weapon-list-left {
                 display: flex !important;
                 /* Force display */
-                transform: translateY(-50%) scale(1.0) !important;
+                transform: translateY(-50%) scale(0.9) !important;
                 transform-origin: left center !important;
                 left: 20px !important;
                 gap: 5px !important;
@@ -2833,6 +2837,13 @@
             <label for="sensitivity-slider">Mouse Sensitivity:</label>
             <input type="range" id="sensitivity-slider" min="0.0005" max="0.01" step="0.0001" value="0.002">
             <span id="sensitivity-value">1.00</span>
+        </div>
+
+        <!-- Volume Control -->
+        <div id="volume-control">
+            <label for="volume-slider">Master Volume:</label>
+            <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.5">
+            <span id="volume-value">50%</span>
         </div>
     </div>
 
@@ -3269,12 +3280,16 @@
         const CAM_RECOIL_SPRING = 70;
         const CAM_RECOIL_DAMPING = 12;
         const CAM_RECOIL_MAX = 0.55;
+        const RIFLE_SHOT_BASE_VOLUME = 0.9;
         const rifleShotAudio = new Audio('rifle2.MP3');
         rifleShotAudio.preload = 'auto';
-        rifleShotAudio.volume = 0.9;
+        rifleShotAudio.volume = RIFLE_SHOT_BASE_VOLUME;
         const playRifleShot = () => {
             const shot = rifleShotAudio.cloneNode(true);
-            shot.volume = rifleShotAudio.volume;
+            const masterVolume = (typeof SoundGen !== 'undefined' && typeof SoundGen.masterVolume === 'number')
+                ? SoundGen.masterVolume
+                : 1.0;
+            shot.volume = RIFLE_SHOT_BASE_VOLUME * masterVolume;
             shot.currentTime = 0;
             shot.play().catch(() => {});
         };
@@ -9334,15 +9349,36 @@
             const sensitivityControl = document.getElementById('sensitivity-control');
             const sensitivitySlider = document.getElementById('sensitivity-slider');
             const sensitivityValue = document.getElementById('sensitivity-value');
+            const volumeControl = document.getElementById('volume-control');
+            const volumeSlider = document.getElementById('volume-slider');
+            const volumeValue = document.getElementById('volume-value');
 
             if (!sensitivityControl || !sensitivitySlider || !sensitivityValue) return;
 
             // Force visibility
             sensitivityControl.style.display = 'flex';
+            if (volumeControl && volumeSlider && volumeValue) {
+                volumeControl.style.display = 'flex';
+            }
 
             // 현재 감도로 슬라이더 설정
             sensitivitySlider.value = SENSITIVITY_MOUSE;
             updateSensitivityDisplay();
+
+            if (volumeSlider && volumeValue) {
+                const savedVolume = localStorage.getItem('masterVolume');
+                const initialVolume = savedVolume ? parseFloat(savedVolume) : SoundGen.masterVolume;
+                const clampedVolume = isNaN(initialVolume) ? SoundGen.masterVolume : Math.max(0, Math.min(1, initialVolume));
+                SoundGen.masterVolume = clampedVolume;
+                volumeSlider.value = clampedVolume;
+                updateVolumeDisplay();
+                volumeSlider.addEventListener('input', (e) => {
+                    const newVolume = Math.max(0, Math.min(1, parseFloat(e.target.value)));
+                    SoundGen.masterVolume = isNaN(newVolume) ? SoundGen.masterVolume : newVolume;
+                    localStorage.setItem('masterVolume', SoundGen.masterVolume.toString());
+                    updateVolumeDisplay();
+                });
+            }
 
             // 슬라이더 변경 이벤트
             sensitivitySlider.addEventListener('input', (e) => {
@@ -9360,12 +9396,29 @@
             sensitivitySlider.addEventListener('click', (e) => {
                 e.stopPropagation();
             });
+            if (volumeControl) {
+                volumeControl.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                });
+            }
+            if (volumeSlider) {
+                volumeSlider.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                });
+            }
 
             function updateSensitivityDisplay() {
                 const displayValue = (SENSITIVITY_MOUSE / 0.002).toFixed(2);
                 sensitivityValue.textContent = displayValue;
             }
+
+            function updateVolumeDisplay() {
+                if (!volumeValue) return;
+                const percent = Math.round(SoundGen.masterVolume * 100);
+                volumeValue.textContent = percent + '%';
+            }
         }
+
 
         function switchWeaponTo(idx) {
             if (curWeaponIdx === idx) return;
