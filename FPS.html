@@ -10802,6 +10802,8 @@ function buildKnife() {
 
                     if (window.knifeSwing > 0 && window.knifeModel && window.knifeRightArm) {
                         const swingT = 1 - (window.knifeSwing / window.KNIFE_SWING_DURATION);
+                        const thrust = Math.sin(swingT * Math.PI) * 0.18;
+                        weaponModel.position.set(0.2, -0.25, -0.4 - thrust);
                         // Fast horizontal slash: Left -> Right
                         
                         // Arm Sweep: wider right -> left, no forward bob
