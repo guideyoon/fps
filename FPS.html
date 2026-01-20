@@ -8022,6 +8022,7 @@ function buildKnife() {
             knifeGroup.position.set(0, -0.2, -0.5); // Adjusted position for larger size
             knifeGroup.rotation.set(0.2, Math.PI / 2, 0); // Tip points left
             weaponModel.add(knifeGroup);
+            window.knifeModel = knifeGroup;
 
             // --- RIGHT ARM (Holding the knife) ---
             const rightArm = new THREE.Group();
@@ -8060,6 +8061,7 @@ function buildKnife() {
             rightArm.scale.set(1.3, 1.3, 1.3); // Reduced scale from 1.8
 
             weaponModel.add(rightArm);
+            window.knifeRightArm = rightArm;
 
             // --- LEFT ARM (Supporting/Ready - WIDER APART) ---
             const leftArm = new THREE.Group();
@@ -8085,6 +8087,7 @@ function buildKnife() {
             leftArm.scale.set(1.3, 1.3, 1.3); // Reduced scale from 1.8
 
             weaponModel.add(leftArm);
+            window.knifeLeftArm = leftArm;
         }
 
 
@@ -10797,27 +10800,41 @@ function buildKnife() {
                     weaponModel.rotation.set(0, 0, 0);
                     weaponModel.position.set(0.2, -0.25, -0.4);
 
-                    if (window.knifeSwing > 0 && window.knifeModel) {
+                    if (window.knifeSwing > 0 && window.knifeModel && window.knifeRightArm) {
                         const swingT = 1 - (window.knifeSwing / window.KNIFE_SWING_DURATION);
                         const ease = Math.sin(swingT * Math.PI);
                         const sweep = swingT; // 0 -> 1 left to right
                         const arc = Math.sin(swingT * Math.PI);
                         
-                        // Apply animation ONLY to the knife mesh
+                        // Right arm drives the swing; knife follows with small wrist motion
+                        window.knifeRightArm.rotation.set(
+                            -0.15 - 0.45 * arc,
+                            -0.15 + 0.35 * sweep,
+                            0.05 - 0.25 * arc
+                        );
+                        window.knifeRightArm.position.set(
+                            0.12 - (0.1 * sweep),
+                            -0.2 + (0.05 * arc),
+                            -0.24 - (0.12 * arc)
+                        );
                         window.knifeModel.rotation.set(
-                            0.1 - 0.35 * arc,
-                            0.5 - 1.0 * sweep,
-                            0.15 - 0.4 * arc
+                            0.1 - 0.2 * arc,
+                            1.45 - 0.35 * sweep,
+                            0.05 - 0.2 * arc
                         );
                         window.knifeModel.position.set(
-                            0.2 - (0.6 * sweep),
-                            -0.2 + (0.12 * arc),
-                            -0.55 - (0.35 * arc)
+                            0.04 - (0.12 * sweep),
+                            -0.16 + (0.08 * arc),
+                            -0.58 - (0.28 * arc)
                         );
                     } else if (window.knifeModel) {
                         // Reset Knife Local Transform
                         window.knifeModel.position.set(0, -0.2, -0.5); 
                         window.knifeModel.rotation.set(0.2, Math.PI / 2, 0);
+                        if (window.knifeRightArm) {
+                            window.knifeRightArm.position.set(0.12, -0.2, -0.24);
+                            window.knifeRightArm.rotation.set(0, -0.15, 0.05);
+                        }
                     }
                 } else {
 
