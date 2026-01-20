@@ -7969,9 +7969,10 @@
             // lArm.scale.set(0.7, 0.7, 0.7); // Removed to match global scale
         }
 
-        function buildKnife() {
+function buildKnife() {
             // === KRUNKER-STYLE KNIFE: Centered blade, held by right hand ===
             const knifeGroup = new THREE.Group();
+            window.knifeModel = knifeGroup;
 
             // --- KNIFE BLADE (centered, pointing forward) ---
             const blade = new THREE.Mesh(
@@ -10005,7 +10006,7 @@
 
             if (fireCooldown > 0) fireCooldown -= dt;
 
-            if (knifeSwing > 0) {
+            if (knifeSwing > 0 && window.knifeModel) {
                 knifeSwing -= dt * 4.5; // 약간 느리게 (더 자연스럽게)
                 const swingProgress = knifeSwing; // 1.0 -> 0.0
                 const swingPhase = 1.0 - swingProgress; // 0.0 -> 1.0
@@ -10018,29 +10019,29 @@
                 // From Left/Low (-1.2, -0.5) to Center/High (0.0, 0.4)
                 const startX = -1.2;
                 const endX = 0.0;
-                weaponModel.position.x = startX + (endX - startX) * swingEase;
+                window.knifeModel.position.x = startX + (endX - startX) * swingEase;
 
                 // 손목 회전 (Y축) - Reduced range for Forward Slash
                 const rotationY = -1.2 + (1.2 - (-1.2)) * swingEase;
-                weaponModel.rotation.y = rotationY;
+                window.knifeModel.rotation.y = rotationY;
 
                 // 손목 회전 (Z축) - Unchanged
-                weaponModel.rotation.z = -0.15 + swingEaseOut * 1.5;
+                window.knifeModel.rotation.z = -0.15 + swingEaseOut * 1.5;
 
                 // 손목 회전 (X축) - Pitch Up
-                weaponModel.rotation.x = 0.25 + swingEaseOut * 1.5;
+                window.knifeModel.rotation.x = 0.25 + swingEaseOut * 1.5;
 
                 // 앞뒤 이동 - Thrust FORWARD (Camera looks down -Z)
-                weaponModel.position.z = -0.6 + (swingEaseOut * 0.9);
+                window.knifeModel.position.z = -0.6 + (swingEaseOut * 0.9);
 
                 // 위아래 움직임 - Swing Up!
-                weaponModel.position.y = -0.4 + (0.7 * swingEaseOut);
+                window.knifeModel.position.y = -0.4 + (0.7 * swingEaseOut);
 
                 if (knifeSwing < 0) {
                     knifeSwing = 0;
-                    // 기본 위치로 복귀 (CS Style Reset)
-                    weaponModel.rotation.set(0, 0, 0);
-                    weaponModel.position.set(0.2, -0.25, -0.4);
+                    // 기본 위치로 복귀 (Local Reset)
+                    window.knifeModel.position.set(0, -0.2, -0.5); // Adjusted position for larger size
+                    window.knifeModel.rotation.set(0.2, Math.PI / 2, 0); // Tip points left
                 }
             }
 
@@ -10826,25 +10827,32 @@
 
                 // 나이프일 때만 특별한 위치/회전 처리
                 if (w.type === 'KNIFE') {
-                    if (window.knifeSwing > 0) {
+                    // Arms Stability: Reset weaponModel (container) to idle pose
+                    weaponModel.rotation.set(0, 0, 0);
+                    weaponModel.position.set(0.2, -0.25, -0.4);
+
+                    if (window.knifeSwing > 0 && window.knifeModel) {
                         const swingT = 1 - (window.knifeSwing / window.KNIFE_SWING_DURATION);
                         const ease = Math.sin(swingT * Math.PI);
                         const sweep = swingT; // 0 -> 1 left to right
                         const arc = Math.sin(swingT * Math.PI);
-                        weaponModel.rotation.set(
+                        
+                        // Apply animation ONLY to the knife mesh
+                        window.knifeModel.rotation.set(
                             -0.2 - 0.6 * arc,
                             -0.9 + 1.8 * sweep,
                             0.4 - 0.8 * arc
                         );
-                        weaponModel.position.set(
-                            -0.4 + (0.9 * sweep),
-                            -0.28 + (0.08 * arc),
-                            -0.6 - (0.2 * arc)
+                        // Relative positions adjusted for weaponModel being at (0.2, -0.25, -0.4)
+                        window.knifeModel.position.set(
+                            -0.6 + (0.9 * sweep),    // Orig: -0.4 -> -0.6
+                            -0.03 + (0.08 * arc),    // Orig: -0.28 -> -0.03
+                            -0.2 - (0.2 * arc)       // Orig: -0.6 -> -0.2
                         );
-                    } else {
-                        // CS Style Reset
-                        weaponModel.rotation.set(0, 0, 0);
-                        weaponModel.position.set(0.2, -0.25, -0.4);
+                    } else if (window.knifeModel) {
+                        // Reset Knife Local Transform
+                        window.knifeModel.position.set(0, -0.2, -0.5); 
+                        window.knifeModel.rotation.set(0.2, Math.PI / 2, 0);
                     }
                 } else {
 
