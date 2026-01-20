@@ -10806,8 +10806,11 @@ function buildKnife() {
                         weaponModel.position.set(0.2, -0.25, -0.4 - thrust);
                         // Fast horizontal slash: Left -> Right
                         
-                        // Arm Sweep: wider right -> left, no forward bob
-                        const sweepX = 0.35 - (0.7 * swingT);
+                        // Arm Sweep: wider right -> left with strong ease
+                        const easeT = swingT < 0.5
+                            ? 4 * swingT * swingT * swingT
+                            : 1 - Math.pow(-2 * swingT + 2, 3) / 2;
+                        const sweepX = 0.55 - (1.1 * easeT);
                         const arcY = Math.sin(swingT * Math.PI) * 0.03;
 
                         window.knifeRightArm.position.set(
@@ -10818,23 +10821,23 @@ function buildKnife() {
 
                         // Arm Rotation: Rotate with the sweep
                         window.knifeRightArm.rotation.set(
-                            -0.05,
-                            0.8 - (1.6 * swingT),
-                            0.05 - (0.1 * swingT)
+                            -0.08,
+                            1.1 - (2.2 * easeT),
+                            0.15 - (0.3 * easeT)
                         );
 
                         // Knife Follows Arm
                         window.knifeModel.position.set(
-                            sweepX - 0.06,
+                            sweepX - 0.08,
                             -0.2 + arcY,
-                            -0.68 - (0.18 * arcY)
+                            -0.66
                         );
                         
                         // Knife Rotation Aligned
                         window.knifeModel.rotation.set(
                             0.2,
-                            (0.8 - (1.6 * swingT)) + 1.57,
-                            0
+                            (1.1 - (2.2 * easeT)) + 1.57,
+                            0.05 - (0.2 * easeT)
                         );
                     } else if (window.knifeModel) {
                         // Reset Knife Local Transform
