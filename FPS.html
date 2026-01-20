@@ -10030,8 +10030,8 @@
                 // 손목 회전 (X축) - Pitch Up
                 weaponModel.rotation.x = 0.25 + swingEaseOut * 1.5;
 
-                // 앞뒤 이동 - Thrust FORWARD (Positive Z toward camera)
-                weaponModel.position.z = -0.1 + (swingEaseOut * 0.8);
+                // 앞뒤 이동 - Thrust FORWARD (Camera looks down -Z)
+                weaponModel.position.z = -0.6 + (swingEaseOut * 0.9);
 
                 // 위아래 움직임 - Swing Up!
                 weaponModel.position.y = -0.4 + (0.7 * swingEaseOut);
