@@ -10804,8 +10804,8 @@ function buildKnife() {
                         const swingT = 1 - (window.knifeSwing / window.KNIFE_SWING_DURATION);
                         // Fast horizontal slash: Left -> Right
                         
-                        // Arm Sweep: wider left -> right, no forward bob
-                        const sweepX = -0.35 + (0.7 * swingT);
+                        // Arm Sweep: wider right -> left, no forward bob
+                        const sweepX = 0.35 - (0.7 * swingT);
                         const arcY = Math.sin(swingT * Math.PI) * 0.03;
 
                         window.knifeRightArm.position.set(
@@ -10817,8 +10817,8 @@ function buildKnife() {
                         // Arm Rotation: Rotate with the sweep
                         window.knifeRightArm.rotation.set(
                             -0.05,
-                            -0.8 + (1.6 * swingT),
-                            0.05 + (0.1 * swingT)
+                            0.8 - (1.6 * swingT),
+                            0.05 - (0.1 * swingT)
                         );
 
                         // Knife Follows Arm
@@ -10831,7 +10831,7 @@ function buildKnife() {
                         // Knife Rotation Aligned
                         window.knifeModel.rotation.set(
                             0.2,
-                            (-0.8 + (1.6 * swingT)) + 1.57,
+                            (0.8 - (1.6 * swingT)) + 1.57,
                             0
                         );
                     } else if (window.knifeModel) {
