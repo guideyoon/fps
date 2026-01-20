@@ -10006,43 +10006,9 @@ function buildKnife() {
 
             if (fireCooldown > 0) fireCooldown -= dt;
 
-            if (knifeSwing > 0 && window.knifeModel) {
+            if (knifeSwing > 0) {
                 knifeSwing -= dt * 4.5; // 약간 느리게 (더 자연스럽게)
-                const swingProgress = knifeSwing; // 1.0 -> 0.0
-                const swingPhase = 1.0 - swingProgress; // 0.0 -> 1.0
-
-                // 부드러운 가속/감속 곡선 (ease-in-out)
-                const swingEase = 0.5 - 0.5 * Math.cos(swingPhase * Math.PI); // 0.0 -> 1.0 (부드러운 S자 곡선)
-                const swingEaseOut = Math.sin(swingPhase * Math.PI); // 0.0 -> 1.0 -> 0.0
-
-                // [User Request] Left to Upward Large Swing
-                // From Left/Low (-1.2, -0.5) to Center/High (0.0, 0.4)
-                const startX = -1.2;
-                const endX = 0.0;
-                window.knifeModel.position.x = startX + (endX - startX) * swingEase;
-
-                // 손목 회전 (Y축) - Reduced range for Forward Slash
-                const rotationY = -1.2 + (1.2 - (-1.2)) * swingEase;
-                window.knifeModel.rotation.y = rotationY;
-
-                // 손목 회전 (Z축) - Unchanged
-                window.knifeModel.rotation.z = -0.15 + swingEaseOut * 1.5;
-
-                // 손목 회전 (X축) - Pitch Up
-                window.knifeModel.rotation.x = 0.25 + swingEaseOut * 1.5;
-
-                // 앞뒤 이동 - Thrust FORWARD (Camera looks down -Z)
-                window.knifeModel.position.z = -0.6 + (swingEaseOut * 0.9);
-
-                // 위아래 움직임 - Swing Up!
-                window.knifeModel.position.y = -0.4 + (0.7 * swingEaseOut);
-
-                if (knifeSwing < 0) {
-                    knifeSwing = 0;
-                    // 기본 위치로 복귀 (Local Reset)
-                    window.knifeModel.position.set(0, -0.2, -0.5); // Adjusted position for larger size
-                    window.knifeModel.rotation.set(0.2, Math.PI / 2, 0); // Tip points left
-                }
+                if (knifeSwing < 0) knifeSwing = 0;
             }
 
             if (isFiring && !isReloading) {
@@ -10839,15 +10805,14 @@ function buildKnife() {
                         
                         // Apply animation ONLY to the knife mesh
                         window.knifeModel.rotation.set(
-                            -0.2 - 0.6 * arc,
-                            -0.9 + 1.8 * sweep,
-                            0.4 - 0.8 * arc
+                            0.1 - 0.35 * arc,
+                            0.5 - 1.0 * sweep,
+                            0.15 - 0.4 * arc
                         );
-                        // Relative positions adjusted for weaponModel being at (0.2, -0.25, -0.4)
                         window.knifeModel.position.set(
-                            -0.6 + (0.9 * sweep),    // Orig: -0.4 -> -0.6
-                            -0.03 + (0.08 * arc),    // Orig: -0.28 -> -0.03
-                            -0.2 - (0.2 * arc)       // Orig: -0.6 -> -0.2
+                            0.2 - (0.6 * sweep),
+                            -0.2 + (0.12 * arc),
+                            -0.55 - (0.35 * arc)
                         );
                     } else if (window.knifeModel) {
                         // Reset Knife Local Transform
