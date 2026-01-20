@@ -2373,7 +2373,9 @@
 
 
         /* Hide text-based weapon inventory in landscape too - FORCE */
-        @media (pointer: coarse), (hover: none) {
+        @media (pointer: coarse),
+        (hover: none) {
+
             body #weapon-inventory,
             body #weapon-list-left {
                 display: none !important;
@@ -3291,7 +3293,7 @@
                 : 1.0;
             shot.volume = RIFLE_SHOT_BASE_VOLUME * masterVolume;
             shot.currentTime = 0;
-            shot.play().catch(() => {});
+            shot.play().catch(() => { });
         };
         let muzzleFlash;
 
@@ -4148,7 +4150,7 @@
             });
 
             addSafeListener(document.getElementById('btn-multi-player'), () => {
-                const serverAddr = 'https://murphy-highs-cradle-acting.trycloudflare.com';
+                const serverAddr = 'https://sharyn-unsubjected-overhostilely.ngrok-free.dev';
                 gameMode = 'multi';
                 modeSelection.style.display = 'none';
                 document.body.classList.remove('single-player');
@@ -4220,7 +4222,7 @@
 
             document.getElementById('btn-confirm-name').addEventListener('click', () => {
                 const name = document.getElementById('player-name-input').value.trim() || 'Player';
-                const serverAddr = 'https://murphy-highs-cradle-acting.trycloudflare.com';
+                const serverAddr = 'https://sharyn-unsubjected-overhostilely.ngrok-free.dev';
 
                 gameMode = 'multi';
                 nameSetup.style.display = 'none';
@@ -7969,7 +7971,7 @@
             // lArm.scale.set(0.7, 0.7, 0.7); // Removed to match global scale
         }
 
-function buildKnife() {
+        function buildKnife() {
             // === KRUNKER-STYLE KNIFE: Centered blade, held by right hand ===
             const knifeGroup = new THREE.Group();
             window.knifeModel = knifeGroup;
@@ -10102,29 +10104,29 @@ function buildKnife() {
                 updateUI();
                 // [User Request] Revert base kick to 0.3 for stable camera, but boost weapon model recoil separately
                 const kick = isAiming ? w.recoil * 0.35 : w.recoil;
- 
-                 let rotScale = 1.2;
-                 let posScale = 16;
- 
-                 // [User Request] Rifle Recoil: Differentiated by Aim State
-                 if (w.type === 'RIFLE') {
-                     if (isAiming) {
-                         rotScale = 9.5;   // Strong pitch kick
-                         posScale = 420;   // Strong backward kick
-                     } else {
-                         rotScale = 2.6;   // Idle: stronger kick
-                         posScale = 30;    // Idle: stronger kick
-                     }
-                 }
- 
-                 const rotImpulse = kick * rotScale;
-                 const posImpulse = kick * posScale;
-                 recoilVel.x += rotImpulse;
-                 recoilVel.z += posImpulse;
- 
-                 const yawImpulse = (Math.random() - 0.5) * kick * 7;
-                 cameraRecoilVel.x += kick * 4;
-                 cameraRecoilVel.y += yawImpulse;
+
+                let rotScale = 1.2;
+                let posScale = 16;
+
+                // [User Request] Rifle Recoil: Differentiated by Aim State
+                if (w.type === 'RIFLE') {
+                    if (isAiming) {
+                        rotScale = 9.5;   // Strong pitch kick
+                        posScale = 420;   // Strong backward kick
+                    } else {
+                        rotScale = 2.6;   // Idle: stronger kick
+                        posScale = 30;    // Idle: stronger kick
+                    }
+                }
+
+                const rotImpulse = kick * rotScale;
+                const posImpulse = kick * posScale;
+                recoilVel.x += rotImpulse;
+                recoilVel.z += posImpulse;
+
+                const yawImpulse = (Math.random() - 0.5) * kick * 7;
+                cameraRecoilVel.x += kick * 4;
+                cameraRecoilVel.y += yawImpulse;
 
 
 
@@ -10805,7 +10807,7 @@ function buildKnife() {
                         const thrust = Math.sin(swingT * Math.PI) * 0.18;
                         weaponModel.position.set(0.2, -0.25, -0.4 - thrust);
                         // Fast horizontal slash: Left -> Right
-                        
+
                         // Arm Sweep: wider right -> left with strong ease
                         const easeT = swingT < 0.5
                             ? 4 * swingT * swingT * swingT
@@ -10832,7 +10834,7 @@ function buildKnife() {
                             -0.2 + arcY,
                             -0.66
                         );
-                        
+
                         // Knife Rotation Aligned
                         window.knifeModel.rotation.set(
                             0.2,
@@ -10841,7 +10843,7 @@ function buildKnife() {
                         );
                     } else if (window.knifeModel) {
                         // Reset Knife Local Transform
-                        window.knifeModel.position.set(0, -0.2, -0.5); 
+                        window.knifeModel.position.set(0, -0.2, -0.5);
                         window.knifeModel.rotation.set(0.2, Math.PI / 2, 0);
                         if (window.knifeRightArm) {
                             window.knifeRightArm.position.set(0.12, -0.2, -0.24);
