@@ -4432,7 +4432,11 @@
                 const connectionUrl = addr.startsWith('http') ? addr : `http://${addr}`;
                 socket = io(connectionUrl, {
                     reconnectionAttempts: 5,
-                    timeout: 10000
+                    timeout: 10000,
+                    transports: ['websocket', 'polling'],
+                    extraHeaders: {
+                        'ngrok-skip-browser-warning': 'true'
+                    }
                 });
 
                 socket.on('connect', () => {
