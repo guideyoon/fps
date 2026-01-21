@@ -2061,7 +2061,8 @@
         }
 
         /* 가로 모드 - 모바일 스타일 적용 (User Request: Like Portrait Mode) */
-        @media (orientation: landscape) and (max-width: 1024px) and (hover: none) and (pointer: coarse) {
+        /* Simplified: removed hover:none and pointer:coarse for broader device support */
+        @media (orientation: landscape) and (max-width: 1024px) and (max-height: 600px) {
             #controls-guide {
                 display: none;
             }
