@@ -12195,174 +12195,170 @@
             }
 
 
-            if (!isDead && !isPaused && isGameStarted) {
-                handleShooting(dt);
-
-                // Check Low Health Effect (Every Frame)
-                checkLowHealth();
-
-                // --- Improved Physics with Raycasting (Fix for Jumping on Objects) ---
-                const eyeHeight = keys.ctrl ? 1.0 : 1.7; // 1.7 is standard eye level
-
-                // Raycast down to find "ground"
-                let groundY = 0.5; // Base floor level
-
-                // Only cast ray if mapGroup exists
-                if (mapGroup) {
-                    const rayOrigin = position.clone();
-                    rayOrigin.y += 0.5; // Start slightly above current foot position to detect very close ground
-                    const downRay = new THREE.Raycaster(rayOrigin, new THREE.Vector3(0, -1, 0), 0, 10);
-                    // Intersect with map objects (collidable)
-                    // Note: We need to traverse mapGroup to find meshes, or use a known list.
-                    // mapGroup.children contains meshes.
-                    const intersects = downRay.intersectObjects(mapGroup.children, true);
-
-                    if (intersects.length > 0) {
-                        // Find highest valid intersection below player
-                        let bestGroundY = groundY;
-                        for (const hit of intersects) {
-                            if (!hit.face) continue;
-                            const worldNormal = hit.face.normal.clone().transformDirection(hit.object.matrixWorld);
-                            if (worldNormal.y > 0.3) {
-                                bestGroundY = Math.max(bestGroundY, hit.point.y);
-                            }
-                        }
-                        groundY = bestGroundY;
-                    }
-                }
-
-                const targetY = groundY + eyeHeight;
-                playerVelocity.copy(position).sub(lastPlayerPosition).multiplyScalar(1 / dt);
-
-                // Apply Gravity
-                velocityY -= 30.0 * dt; // Stronger gravity for snappier feel
-                let nextY = position.y + velocityY * dt;
-
-
-
-                // Ground Collision / Landing
-                // We allow a small tolerance to "snap" to ground
-                const groundTolerance = 0.15; // Allow small height difference for grounded state
-
-                if (velocityY < 0 && nextY <= targetY) {
-                    // Landed
-                    position.y = targetY;
-                    velocityY = 0;
-                    isGrounded = true;
-                } else if (Math.abs(position.y - targetY) < groundTolerance && velocityY <= 0) {
-                    // Very close to ground (within tolerance) - still considered grounded
-                    // This helps with walking on uneven surfaces or objects
-                    position.y = targetY;
-                    velocityY = 0;
-                    isGrounded = true;
-                } else {
-                    position.y = nextY;
-                    // Only set isGrounded to false if we're actually above ground by more than tolerance
-                    if (position.y > targetY + groundTolerance) {
-                        isGrounded = false;
-                    }
-                }
-
-                // Head Collision (Ceiling) - Optional, simplified
-                // ...
-
+            if (!isDead && !isPaused) {
                 const w = WEAPONS[curWeaponIdx];
-                let speed = 9.0; // Default: RUN (User Request)
-                if (keys.shift) speed = 2.0; // Shift: VERY SLOW WALK (reduced from 5.0)
+                if (isGameStarted) {
+                    handleShooting(dt);
 
-                // Weapon-based movement speed multipliers
-                if (w.type === 'KNIFE') speed *= 1.1;
-                else if (w.type === 'PISTOL') speed *= 1.05;
-                else if (w.type === 'SNIPER') speed *= 0.9;
-                else if (w.type === 'GRENADE') speed *= 0.95;
+                    // Check Low Health Effect (Every Frame)
+                    checkLowHealth();
 
-                // Overrides (Crouch & Aim take priority)
-                if (keys.ctrl) speed = 2.5;
-                if (isAiming) speed = 2.0;
+                    // --- Improved Physics with Raycasting (Fix for Jumping on Objects) ---
+                    const eyeHeight = keys.ctrl ? 1.0 : 1.7; // 1.7 is standard eye level
 
+                    // Raycast down to find "ground"
+                    let groundY = 0.5; // Base floor level
 
-                const q = new THREE.Quaternion();
-                q.setFromEuler(new THREE.Euler(rotation.x, rotation.y, 0, 'YXZ'));
-                camera.quaternion.copy(q);
+                    // Only cast ray if mapGroup exists
+                    if (mapGroup) {
+                        const rayOrigin = position.clone();
+                        rayOrigin.y += 0.5; // Start slightly above current foot position to detect very close ground
+                        const downRay = new THREE.Raycaster(rayOrigin, new THREE.Vector3(0, -1, 0), 0, 10);
+                        // Intersect with map objects (collidable)
+                        // Note: We need to traverse mapGroup to find meshes, or use a known list.
+                        // mapGroup.children contains meshes.
+                        const intersects = downRay.intersectObjects(mapGroup.children, true);
 
-                const dx = keys.d - keys.a; const dy = keys.s - keys.w;
-                if (dx !== 0 || dy !== 0) {
-                    const fwd = new THREE.Vector3(0, 0, -1).applyAxisAngle(new THREE.Vector3(0, 1, 0), rotation.y);
-                    const rgt = new THREE.Vector3(1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), rotation.y);
-                    const moveDir = fwd.multiplyScalar(-dy).add(rgt.multiplyScalar(dx)).normalize();
-                    const moveStep = moveDir.clone().multiplyScalar(speed * dt);
+                        if (intersects.length > 0) {
+                            // Find highest valid intersection below player
+                            let bestGroundY = groundY;
+                            for (const hit of intersects) {
+                                if (!hit.face) continue;
+                                const worldNormal = hit.face.normal.clone().transformDirection(hit.object.matrixWorld);
+                                if (worldNormal.y > 0.3) {
+                                    bestGroundY = Math.max(bestGroundY, hit.point.y);
+                                }
+                            }
+                            groundY = bestGroundY;
+                        }
+                    }
 
+                    const targetY = groundY + eyeHeight;
+                    playerVelocity.copy(position).sub(lastPlayerPosition).multiplyScalar(1 / dt);
 
-                    const stepHeight = 0.6; // 등반 가능한 최대 높이 (계단 등)
+                    // Apply Gravity
+                    velocityY -= 30.0 * dt; // Stronger gravity for snappier feel
+                    let nextY = position.y + velocityY * dt;
 
-                    // X축 이동 및 Step Climbing
-                    let nextPosX = position.clone();
-                    nextPosX.x += moveStep.x;
-                    if (!checkCollision(nextPosX)) {
-                        position.x = nextPosX.x;
+                    // Ground Collision / Landing
+                    // We allow a small tolerance to "snap" to ground
+                    const groundTolerance = 0.15; // Allow small height difference for grounded state
+
+                    if (velocityY < 0 && nextY <= targetY) {
+                        // Landed
+                        position.y = targetY;
+                        velocityY = 0;
+                        isGrounded = true;
+                    } else if (Math.abs(position.y - targetY) < groundTolerance && velocityY <= 0) {
+                        // Very close to ground (within tolerance) - still considered grounded
+                        // This helps with walking on uneven surfaces or objects
+                        position.y = targetY;
+                        velocityY = 0;
+                        isGrounded = true;
                     } else {
-                        // 장애물 발견 시 위쪽 공간 체크
-                        let stepUpPos = nextPosX.clone();
-                        stepUpPos.y += stepHeight;
-                        if (!checkCollision(stepUpPos)) {
+                        position.y = nextY;
+                        // Only set isGrounded to false if we're actually above ground by more than tolerance
+                        if (position.y > targetY + groundTolerance) {
+                            isGrounded = false;
+                        }
+                    }
+
+                    let speed = 9.0; // Default: RUN (User Request)
+                    if (keys.shift) speed = 2.0; // Shift: VERY SLOW WALK (reduced from 5.0)
+
+                    // Weapon-based movement speed multipliers
+                    if (w.type === 'KNIFE') speed *= 1.1;
+                    else if (w.type === 'PISTOL') speed *= 1.05;
+                    else if (w.type === 'SNIPER') speed *= 0.9;
+                    else if (w.type === 'GRENADE') speed *= 0.95;
+
+                    // Overrides (Crouch & Aim take priority)
+                    if (keys.ctrl) speed = 2.5;
+                    if (isAiming) speed = 2.0;
+
+                    const q = new THREE.Quaternion();
+                    q.setFromEuler(new THREE.Euler(rotation.x, rotation.y, 0, 'YXZ'));
+                    camera.quaternion.copy(q);
+
+                    const dx = keys.d - keys.a; const dy = keys.s - keys.w;
+                    if (dx !== 0 || dy !== 0) {
+                        const fwd = new THREE.Vector3(0, 0, -1).applyAxisAngle(new THREE.Vector3(0, 1, 0), rotation.y);
+                        const rgt = new THREE.Vector3(1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), rotation.y);
+                        const moveDir = fwd.multiplyScalar(-dy).add(rgt.multiplyScalar(dx)).normalize();
+                        const moveStep = moveDir.clone().multiplyScalar(speed * dt);
+
+                        const stepHeight = 0.6; // 등반 가능한 최대 높이 (계단 등)
+
+                        // X축 이동 및 Step Climbing
+                        let nextPosX = position.clone();
+                        nextPosX.x += moveStep.x;
+                        if (!checkCollision(nextPosX)) {
                             position.x = nextPosX.x;
-                            position.y += 0.1; // 살짝 들어올려줌 (부드러운 등반)
-                        }
-                    }
-
-                    // Z축 이동 및 Step Climbing
-                    let nextPosZ = position.clone();
-                    nextPosZ.z += moveStep.z;
-                    if (!checkCollision(nextPosZ)) {
-                        position.z = nextPosZ.z;
-                    } else {
-                        // 장애물 발견 시 위쪽 공간 체크
-                        let stepUpPos = nextPosZ.clone();
-                        stepUpPos.y += stepHeight;
-                        if (!checkCollision(stepUpPos)) {
-                            position.z = nextPosZ.z;
-                            position.y += 0.1; // 살짝 들어올려줌
-                        }
-                    }
-
-                    if (!isAiming) {
-                        if (isGrounded) {
-                            moveDistance += speed * dt;
-                            if (moveDistance > STEP_INTERVAL) {
-                                SoundGen.playStep();
-                                moveDistance = 0;
+                        } else {
+                            // 장애물 발견 시 위쪽 공간 체크
+                            let stepUpPos = nextPosX.clone();
+                            stepUpPos.y += stepHeight;
+                            if (!checkCollision(stepUpPos)) {
+                                position.x = nextPosX.x;
+                                position.y += 0.1; // 살짝 들어올려줌 (부드러운 등반)
                             }
                         }
 
-                        const bobFreq = keys.shift ? 15 : 8; const bobAmp = keys.shift ? 0.05 : 0.02;
-                        swayOffset.y = Math.sin(time * 0.001 * bobFreq) * bobAmp;
-                        swayOffset.x = Math.cos(time * 0.001 * (bobFreq / 2)) * bobAmp;
+                        // Z축 이동 및 Step Climbing
+                        let nextPosZ = position.clone();
+                        nextPosZ.z += moveStep.z;
+                        if (!checkCollision(nextPosZ)) {
+                            position.z = nextPosZ.z;
+                        } else {
+                            // 장애물 발견 시 위쪽 공간 체크
+                            let stepUpPos = nextPosZ.clone();
+                            stepUpPos.y += stepHeight;
+                            if (!checkCollision(stepUpPos)) {
+                                position.z = nextPosZ.z;
+                                position.y += 0.1; // 살짝 들어올려줌
+                            }
+                        }
+
+                        if (!isAiming) {
+                            if (isGrounded) {
+                                moveDistance += speed * dt;
+                                if (moveDistance > STEP_INTERVAL) {
+                                    SoundGen.playStep();
+                                    moveDistance = 0;
+                                }
+                            }
+
+                            const bobFreq = keys.shift ? 15 : 8; const bobAmp = keys.shift ? 0.05 : 0.02;
+                            swayOffset.y = Math.sin(time * 0.001 * bobFreq) * bobAmp;
+                            swayOffset.x = Math.cos(time * 0.001 * (bobFreq / 2)) * bobAmp;
+                        } else {
+                            // [FIX] Smoothly reset sway when aiming while moving (fixes pistol crosshair wobble)
+                            swayOffset.x = THREE.MathUtils.lerp(swayOffset.x, 0, 15 * dt);
+                            swayOffset.y = THREE.MathUtils.lerp(swayOffset.y, 0, 15 * dt);
+                        }
                     } else {
-                        // [FIX] Smoothly reset sway when aiming while moving (fixes pistol crosshair wobble)
-                        swayOffset.x = THREE.MathUtils.lerp(swayOffset.x, 0, 15 * dt);
-                        swayOffset.y = THREE.MathUtils.lerp(swayOffset.y, 0, 15 * dt);
+                        playerVelocity.set(0, 0, 0);
+                        // [User Request] Idle sway animation when standing still (all weapons)
+                        // Stop sway when aiming
+                        if (!isAiming) {
+                            const swayFreqX = 1.2; const swayFreqY = 0.9;
+                            const swayAmpX = 0.015; const swayAmpY = 0.012;
+                            swayOffset.x = Math.sin(time * 0.001 * swayFreqX) * swayAmpX;
+                            swayOffset.y = Math.sin(time * 0.001 * swayFreqY) * swayAmpY;
+                        } else {
+                            // Reset sway smoothly when aiming
+                            swayOffset.x = THREE.MathUtils.lerp(swayOffset.x, 0, 10 * dt);
+                            swayOffset.y = THREE.MathUtils.lerp(swayOffset.y, 0, 10 * dt);
+                        }
                     }
-                } else {
-                    playerVelocity.set(0, 0, 0);
-                    // [User Request] Idle sway animation when standing still (all weapons)
-                    // Stop sway when aiming
-                    if (!isAiming) {
-                        const swayFreqX = 1.2; const swayFreqY = 0.9;
-                        const swayAmpX = 0.015; const swayAmpY = 0.012;
-                        swayOffset.x = Math.sin(time * 0.001 * swayFreqX) * swayAmpX;
-                        swayOffset.y = Math.sin(time * 0.001 * swayFreqY) * swayAmpY;
-                    } else {
-                        // Reset sway smoothly when aiming
-                        swayOffset.x = THREE.MathUtils.lerp(swayOffset.x, 0, 10 * dt);
-                        swayOffset.y = THREE.MathUtils.lerp(swayOffset.y, 0, 10 * dt);
-                    }
+
+                    lastPlayerPosition.copy(position);
                 }
 
 
-
-                lastPlayerPosition.copy(position);
-
+                // --- Visual Updates (Runs even during countdown) ---
                 const isSniperAiming = isAiming && w.type === 'SNIPER';
+
 
                 if (isSniperAiming) {
 
@@ -12719,72 +12715,73 @@
                     }
                 }
                 elVignette.style.opacity = (isAiming && w.type !== 'KNIFE') ? 0.5 : 0;
-            }
 
-            if (window.knifeSwing > 0) {
-                window.knifeSwing = Math.max(window.knifeSwing - dt, 0);
-            }
+                if (window.knifeSwing > 0) {
+                    window.knifeSwing = Math.max(window.knifeSwing - dt, 0);
+                }
 
 
-            updateShells(dt);
+                updateShells(dt);
 
-            updateParticles(dt);
-            updateSparks(dt);
-            updateSmoke(dt);
-            updateGrenades(dt); // Grenade Physics
-            if (!isPaused) {
-                updateHealthPills(dt);
-                updateGrenadeDrops(dt);
-            }
-            // 모드별 업데이트
-            if (gameMode === 'single') {
-                updateEnemies(dt);
-            } else if (gameMode === 'multi') {
-                // 원격 플레이어 HP 바가 항상 카메라를 향하게
-                otherPlayers.forEach(p => {
-                    p.lookAt(camera.position.x, p.position.y, camera.position.z);
-                });
-
-                // 자신의 상태 서버 전송 (초당 약 30~60회 렌더링마다 전송하면 부하가 생길 수 있으므로 최적화 가능)
-                if (socket && socket.connected && !isDead) {
-                    socket.emit('playerMove', {
-                        position: { x: position.x, y: position.y, z: position.z },
-                        rotation: { x: rotation.x, y: rotation.y }
+                updateParticles(dt);
+                updateSparks(dt);
+                updateSmoke(dt);
+                updateGrenades(dt); // Grenade Physics
+                if (!isPaused) {
+                    updateHealthPills(dt);
+                    updateGrenadeDrops(dt);
+                }
+                // 모드별 업데이트
+                if (gameMode === 'single') {
+                    updateEnemies(dt);
+                } else if (gameMode === 'multi') {
+                    // 원격 플레이어 HP 바가 항상 카메라를 향하게
+                    otherPlayers.forEach(p => {
+                        p.lookAt(camera.position.x, p.position.y, camera.position.z);
                     });
+
+                    // 자신의 상태 서버 전송 (초당 약 30~60회 렌더링마다 전송하면 부하가 생길 수 있으므로 최적화 가능)
+                    if (socket && socket.connected && !isDead) {
+                        socket.emit('playerMove', {
+                            position: { x: position.x, y: position.y, z: position.z },
+                            rotation: { x: rotation.x, y: rotation.y }
+                        });
+                    }
+                }
+
+                // 물리 엔진 업데이트
+                if (usePhysics && physicsWorld) {
+                    updatePhysics(dt);
+                }
+
+                if (!isPaused) {
+                    const camAccelX = -CAM_RECOIL_SPRING * cameraRecoil.x - CAM_RECOIL_DAMPING * cameraRecoilVel.x;
+                    cameraRecoilVel.x += camAccelX * dt;
+                    cameraRecoil.x += cameraRecoilVel.x * dt;
+                    cameraRecoil.x = THREE.MathUtils.clamp(cameraRecoil.x, -CAM_RECOIL_MAX, CAM_RECOIL_MAX);
+
+                    const camAccelY = -CAM_RECOIL_SPRING * cameraRecoil.y - CAM_RECOIL_DAMPING * cameraRecoilVel.y;
+                    cameraRecoilVel.y += camAccelY * dt;
+                    cameraRecoil.y += cameraRecoilVel.y * dt;
+                    cameraRecoil.y = THREE.MathUtils.clamp(cameraRecoil.y, -CAM_RECOIL_MAX, CAM_RECOIL_MAX);
+
+                    const deltaX = cameraRecoil.x - cameraRecoilApplied.x;
+                    const deltaY = cameraRecoil.y - cameraRecoilApplied.y;
+                    // [User Request] Remove vertical camera recoil (no muzzle climb) - recoil stays on weapon only
+                    // camera.rotation.x += deltaX; // DISABLED: No vertical camera movement
+                    camera.rotation.y += deltaY;
+                    cameraRecoilApplied.x = cameraRecoil.x;
+                    cameraRecoilApplied.y = cameraRecoil.y;
+
+                    // 렌더링
+                    renderer.render(scene, camera);
+                }  // 후처리 효과 적용 (렌더링 후)
+                if (usePostProcessing && postProcessingEnabled) {
+                    applyPostProcessing();
                 }
             }
-
-            // 물리 엔진 업데이트
-            if (usePhysics && physicsWorld) {
-                updatePhysics(dt);
-            }
-
-            if (!isPaused) {
-                const camAccelX = -CAM_RECOIL_SPRING * cameraRecoil.x - CAM_RECOIL_DAMPING * cameraRecoilVel.x;
-                cameraRecoilVel.x += camAccelX * dt;
-                cameraRecoil.x += cameraRecoilVel.x * dt;
-                cameraRecoil.x = THREE.MathUtils.clamp(cameraRecoil.x, -CAM_RECOIL_MAX, CAM_RECOIL_MAX);
-
-                const camAccelY = -CAM_RECOIL_SPRING * cameraRecoil.y - CAM_RECOIL_DAMPING * cameraRecoilVel.y;
-                cameraRecoilVel.y += camAccelY * dt;
-                cameraRecoil.y += cameraRecoilVel.y * dt;
-                cameraRecoil.y = THREE.MathUtils.clamp(cameraRecoil.y, -CAM_RECOIL_MAX, CAM_RECOIL_MAX);
-
-                const deltaX = cameraRecoil.x - cameraRecoilApplied.x;
-                const deltaY = cameraRecoil.y - cameraRecoilApplied.y;
-                // [User Request] Remove vertical camera recoil (no muzzle climb) - recoil stays on weapon only
-                // camera.rotation.x += deltaX; // DISABLED: No vertical camera movement
-                camera.rotation.y += deltaY;
-                cameraRecoilApplied.x = cameraRecoil.x;
-                cameraRecoilApplied.y = cameraRecoil.y;
-
-                // 렌더링
-                renderer.render(scene, camera);
-            }  // 후처리 효과 적용 (렌더링 후)
-            if (usePostProcessing && postProcessingEnabled) {
-                applyPostProcessing();
-            }
         }
+
 
         function checkLowHealth() {
             const overlay = document.getElementById('low-health-overlay');
