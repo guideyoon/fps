@@ -5983,10 +5983,11 @@
         function createRemotePlayer(p) {
             console.log('createRemotePlayer called for:', p); // DEBUG
 
-            // Simple Low-Poly Materials (Minecraft-style)
+            // Simple Low-Poly Materials (Minecraft-style) - Updated colors to match reference
             const matSkin = new THREE.MeshStandardMaterial({ color: 0xffdbac, roughness: 0.8 }); // Skin
-            const matShirt = new THREE.MeshStandardMaterial({ color: 0x3498db, roughness: 0.7 }); // Blue shirt
-            const matPants = new THREE.MeshStandardMaterial({ color: 0x2c3e50, roughness: 0.7 }); // Dark pants
+            const matShirt = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.7 }); // Dark Grey Suit
+            const matPants = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.7 }); // Darker Grey Pants
+            const matHair = new THREE.MeshStandardMaterial({ color: 0x5d4037, roughness: 0.9 }); // Brown Hair
 
             const group = new THREE.Group();
 
@@ -5996,6 +5997,11 @@
             head.name = 'head';
             group.add(head);
             group.userData.head = head;
+
+            // Hair (Flat top)
+            const hair = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.08, 0.32), matHair);
+            hair.position.y = 1.65 + 0.16; // Top of head
+            group.add(hair);
 
             // Eyes (simple black pixels)
             const eyeGeo = new THREE.BoxGeometry(0.08, 0.08, 0.01);
@@ -6015,14 +6021,17 @@
             // --- 3. Arms (Simple Boxes) ---
             const armGeo = new THREE.BoxGeometry(0.12, 0.45, 0.12);
 
-            // Left Arm
+            // Left Arm (Angled to support weapon)
             const leftArm = new THREE.Mesh(armGeo, matShirt);
-            leftArm.position.set(-0.21, 1.2, 0);
+            leftArm.position.set(-0.21, 1.35, 0.2); // Moved forward and up
+            leftArm.rotation.x = -Math.PI / 4; // Angle forward
+            leftArm.rotation.z = 0.2; // Angle inward
             group.add(leftArm);
 
-            // Right Arm (save reference for weapon attachment)
+            // Right Arm (Holding grip)
             const rightArm = new THREE.Mesh(armGeo, matShirt);
-            rightArm.position.set(0.21, 1.2, 0);
+            rightArm.position.set(0.21, 1.35, 0.1); // Moved forward
+            rightArm.rotation.x = -Math.PI / 3; // Lifted higher for gun
             group.add(rightArm);
             group.userData.rArm = rightArm;
 
