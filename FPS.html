@@ -6119,7 +6119,7 @@
             });
             const nameSprite = new THREE.Sprite(spriteMaterial);
             nameSprite.scale.set(2, 0.5, 1);
-            nameSprite.position.y = 2.0; // Slightly above head
+            nameSprite.position.y = 2.2; // Adjusted for 2x scale (higher above head)
             group.add(nameSprite);
             group.userData.nameSprite = nameSprite;
 
@@ -6176,8 +6176,8 @@
 
             // Ensure scene exists before adding
             if (window.scene) {
-                // Scale for visibility
-                group.scale.set(1.0, 1.0, 1.0);
+                // Scale for visibility (Doubled as requested)
+                group.scale.set(2.0, 2.0, 2.0);
                 // Position: use player position directly (model origin should be at feet)
                 // [FIX] Apply -1.7 offset (assuming p.position is eye level)
                 group.position.set(p.position.x, p.position.y - 1.7, p.position.z);
@@ -12990,8 +12990,8 @@
                         // Calculate distance to local player for name tag visibility
                         const dist = p.position.distanceTo(camera.position);
                         if (p.userData.nameSprite) {
-                            // Only show name if within 20 meters
-                            p.userData.nameSprite.visible = (dist < 20);
+                            // Only show name if within 50 meters
+                            p.userData.nameSprite.visible = (dist < 50);
                         }
                     });
 
