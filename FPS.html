@@ -137,10 +137,10 @@
             display: block;
         }
 
+        #hud-score-ally,
+        #hud-score-enemy,
         #hud-kill-count {
-            display: none;
-            color: #ffaa00;
-            transform: skewX(10deg);
+            display: none !important;
         }
 
         /* Top Right: Kill Feed */
@@ -2251,9 +2251,13 @@
             }
 
 
-            /* 채팅 숨기기 */
+            /* 채팅 가시성 및 위치 조정 (User Request) */
             #chat-container {
-                display: none !important;
+                display: flex !important;
+                bottom: 110px !important;
+                left: 10px !important;
+                width: 240px !important;
+                z-index: 10000 !important;
             }
 
             /* 조명 버튼 위치 조정 */
@@ -6118,7 +6122,7 @@
             });
             const nameSprite = new THREE.Sprite(spriteMaterial);
             nameSprite.scale.set(2, 0.5, 1);
-            nameSprite.position.y = 2.2; // Adjusted for 2x scale (higher above head)
+            nameSprite.position.y = 1.1; // Lowered (2.2 was too high at 2x scale)
             group.add(nameSprite);
             group.userData.nameSprite = nameSprite;
 
