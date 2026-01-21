@@ -6083,104 +6083,75 @@
         function createRemotePlayer(p) {
             console.log('createRemotePlayer called for:', p); // DEBUG
 
-            // Simple Low-Poly Materials (Minecraft-style) - Updated colors to match reference
-            const matSkin = new THREE.MeshStandardMaterial({ color: 0xffdbac, roughness: 0.8 }); // Skin
-            const matShirt = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.7 }); // Dark Grey Suit
-            const matPants = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.7 }); // Darker Grey Pants
-            const matHair = new THREE.MeshStandardMaterial({ color: 0x5d4037, roughness: 0.9 }); // Brown Hair
-
             const group = new THREE.Group();
 
-            // --- 1. Head (Cubic) ---
-            const head = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.3, 0.3), matSkin);
-            head.position.y = 1.65;
-            head.name = 'head';
-            group.add(head);
-            group.userData.head = head;
-
-            // Hair (Flat top)
-            const hair = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.08, 0.32), matHair);
-            hair.position.y = 1.65 + 0.16; // Top of head
-            group.add(hair);
-
-            // Eyes (simple black pixels)
-            const eyeGeo = new THREE.BoxGeometry(0.08, 0.08, 0.01);
-            const eyeMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
-            const leftEye = new THREE.Mesh(eyeGeo, eyeMat);
-            leftEye.position.set(-0.07, 1.68, 0.16);
-            group.add(leftEye);
-            const rightEye = new THREE.Mesh(eyeGeo, eyeMat);
-            rightEye.position.set(0.07, 1.68, 0.16);
-            group.add(rightEye);
-
-            // --- 2. Torso (Box) ---
-            const torso = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.45, 0.15), matShirt);
-            torso.position.y = 1.2;
-            group.add(torso);
-
-            // --- 3. Arms (Simple Boxes) ---
-            const armGeo = new THREE.BoxGeometry(0.12, 0.45, 0.12);
-
-            // Left Arm (Angled to support weapon)
-            const leftArm = new THREE.Mesh(armGeo, matShirt);
-            leftArm.position.set(-0.21, 1.35, 0.2); // Moved forward and up
-            leftArm.rotation.x = -Math.PI / 4; // Angle forward
-            leftArm.rotation.z = 0.2; // Angle inward
-            group.add(leftArm);
-
-            // Right Arm (Holding grip)
-            const rightArm = new THREE.Mesh(armGeo, matShirt);
-            rightArm.position.set(0.21, 1.35, 0.1); // Moved forward
-            rightArm.rotation.x = -Math.PI / 3; // Lifted higher for gun
-            group.add(rightArm);
-            group.userData.rArm = rightArm;
-
-            // --- 4. Legs (Simple Boxes) ---
-            const legGeo = new THREE.BoxGeometry(0.14, 0.45, 0.14);
-
-            // Left Leg
-            const leftLeg = new THREE.Mesh(legGeo, matPants);
-            leftLeg.position.set(-0.08, 0.7, 0);
-            group.add(leftLeg);
-
-            // Right Leg
-            const rightLeg = new THREE.Mesh(legGeo, matPants);
-            rightLeg.position.set(0.08, 0.7, 0);
-            group.add(rightLeg);
-
-            // --- 5. Weapon (Load GLB) ---
-            const wIdx = p.weaponIdx !== undefined ? p.weaponIdx : 0;
-            loadRemoteWeaponObj(group, wIdx);
-
-            // --- HP Bar (Hidden in multiplayer) ---
-            const matHpBg = new THREE.MeshBasicMaterial({ color: 0x000000 });
-            const matHpFg = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-            const hpBg = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.1), matHpBg);
-            hpBg.position.y = 2.2;
-            hpBg.visible = false;
-            group.add(hpBg);
-            const hpFg = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.1), matHpFg);
-            hpFg.position.y = 2.2;
-            hpFg.position.z = 0.01;
-            hpFg.visible = false;
-            group.add(hpFg);
-
+            // Set user data immediately
             group.userData.hp = p.hp || 100;
             group.userData.maxHp = 100;
-            group.userData.hpBar = hpFg;
             group.userData.playerId = p.id;
-            group.userData.weaponIdx = wIdx;
+            group.userData.weaponIdx = p.weaponIdx !== undefined ? p.weaponIdx : 0;
+
+            // Load GLB character model
+            const loader = new THREE.GLTFLoader();
+            loader.load('char/cr.glb', (gltf) => {
+                const model = gltf.scene;
+
+                // Adjust scale and position of the loaded model
+                model.scale.set(1, 1, 1);
+                model.position.y = 0; // Adjust as needed based on model origin
+
+                // Enable shadows
+                model.traverse((child) => {
+                    if (child.isMesh) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+                    }
+                });
+
+                // Find head for hit detection (if model has a head bone/mesh)
+                model.traverse((child) => {
+                    if (child.name && child.name.toLowerCase().includes('head')) {
+                        group.userData.head = child;
+                    }
+                });
+
+                // If no head found, use first mesh as fallback
+                if (!group.userData.head) {
+                    model.traverse((child) => {
+                        if (child.isMesh && !group.userData.head) {
+                            group.userData.head = child;
+                        }
+                    });
+                }
+
+                group.add(model);
+                group.userData.model = model;
+
+                console.log('GLB character model loaded for:', p.name);
+            }, undefined, (error) => {
+                console.error('Failed to load character GLB:', error);
+
+                // Fallback: simple box if GLB fails
+                const fallbackMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
+                const fallbackMesh = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.5, 1.5, 0.3),
+                    fallbackMat
+                );
+                fallbackMesh.position.y = 0.75;
+                group.add(fallbackMesh);
+                group.userData.head = fallbackMesh;
+            });
 
             // Ensure scene exists before adding
             if (window.scene) {
-                // Match player height (Doubled size as requested: 0.9 -> 1.8)
-                group.scale.set(1.8, 1.8, 1.8);
+                // Scale for visibility
+                group.scale.set(1.0, 1.0, 1.0);
                 group.position.set(p.position.x, p.position.y - 1.7, p.position.z);
 
                 scene.add(group);
                 otherPlayersMap[p.id] = group;
                 if (typeof otherPlayers !== 'undefined') otherPlayers.push(group);
-                console.log('Low-poly player mesh added for:', p.name); // DEBUG
+                console.log('Remote player group added for:', p.name); // DEBUG
             } else {
                 console.error('Window.scene is missing in createRemotePlayer!'); // DEBUG
             }
