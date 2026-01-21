@@ -2261,6 +2261,106 @@
                 height: 35px;
                 font-size: 16px;
             }
+
+            /* ===== [FIX] HP/탄창 UI 크기 축소 (모바일 가로 모드) ===== */
+            .vitals-panel {
+                padding: 3px 8px !important;
+                left: 130px !important;
+                bottom: 10px !important;
+                transform: scale(0.7) !important;
+                transform-origin: left bottom;
+            }
+
+            .vitals-panel .health-text {
+                font-size: 16px !important;
+            }
+
+            .vitals-panel .bar-container {
+                width: 80px !important;
+                height: 6px !important;
+            }
+
+            .weapon-panel {
+                padding: 3px 8px !important;
+                right: 130px !important;
+                bottom: 10px !important;
+                transform: scale(0.7) !important;
+                transform-origin: right bottom;
+            }
+
+            .weapon-panel .ammo-current {
+                font-size: 16px !important;
+            }
+
+            .weapon-panel .ammo-reserve {
+                font-size: 10px !important;
+            }
+
+            /* ===== [FIX] 무기 선택기 강제 표시 (모바일 가로 모드) ===== */
+            #weapon-selector-vertical {
+                display: flex !important;
+                left: 10px !important;
+                top: 50% !important;
+                transform: translateY(-50%) !important;
+                gap: 3px !important;
+            }
+
+            #weapon-selector-vertical .weapon-select-btn {
+                width: 22px !important;
+                height: 22px !important;
+                font-size: 9px !important;
+            }
+
+            /* ===== [FIX] 조이스틱 및 버튼 강제 표시 (모바일 가로 모드) ===== */
+            #joystick-zone {
+                display: block !important;
+                bottom: 20px !important;
+                left: 20px !important;
+                width: 100px !important;
+                height: 100px !important;
+            }
+
+            #joystick-base {
+                width: 100% !important;
+                height: 100% !important;
+            }
+
+            #joystick-handle {
+                width: 35px !important;
+                height: 35px !important;
+            }
+
+            #btn-shoot {
+                display: flex !important;
+                bottom: 50px !important;
+                right: 80px !important;
+                width: 45px !important;
+                height: 45px !important;
+            }
+
+            #btn-jump {
+                display: flex !important;
+                bottom: 20px !important;
+                right: 30px !important;
+                width: 40px !important;
+                height: 40px !important;
+            }
+
+            #btn-reload {
+                display: flex !important;
+                bottom: 80px !important;
+                right: 30px !important;
+                width: 40px !important;
+                height: 40px !important;
+            }
+
+            #btn-aim {
+                display: flex !important;
+                bottom: 20px !important;
+                right: 140px !important;
+                width: 40px !important;
+                height: 40px !important;
+            }
         }
 
         /* 세로 모드 */
