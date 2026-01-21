@@ -6146,7 +6146,13 @@
             if (window.scene) {
                 // Scale for visibility
                 group.scale.set(1.0, 1.0, 1.0);
-                group.position.set(p.position.x, p.position.y - 1.7, p.position.z);
+                // Position: use player position directly (model origin should be at feet)
+                group.position.set(p.position.x, p.position.y, p.position.z);
+
+                // Rotation: sync with player's facing direction
+                if (p.rotation !== undefined) {
+                    group.rotation.y = p.rotation;
+                }
 
                 scene.add(group);
                 otherPlayersMap[p.id] = group;
@@ -10899,6 +10905,16 @@
                     }
                 }
                 if (k === 'r') doReload();
+
+                // Enter key: Focus chat input (multiplayer only)
+                if (k === 'enter' && gameMode === 'multi') {
+                    const chatInput = document.getElementById('chat-input');
+                    const chatContainer = document.getElementById('chat-container');
+                    if (chatInput && chatContainer && chatContainer.style.display !== 'none') {
+                        e.preventDefault();
+                        chatInput.focus();
+                    }
+                }
             });
 
             // EDITOR MODE: Mouse wheel to cycle object types
@@ -12463,8 +12479,8 @@
                         }
                     }
 
-                    let speed = 9.0; // Default: RUN (User Request)
-                    if (keys.shift) speed = 2.0; // Shift: VERY SLOW WALK (reduced from 5.0)
+                    let speed = 15.0; // Default: RUN (User Request - Increased from 9.0)
+                    if (keys.shift) speed = 4.0; // Shift: SLOW WALK (increased from 2.0)
 
                     // Weapon-based movement speed multipliers
                     if (w.type === 'KNIFE') speed *= 1.1;
