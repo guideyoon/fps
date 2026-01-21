@@ -5741,8 +5741,8 @@
 
                     const mesh = otherPlayersMap[p.id];
                     if (mesh) {
-                        // Keep player on ground (y=0), only use x and z from server
-                        mesh.position.set(p.position.x, 0, p.position.z);
+                        // Use server position for all axes
+                        mesh.position.set(p.position.x, p.position.y, p.position.z);
                         mesh.rotation.y = p.rotation.y;
                     } else {
                         // If player exists but no mesh (e.g. joined mid-game), create it
@@ -6090,6 +6090,34 @@
             group.userData.maxHp = 100;
             group.userData.playerId = p.id;
             group.userData.weaponIdx = p.weaponIdx !== undefined ? p.weaponIdx : 0;
+            group.userData.playerName = p.name || 'Unknown';
+
+            // Create username label sprite (red text above player)
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.width = 256;
+            canvas.height = 64;
+
+            // Draw red text on transparent background
+            context.fillStyle = 'rgba(0, 0, 0, 0.5)';
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            context.font = 'bold 32px Arial';
+            context.fillStyle = '#ff3333';
+            context.textAlign = 'center';
+            context.textBaseline = 'middle';
+            context.fillText(p.name || 'Unknown', canvas.width / 2, canvas.height / 2);
+
+            const texture = new THREE.CanvasTexture(canvas);
+            const spriteMaterial = new THREE.SpriteMaterial({
+                map: texture,
+                transparent: true,
+                depthTest: false  // Always visible through walls
+            });
+            const nameSprite = new THREE.Sprite(spriteMaterial);
+            nameSprite.scale.set(2, 0.5, 1);
+            nameSprite.position.y = 2.5; // Above the character head
+            group.add(nameSprite);
+            group.userData.nameSprite = nameSprite;
 
             // Load GLB character model
             const loader = new THREE.GLTFLoader();
