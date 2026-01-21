@@ -1,0 +1,519 @@
+﻿{
+    "id":  1,
+    "jsonrpc":  "2.0",
+    "result":  {
+                   "content":  [
+                                   {
+                                       "text":  "{\"projects\":[{\"name\":\"projects/6643770654198232668\",\"title\":\"게임 레벨 선택 화면\",\"visibility\":\"PRIVATE\",\"createTime\":\"2026-01-03T09:16:24.667162Z\",\"updateTime\":\"2026-01-03T09:20:04.892269Z\",\"projectType\":\"TEXT_TO_UI_PRO\",\"thumbnailScreenshot\":{\"name\":\"projects/6643770654198232668/files/24514dce25404e96a78335dd308ee4e2\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AOfcidVvhUAXyx-y3ZnVSMCRGEUxTvfzaNiUfk7SRVfhS8aHXyCGJI_GUiRzTI1i-gMp1P9W9ilC8bizyuWr2QF2LvOoKqUDc-iHcEqTeckBJ8k_PE1yj3EDUItjw-KKT2nQFEkExkSity743l71RTHTXVD4Djy7RcZNhK9F9DuGoL-A7_jgGlX0ORwPA4YxUURSITx2mJnlNJuDUK10rqpvMcARJq11ilsh6OpioPTu_M5msTstyvGl9Ngoswg\"},\"origin\":\"STITCH\",\"deviceType\":\"MOBILE\",\"designTheme\":{\"colorMode\":\"LIGHT\",\"font\":\"SPLINE_SANS\",\"roundness\":\"ROUND_FULL\",\"customColor\":\"#f48c25\",\"saturation\":2},\"screenInstances\":[{\"id\":\"08eaff8c4e0f4188bfd976b80bbda6b2\",\"sourceScreen\":\"projects/6643770654198232668/screens/08eaff8c4e0f4188bfd976b80bbda6b2\",\"x\":1362,\"width\":390,\"height\":884},{\"id\":\"11997939f63a4304b71e6e8e65bff36d\",\"sourceScreen\":\"projects/6643770654198232668/screens/11997939f63a4304b71e6e8e65bff36d\",\"x\":908,\"width\":390,\"height\":884},{\"id\":\"5b2a8a7f4d8d4ba8985202b4ee586d52\",\"sourceScreen\":\"projects/6643770654198232668/screens/5b2a8a7f4d8d4ba8985202b4ee586d52\",\"x\":454,\"width\":390,\"height\":1370},{\"id\":\"cdd57d8f57be44d983c2284cff2e5568\",\"sourceScreen\":\"projects/6643770654198232668/screens/cdd57d8f57be44d983c2284cff2e5568\",\"width\":390,\"height\":884}],\"metadata\":{\"userRole\":\"OWNER\"}},{\"name\":\"projects/2440741989879908873\",\"title\":\"사진 편집\",\"visibility\":\"PRIVATE\",\"createTime\":\"2025-11-21T10:54:49.210890Z\",\"updateTime\":\"2025-11-21T10:57:07.009004Z\",\"projectType\":\"TEXT_TO_UI_PRO\",\"thumbnailScreenshot\":{\"name\":\"projects/2440741989879908873/files/4aef59642b5c45dd8ee9f7f0bef50dbf\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AOfcidU0fYd6H0gQMUVitWtKLbnI-tXSj5Nk4CMY7WOYi7JXI043sGNRR-hYKII5kSWrfSdrA2-TbgJSFFs46peg6AS78Th9xwFuHK-AJ_cB01jF28ha59FJVt_zL-ub0MHlT7CBWdCGRLgMtLmgD9ar7s8yZwk42Pkp6BUIMJxdmktNAj-q0QV7Hd7t5NGoVGAii-V1LxBRxTXQcntEtEl6KQdPoTmd-S-SC_oBeCj60uhfqJzj_E2RfPTkw4Q\"},\"origin\":\"STITCH\",\"deviceType\":\"MOBILE\",\"designTheme\":{\"colorMode\":\"DARK\",\"font\":\"PLUS_JAKARTA_SANS\",\"roundness\":\"ROUND_EIGHT\",\"customColor\":\"#f47b25\",\"saturation\":3},\"screenInstances\":[{\"id\":\"10a7345058554786b49e8d6b915ea1af\",\"sourceScreen\":\"projects/2440741989879908873/screens/10a7345058554786b49e8d6b915ea1af\",\"x\":868,\"width\":390,\"height\":884},{\"id\":\"16ab64191f5a4f5f9aef11aa8e5683c2\",\"sourceScreen\":\"projects/2440741989879908873/screens/16ab64191f5a4f5f9aef11aa8e5683c2\",\"x\":454,\"width\":390,\"height\":884},{\"id\":\"b3960b0b3c91493fa5262be009a1da03\",\"sourceScreen\":\"projects/2440741989879908873/screens/b3960b0b3c91493fa5262be009a1da03\",\"width\":390,\"height\":884}],\"metadata\":{\"userRole\":\"OWNER\"}},{\"name\":\"projects/16253579680433783581\",\"title\":\"메인 메뉴\",\"visibility\":\"PRIVATE\",\"createTime\":\"2025-11-14T23:19:30.982935Z\",\"updateTime\":\"2025-11-14T23:21:48.155982Z\",\"projectType\":\"TEXT_TO_UI_PRO\",\"thumbnailScreenshot\":{\"name\":\"projects/16253579680433783581/files/346843495d6b4efab7235562e7edebb4\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AOfcidUU_z_6Qia1MRrhpJL8XsX3YFpr4D91UIDrjhYhbi8JcIB9qYS_qTNVDSM4TDHQSspPDAEu7jr2HLDwzyVfXhljBFiX13edbHBRd3Scps-FloJ4Bcyg1d5kaK40Tj3B7D-gBB74QW5dSROIrLdmOhtRLaDhUBb0Z64lm_Pnl1HdVE5bK5jJHxKlojivkM5uCrqXhNRRFsLelJvbueW-wo4oHHRBjM49giStDB1sS8UugbpvMb9n4A9XQ-6d\"},\"origin\":\"STITCH\",\"deviceType\":\"MOBILE\",\"designTheme\":{\"colorMode\":\"DARK\",\"font\":\"BE_VIETNAM_PRO\",\"roundness\":\"ROUND_TWELVE\",\"customColor\":\"#0d7ff2\",\"saturation\":2},\"screenInstances\":[{\"id\":\"b5cb8556023742a7b6960f24d100703b\",\"sourceScreen\":\"projects/16253579680433783581/screens/b5cb8556023742a7b6960f24d100703b\",\"x\":1362,\"width\":390,\"height\":884},{\"id\":\"c08065c236364b9dbf126c6f7d22c4b5\",\"sourceScreen\":\"projects/16253579680433783581/screens/c08065c236364b9dbf126c6f7d22c4b5\",\"x\":908,\"width\":390,\"height\":884},{\"id\":\"ef71248b930d46ad902a568b780b7bb9\",\"sourceScreen\":\"projects/16253579680433783581/screens/ef71248b930d46ad902a568b780b7bb9\",\"x\":455,\"width\":390,\"height\":884},{\"id\":\"f217fce215fe4535bce1073348497e96\",\"sourceScreen\":\"projects/16253579680433783581/screens/f217fce215fe4535bce1073348497e96\",\"width\":390,\"height\":884}],\"metadata\":{\"userRole\":\"OWNER\"}},{\"name\":\"projects/12217641091884975419\",\"title\":\"Home Screen\",\"visibility\":\"PRIVATE\",\"createTime\":\"2025-10-06T01:33:21.758768Z\",\"updateTime\":\"2025-10-06T01:34:49.173989Z\",\"projectType\":\"TEXT_TO_UI_PRO\",\"thumbnailScreenshot\":{\"name\":\"projects/12217641091884975419/files/7fc01efc77d2463797707e44319df6dc\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AOfcidUzdIZ82OvfAtVW8jfkLGZVmLjDvUPArId_TgOiUVc5eUBK6RNt6zmr1UJyMttnTTmg-rh9NqXCjXlDfZMrHSX-aCMEkWFfU5_nfUznLTY_qFUiMR5FuZYV2JpnqEL8xod7SpO6t-qVd-prtCWr_4XBX90WiDZ02almGiqbwI9zPqKT9KAdVD-ratvpc3Zfn2XkPXZU_V4k5ddVww0UC18fQJ0bFp_sRvpziyWZu2VttPreBCFJ0StZoBLS\"},\"origin\":\"STITCH\",\"deviceType\":\"MOBILE\",\"designTheme\":{\"colorMode\":\"DARK\",\"font\":\"SPACE_GROTESK\",\"roundness\":\"ROUND_EIGHT\",\"customColor\":\"#0f6fbd\",\"saturation\":3},\"screenInstances\":[{\"id\":\"0b25c97db03f4d8eb652e7a2cf60d8f1\",\"sourceScreen\":\"projects/12217641091884975419/screens/0b25c97db03f4d8eb652e7a2cf60d8f1\",\"x\":454},{\"id\":\"1e8a0b694f8f48f7951ededda94612e7\",\"sourceScreen\":\"projects/12217641091884975419/screens/1e8a0b694f8f48f7951ededda94612e7\",\"x\":1816},{\"id\":\"7ebc5f25e9cc4e3ea35418e0a2bfc2df\",\"sourceScreen\":\"projects/12217641091884975419/screens/7ebc5f25e9cc4e3ea35418e0a2bfc2df\",\"x\":2270},{\"id\":\"87ae4605d4ae490bbbbc151b33fc1c6a\",\"sourceScreen\":\"projects/12217641091884975419/screens/87ae4605d4ae490bbbbc151b33fc1c6a\",\"x\":1362},{\"id\":\"8e4d3324ad974f599d8aed9d6f14d48d\",\"sourceScreen\":\"projects/12217641091884975419/screens/8e4d3324ad974f599d8aed9d6f14d48d\",\"x\":908},{\"id\":\"ba52ddfc0df742c1a50bae638988ccec\",\"sourceScreen\":\"projects/12217641091884975419/screens/ba52ddfc0df742c1a50bae638988ccec\"}],\"metadata\":{\"userRole\":\"OWNER\"}},{\"name\":\"projects/11404269890987929609\",\"title\":\"시작 화면\",\"visibility\":\"PRIVATE\",\"createTime\":\"2025-05-25T05:22:46.557331Z\",\"updateTime\":\"2025-10-06T01:30:20.558721Z\",\"projectType\":\"TEXT_TO_UI\",\"thumbnailScreenshot\":{\"name\":\"projects/11404269890987929609/files/b919a513665f4d45b7c578bf58d7f934\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AOfcidWTxAb55wqPuvEpF2Y9o43W3PJMVoCWkjejnh54ZwUWhJF8A_ryWdWil3bJU257gPGIC0iikbqt2_4jCSwKIaMxV3fmEHUtYnU7VyT43f_m4ogfh6sJ0nWmGF0gbf1rZD4Anbh6B4f7TQ2ZvPMYe-az4pPsCRvy5rkbJKJOs8Hge3N_T1cAnTSfATUzWvkp4GcGBSyhgcUJ7OA94Cvu5AOTF3qWxLQJSOyNOjYZ-tek-lllJCbpNylX2Oyp\"},\"origin\":\"STITCH\",\"deviceType\":\"MOBILE\",\"designTheme\":{\"colorMode\":\"LIGHT\",\"font\":\"PLUS_JAKARTA_SANS\",\"roundness\":\"ROUND_TWELVE\",\"customColor\":\"#e92933\",\"saturation\":2},\"screenInstances\":[{\"id\":\"19289ab7618347d7a307ed23ef15d395\",\"sourceScreen\":\"projects/11404269890987929609/screens/19289ab7618347d7a307ed23ef15d395\",\"x\":454},{\"id\":\"5a2aff385bdb4bbb823058c4158903c5\",\"sourceScreen\":\"projects/11404269890987929609/screens/5a2aff385bdb4bbb823058c4158903c5\"},{\"id\":\"83a1b34e4b76480ca70788f512c723df\",\"sourceScreen\":\"projects/11404269890987929609/screens/83a1b34e4b76480ca70788f512c723df\",\"x\":908}],\"metadata\":{\"userRole\":\"OWNER\"}},{\"name\":\"projects/9815217293492327621\",\"title\":\"Galaga Game UI\",\"visibility\":\"PRIVATE\",\"createTime\":\"2025-10-06T01:25:18.963741Z\",\"updateTime\":\"2025-10-06T01:30:05.373355Z\",\"projectType\":\"TEXT_TO_UI_PRO\",\"thumbnailScreenshot\":{\"name\":\"projects/9815217293492327621/files/115fc588985d421b83144df53b59ad4b\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AOfcidUKX3HQFWPALG5CRalzKqCHhH9hCYWtviKSfFIHm04pGGUidrYBm2t8GA2F-l3zyKje30qFqG8VA_rFU9cbWdCCo-S8sVhcxIScSFqzO6C4ziTvpQCD3O2svavCkZ9LErTG9-JtvRq724UQbCJ0qv9P7fgL-EEh9eSUTe6CYgBM-dCQ4-0IZmL0uI-EwqJbFHWKC_oanUjrGO4BgVziE4-igLBmbJeZMv1Td8ueX1gTSDQY9XSB_5tHwN0\"},\"origin\":\"STITCH\",\"deviceType\":\"MOBILE\",\"designTheme\":{\"colorMode\":\"DARK\",\"font\":\"SPACE_GROTESK\",\"roundness\":\"ROUND_FOUR\",\"customColor\":\"#1919e6\",\"saturation\":3},\"screenInstances\":[{\"id\":\"a23d4177c6e946dc9c2652d23982b657\",\"sourceScreen\":\"projects/9815217293492327621/screens/a23d4177c6e946dc9c2652d23982b657\",\"x\":2,\"y\":189,\"width\":390,\"height\":884}],\"metadata\":{\"userRole\":\"OWNER\"}},{\"name\":\"projects/10800481588429978261\",\"title\":\"Landing page for an homemade pizza cooking elite class, happening once a year in Napoli.\",\"visibility\":\"PRIVATE\",\"createTime\":\"2025-06-29T04:23:21.327673Z\",\"updateTime\":\"2025-09-14T00:13:09.011033Z\",\"projectType\":\"TEXT_TO_UI\",\"thumbnailScreenshot\":{\"name\":\"projects/10800481588429978261/files/adef694b13a14abfa3aa18b11cb75813\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AOfcidW5gUFoBUdOKt0ikWlPPfJ7ma2os45V8xZx-t9XjtdDQyVBBbK8LlZJayuQhj-aHxpKQuSxsYs1MdluJt5IMjlJlqVgkKEIRf9ULdcBAwVLWdKF9HMiFuTd7Ny-IX1R7gTKChCPw7vB6j_zes3RjIi7Ezeoq2RspoueiP9RBDDb5CLrlsaWmzT-uQmDpDrwe6y-YQQVHV1Pvt5pge67KO_WRPRgC8SbUIzfq_CTsbD7InPDXV3_9386EPw\"},\"origin\":\"STITCH\",\"deviceType\":\"DESKTOP\",\"designTheme\":{\"colorMode\":\"LIGHT\",\"font\":\"PLUS_JAKARTA_SANS\",\"roundness\":\"ROUND_TWELVE\",\"customColor\":\"#e55d19\",\"saturation\":3},\"screenInstances\":[{\"id\":\"2c331edff01a4b138f50f181e4221bd3\",\"sourceScreen\":\"projects/10800481588429978261/screens/2c331edff01a4b138f50f181e4221bd3\"}],\"metadata\":{\"userRole\":\"OWNER\"}},{\"name\":\"projects/7808738272745286719\",\"title\":\"Naver Cafe for real estate sales information in Jeonggwan.\",\"visibility\":\"PRIVATE\",\"createTime\":\"2025-05-31T11:43:39.472999Z\",\"updateTime\":\"2025-05-31T11:44:44.667847Z\",\"projectType\":\"TEXT_TO_UI\",\"thumbnailScreenshot\":{\"name\":\"projects/7808738272745286719/files/ea396947b4be47838d03a08e26c63dc4\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AOfcidUyTbS-Q-MJeWI8vZxXPq1dg-wnBEJxT1iPG_SrMF6lmKGK77_uuK7LexpbUrD_DxYDrhPQSpEX25sYFbeg1xdoLL9KnaI-dc5KklDJWTUy5_ztkj_PoembPTYrjZIwJbXrqw8882wYy4MGgQ6RXvzW1hiR-UU77ONHiXf83WYMvfZnctK-GZ-2HxRz-4DBCKMaObLcxwA9dDdJfjP9GzXsn7wH4C1Bs_jqilZIR2ZLGoczTDRlRnOnE1c\"},\"origin\":\"STITCH\",\"deviceType\":\"DESKTOP\",\"designTheme\":{\"colorMode\":\"LIGHT\",\"font\":\"PLUS_JAKARTA_SANS\",\"roundness\":\"ROUND_EIGHT\",\"customColor\":\"#e87930\",\"saturation\":3},\"metadata\":{\"userRole\":\"OWNER\"}},{\"name\":\"projects/14493276242185476712\",\"title\":\"플레이어 입력\",\"visibility\":\"PRIVATE\",\"createTime\":\"2025-05-25T05:26:24.866654Z\",\"updateTime\":\"2025-05-25T05:28:20.789189Z\",\"projectType\":\"TEXT_TO_UI_PRO\",\"thumbnailScreenshot\":{\"name\":\"projects/14493276242185476712/files/20f3e79e2c6848ff8e4439d367b3075d\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AOfcidV9vUktwVGTLYAeZOdgSpGqDS_I3wuAY-DxRxy6NR7UjaVJOcDK5s5b0zb_uAsR69u_BryqpkhTSVDtmNCz_HnY5eRxvwBQAmY4j5aBF6RlYa3yM80G9W3CloTaXnzggrDxP2X9I6cbTL5G-H6NLNJolsjVAwk6poAS7TYjxhFpdwOAFp6zftJwaWoz2eO6kzors_KXbky-KNfnnnkIb2ynzcVXk-KRP8t8Osz8nSyTJA67NrX87QbtEw0\"},\"origin\":\"STITCH\",\"deviceType\":\"MOBILE\",\"designTheme\":{\"colorMode\":\"LIGHT\",\"font\":\"BE_VIETNAM_PRO\",\"roundness\":\"ROUND_EIGHT\",\"customColor\":\"#0c7ff2\",\"saturation\":3},\"metadata\":{\"userRole\":\"OWNER\"}},{\"name\":\"projects/18348424520595621239\",\"title\":\"환영 화면\",\"visibility\":\"PRIVATE\",\"createTime\":\"2025-05-25T05:19:06.918950Z\",\"updateTime\":\"2025-05-25T05:20:17.300225Z\",\"projectType\":\"TEXT_TO_UI\",\"thumbnailScreenshot\":{\"name\":\"projects/18348424520595621239/files/66403c6d0cdc4c56bc8ce7d66fafd52a\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AOfcidWx60LMrkr_msMHke-6GdMufUB17SQVoCNmHNMbewWhJlpfkT0QSb_ZYxPNZ5WJA2Glqf8bBT7ws0EFMEvhXZkot3fpp9KJzhtqTiCyXKeB0kbD6gBR-1jKCRJmE6PQf1KkfaXhfsU5f3jQ3h0qZlXjjbXDPyO4_MIVWNhACDKkZFjeVSUQye06M6mKDFc6M_tUGhdrWRxX6J6mHeg3VELNhZwPgGgDc1bYuN5tLcN6PmPz8IfQC3R5smha\"},\"origin\":\"STITCH\",\"deviceType\":\"MOBILE\",\"designTheme\":{\"colorMode\":\"LIGHT\",\"font\":\"BE_VIETNAM_PRO\",\"roundness\":\"ROUND_TWELVE\",\"customColor\":\"#f3bf24\",\"saturation\":2},\"metadata\":{\"userRole\":\"OWNER\"}},{\"name\":\"projects/8714279671981862397\",\"title\":\"Yun Total Construction Landing Page\",\"visibility\":\"PRIVATE\",\"createTime\":\"2025-05-23T01:33:03.870673Z\",\"updateTime\":\"2025-05-23T01:34:06.409095Z\",\"projectType\":\"TEXT_TO_UI\",\"thumbnailScreenshot\":{\"name\":\"projects/8714279671981862397/files/6d734048fe4c401fa305f8bf7d14a47b\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AOfcidVHKgHmKlnLFmWd13YvSmS-A4N5Dwas_F6pV9fNVB8AAZsXKXLGVSsuEUq7nRALH83Azd-lZA20jWaLeilJWK0wzX1ZpLR8dg4TxnhWHKxUTtb5hOiX0OYrKwzfj_oVcfqlK7W5piZdB5998AsZbJKPa67NqFkpnAAyyXb282OXTERYqUBdgELBn4p9e3FOMKp4N_iB_sEE5C_W9Ygj7ibJ27etaM7p3zhmsBVt7iAisbbtYBxGOXsE-w\"},\"origin\":\"STITCH\",\"deviceType\":\"DESKTOP\",\"designTheme\":{\"colorMode\":\"LIGHT\",\"font\":\"WORK_SANS\",\"roundness\":\"ROUND_EIGHT\",\"customColor\":\"#1672ce\",\"saturation\":2},\"metadata\":{\"userRole\":\"OWNER\"}},{\"name\":\"projects/4444280685739325746\",\"title\":\"Dental Home Page\",\"visibility\":\"PRIVATE\",\"createTime\":\"2025-05-22T14:27:44.200703Z\",\"updateTime\":\"2025-05-22T14:28:22.196277Z\",\"projectType\":\"TEXT_TO_UI\",\"thumbnailScreenshot\":{\"name\":\"projects/4444280685739325746/files/1ab81c722080413b962f898f0d23b3de\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AOfcidXTc0hRwK2EHp6KYoHa8GsV02QbcLcg28j3taJPdmzYBAclmVHZAahMl6HemnDx96A5hiqk_c8u-ZOqw3ngfyj7hRmGyub9u7k3o0NIGtxSk9w_kY6rHYf0As-EHFHYwMk6ZGVonvxcsTrpePti1koeB7AvhctyKP6pPlqEXZBHNu3lOIzqgGDyBfinCqCNrvuftf6IbBWHiFHxdiHHU6sH1s0NYu-rdi88FQOm24MNTwV5rY6fpp-LR-Q\"},\"origin\":\"STITCH\",\"deviceType\":\"DESKTOP\",\"designTheme\":{\"colorMode\":\"LIGHT\",\"font\":\"PUBLIC_SANS\",\"roundness\":\"ROUND_EIGHT\",\"customColor\":\"#1993e5\",\"saturation\":3},\"metadata\":{\"userRole\":\"OWNER\"}},{\"name\":\"projects/12521958146779910528\",\"title\":\"Browse Tab\",\"visibility\":\"PRIVATE\",\"createTime\":\"2025-05-22T11:59:08.688922Z\",\"updateTime\":\"2025-05-22T11:59:42.001017Z\",\"projectType\":\"TEXT_TO_UI\",\"thumbnailScreenshot\":{\"name\":\"projects/12521958146779910528/files/1975c17c0fa2475a854158a84c4b3c00\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AOfcidXnT_PZnUDVhcoCRu5eeR4TVIozAbAi_y0LmFREqvACPFyXSQXkGg5uTV26jQaIdExeMR2zerFOzOzoIVu4mybWyddpN5qtmUKrXCb45ZQCPO15LFBGmTXs5aiVtrTTmogPl8lKw8eB7wpJSC-bYI4fXg-yM2KfY1svfAYQ6ugK1IvX-OVHuTKKMbNvp0YVnWcJXaNipQNTjISblR1GKHqtIINGkbMq05JKFyPCjn_qWpFT_gVNrC6R1Kc\"},\"origin\":\"STITCH\",\"deviceType\":\"MOBILE\",\"designTheme\":{\"colorMode\":\"LIGHT\",\"font\":\"PLUS_JAKARTA_SANS\",\"roundness\":\"ROUND_TWELVE\",\"customColor\":\"#e8306d\",\"saturation\":3},\"metadata\":{\"userRole\":\"OWNER\"}},{\"name\":\"projects/13712436398519615139\",\"title\":\"Dane Design Explore Page\",\"visibility\":\"PRIVATE\",\"createTime\":\"2025-05-22T11:34:16.605497Z\",\"updateTime\":\"2025-05-22T11:34:46.433443Z\",\"projectType\":\"TEXT_TO_UI\",\"thumbnailScreenshot\":{\"name\":\"projects/13712436398519615139/files/138436eef6824ce3ad6b729204a9bb57\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AOfcidV_y0hwCLeSKcxKDSbklwGLaVJqPwZnSGoYlCewsp6CxlJ64qSuAQMATmFpIyx1pisgPuwTasrZzkW-x8gLKpZD0zcqohaQd_VOk3hLAO16I0aCv5ZWASfwLCzvw5ftbTSm9V0aFc0NGUa3e9qfi66JqiT3uBclcJs-zP484D-4gwJQfRwDTPRhg9lrzV5aO82rnmnyUatq_zCZsM4N9TUTBaOQku-a3hAYQe5K94DkCg4T6rbAq7wIavQ\"},\"origin\":\"STITCH\",\"deviceType\":\"DESKTOP\",\"designTheme\":{\"colorMode\":\"LIGHT\",\"font\":\"SPACE_GROTESK\",\"roundness\":\"ROUND_EIGHT\",\"customColor\":\"#ed7b2a\",\"saturation\":3},\"metadata\":{\"userRole\":\"OWNER\"}},{\"name\":\"projects/6465306098148883206\",\"title\":\"Bird Watching Gear Store Home\",\"visibility\":\"PRIVATE\",\"createTime\":\"2025-05-22T11:32:01.294022Z\",\"updateTime\":\"2025-05-22T11:32:27.388198Z\",\"projectType\":\"TEXT_TO_UI\",\"thumbnailScreenshot\":{\"name\":\"projects/6465306098148883206/files/705ab261ab534c77a4e82a236a3b28f1\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AOfcidXPUAoS7gTo-m0dpdcytqUnniiYb8oJn8J9bfSEbXsa_Tnje_wOfrJ8SXYSsUlsS5CFoRbJgOlhIVcUBgkHttXQmJ89eWsjs2p24IIsuQhaki8V46GKDgbn4COqPLXYQK7jxNyOY9lGmGJ0KHnIFtLi6z45vuEe1TU2SdZMdqPt2k-zOd4MC8MFbdFxfDe-yZyc476yYrjOE37yptTgzs380uXqOwGKHI4w3N1KLVViINRWKnVtvOzgZQ\"},\"origin\":\"STITCH\",\"deviceType\":\"MOBILE\",\"designTheme\":{\"colorMode\":\"LIGHT\",\"font\":\"SPACE_GROTESK\",\"roundness\":\"ROUND_EIGHT\",\"customColor\":\"#53d22c\",\"saturation\":2},\"metadata\":{\"userRole\":\"OWNER\"}}]}",
+                                       "type":  "text"
+                                   }
+                               ],
+                   "structuredContent":  {
+                                             "projects":  [
+                                                              {
+                                                                  "createTime":  "2026-01-03T09:16:24.667162Z",
+                                                                  "designTheme":  {
+                                                                                      "colorMode":  "LIGHT",
+                                                                                      "customColor":  "#f48c25",
+                                                                                      "font":  "SPLINE_SANS",
+                                                                                      "roundness":  "ROUND_FULL",
+                                                                                      "saturation":  2
+                                                                                  },
+                                                                  "deviceType":  "MOBILE",
+                                                                  "metadata":  {
+                                                                                   "userRole":  "OWNER"
+                                                                               },
+                                                                  "name":  "projects/6643770654198232668",
+                                                                  "origin":  "STITCH",
+                                                                  "projectType":  "TEXT_TO_UI_PRO",
+                                                                  "screenInstances":  [
+                                                                                          {
+                                                                                              "height":  884,
+                                                                                              "id":  "08eaff8c4e0f4188bfd976b80bbda6b2",
+                                                                                              "sourceScreen":  "projects/6643770654198232668/screens/08eaff8c4e0f4188bfd976b80bbda6b2",
+                                                                                              "width":  390,
+                                                                                              "x":  1362
+                                                                                          },
+                                                                                          {
+                                                                                              "height":  884,
+                                                                                              "id":  "11997939f63a4304b71e6e8e65bff36d",
+                                                                                              "sourceScreen":  "projects/6643770654198232668/screens/11997939f63a4304b71e6e8e65bff36d",
+                                                                                              "width":  390,
+                                                                                              "x":  908
+                                                                                          },
+                                                                                          {
+                                                                                              "height":  1370,
+                                                                                              "id":  "5b2a8a7f4d8d4ba8985202b4ee586d52",
+                                                                                              "sourceScreen":  "projects/6643770654198232668/screens/5b2a8a7f4d8d4ba8985202b4ee586d52",
+                                                                                              "width":  390,
+                                                                                              "x":  454
+                                                                                          },
+                                                                                          {
+                                                                                              "height":  884,
+                                                                                              "id":  "cdd57d8f57be44d983c2284cff2e5568",
+                                                                                              "sourceScreen":  "projects/6643770654198232668/screens/cdd57d8f57be44d983c2284cff2e5568",
+                                                                                              "width":  390
+                                                                                          }
+                                                                                      ],
+                                                                  "thumbnailScreenshot":  {
+                                                                                              "downloadUrl":  "https://lh3.googleusercontent.com/aida/AOfcidVvhUAXyx-y3ZnVSMCRGEUxTvfzaNiUfk7SRVfhS8aHXyCGJI_GUiRzTI1i-gMp1P9W9ilC8bizyuWr2QF2LvOoKqUDc-iHcEqTeckBJ8k_PE1yj3EDUItjw-KKT2nQFEkExkSity743l71RTHTXVD4Djy7RcZNhK9F9DuGoL-A7_jgGlX0ORwPA4YxUURSITx2mJnlNJuDUK10rqpvMcARJq11ilsh6OpioPTu_M5msTstyvGl9Ngoswg",
+                                                                                              "name":  "projects/6643770654198232668/files/24514dce25404e96a78335dd308ee4e2"
+                                                                                          },
+                                                                  "title":  "게임 레벨 선택 화면",
+                                                                  "updateTime":  "2026-01-03T09:20:04.892269Z",
+                                                                  "visibility":  "PRIVATE"
+                                                              },
+                                                              {
+                                                                  "createTime":  "2025-11-21T10:54:49.210890Z",
+                                                                  "designTheme":  {
+                                                                                      "colorMode":  "DARK",
+                                                                                      "customColor":  "#f47b25",
+                                                                                      "font":  "PLUS_JAKARTA_SANS",
+                                                                                      "roundness":  "ROUND_EIGHT",
+                                                                                      "saturation":  3
+                                                                                  },
+                                                                  "deviceType":  "MOBILE",
+                                                                  "metadata":  {
+                                                                                   "userRole":  "OWNER"
+                                                                               },
+                                                                  "name":  "projects/2440741989879908873",
+                                                                  "origin":  "STITCH",
+                                                                  "projectType":  "TEXT_TO_UI_PRO",
+                                                                  "screenInstances":  [
+                                                                                          {
+                                                                                              "height":  884,
+                                                                                              "id":  "10a7345058554786b49e8d6b915ea1af",
+                                                                                              "sourceScreen":  "projects/2440741989879908873/screens/10a7345058554786b49e8d6b915ea1af",
+                                                                                              "width":  390,
+                                                                                              "x":  868
+                                                                                          },
+                                                                                          {
+                                                                                              "height":  884,
+                                                                                              "id":  "16ab64191f5a4f5f9aef11aa8e5683c2",
+                                                                                              "sourceScreen":  "projects/2440741989879908873/screens/16ab64191f5a4f5f9aef11aa8e5683c2",
+                                                                                              "width":  390,
+                                                                                              "x":  454
+                                                                                          },
+                                                                                          {
+                                                                                              "height":  884,
+                                                                                              "id":  "b3960b0b3c91493fa5262be009a1da03",
+                                                                                              "sourceScreen":  "projects/2440741989879908873/screens/b3960b0b3c91493fa5262be009a1da03",
+                                                                                              "width":  390
+                                                                                          }
+                                                                                      ],
+                                                                  "thumbnailScreenshot":  {
+                                                                                              "downloadUrl":  "https://lh3.googleusercontent.com/aida/AOfcidU0fYd6H0gQMUVitWtKLbnI-tXSj5Nk4CMY7WOYi7JXI043sGNRR-hYKII5kSWrfSdrA2-TbgJSFFs46peg6AS78Th9xwFuHK-AJ_cB01jF28ha59FJVt_zL-ub0MHlT7CBWdCGRLgMtLmgD9ar7s8yZwk42Pkp6BUIMJxdmktNAj-q0QV7Hd7t5NGoVGAii-V1LxBRxTXQcntEtEl6KQdPoTmd-S-SC_oBeCj60uhfqJzj_E2RfPTkw4Q",
+                                                                                              "name":  "projects/2440741989879908873/files/4aef59642b5c45dd8ee9f7f0bef50dbf"
+                                                                                          },
+                                                                  "title":  "사진 편집",
+                                                                  "updateTime":  "2025-11-21T10:57:07.009004Z",
+                                                                  "visibility":  "PRIVATE"
+                                                              },
+                                                              {
+                                                                  "createTime":  "2025-11-14T23:19:30.982935Z",
+                                                                  "designTheme":  {
+                                                                                      "colorMode":  "DARK",
+                                                                                      "customColor":  "#0d7ff2",
+                                                                                      "font":  "BE_VIETNAM_PRO",
+                                                                                      "roundness":  "ROUND_TWELVE",
+                                                                                      "saturation":  2
+                                                                                  },
+                                                                  "deviceType":  "MOBILE",
+                                                                  "metadata":  {
+                                                                                   "userRole":  "OWNER"
+                                                                               },
+                                                                  "name":  "projects/16253579680433783581",
+                                                                  "origin":  "STITCH",
+                                                                  "projectType":  "TEXT_TO_UI_PRO",
+                                                                  "screenInstances":  [
+                                                                                          {
+                                                                                              "height":  884,
+                                                                                              "id":  "b5cb8556023742a7b6960f24d100703b",
+                                                                                              "sourceScreen":  "projects/16253579680433783581/screens/b5cb8556023742a7b6960f24d100703b",
+                                                                                              "width":  390,
+                                                                                              "x":  1362
+                                                                                          },
+                                                                                          {
+                                                                                              "height":  884,
+                                                                                              "id":  "c08065c236364b9dbf126c6f7d22c4b5",
+                                                                                              "sourceScreen":  "projects/16253579680433783581/screens/c08065c236364b9dbf126c6f7d22c4b5",
+                                                                                              "width":  390,
+                                                                                              "x":  908
+                                                                                          },
+                                                                                          {
+                                                                                              "height":  884,
+                                                                                              "id":  "ef71248b930d46ad902a568b780b7bb9",
+                                                                                              "sourceScreen":  "projects/16253579680433783581/screens/ef71248b930d46ad902a568b780b7bb9",
+                                                                                              "width":  390,
+                                                                                              "x":  455
+                                                                                          },
+                                                                                          {
+                                                                                              "height":  884,
+                                                                                              "id":  "f217fce215fe4535bce1073348497e96",
+                                                                                              "sourceScreen":  "projects/16253579680433783581/screens/f217fce215fe4535bce1073348497e96",
+                                                                                              "width":  390
+                                                                                          }
+                                                                                      ],
+                                                                  "thumbnailScreenshot":  {
+                                                                                              "downloadUrl":  "https://lh3.googleusercontent.com/aida/AOfcidUU_z_6Qia1MRrhpJL8XsX3YFpr4D91UIDrjhYhbi8JcIB9qYS_qTNVDSM4TDHQSspPDAEu7jr2HLDwzyVfXhljBFiX13edbHBRd3Scps-FloJ4Bcyg1d5kaK40Tj3B7D-gBB74QW5dSROIrLdmOhtRLaDhUBb0Z64lm_Pnl1HdVE5bK5jJHxKlojivkM5uCrqXhNRRFsLelJvbueW-wo4oHHRBjM49giStDB1sS8UugbpvMb9n4A9XQ-6d",
+                                                                                              "name":  "projects/16253579680433783581/files/346843495d6b4efab7235562e7edebb4"
+                                                                                          },
+                                                                  "title":  "메인 메뉴",
+                                                                  "updateTime":  "2025-11-14T23:21:48.155982Z",
+                                                                  "visibility":  "PRIVATE"
+                                                              },
+                                                              {
+                                                                  "createTime":  "2025-10-06T01:33:21.758768Z",
+                                                                  "designTheme":  {
+                                                                                      "colorMode":  "DARK",
+                                                                                      "customColor":  "#0f6fbd",
+                                                                                      "font":  "SPACE_GROTESK",
+                                                                                      "roundness":  "ROUND_EIGHT",
+                                                                                      "saturation":  3
+                                                                                  },
+                                                                  "deviceType":  "MOBILE",
+                                                                  "metadata":  {
+                                                                                   "userRole":  "OWNER"
+                                                                               },
+                                                                  "name":  "projects/12217641091884975419",
+                                                                  "origin":  "STITCH",
+                                                                  "projectType":  "TEXT_TO_UI_PRO",
+                                                                  "screenInstances":  [
+                                                                                          {
+                                                                                              "id":  "0b25c97db03f4d8eb652e7a2cf60d8f1",
+                                                                                              "sourceScreen":  "projects/12217641091884975419/screens/0b25c97db03f4d8eb652e7a2cf60d8f1",
+                                                                                              "x":  454
+                                                                                          },
+                                                                                          {
+                                                                                              "id":  "1e8a0b694f8f48f7951ededda94612e7",
+                                                                                              "sourceScreen":  "projects/12217641091884975419/screens/1e8a0b694f8f48f7951ededda94612e7",
+                                                                                              "x":  1816
+                                                                                          },
+                                                                                          {
+                                                                                              "id":  "7ebc5f25e9cc4e3ea35418e0a2bfc2df",
+                                                                                              "sourceScreen":  "projects/12217641091884975419/screens/7ebc5f25e9cc4e3ea35418e0a2bfc2df",
+                                                                                              "x":  2270
+                                                                                          },
+                                                                                          {
+                                                                                              "id":  "87ae4605d4ae490bbbbc151b33fc1c6a",
+                                                                                              "sourceScreen":  "projects/12217641091884975419/screens/87ae4605d4ae490bbbbc151b33fc1c6a",
+                                                                                              "x":  1362
+                                                                                          },
+                                                                                          {
+                                                                                              "id":  "8e4d3324ad974f599d8aed9d6f14d48d",
+                                                                                              "sourceScreen":  "projects/12217641091884975419/screens/8e4d3324ad974f599d8aed9d6f14d48d",
+                                                                                              "x":  908
+                                                                                          },
+                                                                                          {
+                                                                                              "id":  "ba52ddfc0df742c1a50bae638988ccec",
+                                                                                              "sourceScreen":  "projects/12217641091884975419/screens/ba52ddfc0df742c1a50bae638988ccec"
+                                                                                          }
+                                                                                      ],
+                                                                  "thumbnailScreenshot":  {
+                                                                                              "downloadUrl":  "https://lh3.googleusercontent.com/aida/AOfcidUzdIZ82OvfAtVW8jfkLGZVmLjDvUPArId_TgOiUVc5eUBK6RNt6zmr1UJyMttnTTmg-rh9NqXCjXlDfZMrHSX-aCMEkWFfU5_nfUznLTY_qFUiMR5FuZYV2JpnqEL8xod7SpO6t-qVd-prtCWr_4XBX90WiDZ02almGiqbwI9zPqKT9KAdVD-ratvpc3Zfn2XkPXZU_V4k5ddVww0UC18fQJ0bFp_sRvpziyWZu2VttPreBCFJ0StZoBLS",
+                                                                                              "name":  "projects/12217641091884975419/files/7fc01efc77d2463797707e44319df6dc"
+                                                                                          },
+                                                                  "title":  "Home Screen",
+                                                                  "updateTime":  "2025-10-06T01:34:49.173989Z",
+                                                                  "visibility":  "PRIVATE"
+                                                              },
+                                                              {
+                                                                  "createTime":  "2025-05-25T05:22:46.557331Z",
+                                                                  "designTheme":  {
+                                                                                      "colorMode":  "LIGHT",
+                                                                                      "customColor":  "#e92933",
+                                                                                      "font":  "PLUS_JAKARTA_SANS",
+                                                                                      "roundness":  "ROUND_TWELVE",
+                                                                                      "saturation":  2
+                                                                                  },
+                                                                  "deviceType":  "MOBILE",
+                                                                  "metadata":  {
+                                                                                   "userRole":  "OWNER"
+                                                                               },
+                                                                  "name":  "projects/11404269890987929609",
+                                                                  "origin":  "STITCH",
+                                                                  "projectType":  "TEXT_TO_UI",
+                                                                  "screenInstances":  [
+                                                                                          {
+                                                                                              "id":  "19289ab7618347d7a307ed23ef15d395",
+                                                                                              "sourceScreen":  "projects/11404269890987929609/screens/19289ab7618347d7a307ed23ef15d395",
+                                                                                              "x":  454
+                                                                                          },
+                                                                                          {
+                                                                                              "id":  "5a2aff385bdb4bbb823058c4158903c5",
+                                                                                              "sourceScreen":  "projects/11404269890987929609/screens/5a2aff385bdb4bbb823058c4158903c5"
+                                                                                          },
+                                                                                          {
+                                                                                              "id":  "83a1b34e4b76480ca70788f512c723df",
+                                                                                              "sourceScreen":  "projects/11404269890987929609/screens/83a1b34e4b76480ca70788f512c723df",
+                                                                                              "x":  908
+                                                                                          }
+                                                                                      ],
+                                                                  "thumbnailScreenshot":  {
+                                                                                              "downloadUrl":  "https://lh3.googleusercontent.com/aida/AOfcidWTxAb55wqPuvEpF2Y9o43W3PJMVoCWkjejnh54ZwUWhJF8A_ryWdWil3bJU257gPGIC0iikbqt2_4jCSwKIaMxV3fmEHUtYnU7VyT43f_m4ogfh6sJ0nWmGF0gbf1rZD4Anbh6B4f7TQ2ZvPMYe-az4pPsCRvy5rkbJKJOs8Hge3N_T1cAnTSfATUzWvkp4GcGBSyhgcUJ7OA94Cvu5AOTF3qWxLQJSOyNOjYZ-tek-lllJCbpNylX2Oyp",
+                                                                                              "name":  "projects/11404269890987929609/files/b919a513665f4d45b7c578bf58d7f934"
+                                                                                          },
+                                                                  "title":  "시작 화면",
+                                                                  "updateTime":  "2025-10-06T01:30:20.558721Z",
+                                                                  "visibility":  "PRIVATE"
+                                                              },
+                                                              {
+                                                                  "createTime":  "2025-10-06T01:25:18.963741Z",
+                                                                  "designTheme":  {
+                                                                                      "colorMode":  "DARK",
+                                                                                      "customColor":  "#1919e6",
+                                                                                      "font":  "SPACE_GROTESK",
+                                                                                      "roundness":  "ROUND_FOUR",
+                                                                                      "saturation":  3
+                                                                                  },
+                                                                  "deviceType":  "MOBILE",
+                                                                  "metadata":  {
+                                                                                   "userRole":  "OWNER"
+                                                                               },
+                                                                  "name":  "projects/9815217293492327621",
+                                                                  "origin":  "STITCH",
+                                                                  "projectType":  "TEXT_TO_UI_PRO",
+                                                                  "screenInstances":  [
+                                                                                          {
+                                                                                              "height":  884,
+                                                                                              "id":  "a23d4177c6e946dc9c2652d23982b657",
+                                                                                              "sourceScreen":  "projects/9815217293492327621/screens/a23d4177c6e946dc9c2652d23982b657",
+                                                                                              "width":  390,
+                                                                                              "x":  2,
+                                                                                              "y":  189
+                                                                                          }
+                                                                                      ],
+                                                                  "thumbnailScreenshot":  {
+                                                                                              "downloadUrl":  "https://lh3.googleusercontent.com/aida/AOfcidUKX3HQFWPALG5CRalzKqCHhH9hCYWtviKSfFIHm04pGGUidrYBm2t8GA2F-l3zyKje30qFqG8VA_rFU9cbWdCCo-S8sVhcxIScSFqzO6C4ziTvpQCD3O2svavCkZ9LErTG9-JtvRq724UQbCJ0qv9P7fgL-EEh9eSUTe6CYgBM-dCQ4-0IZmL0uI-EwqJbFHWKC_oanUjrGO4BgVziE4-igLBmbJeZMv1Td8ueX1gTSDQY9XSB_5tHwN0",
+                                                                                              "name":  "projects/9815217293492327621/files/115fc588985d421b83144df53b59ad4b"
+                                                                                          },
+                                                                  "title":  "Galaga Game UI",
+                                                                  "updateTime":  "2025-10-06T01:30:05.373355Z",
+                                                                  "visibility":  "PRIVATE"
+                                                              },
+                                                              {
+                                                                  "createTime":  "2025-06-29T04:23:21.327673Z",
+                                                                  "designTheme":  {
+                                                                                      "colorMode":  "LIGHT",
+                                                                                      "customColor":  "#e55d19",
+                                                                                      "font":  "PLUS_JAKARTA_SANS",
+                                                                                      "roundness":  "ROUND_TWELVE",
+                                                                                      "saturation":  3
+                                                                                  },
+                                                                  "deviceType":  "DESKTOP",
+                                                                  "metadata":  {
+                                                                                   "userRole":  "OWNER"
+                                                                               },
+                                                                  "name":  "projects/10800481588429978261",
+                                                                  "origin":  "STITCH",
+                                                                  "projectType":  "TEXT_TO_UI",
+                                                                  "screenInstances":  [
+                                                                                          {
+                                                                                              "id":  "2c331edff01a4b138f50f181e4221bd3",
+                                                                                              "sourceScreen":  "projects/10800481588429978261/screens/2c331edff01a4b138f50f181e4221bd3"
+                                                                                          }
+                                                                                      ],
+                                                                  "thumbnailScreenshot":  {
+                                                                                              "downloadUrl":  "https://lh3.googleusercontent.com/aida/AOfcidW5gUFoBUdOKt0ikWlPPfJ7ma2os45V8xZx-t9XjtdDQyVBBbK8LlZJayuQhj-aHxpKQuSxsYs1MdluJt5IMjlJlqVgkKEIRf9ULdcBAwVLWdKF9HMiFuTd7Ny-IX1R7gTKChCPw7vB6j_zes3RjIi7Ezeoq2RspoueiP9RBDDb5CLrlsaWmzT-uQmDpDrwe6y-YQQVHV1Pvt5pge67KO_WRPRgC8SbUIzfq_CTsbD7InPDXV3_9386EPw",
+                                                                                              "name":  "projects/10800481588429978261/files/adef694b13a14abfa3aa18b11cb75813"
+                                                                                          },
+                                                                  "title":  "Landing page for an homemade pizza cooking elite class, happening once a year in Napoli.",
+                                                                  "updateTime":  "2025-09-14T00:13:09.011033Z",
+                                                                  "visibility":  "PRIVATE"
+                                                              },
+                                                              {
+                                                                  "createTime":  "2025-05-31T11:43:39.472999Z",
+                                                                  "designTheme":  {
+                                                                                      "colorMode":  "LIGHT",
+                                                                                      "customColor":  "#e87930",
+                                                                                      "font":  "PLUS_JAKARTA_SANS",
+                                                                                      "roundness":  "ROUND_EIGHT",
+                                                                                      "saturation":  3
+                                                                                  },
+                                                                  "deviceType":  "DESKTOP",
+                                                                  "metadata":  {
+                                                                                   "userRole":  "OWNER"
+                                                                               },
+                                                                  "name":  "projects/7808738272745286719",
+                                                                  "origin":  "STITCH",
+                                                                  "projectType":  "TEXT_TO_UI",
+                                                                  "thumbnailScreenshot":  {
+                                                                                              "downloadUrl":  "https://lh3.googleusercontent.com/aida/AOfcidUyTbS-Q-MJeWI8vZxXPq1dg-wnBEJxT1iPG_SrMF6lmKGK77_uuK7LexpbUrD_DxYDrhPQSpEX25sYFbeg1xdoLL9KnaI-dc5KklDJWTUy5_ztkj_PoembPTYrjZIwJbXrqw8882wYy4MGgQ6RXvzW1hiR-UU77ONHiXf83WYMvfZnctK-GZ-2HxRz-4DBCKMaObLcxwA9dDdJfjP9GzXsn7wH4C1Bs_jqilZIR2ZLGoczTDRlRnOnE1c",
+                                                                                              "name":  "projects/7808738272745286719/files/ea396947b4be47838d03a08e26c63dc4"
+                                                                                          },
+                                                                  "title":  "Naver Cafe for real estate sales information in Jeonggwan.",
+                                                                  "updateTime":  "2025-05-31T11:44:44.667847Z",
+                                                                  "visibility":  "PRIVATE"
+                                                              },
+                                                              {
+                                                                  "createTime":  "2025-05-25T05:26:24.866654Z",
+                                                                  "designTheme":  {
+                                                                                      "colorMode":  "LIGHT",
+                                                                                      "customColor":  "#0c7ff2",
+                                                                                      "font":  "BE_VIETNAM_PRO",
+                                                                                      "roundness":  "ROUND_EIGHT",
+                                                                                      "saturation":  3
+                                                                                  },
+                                                                  "deviceType":  "MOBILE",
+                                                                  "metadata":  {
+                                                                                   "userRole":  "OWNER"
+                                                                               },
+                                                                  "name":  "projects/14493276242185476712",
+                                                                  "origin":  "STITCH",
+                                                                  "projectType":  "TEXT_TO_UI_PRO",
+                                                                  "thumbnailScreenshot":  {
+                                                                                              "downloadUrl":  "https://lh3.googleusercontent.com/aida/AOfcidV9vUktwVGTLYAeZOdgSpGqDS_I3wuAY-DxRxy6NR7UjaVJOcDK5s5b0zb_uAsR69u_BryqpkhTSVDtmNCz_HnY5eRxvwBQAmY4j5aBF6RlYa3yM80G9W3CloTaXnzggrDxP2X9I6cbTL5G-H6NLNJolsjVAwk6poAS7TYjxhFpdwOAFp6zftJwaWoz2eO6kzors_KXbky-KNfnnnkIb2ynzcVXk-KRP8t8Osz8nSyTJA67NrX87QbtEw0",
+                                                                                              "name":  "projects/14493276242185476712/files/20f3e79e2c6848ff8e4439d367b3075d"
+                                                                                          },
+                                                                  "title":  "플레이어 입력",
+                                                                  "updateTime":  "2025-05-25T05:28:20.789189Z",
+                                                                  "visibility":  "PRIVATE"
+                                                              },
+                                                              {
+                                                                  "createTime":  "2025-05-25T05:19:06.918950Z",
+                                                                  "designTheme":  {
+                                                                                      "colorMode":  "LIGHT",
+                                                                                      "customColor":  "#f3bf24",
+                                                                                      "font":  "BE_VIETNAM_PRO",
+                                                                                      "roundness":  "ROUND_TWELVE",
+                                                                                      "saturation":  2
+                                                                                  },
+                                                                  "deviceType":  "MOBILE",
+                                                                  "metadata":  {
+                                                                                   "userRole":  "OWNER"
+                                                                               },
+                                                                  "name":  "projects/18348424520595621239",
+                                                                  "origin":  "STITCH",
+                                                                  "projectType":  "TEXT_TO_UI",
+                                                                  "thumbnailScreenshot":  {
+                                                                                              "downloadUrl":  "https://lh3.googleusercontent.com/aida/AOfcidWx60LMrkr_msMHke-6GdMufUB17SQVoCNmHNMbewWhJlpfkT0QSb_ZYxPNZ5WJA2Glqf8bBT7ws0EFMEvhXZkot3fpp9KJzhtqTiCyXKeB0kbD6gBR-1jKCRJmE6PQf1KkfaXhfsU5f3jQ3h0qZlXjjbXDPyO4_MIVWNhACDKkZFjeVSUQye06M6mKDFc6M_tUGhdrWRxX6J6mHeg3VELNhZwPgGgDc1bYuN5tLcN6PmPz8IfQC3R5smha",
+                                                                                              "name":  "projects/18348424520595621239/files/66403c6d0cdc4c56bc8ce7d66fafd52a"
+                                                                                          },
+                                                                  "title":  "환영 화면",
+                                                                  "updateTime":  "2025-05-25T05:20:17.300225Z",
+                                                                  "visibility":  "PRIVATE"
+                                                              },
+                                                              {
+                                                                  "createTime":  "2025-05-23T01:33:03.870673Z",
+                                                                  "designTheme":  {
+                                                                                      "colorMode":  "LIGHT",
+                                                                                      "customColor":  "#1672ce",
+                                                                                      "font":  "WORK_SANS",
+                                                                                      "roundness":  "ROUND_EIGHT",
+                                                                                      "saturation":  2
+                                                                                  },
+                                                                  "deviceType":  "DESKTOP",
+                                                                  "metadata":  {
+                                                                                   "userRole":  "OWNER"
+                                                                               },
+                                                                  "name":  "projects/8714279671981862397",
+                                                                  "origin":  "STITCH",
+                                                                  "projectType":  "TEXT_TO_UI",
+                                                                  "thumbnailScreenshot":  {
+                                                                                              "downloadUrl":  "https://lh3.googleusercontent.com/aida/AOfcidVHKgHmKlnLFmWd13YvSmS-A4N5Dwas_F6pV9fNVB8AAZsXKXLGVSsuEUq7nRALH83Azd-lZA20jWaLeilJWK0wzX1ZpLR8dg4TxnhWHKxUTtb5hOiX0OYrKwzfj_oVcfqlK7W5piZdB5998AsZbJKPa67NqFkpnAAyyXb282OXTERYqUBdgELBn4p9e3FOMKp4N_iB_sEE5C_W9Ygj7ibJ27etaM7p3zhmsBVt7iAisbbtYBxGOXsE-w",
+                                                                                              "name":  "projects/8714279671981862397/files/6d734048fe4c401fa305f8bf7d14a47b"
+                                                                                          },
+                                                                  "title":  "Yun Total Construction Landing Page",
+                                                                  "updateTime":  "2025-05-23T01:34:06.409095Z",
+                                                                  "visibility":  "PRIVATE"
+                                                              },
+                                                              {
+                                                                  "createTime":  "2025-05-22T14:27:44.200703Z",
+                                                                  "designTheme":  {
+                                                                                      "colorMode":  "LIGHT",
+                                                                                      "customColor":  "#1993e5",
+                                                                                      "font":  "PUBLIC_SANS",
+                                                                                      "roundness":  "ROUND_EIGHT",
+                                                                                      "saturation":  3
+                                                                                  },
+                                                                  "deviceType":  "DESKTOP",
+                                                                  "metadata":  {
+                                                                                   "userRole":  "OWNER"
+                                                                               },
+                                                                  "name":  "projects/4444280685739325746",
+                                                                  "origin":  "STITCH",
+                                                                  "projectType":  "TEXT_TO_UI",
+                                                                  "thumbnailScreenshot":  {
+                                                                                              "downloadUrl":  "https://lh3.googleusercontent.com/aida/AOfcidXTc0hRwK2EHp6KYoHa8GsV02QbcLcg28j3taJPdmzYBAclmVHZAahMl6HemnDx96A5hiqk_c8u-ZOqw3ngfyj7hRmGyub9u7k3o0NIGtxSk9w_kY6rHYf0As-EHFHYwMk6ZGVonvxcsTrpePti1koeB7AvhctyKP6pPlqEXZBHNu3lOIzqgGDyBfinCqCNrvuftf6IbBWHiFHxdiHHU6sH1s0NYu-rdi88FQOm24MNTwV5rY6fpp-LR-Q",
+                                                                                              "name":  "projects/4444280685739325746/files/1ab81c722080413b962f898f0d23b3de"
+                                                                                          },
+                                                                  "title":  "Dental Home Page",
+                                                                  "updateTime":  "2025-05-22T14:28:22.196277Z",
+                                                                  "visibility":  "PRIVATE"
+                                                              },
+                                                              {
+                                                                  "createTime":  "2025-05-22T11:59:08.688922Z",
+                                                                  "designTheme":  {
+                                                                                      "colorMode":  "LIGHT",
+                                                                                      "customColor":  "#e8306d",
+                                                                                      "font":  "PLUS_JAKARTA_SANS",
+                                                                                      "roundness":  "ROUND_TWELVE",
+                                                                                      "saturation":  3
+                                                                                  },
+                                                                  "deviceType":  "MOBILE",
+                                                                  "metadata":  {
+                                                                                   "userRole":  "OWNER"
+                                                                               },
+                                                                  "name":  "projects/12521958146779910528",
+                                                                  "origin":  "STITCH",
+                                                                  "projectType":  "TEXT_TO_UI",
+                                                                  "thumbnailScreenshot":  {
+                                                                                              "downloadUrl":  "https://lh3.googleusercontent.com/aida/AOfcidXnT_PZnUDVhcoCRu5eeR4TVIozAbAi_y0LmFREqvACPFyXSQXkGg5uTV26jQaIdExeMR2zerFOzOzoIVu4mybWyddpN5qtmUKrXCb45ZQCPO15LFBGmTXs5aiVtrTTmogPl8lKw8eB7wpJSC-bYI4fXg-yM2KfY1svfAYQ6ugK1IvX-OVHuTKKMbNvp0YVnWcJXaNipQNTjISblR1GKHqtIINGkbMq05JKFyPCjn_qWpFT_gVNrC6R1Kc",
+                                                                                              "name":  "projects/12521958146779910528/files/1975c17c0fa2475a854158a84c4b3c00"
+                                                                                          },
+                                                                  "title":  "Browse Tab",
+                                                                  "updateTime":  "2025-05-22T11:59:42.001017Z",
+                                                                  "visibility":  "PRIVATE"
+                                                              },
+                                                              {
+                                                                  "createTime":  "2025-05-22T11:34:16.605497Z",
+                                                                  "designTheme":  {
+                                                                                      "colorMode":  "LIGHT",
+                                                                                      "customColor":  "#ed7b2a",
+                                                                                      "font":  "SPACE_GROTESK",
+                                                                                      "roundness":  "ROUND_EIGHT",
+                                                                                      "saturation":  3
+                                                                                  },
+                                                                  "deviceType":  "DESKTOP",
+                                                                  "metadata":  {
+                                                                                   "userRole":  "OWNER"
+                                                                               },
+                                                                  "name":  "projects/13712436398519615139",
+                                                                  "origin":  "STITCH",
+                                                                  "projectType":  "TEXT_TO_UI",
+                                                                  "thumbnailScreenshot":  {
+                                                                                              "downloadUrl":  "https://lh3.googleusercontent.com/aida/AOfcidV_y0hwCLeSKcxKDSbklwGLaVJqPwZnSGoYlCewsp6CxlJ64qSuAQMATmFpIyx1pisgPuwTasrZzkW-x8gLKpZD0zcqohaQd_VOk3hLAO16I0aCv5ZWASfwLCzvw5ftbTSm9V0aFc0NGUa3e9qfi66JqiT3uBclcJs-zP484D-4gwJQfRwDTPRhg9lrzV5aO82rnmnyUatq_zCZsM4N9TUTBaOQku-a3hAYQe5K94DkCg4T6rbAq7wIavQ",
+                                                                                              "name":  "projects/13712436398519615139/files/138436eef6824ce3ad6b729204a9bb57"
+                                                                                          },
+                                                                  "title":  "Dane Design Explore Page",
+                                                                  "updateTime":  "2025-05-22T11:34:46.433443Z",
+                                                                  "visibility":  "PRIVATE"
+                                                              },
+                                                              {
+                                                                  "createTime":  "2025-05-22T11:32:01.294022Z",
+                                                                  "designTheme":  {
+                                                                                      "colorMode":  "LIGHT",
+                                                                                      "customColor":  "#53d22c",
+                                                                                      "font":  "SPACE_GROTESK",
+                                                                                      "roundness":  "ROUND_EIGHT",
+                                                                                      "saturation":  2
+                                                                                  },
+                                                                  "deviceType":  "MOBILE",
+                                                                  "metadata":  {
+                                                                                   "userRole":  "OWNER"
+                                                                               },
+                                                                  "name":  "projects/6465306098148883206",
+                                                                  "origin":  "STITCH",
+                                                                  "projectType":  "TEXT_TO_UI",
+                                                                  "thumbnailScreenshot":  {
+                                                                                              "downloadUrl":  "https://lh3.googleusercontent.com/aida/AOfcidXPUAoS7gTo-m0dpdcytqUnniiYb8oJn8J9bfSEbXsa_Tnje_wOfrJ8SXYSsUlsS5CFoRbJgOlhIVcUBgkHttXQmJ89eWsjs2p24IIsuQhaki8V46GKDgbn4COqPLXYQK7jxNyOY9lGmGJ0KHnIFtLi6z45vuEe1TU2SdZMdqPt2k-zOd4MC8MFbdFxfDe-yZyc476yYrjOE37yptTgzs380uXqOwGKHI4w3N1KLVViINRWKnVtvOzgZQ",
+                                                                                              "name":  "projects/6465306098148883206/files/705ab261ab534c77a4e82a236a3b28f1"
+                                                                                          },
+                                                                  "title":  "Bird Watching Gear Store Home",
+                                                                  "updateTime":  "2025-05-22T11:32:27.388198Z",
+                                                                  "visibility":  "PRIVATE"
+                                                              }
+                                                          ]
+                                         }
+               }
+}

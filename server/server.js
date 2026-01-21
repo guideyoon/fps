@@ -1,13 +1,22 @@
 const express = require('express');
 const http = require('http');
+const path = require('path');
 const { Server } = require('socket.io');
 
 const app = express();
 const server = http.createServer(app);
 
+// Serve static files from the root directory
+app.use(express.static(path.join(__dirname, '../')));
+
 // Health check endpoint
 app.get('/', (req, res) => {
     res.send('<h1>FPS Game Server is Running!</h1><p>Socket.io is waiting for connections.</p>');
+});
+
+// Explicit route for /FPS
+app.get('/FPS', (req, res) => {
+    res.sendFile(path.join(__dirname, '../FPS.html'));
 });
 
 const io = new Server(server, {

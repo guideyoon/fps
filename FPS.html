@@ -185,7 +185,7 @@
             transform: translateY(-50%);
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 10px;
             pointer-events: none;
             /* Just for display */
         }
@@ -204,8 +204,8 @@
         }
 
         .weapon-item .key-hint {
-            width: 40px;
-            height: 40px;
+            width: 32px;
+            height: 32px;
             background: rgba(0, 0, 0, 0.5);
             color: #fff;
             border: 1px solid rgba(255, 255, 255, 0.3);
@@ -213,7 +213,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            font-size: 16px;
             font-weight: bold;
             margin-right: 10px;
         }
@@ -225,8 +225,8 @@
         }
 
         .weapon-item .icon-box {
-            width: 150px;
-            height: 150px;
+            width: 110px;
+            height: 110px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -242,7 +242,7 @@
         }
 
         .weapon-item i {
-            font-size: 72px;
+            font-size: 54px;
             color: #fff;
         }
 
@@ -464,6 +464,172 @@
             border-radius: 4px;
             cursor: pointer;
         }
+
+        #pistol-debug-panel {
+            position: fixed;
+            top: 12px;
+            left: 12px;
+            z-index: 9999;
+            background: rgba(0, 0, 0, 0.75);
+            color: #ffcc9e;
+            font-family: ui-monospace, Menlo, Consolas, monospace;
+            font-size: 12px;
+            padding: 10px 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            display: none;
+        }
+
+        #pistol-debug-panel .panel-title {
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #ffd1c9;
+        }
+
+        #pistol-debug-panel .panel-row {
+            display: grid;
+            grid-template-columns: 25px 1fr 45px;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 6px;
+        }
+
+        #pistol-debug-panel input[type="range"] {
+            flex: 1;
+            min-width: 0;
+            cursor: pointer;
+        }
+
+        #pistol-debug-panel button {
+            background: #8f4a1f;
+            color: #fff;
+            border: none;
+            padding: 6px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        #sniper-debug-panel {
+            position: fixed;
+            top: 12px;
+            left: 12px;
+            z-index: 9999;
+            background: rgba(0, 0, 0, 0.75);
+            color: #9eccff;
+            font-family: ui-monospace, Menlo, Consolas, monospace;
+            font-size: 12px;
+            padding: 10px 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            display: none;
+        }
+
+        #sniper-debug-panel .panel-title {
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #c9e1ff;
+        }
+
+        #sniper-debug-panel .panel-row {
+            display: grid;
+            grid-template-columns: 25px 1fr 45px;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 6px;
+        }
+
+        #sniper-debug-panel input[type="range"] {
+            flex: 1;
+            min-width: 0;
+            cursor: pointer;
+        }
+
+        #sniper-debug-panel button {
+            background: #1f4a8f;
+            color: #fff;
+            border: none;
+            padding: 6px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        #sniper-debug-panel .arms-flex-container {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        #sniper-debug-panel .arm-column {
+            flex: 1;
+            min-width: 260px;
+        }
+
+        #sniper-debug-panel .section-title,
+        #knife-debug-panel .section-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        #knife-debug-panel {
+            position: fixed;
+            top: 12px;
+            left: 12px;
+            z-index: 9999;
+            background: rgba(0, 0, 0, 0.75);
+            color: #ff9ecc;
+            font-family: ui-monospace, Menlo, Consolas, monospace;
+            font-size: 12px;
+            padding: 10px 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            display: none;
+        }
+
+        #knife-debug-panel .panel-title {
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #ffc9e1;
+        }
+
+        #knife-debug-panel .panel-row {
+            display: grid;
+            grid-template-columns: 25px 1fr 45px;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 6px;
+        }
+
+        #knife-debug-panel input[type="range"] {
+            flex: 1;
+            min-width: 0;
+            cursor: pointer;
+        }
+
+        #knife-debug-panel button {
+            background: #8f1f4a;
+            color: #fff;
+            border: none;
+            padding: 6px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        #knife-debug-panel .arms-flex-container {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        #knife-debug-panel .arm-column {
+            flex: 1;
+            min-width: 260px;
+        }
+
 
 
         .weapon-slot {
@@ -2426,7 +2592,6 @@
             height: 45px;
             font-size: 22px;
         }
-        }
 
         /* Force hide mode-selection when game is active */
         body.game-active #mode-selection,
@@ -2910,48 +3075,661 @@
             <label for="rifle-z">Z</label>
             <div class="slider-group">
                 <button class="nudge-btn" type="button" data-target="rifle-z" data-dir="-1">-</button>
-                <input id="rifle-z" type="range" min="-1" max="1" step="0.01" value="-0.2">
+                <input id="rifle-z" type="range" min="-1" max="1" step="0.01" value="0.44">
                 <button class="nudge-btn" type="button" data-target="rifle-z" data-dir="1">+</button>
             </div>
-            <span id="rifle-z-val">-0.20</span>
+            <span id="rifle-z-val">0.44</span>
         </div>
         <div class="panel-row">
             <label for="rifle-scale">S</label>
             <div class="slider-group">
                 <button class="nudge-btn" type="button" data-target="rifle-scale" data-dir="-1">-</button>
-                <input id="rifle-scale" type="range" min="0.05" max="0.5" step="0.01" value="0.22">
+                <input id="rifle-scale" type="range" min="0.05" max="0.5" step="0.01" value="0.50">
                 <button class="nudge-btn" type="button" data-target="rifle-scale" data-dir="1">+</button>
             </div>
-            <span id="rifle-scale-val">0.22</span>
+            <span id="rifle-scale-val">0.50</span>
         </div>
         <div class="panel-row">
             <label for="rifle-rx">RX</label>
             <div class="slider-group">
                 <button class="nudge-btn" type="button" data-target="rifle-rx" data-dir="-1">-</button>
-                <input id="rifle-rx" type="range" min="-3.14" max="3.14" step="0.01" value="0">
+                <input id="rifle-rx" type="range" min="-3.14" max="3.14" step="0.01" value="0.43">
                 <button class="nudge-btn" type="button" data-target="rifle-rx" data-dir="1">+</button>
             </div>
-            <span id="rifle-rx-val">0.00</span>
+            <span id="rifle-rx-val">0.43</span>
         </div>
         <div class="panel-row">
             <label for="rifle-ry">RY</label>
             <div class="slider-group">
                 <button class="nudge-btn" type="button" data-target="rifle-ry" data-dir="-1">-</button>
-                <input id="rifle-ry" type="range" min="-3.14" max="3.14" step="0.01" value="4.71">
+                <input id="rifle-ry" type="range" min="-3.14" max="3.14" step="0.01" value="1.69">
                 <button class="nudge-btn" type="button" data-target="rifle-ry" data-dir="1">+</button>
             </div>
-            <span id="rifle-ry-val">4.71</span>
+            <span id="rifle-ry-val">1.69</span>
         </div>
         <div class="panel-row">
             <label for="rifle-rz">RZ</label>
             <div class="slider-group">
                 <button class="nudge-btn" type="button" data-target="rifle-rz" data-dir="-1">-</button>
-                <input id="rifle-rz" type="range" min="-3.14" max="3.14" step="0.01" value="0">
+                <input id="rifle-rz" type="range" min="-3.14" max="3.14" step="0.01" value="-0.25">
                 <button class="nudge-btn" type="button" data-target="rifle-rz" data-dir="1">+</button>
             </div>
-            <span id="rifle-rz-val">0.00</span>
+            <span id="rifle-rz-val">-0.25</span>
+        </div>
+        <div class="panel-row">
+            <label for="rifle-mx">MX</label>
+            <div class="slider-group">
+                <button class="nudge-btn" type="button" data-target="rifle-mx" data-dir="-1">-</button>
+                <input id="rifle-mx" type="range" min="-0.5" max="0.5" step="0.001" value="0">
+                <button class="nudge-btn" type="button" data-target="rifle-mx" data-dir="1">+</button>
+            </div>
+            <span id="rifle-mx-val">0.000</span>
+        </div>
+        <div class="panel-row">
+            <label for="rifle-my">MY</label>
+            <div class="slider-group">
+                <button class="nudge-btn" type="button" data-target="rifle-my" data-dir="-1">-</button>
+                <input id="rifle-my" type="range" min="-0.5" max="0.5" step="0.001" value="0.055">
+                <button class="nudge-btn" type="button" data-target="rifle-my" data-dir="1">+</button>
+            </div>
+            <span id="rifle-my-val">0.055</span>
+        </div>
+        <div class="panel-row">
+            <label for="rifle-mz">MZ</label>
+            <div class="slider-group">
+                <button class="nudge-btn" type="button" data-target="rifle-mz" data-dir="-1">-</button>
+                <input id="rifle-mz" type="range" min="-1.5" max="0.3" step="0.005" value="-0.65">
+                <button class="nudge-btn" type="button" data-target="rifle-mz" data-dir="1">+</button>
+            </div>
+            <span id="rifle-mz-val">-0.65</span>
+        </div>
+        <div style="border-top:1px solid #444; margin:8px 0; padding-top:8px; color:#ff9e9e">Left Arm (LA)</div>
+        <div class="panel-row">
+            <label for="rifle-lax">LAX</label>
+            <div class="slider-group">
+                <button class="nudge-btn" type="button" data-target="rifle-lax" data-dir="-1">-</button>
+                <input id="rifle-lax" type="range" min="-1" max="1" step="0.01" value="-0.05">
+                <button class="nudge-btn" type="button" data-target="rifle-lax" data-dir="1">+</button>
+            </div>
+            <span id="rifle-lax-val">-0.05</span>
+        </div>
+        <div class="panel-row">
+            <label for="rifle-lay">LAY</label>
+            <div class="slider-group">
+                <button class="nudge-btn" type="button" data-target="rifle-lay" data-dir="-1">-</button>
+                <input id="rifle-lay" type="range" min="-1" max="1" step="0.01" value="-0.25">
+                <button class="nudge-btn" type="button" data-target="rifle-lay" data-dir="1">+</button>
+            </div>
+            <span id="rifle-lay-val">-0.25</span>
+        </div>
+        <div class="panel-row">
+            <label for="rifle-laz">LAZ</label>
+            <div class="slider-group">
+                <button class="nudge-btn" type="button" data-target="rifle-laz" data-dir="-1">-</button>
+                <input id="rifle-laz" type="range" min="-1.5" max="1" step="0.01" value="-0.44">
+                <button class="nudge-btn" type="button" data-target="rifle-laz" data-dir="1">+</button>
+            </div>
+            <span id="rifle-laz-val">-0.44</span>
+        </div>
+        <div class="panel-row">
+            <label for="rifle-larx">LARX</label>
+            <div class="slider-group">
+                <button class="nudge-btn" type="button" data-target="rifle-larx" data-dir="-1">-</button>
+                <input id="rifle-larx" type="range" min="-3.14" max="3.14" step="0.02" value="0.54">
+                <button class="nudge-btn" type="button" data-target="rifle-larx" data-dir="1">+</button>
+            </div>
+            <span id="rifle-larx-val">0.54</span>
+        </div>
+        <div class="panel-row">
+            <label for="rifle-lary">LARY</label>
+            <div class="slider-group">
+                <button class="nudge-btn" type="button" data-target="rifle-lary" data-dir="-1">-</button>
+                <input id="rifle-lary" type="range" min="-3.14" max="3.14" step="0.02" value="-0.82">
+                <button class="nudge-btn" type="button" data-target="rifle-lary" data-dir="1">+</button>
+            </div>
+            <span id="rifle-lary-val">-0.82</span>
+        </div>
+        <div class="panel-row">
+            <label for="rifle-larz">LARZ</label>
+            <div class="slider-group">
+                <button class="nudge-btn" type="button" data-target="rifle-larz" data-dir="-1">-</button>
+                <input id="rifle-larz" type="range" min="-3.14" max="3.14" step="0.02" value="0.60">
+                <button class="nudge-btn" type="button" data-target="rifle-larz" data-dir="1">+</button>
+            </div>
+            <span id="rifle-larz-val">0.60</span>
         </div>
         <button id="rifle-copy" style="width:100%;margin-top:6px;">Copy values</button>
+    </div>
+
+    <!-- Pistol GLB Debug Panel -->
+    <div id="pistol-debug-panel">
+        <div class="panel-title">Pistol GLB</div>
+        <div class="panel-row">
+            <label for="pistol-x">X</label>
+            <div class="slider-group">
+                <button class="nudge-btn" type="button" data-target="pistol-x" data-dir="-1">-</button>
+                <input id="pistol-x" type="range" min="-1" max="1" step="0.01" value="0">
+                <button class="nudge-btn" type="button" data-target="pistol-x" data-dir="1">+</button>
+            </div>
+            <span id="pistol-x-val">0.00</span>
+        </div>
+        <div class="panel-row">
+            <label for="pistol-x-step">XS</label>
+            <div class="slider-group">
+                <button class="nudge-btn" type="button" data-target="pistol-x-step" data-dir="-1">-</button>
+                <input id="pistol-x-step" type="range" min="0.001" max="0.05" step="0.001" value="0.01">
+                <button class="nudge-btn" type="button" data-target="pistol-x-step" data-dir="1">+</button>
+            </div>
+            <span id="pistol-x-step-val">0.010</span>
+        </div>
+        <div class="panel-row">
+            <label for="pistol-x-nudge">X±</label>
+            <div style="display:flex;gap:6px;align-items:center;justify-content:center;width:100%">
+                <button id="pistol-x-minus" type="button">-</button>
+                <button id="pistol-x-plus" type="button">+</button>
+            </div>
+            <span id="pistol-x-nudge-val">0.01</span>
+        </div>
+        <div class="panel-row">
+            <label for="pistol-y">Y</label>
+            <div class="slider-group">
+                <button class="nudge-btn" type="button" data-target="pistol-y" data-dir="-1">-</button>
+                <input id="pistol-y" type="range" min="-1" max="1" step="0.01" value="-0.05">
+                <button class="nudge-btn" type="button" data-target="pistol-y" data-dir="1">+</button>
+            </div>
+            <span id="pistol-y-val">-0.05</span>
+        </div>
+        <div class="panel-row">
+            <label for="pistol-z">Z</label>
+            <div class="slider-group">
+                <button class="nudge-btn" type="button" data-target="pistol-z" data-dir="-1">-</button>
+                <input id="pistol-z" type="range" min="-1" max="1" step="0.01" value="0">
+                <button class="nudge-btn" type="button" data-target="pistol-z" data-dir="1">+</button>
+            </div>
+            <span id="pistol-z-val">0.00</span>
+        </div>
+        <div class="panel-row">
+            <label for="pistol-scale">S</label>
+            <div class="slider-group">
+                <button class="nudge-btn" type="button" data-target="pistol-scale" data-dir="-1">-</button>
+                <input id="pistol-scale" type="range" min="0.01" max="0.5" step="0.01" value="0.15">
+                <button class="nudge-btn" type="button" data-target="pistol-scale" data-dir="1">+</button>
+            </div>
+            <span id="pistol-scale-val">0.15</span>
+        </div>
+        <div class="panel-row">
+            <label for="pistol-rx">RX</label>
+            <div class="slider-group">
+                <button class="nudge-btn" type="button" data-target="pistol-rx" data-dir="-1">-</button>
+                <input id="pistol-rx" type="range" min="-3.14" max="3.14" step="0.01" value="0">
+                <button class="nudge-btn" type="button" data-target="pistol-rx" data-dir="1">+</button>
+            </div>
+            <span id="pistol-rx-val">0.00</span>
+        </div>
+        <div class="panel-row">
+            <label for="pistol-ry">RY</label>
+            <div class="slider-group">
+                <button class="nudge-btn" type="button" data-target="pistol-ry" data-dir="-1">-</button>
+                <input id="pistol-ry" type="range" min="-3.14" max="6.28" step="0.01" value="3.14">
+                <button class="nudge-btn" type="button" data-target="pistol-ry" data-dir="1">+</button>
+            </div>
+            <span id="pistol-ry-val">3.14</span>
+        </div>
+        <div class="panel-row">
+            <label for="pistol-rz">RZ</label>
+            <div class="slider-group">
+                <button class="nudge-btn" type="button" data-target="pistol-rz" data-dir="-1">-</button>
+                <input id="pistol-rz" type="range" min="-3.14" max="3.14" step="0.01" value="0">
+                <button class="nudge-btn" type="button" data-target="pistol-rz" data-dir="1">+</button>
+            </div>
+            <span id="pistol-rz-val">0.00</span>
+        </div>
+        <div class="panel-row">
+            <label for="pistol-mx">MX</label>
+            <div class="slider-group">
+                <button class="nudge-btn" type="button" data-target="pistol-mx" data-dir="-1">-</button>
+                <input id="pistol-mx" type="range" min="-0.5" max="0.5" step="0.001" value="-0.066">
+                <button class="nudge-btn" type="button" data-target="pistol-mx" data-dir="1">+</button>
+            </div>
+            <span id="pistol-mx-val">-0.066</span>
+        </div>
+        <div class="panel-row">
+            <label for="pistol-my">MY</label>
+            <div class="slider-group">
+                <button class="nudge-btn" type="button" data-target="pistol-my" data-dir="-1">-</button>
+                <input id="pistol-my" type="range" min="-0.5" max="0.5" step="0.001" value="0.190">
+                <button class="nudge-btn" type="button" data-target="pistol-my" data-dir="1">+</button>
+            </div>
+            <span id="pistol-my-val">0.190</span>
+        </div>
+        <div class="panel-row">
+            <label for="pistol-mz">MZ</label>
+            <div class="slider-group">
+                <button class="nudge-btn" type="button" data-target="pistol-mz" data-dir="-1">-</button>
+                <input id="pistol-mz" type="range" min="-1" max="0" step="0.001" value="-0.199">
+                <button class="nudge-btn" type="button" data-target="pistol-mz" data-dir="1">+</button>
+            </div>
+            <span id="pistol-mz-val">-0.199</span>
+        </div>
+        <button id="pistol-copy" style="width:100%;margin-top:6px;">Copy values</button>
+    </div>
+
+    <!-- Sniper GLB Debug Panel -->
+    <div id="sniper-debug-panel">
+        <div class="panel-title">Sniper GLB</div>
+        <div class="panel-row">
+            <label for="sniper-x">X</label>
+            <div class="slider-group">
+                <button class="nudge-btn" type="button" data-target="sniper-x" data-dir="-1">-</button>
+                <input id="sniper-x" type="range" min="-5" max="5" step="0.01" value="0.15">
+                <button class="nudge-btn" type="button" data-target="sniper-x" data-dir="1">+</button>
+            </div>
+            <span id="sniper-x-val">0.15</span>
+        </div>
+        <div class="panel-row">
+            <label for="sniper-x-step">XS</label>
+            <div class="slider-group">
+                <button class="nudge-btn" type="button" data-target="sniper-x-step" data-dir="-1">-</button>
+                <input id="sniper-x-step" type="range" min="0.001" max="0.05" step="0.001" value="0.01">
+                <button class="nudge-btn" type="button" data-target="sniper-x-step" data-dir="1">+</button>
+            </div>
+            <span id="sniper-x-step-val">0.010</span>
+        </div>
+        <div class="panel-row">
+            <label for="sniper-x-nudge">X±</label>
+            <div style="display:flex;gap:6px;align-items:center;justify-content:center;width:100%">
+                <button id="sniper-x-minus" type="button">-</button>
+                <button id="sniper-x-plus" type="button">+</button>
+            </div>
+            <span id="sniper-x-nudge-val">0.01</span>
+        </div>
+        <div class="panel-row">
+            <label for="sniper-y">Y</label>
+            <div class="slider-group">
+                <button class="nudge-btn" type="button" data-target="sniper-y" data-dir="-1">-</button>
+                <input id="sniper-y" type="range" min="-5" max="5" step="0.01" value="-0.3">
+                <button class="nudge-btn" type="button" data-target="sniper-y" data-dir="1">+</button>
+            </div>
+            <span id="sniper-y-val">-0.30</span>
+        </div>
+        <div class="panel-row">
+            <label for="sniper-z">Z</label>
+            <div class="slider-group">
+                <button class="nudge-btn" type="button" data-target="sniper-z" data-dir="-1">-</button>
+                <input id="sniper-z" type="range" min="-5" max="5" step="0.01" value="1.0">
+                <button class="nudge-btn" type="button" data-target="sniper-z" data-dir="1">+</button>
+            </div>
+            <span id="sniper-z-val">1.00</span>
+        </div>
+        <div class="panel-row">
+            <label for="sniper-scale">S</label>
+            <div class="slider-group">
+                <button class="nudge-btn" type="button" data-target="sniper-scale" data-dir="-1">-</button>
+                <input id="sniper-scale" type="range" min="0.01" max="10" step="0.01" value="0.2">
+                <button class="nudge-btn" type="button" data-target="sniper-scale" data-dir="1">+</button>
+            </div>
+            <span id="sniper-scale-val">0.20</span>
+        </div>
+        <div class="panel-row">
+            <label for="sniper-rx">RX</label>
+            <div class="slider-group">
+                <button class="nudge-btn" type="button" data-target="sniper-rx" data-dir="-1">-</button>
+                <input id="sniper-rx" type="range" min="-3.14" max="3.14" step="0.01" value="0">
+                <button class="nudge-btn" type="button" data-target="sniper-rx" data-dir="1">+</button>
+            </div>
+            <span id="sniper-rx-val">0.00</span>
+        </div>
+        <div class="panel-row">
+            <label for="sniper-ry">RY</label>
+            <div class="slider-group">
+                <button class="nudge-btn" type="button" data-target="sniper-ry" data-dir="-1">-</button>
+                <input id="sniper-ry" type="range" min="-3.14" max="6.28" step="0.01" value="3.14">
+                <button class="nudge-btn" type="button" data-target="sniper-ry" data-dir="1">+</button>
+            </div>
+            <span id="sniper-ry-val">3.14</span>
+        </div>
+        <div class="panel-row">
+            <label for="sniper-rz">RZ</label>
+            <div class="slider-group">
+                <button class="nudge-btn" type="button" data-target="sniper-rz" data-dir="-1">-</button>
+                <input id="sniper-rz" type="range" min="-3.14" max="3.14" step="0.01" value="0">
+                <button class="nudge-btn" type="button" data-target="sniper-rz" data-dir="1">+</button>
+            </div>
+            <span id="sniper-rz-val">0.00</span>
+        </div>
+        <div class="panel-row">
+            <label for="sniper-mx">MX</label>
+            <div class="slider-group">
+                <button class="nudge-btn" type="button" data-target="sniper-mx" data-dir="-1">-</button>
+                <input id="sniper-mx" type="range" min="-0.5" max="0.5" step="0.001" value="0">
+                <button class="nudge-btn" type="button" data-target="sniper-mx" data-dir="1">+</button>
+            </div>
+            <span id="sniper-mx-val">0.000</span>
+        </div>
+        <div class="panel-row">
+            <label for="sniper-my">MY</label>
+            <div class="slider-group">
+                <button class="nudge-btn" type="button" data-target="sniper-my" data-dir="-1">-</button>
+                <input id="sniper-my" type="range" min="-0.5" max="0.5" step="0.001" value="0">
+                <button class="nudge-btn" type="button" data-target="sniper-my" data-dir="1">+</button>
+            </div>
+            <span id="sniper-my-val">0.000</span>
+        </div>
+        <div class="panel-row">
+            <label for="sniper-mz">MZ</label>
+            <div class="slider-group">
+                <button class="nudge-btn" type="button" data-target="sniper-mz" data-dir="-1">-</button>
+                <input id="sniper-mz" type="range" min="-1.5" max="0" step="0.001" value="-0.85">
+                <button class="nudge-btn" type="button" data-target="sniper-mz" data-dir="1">+</button>
+            </div>
+            <span id="sniper-mz-val">-0.850</span>
+        </div>
+        <div class="arms-flex-container">
+            <div class="arm-column">
+                <div class="section-title" style="color:#ff9e9e">Left Arm (LA)</div>
+                <div class="panel-row">
+                    <label for="sniper-lax">LAX</label>
+                    <div class="slider-group">
+                        <button class="nudge-btn" type="button" data-target="sniper-lax" data-dir="-1">-</button>
+                        <input id="sniper-lax" type="range" min="-1" max="1" step="0.01" value="0.01">
+                        <button class="nudge-btn" type="button" data-target="sniper-lax" data-dir="1">+</button>
+                    </div>
+                    <span id="sniper-lax-val">0.01</span>
+                </div>
+                <div class="panel-row">
+                    <label for="sniper-lay">LAY</label>
+                    <div class="slider-group">
+                        <button class="nudge-btn" type="button" data-target="sniper-lay" data-dir="-1">-</button>
+                        <input id="sniper-lay" type="range" min="-1" max="1" step="0.01" value="-0.24">
+                        <button class="nudge-btn" type="button" data-target="sniper-lay" data-dir="1">+</button>
+                    </div>
+                    <span id="sniper-lay-val">-0.24</span>
+                </div>
+                <div class="panel-row">
+                    <label for="sniper-laz">LAZ</label>
+                    <div class="slider-group">
+                        <button class="nudge-btn" type="button" data-target="sniper-laz" data-dir="-1">-</button>
+                        <input id="sniper-laz" type="range" min="-2" max="1" step="0.01" value="-0.60">
+                        <button class="nudge-btn" type="button" data-target="sniper-laz" data-dir="1">+</button>
+                    </div>
+                    <span id="sniper-laz-val">-0.60</span>
+                </div>
+                <div class="panel-row">
+                    <label for="sniper-larx">LARX</label>
+                    <div class="slider-group">
+                        <button class="nudge-btn" type="button" data-target="sniper-larx" data-dir="-1">-</button>
+                        <input id="sniper-larx" type="range" min="-3.14" max="3.14" step="0.02" value="0.72">
+                        <button class="nudge-btn" type="button" data-target="sniper-larx" data-dir="1">+</button>
+                    </div>
+                    <span id="sniper-larx-val">0.72</span>
+                </div>
+                <div class="panel-row">
+                    <label for="sniper-lary">LARY</label>
+                    <div class="slider-group">
+                        <button class="nudge-btn" type="button" data-target="sniper-lary" data-dir="-1">-</button>
+                        <input id="sniper-lary" type="range" min="-3.14" max="3.14" step="0.02" value="-0.76">
+                        <button class="nudge-btn" type="button" data-target="sniper-lary" data-dir="1">+</button>
+                    </div>
+                    <span id="sniper-lary-val">-0.76</span>
+                </div>
+                <div class="panel-row">
+                    <label for="sniper-larz">LARZ</label>
+                    <div class="slider-group">
+                        <button class="nudge-btn" type="button" data-target="sniper-larz" data-dir="-1">-</button>
+                        <input id="sniper-larz" type="range" min="-3.14" max="3.14" step="0.02" value="-0.02">
+                        <button class="nudge-btn" type="button" data-target="sniper-larz" data-dir="1">+</button>
+                    </div>
+                    <span id="sniper-larz-val">-0.02</span>
+                </div>
+            </div>
+            <div class="arm-column">
+                <div class="section-title" style="color:#9eff9e">Right Arm (RA)</div>
+                <div class="panel-row">
+                    <label for="sniper-rax">RAX</label>
+                    <div class="slider-group">
+                        <button class="nudge-btn" type="button" data-target="sniper-rax" data-dir="-1">-</button>
+                        <input id="sniper-rax" type="range" min="-1" max="1" step="0.01" value="0.15">
+                        <button class="nudge-btn" type="button" data-target="sniper-rax" data-dir="1">+</button>
+                    </div>
+                    <span id="sniper-rax-val">0.15</span>
+                </div>
+                <div class="panel-row">
+                    <label for="sniper-ray">RAY</label>
+                    <div class="slider-group">
+                        <button class="nudge-btn" type="button" data-target="sniper-ray" data-dir="-1">-</button>
+                        <input id="sniper-ray" type="range" min="-1" max="1" step="0.01" value="-0.17">
+                        <button class="nudge-btn" type="button" data-target="sniper-ray" data-dir="1">+</button>
+                    </div>
+                    <span id="sniper-ray-val">-0.17</span>
+                </div>
+                <div class="panel-row">
+                    <label for="sniper-raz">RAZ</label>
+                    <div class="slider-group">
+                        <button class="nudge-btn" type="button" data-target="sniper-raz" data-dir="-1">-</button>
+                        <input id="sniper-raz" type="range" min="-1" max="1" step="0.01" value="0.08">
+                        <button class="nudge-btn" type="button" data-target="sniper-raz" data-dir="1">+</button>
+                    </div>
+                    <span id="sniper-raz-val">0.08</span>
+                </div>
+                <div class="panel-row">
+                    <label for="sniper-rarx">RARX</label>
+                    <div class="slider-group">
+                        <button class="nudge-btn" type="button" data-target="sniper-rarx" data-dir="-1">-</button>
+                        <input id="sniper-rarx" type="range" min="-3.14" max="3.14" step="0.02" value="-0.02">
+                        <button class="nudge-btn" type="button" data-target="sniper-rarx" data-dir="1">+</button>
+                    </div>
+                    <span id="sniper-rarx-val">-0.02</span>
+                </div>
+                <div class="panel-row">
+                    <label for="sniper-rary">RARY</label>
+                    <div class="slider-group">
+                        <button class="nudge-btn" type="button" data-target="sniper-rary" data-dir="-1">-</button>
+                        <input id="sniper-rary" type="range" min="-3.14" max="3.14" step="0.02" value="0.02">
+                        <button class="nudge-btn" type="button" data-target="sniper-rary" data-dir="1">+</button>
+                    </div>
+                    <span id="sniper-rary-val">0.02</span>
+                </div>
+                <div class="panel-row">
+                    <label for="sniper-rarz">RARZ</label>
+                    <div class="slider-group">
+                        <button class="nudge-btn" type="button" data-target="sniper-rarz" data-dir="-1">-</button>
+                        <input id="sniper-rarz" type="range" min="-3.14" max="3.14" step="0.02" value="0.58">
+                        <button class="nudge-btn" type="button" data-target="sniper-rarz" data-dir="1">+</button>
+                    </div>
+                    <span id="sniper-rarz-val">0.58</span>
+                </div>
+            </div>
+        </div>
+        <button id="sniper-copy" style="width:100%;margin-top:6px;">Copy values</button>
+    </div>
+
+    <div id="knife-debug-panel">
+        <div class="panel-title">Knife GLB/Arm Adjustment</div>
+
+        <div class="panel-row">
+            <label for="knife-x">X</label>
+            <div class="slider-group">
+                <button class="nudge-btn" type="button" data-target="knife-x" data-dir="-1">-</button>
+                <input id="knife-x" type="range" min="-1" max="1" step="0.01" value="0">
+                <button class="nudge-btn" type="button" data-target="knife-x" data-dir="1">+</button>
+            </div>
+            <span id="knife-x-val">0</span>
+        </div>
+        <div class="panel-row">
+            <label for="knife-y">Y</label>
+            <div class="slider-group">
+                <button class="nudge-btn" type="button" data-target="knife-y" data-dir="-1">-</button>
+                <input id="knife-y" type="range" min="-1" max="1" step="0.01" value="-0.2">
+                <button class="nudge-btn" type="button" data-target="knife-y" data-dir="1">+</button>
+            </div>
+            <span id="knife-y-val">-0.2</span>
+        </div>
+        <div class="panel-row">
+            <label for="knife-z">Z</label>
+            <div class="slider-group">
+                <button class="nudge-btn" type="button" data-target="knife-z" data-dir="-1">-</button>
+                <input id="knife-z" type="range" min="-2" max="1" step="0.01" value="-0.5">
+                <button class="nudge-btn" type="button" data-target="knife-z" data-dir="1">+</button>
+            </div>
+            <span id="knife-z-val">-0.5</span>
+        </div>
+        <div class="panel-row">
+            <label for="knife-rx">Rot X</label>
+            <div class="slider-group">
+                <button class="nudge-btn" type="button" data-target="knife-rx" data-dir="-1">-</button>
+                <input id="knife-rx" type="range" min="-3.14" max="3.14" step="0.02" value="0.1">
+                <button class="nudge-btn" type="button" data-target="knife-rx" data-dir="1">+</button>
+            </div>
+            <span id="knife-rx-val">0.1</span>
+        </div>
+        <div class="panel-row">
+            <label for="knife-ry">Rot Y</label>
+            <div class="slider-group">
+                <button class="nudge-btn" type="button" data-target="knife-ry" data-dir="-1">-</button>
+                <input id="knife-ry" type="range" min="-3.14" max="3.14" step="0.02" value="1.8">
+                <button class="nudge-btn" type="button" data-target="knife-ry" data-dir="1">+</button>
+            </div>
+            <span id="knife-ry-val">1.8</span>
+        </div>
+        <div class="panel-row">
+            <label for="knife-rz">Rot Z</label>
+            <div class="slider-group">
+                <button class="nudge-btn" type="button" data-target="knife-rz" data-dir="-1">-</button>
+                <input id="knife-rz" type="range" min="-3.14" max="3.14" step="0.02" value="-0.2">
+                <button class="nudge-btn" type="button" data-target="knife-rz" data-dir="1">+</button>
+            </div>
+            <span id="knife-rz-val">-0.2</span>
+        </div>
+        <div class="panel-row">
+            <label for="knife-scale">S</label>
+            <div class="slider-group">
+                <button class="nudge-btn" type="button" data-target="knife-scale" data-dir="-1">-</button>
+                <input id="knife-scale" type="range" min="0.1" max="5" step="0.05" value="2.5">
+                <button class="nudge-btn" type="button" data-target="knife-scale" data-dir="1">+</button>
+            </div>
+            <span id="knife-scale-val">2.5</span>
+        </div>
+
+        <div class="arms-flex-container">
+            <!-- Left Arm Column -->
+            <div class="arm-column">
+                <div class="section-title" style="color:#ff9e9e">Left Arm (LA)</div>
+                <div class="panel-row">
+                    <label for="knife-lax">LAX</label>
+                    <div class="slider-group">
+                        <button class="nudge-btn" type="button" data-target="knife-lax" data-dir="-1">-</button>
+                        <input id="knife-lax" type="range" min="-3" max="1" step="0.01" value="-1.2">
+                        <button class="nudge-btn" type="button" data-target="knife-lax" data-dir="1">+</button>
+                    </div>
+                    <span id="knife-lax-val">-1.2</span>
+                </div>
+                <div class="panel-row">
+                    <label for="knife-lay">LAY</label>
+                    <div class="slider-group">
+                        <button class="nudge-btn" type="button" data-target="knife-lay" data-dir="-1">-</button>
+                        <input id="knife-lay" type="range" min="-2" max="1" step="0.01" value="-0.35">
+                        <button class="nudge-btn" type="button" data-target="knife-lay" data-dir="1">+</button>
+                    </div>
+                    <span id="knife-lay-val">-0.35</span>
+                </div>
+                <div class="panel-row">
+                    <label for="knife-laz">LAZ</label>
+                    <div class="slider-group">
+                        <button class="nudge-btn" type="button" data-target="knife-laz" data-dir="-1">-</button>
+                        <input id="knife-laz" type="range" min="-2" max="1" step="0.01" value="-0.25">
+                        <button class="nudge-btn" type="button" data-target="knife-laz" data-dir="1">+</button>
+                    </div>
+                    <span id="knife-laz-val">-0.25</span>
+                </div>
+                <div class="panel-row">
+                    <label for="knife-larx">LARX</label>
+                    <div class="slider-group">
+                        <button class="nudge-btn" type="button" data-target="knife-larx" data-dir="-1">-</button>
+                        <input id="knife-larx" type="range" min="-3.14" max="3.14" step="0.02" value="0.2">
+                        <button class="nudge-btn" type="button" data-target="knife-larx" data-dir="1">+</button>
+                    </div>
+                    <span id="knife-larx-val">0.2</span>
+                </div>
+                <div class="panel-row">
+                    <label for="knife-lary">LARY</label>
+                    <div class="slider-group">
+                        <button class="nudge-btn" type="button" data-target="knife-lary" data-dir="-1">-</button>
+                        <input id="knife-lary" type="range" min="-3.14" max="3.14" step="0.02" value="0.3">
+                        <button class="nudge-btn" type="button" data-target="knife-lary" data-dir="1">+</button>
+                    </div>
+                    <span id="knife-lary-val">0.3</span>
+                </div>
+                <div class="panel-row">
+                    <label for="knife-larz">LARZ</label>
+                    <div class="slider-group">
+                        <button class="nudge-btn" type="button" data-target="knife-larz" data-dir="-1">-</button>
+                        <input id="knife-larz" type="range" min="-3.14" max="3.14" step="0.02" value="-0.15">
+                        <button class="nudge-btn" type="button" data-target="knife-larz" data-dir="1">+</button>
+                    </div>
+                    <span id="knife-larz-val">-0.15</span>
+                </div>
+            </div>
+
+            <!-- Right Arm Column -->
+            <div class="arm-column">
+                <div class="section-title" style="color:#9eff9e">Right Arm (RA)</div>
+                <div class="panel-row">
+                    <label for="knife-rax">RAX</label>
+                    <div class="slider-group">
+                        <button class="nudge-btn" type="button" data-target="knife-rax" data-dir="-1">-</button>
+                        <input id="knife-rax" type="range" min="-1" max="1" step="0.01" value="0.12">
+                        <button class="nudge-btn" type="button" data-target="knife-rax" data-dir="1">+</button>
+                    </div>
+                    <span id="knife-rax-val">0.12</span>
+                </div>
+                <div class="panel-row">
+                    <label for="knife-ray">RAY</label>
+                    <div class="slider-group">
+                        <button class="nudge-btn" type="button" data-target="knife-ray" data-dir="-1">-</button>
+                        <input id="knife-ray" type="range" min="-1" max="1" step="0.01" value="-0.2">
+                        <button class="nudge-btn" type="button" data-target="knife-ray" data-dir="1">+</button>
+                    </div>
+                    <span id="knife-ray-val">-0.2</span>
+                </div>
+                <div class="panel-row">
+                    <label for="knife-raz">RAZ</label>
+                    <div class="slider-group">
+                        <button class="nudge-btn" type="button" data-target="knife-raz" data-dir="-1">-</button>
+                        <input id="knife-raz" type="range" min="-1" max="1" step="0.01" value="-0.15">
+                        <button class="nudge-btn" type="button" data-target="knife-raz" data-dir="1">+</button>
+                    </div>
+                    <span id="knife-raz-val">-0.15</span>
+                </div>
+                <div class="panel-row">
+                    <label for="knife-rarx">RARX</label>
+                    <div class="slider-group">
+                        <button class="nudge-btn" type="button" data-target="knife-rarx" data-dir="-1">-</button>
+                        <input id="knife-rarx" type="range" min="-3.14" max="3.14" step="0.02" value="0">
+                        <button class="nudge-btn" type="button" data-target="knife-rarx" data-dir="1">+</button>
+                    </div>
+                    <span id="knife-rarx-val">0</span>
+                </div>
+                <div class="panel-row">
+                    <label for="knife-rary">RARY</label>
+                    <div class="slider-group">
+                        <button class="nudge-btn" type="button" data-target="knife-rary" data-dir="-1">-</button>
+                        <input id="knife-rary" type="range" min="-3.14" max="3.14" step="0.02" value="-0.15">
+                        <button class="nudge-btn" type="button" data-target="knife-rary" data-dir="1">+</button>
+                    </div>
+                    <span id="knife-rary-val">-0.15</span>
+                </div>
+                <div class="panel-row">
+                    <label for="knife-rarz">RARZ</label>
+                    <div class="slider-group">
+                        <button class="nudge-btn" type="button" data-target="knife-rarz" data-dir="-1">-</button>
+                        <input id="knife-rarz" type="range" min="-3.14" max="3.14" step="0.02" value="0.05">
+                        <button class="nudge-btn" type="button" data-target="knife-rarz" data-dir="1">+</button>
+                    </div>
+                    <span id="knife-rarz-val">0.05</span>
+                </div>
+            </div>
+        </div>
+        <button id="knife-copy" style="width:100%;margin-top:6px;">Copy values</button>
     </div>
 
 
@@ -3051,7 +3829,7 @@
         // isAiming is defined below with weapon state
         let aimLocked = false;
         window.knifeSwing = window.knifeSwing ?? 0;
-        window.KNIFE_SWING_DURATION = window.KNIFE_SWING_DURATION ?? 0.25;
+        window.KNIFE_SWING_DURATION = window.KNIFE_SWING_DURATION ?? 0.18; // Speed up: 0.25 -> 0.18
 
 
 
@@ -3209,32 +3987,66 @@
                     scale: new THREE.Vector3(0.50, 0.50, 0.50)
                 },
                 glbAds: {
-                    // Original working values for ADS (Center aligned)
-                    pos: new THREE.Vector3(0.02, -0.47, 0.33),
-                    rot: new THREE.Vector3(0.34, 1.58, -0.28),
-                    scale: new THREE.Vector3(0.47, 0.47, 0.47)
+                    // [User Request] Set to coordinates provide in image
+                    pos: new THREE.Vector3(0.00, -0.47, -0.06),
+                    rot: new THREE.Vector3(0.36, 1.57, -0.29),
+                    scale: new THREE.Vector3(0.45, 0.45, 0.45)
                 },
                 // ADS: Z더 멀리 (-0.45), FOV 약간 증가 (25) for smaller appearance
                 posAds: new THREE.Vector3(0, -0.062, -0.45),
                 rotAds: new THREE.Vector3(0, 0, 0), // Aim Rotation (Default)
                 fovAds: 25, fireRate: 0.08, recoil: 0.06, damage: 30,
+                muzzleHip: new THREE.Vector3(0, 0.12, -0.65),
+                muzzleAds: new THREE.Vector3(-0.049, 0.024, -0.655),
+                lArmHip: { pos: new THREE.Vector3(-0.05, -0.25, -0.44), rot: new THREE.Vector3(0.54, -0.82, 0.60) },
+                lArmAds: { pos: new THREE.Vector3(-0.10, -0.27, -1.46), rot: new THREE.Vector3(0.80, -0.80, 0.62) },
                 switchSound: 'c-sochong'
             },
             {
                 id: 1, name: "TACTICAL PISTOL",
                 type: 'PISTOL', maxAmmo: 10, ammo: 10, automatic: false,
                 posHip: new THREE.Vector3(0.08, -0.2, -0.45),
+                // [User Request] Separate GLB transforms for Idle vs ADS
+                glbHip: {
+                    pos: new THREE.Vector3(-0.02, 0.02, 0.09),
+                    rot: new THREE.Vector3(0.04, 1.61, 0.05),
+                    scale: new THREE.Vector3(0.20, 0.20, 0.20)
+                },
+                glbAds: {
+                    pos: new THREE.Vector3(0.00, -0.09, 0.07),
+                    rot: new THREE.Vector3(-0.04, 1.57, 0.06),
+                    scale: new THREE.Vector3(0.17, 0.17, 0.17)
+                },
                 // Pistol ADS: Centered and aligned to sights
                 posAds: new THREE.Vector3(0, -0.048, -0.35),
                 fovAds: 55, fireRate: 0.15, recoil: 0.1, damage: 20,
+                muzzleHip: new THREE.Vector3(-0.066, 0.190, -0.199),
+                muzzleAds: new THREE.Vector3(0.01, 0.01, -0.20),
                 switchSound: 'c-gun'
             },
             {
                 id: 2, name: "TAC-50 SNIPER",
                 type: 'SNIPER', maxAmmo: 4, ammo: 4, automatic: false,
                 posHip: new THREE.Vector3(0.08, -0.3, -0.5),
+                // [User Request] Sniper GLB Config
+                glbHip: {
+                    pos: new THREE.Vector3(0.19, -0.11, 0.17),
+                    rot: new THREE.Vector3(0.45, 1.59, -0.39),
+                    scale: new THREE.Vector3(0.64, 0.64, 0.64)
+                },
+                glbAds: {
+                    pos: new THREE.Vector3(0, -0.15, 0.2),
+                    rot: new THREE.Vector3(0, 3.14, 0),
+                    scale: new THREE.Vector3(0.2, 0.2, 0.2)
+                },
                 posAds: new THREE.Vector3(0, -0.06, -0.15),
-                fovAds: 8, fireRate: 2.0, recoil: 0.4, damage: 100,
+                fovAds: 8, fireRate: 1.5, recoil: 0.4, damage: 100,
+                muzzleHip: new THREE.Vector3(0.0, 0.28, -2.5),
+                muzzleAds: new THREE.Vector3(0, 0.035, -0.85),
+                lArmHip: { pos: new THREE.Vector3(0.01, -0.24, -0.60), rot: new THREE.Vector3(0.72, -0.76, -0.02) },
+                lArmAds: { pos: new THREE.Vector3(-0.15, -0.25, -0.6), rot: new THREE.Vector3(0.7, 0.3, -0.35) },
+                rArmHip: { pos: new THREE.Vector3(0.15, -0.17, 0.08), rot: new THREE.Vector3(-0.02, 0.02, 0.58) },
+                rArmAds: { pos: new THREE.Vector3(0.12, -0.28, 0.1), rot: new THREE.Vector3(0.2, -0.2, 0.4) },
                 switchSound: 'c-rifle'
             },
             {
@@ -3242,6 +4054,13 @@
                 type: 'KNIFE', maxAmmo: 0, ammo: 0, automatic: true,
                 posHip: new THREE.Vector3(0.25, -0.25, -0.5),
                 posAds: new THREE.Vector3(0.25, -0.25, -0.45),
+                glbHip: {
+                    pos: new THREE.Vector3(-0.47, 0.11, -0.31),
+                    rot: new THREE.Vector3(1.16, 1.18, -0.10),
+                    scale: new THREE.Vector3(2.70, 2.70, 2.70)
+                },
+                lArmHip: { pos: new THREE.Vector3(-1.63, -0.14, -0.11), rot: new THREE.Vector3(0.56, -0.56, -1.98) },
+                rArmHip: { pos: new THREE.Vector3(0.02, 0.02, -0.15), rot: new THREE.Vector3(0.18, 0.36, 3.14) },
                 fovAds: 65, fireRate: 0.4, recoil: 0, damage: 15,
                 switchSound: 'c-sword'
             },
@@ -3458,6 +4277,12 @@
                 // 저격총은 오디오 파일 사용, 없으면 기존 소리 생성
                 if (type === 'SNIPER' && this.audioBuffers['rifle']) {
                     this.playAudioFile('rifle', 0.25); // 볼륨 25%
+                    return;
+                }
+
+                // 소총(어썰트라이플)은 오디오 파일 사용 (User Request: 50% volume)
+                if (type === 'RIFLE' && this.audioBuffers['gunshot']) {
+                    this.playAudioFile('gunshot', 0.5); // 볼륨 50%
                     return;
                 }
 
@@ -4005,6 +4830,21 @@
         document.addEventListener('keydown', (e) => {
             if (e.key === '9') {
                 logWeaponDebugInfo();
+            }
+            // Toggle currently active weapon debug panel with 'P'
+            if (e.key === 'p' || e.key === 'P') {
+                const currentWeapon = WEAPONS[curWeaponIdx];
+                let panelId = '';
+                if (currentWeapon.type === 'RIFLE') panelId = 'rifle-debug-panel';
+                else if (currentWeapon.type === 'PISTOL') panelId = 'pistol-debug-panel';
+                else if (currentWeapon.type === 'SNIPER') panelId = 'sniper-debug-panel';
+
+                if (panelId) {
+                    const panel = document.getElementById(panelId);
+                    if (panel) {
+                        panel.style.display = (panel.style.display === 'none' || panel.style.display === '') ? 'block' : 'none';
+                    }
+                }
             }
         });
 
@@ -4732,7 +5572,9 @@
 
                     const mesh = otherPlayersMap[data.id];
                     if (mesh) {
-                        if (data.action === 'shoot') {
+                        if (data.action === 'switch') {
+                            loadRemoteWeaponObj(mesh, data.weaponIdx);
+                        } else if (data.action === 'shoot') {
                             SoundGen.playShoot(WEAPONS[data.weaponIdx].type);
 
                             // Visual shoot effect - Muzzle flash
@@ -5137,10 +5979,24 @@
             helmet.position.y = 0.12;
             head.add(helmet);
 
-            // Goggles/Visor
-            const visor = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.06, 0.04), matVisor);
-            visor.position.set(0, 0.02, 0.11);
-            head.add(visor);
+            // Face Features (Eyes, Nose, Mouth) instead of Visor
+            // Eyes
+            const eyeGeo = new THREE.BoxGeometry(0.035, 0.015, 0.01);
+            const eyeMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+            const leftEye = new THREE.Mesh(eyeGeo, eyeMat);
+            leftEye.position.set(-0.05, 0.02, 0.115);
+            head.add(leftEye);
+            const rightEye = new THREE.Mesh(eyeGeo, eyeMat);
+            rightEye.position.set(0.05, 0.02, 0.115);
+            head.add(rightEye);
+            // Nose
+            const nose = new THREE.Mesh(new THREE.BoxGeometry(0.015, 0.04, 0.015), matSkin);
+            nose.position.set(0, -0.02, 0.12);
+            head.add(nose);
+            // Mouth
+            const mouth = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.008, 0.01), new THREE.MeshBasicMaterial({ color: 0x552222 }));
+            mouth.position.set(0, -0.07, 0.115);
+            head.add(mouth);
 
             head.name = 'head';
             group.add(head);
@@ -5180,30 +6036,14 @@
                 return arm;
             }
             group.add(createArm(-1)); // Left
-            group.add(createArm(1));  // Right
 
-            // --- 5. Weapon ---
-            const weapon = new THREE.Group();
-            weapon.position.set(0, 1.25, 0.4);
+            const rArm = createArm(1); // Right
+            group.add(rArm);
+            group.userData.rArm = rArm; // Save for weapon attachment
 
-            // Gun Body
-            weapon.add(new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.1, 0.5), matWeapon));
-            // Barrel
-            const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.25, 8), matWeapon);
-            barrel.rotation.x = Math.PI / 2;
-            barrel.position.z = -0.35;
-            weapon.add(barrel);
-            // Mag
-            const mag = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.15, 0.08), matPad);
-            mag.position.set(0, -0.1, 0.05);
-            weapon.add(mag);
-            // Scope
-            const scope = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.03, 0.15, 8), matWeapon);
-            scope.rotation.x = Math.PI / 2;
-            scope.position.y = 0.08;
-            weapon.add(scope);
-
-            group.add(weapon);
+            // --- 5. Weapon (Load GLB) ---
+            const wIdx = p.weaponIdx !== undefined ? p.weaponIdx : 0;
+            loadRemoteWeaponObj(group, wIdx);
 
             // --- HP Bar ---
             const hpBg = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.1), matHpBg);
@@ -5233,6 +6073,91 @@
                 console.log('Detailed Player mesh added.'); // DEBUG
             } else {
                 console.error('Window.scene is missing in createRemotePlayer!'); // DEBUG
+            }
+        }
+
+        function loadRemoteWeaponObj(playerGroup, weaponIdx) {
+            const w = WEAPONS[weaponIdx];
+            if (!w) return;
+
+            const rArm = playerGroup.userData.rArm;
+            if (!rArm) return;
+
+            // Remove existing weapon
+            if (playerGroup.userData.weaponMesh) {
+                if (playerGroup.userData.weaponMesh.parent) {
+                    playerGroup.userData.weaponMesh.parent.remove(playerGroup.userData.weaponMesh);
+                }
+                playerGroup.userData.weaponMesh = null;
+            }
+
+            // Define Model Path & Transforms
+            let modelPath = null;
+            let scale = 1.0;
+            // Hand Local Offset (Adjusting to fit end of lower arm)
+            let offset = new THREE.Vector3(0, -0.25, 0.1);
+            let rotation = new THREE.Vector3(0, Math.PI, 0);
+
+            if (w.type === 'RIFLE') {
+                modelPath = 'gun/Assault Rifle.glb';
+                scale = 0.5;
+                offset.set(0, -0.4, 0.3);
+                rotation.set(0, Math.PI, 0);
+            } else if (w.type === 'PISTOL') {
+                modelPath = 'gun/pistol.glb';
+                scale = 0.2;
+                offset.set(0, -0.3, 0.15);
+            } else if (w.type === 'SNIPER') {
+                modelPath = 'gun/Sniper.glb';
+                scale = 0.64;
+                offset.set(0, -0.4, 0.4);
+            } else if (w.type === 'KNIFE') {
+                // Manual Knife Mesh
+                const kGroup = new THREE.Group();
+                const blade = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.35, 0.008), new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.6, roughness: 0.3 }));
+                blade.position.set(0, 0.2, 0);
+                kGroup.add(blade);
+
+                const handle = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.12, 0.045), new THREE.MeshStandardMaterial({ color: 0x111111 }));
+                handle.position.set(0, 0, 0);
+                kGroup.add(handle);
+
+                kGroup.scale.set(2.5, 2.5, 2.5);
+                kGroup.position.set(0, -0.3, 0.05);
+                kGroup.rotation.set(Math.PI / 2, Math.PI, 0);
+
+                rArm.add(kGroup);
+                playerGroup.userData.weaponMesh = kGroup;
+                return;
+            }
+
+            if (modelPath && window.gltfLoader) {
+                window.gltfLoader.load(modelPath, (gltf) => {
+                    const model = gltf.scene;
+                    model.traverse(c => {
+                        if (c.isMesh) {
+                            c.castShadow = true;
+                            c.receiveShadow = true;
+                        }
+                    });
+
+                    const clonedModel = model.clone();
+                    clonedModel.scale.set(scale, scale, scale);
+                    clonedModel.position.copy(offset);
+                    clonedModel.rotation.set(rotation.x, rotation.y, rotation.z);
+
+                    rArm.add(clonedModel);
+                    playerGroup.userData.weaponMesh = clonedModel;
+                }, undefined, (err) => {
+                    console.error('Failed to load remote weapon:', modelPath, err);
+                });
+            } else {
+                // Fallback
+                const geo = new THREE.BoxGeometry(0.08, 0.08, 0.4);
+                const mesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: 0x333333 }));
+                mesh.position.set(0, -0.4, 0.2);
+                rArm.add(mesh);
+                playerGroup.userData.weaponMesh = mesh;
             }
         }
 
@@ -5437,6 +6362,7 @@
 
             // Block game loop updates while counting down
             isGameStarted = false;
+            if (window.weaponModel) window.weaponModel.visible = false; // Hide weapon during countdown
 
             const interval = setInterval(() => {
                 count--;
@@ -5452,6 +6378,8 @@
 
                     setTimeout(() => {
                         countdownEl.style.display = 'none';
+                        if (window.weaponModel) window.weaponModel.visible = true; // Show weapon
+
                         if (gameMode === 'multi') {
                             isGameStarted = true; // Unlock game loop
                             console.log('Multiplayer Match Started!');
@@ -7405,13 +8333,8 @@
                 });
                 muzzleFlash = new THREE.Mesh(fGeo, fMat);
                 muzzleFlash.visible = false;
-                let zPos = -0.65;
-                if (wData.type === 'PISTOL') zPos = -0.12; // 권총 총구 바로 앞 (소총처럼)
-                if (wData.type === 'SNIPER') zPos = -0.85;
-                const yPos = (wData.type === 'PISTOL') ? 0.045 : 0.035;
-                // [User Request] 소총 섬광을 화면 중앙으로 이동 (x=0)
-                const xPos = (wData.type === 'PISTOL') ? -0.01 : 0;
-                muzzleFlash.position.set(xPos, yPos, zPos);
+                const mPos = (isAiming && wData.muzzleAds) ? wData.muzzleAds : (wData.muzzleHip || new THREE.Vector3(0, 0, -0.5));
+                muzzleFlash.position.copy(mPos);
 
                 weaponModel.add(muzzleFlash);
             }
@@ -7518,6 +8441,7 @@
                 // [FIX] Define arm materials INLINE (avoid external variable issues)
                 const armSleeveMat = new THREE.MeshBasicMaterial({ color: 0x2b2b2b }); // Dark grey sleeve
                 const armGloveMat = new THREE.MeshBasicMaterial({ color: 0x1a1a1a }); // Black glove
+                const armSkinMat = new THREE.MeshBasicMaterial({ color: 0xeebb99 }); // [MOD] Skin color
 
                 // [FIX] Remove existing arms if any (Prevent Duplication Loop)
                 const oldLArm = weaponModel.getObjectByName('LeftArmGroup');
@@ -7528,55 +8452,51 @@
                 // Left Arm Group (Gripping Handguard)
                 const lArmGroup = new THREE.Group();
                 lArmGroup.name = 'LeftArmGroup'; // Tag for cleanup
-                const lSleeve = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.12, 0.45), armSleeveMat);
-                lSleeve.position.set(0, 0, 0.2); // Extends backward from hand
+                const lSleeve = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.14, 0.55), armSleeveMat); // Standard Knife-style sleeve
+                lSleeve.position.set(0, 0, 0.25);
                 lArmGroup.add(lSleeve);
 
                 // Left Hand
-                const lHand = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.08, 0.12), armGloveMat);
-                lHand.position.set(0, 0, -0.05); // Hand pos relative to group
+                const lHand = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.1, 0.14), armSkinMat); // [MOD] Skin Color Hand
+                lHand.position.set(0, 0, -0.05);
                 lArmGroup.add(lHand);
 
-                // Position Left Arm (Adjusted: Centered & Higher)
-                // x=-0.15 (Closer to center), y=-0.12 (Visible), z=-0.75 (Extended)
-                // Position Left Arm (Sniper Baseline)
-                lArmGroup.position.set(-0.08, -0.12, -0.3);
-                lArmGroup.rotation.set(0.7, 0.3, -0.35);
-                lArmGroup.scale.set(0.65, 0.65, 0.65);
+                // [User Request] Position Left Arm using WEAPONS data
+                const wData = WEAPONS.find(w => w.type === 'RIFLE');
+                if (wData && wData.lArmHip) {
+                    lArmGroup.position.copy(wData.lArmHip.pos);
+                    lArmGroup.rotation.set(wData.lArmHip.rot.x, wData.lArmHip.rot.y, wData.lArmHip.rot.z);
+                } else {
+                    lArmGroup.position.set(-0.15, -0.22, -0.5);
+                    lArmGroup.rotation.set(0.4, 0.2, -0.1);
+                }
+                lArmGroup.scale.set(2.5, 2.5, 2.5); // [MOD] Standardized Scale 2.5
                 weaponModel.add(lArmGroup);
 
 
                 // Right Arm Group (Trigger Finger)
                 const rArmGroup = new THREE.Group();
                 rArmGroup.name = 'RightArmGroup'; // Tag for cleanup
-                const rSleeve = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.12, 0.45), armSleeveMat);
-                rSleeve.position.set(0, 0, 0.2);
+                const rSleeve = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.14, 0.55), armSleeveMat);
+                rSleeve.position.set(0, 0, 0.25);
                 rArmGroup.add(rSleeve);
 
                 // Right Hand
-                const rHand = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.08, 0.12), armGloveMat);
+                const rHand = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.1, 0.14), armSkinMat); // [MOD] Skin Color Hand
                 rHand.position.set(0, 0, -0.05);
                 rArmGroup.add(rHand);
 
-                // Position Right Arm (Adjusted: Centered & Higher)
-                // Position Right Arm (Sniper Baseline)
-                rArmGroup.position.set(0.12, -0.15, 0.25);
-                rArmGroup.rotation.set(0.2, -0.2, 0.4);
-                rArmGroup.scale.set(0.65, 0.65, 0.65);
+                // Position Right Arm (Grip Position for Scale 2.5)
+                rArmGroup.position.set(0.08, -0.25, 0.1);
+                rArmGroup.rotation.set(0.1, -0.1, 0.2);
+                rArmGroup.scale.set(2.5, 2.5, 2.5); // [MOD] Standardized Scale 2.5
                 weaponModel.add(rArmGroup);
 
                 // Clear any previous async load results
                 const token = ++rifleLoadToken;
 
 
-                // [Override] Ensure Sniper-style arms (User Request)
-                ['LeftArmGroup', 'RightArmGroup'].forEach(name => {
-                    const existing = weaponModel.getObjectByName(name);
-                    if (existing) weaponModel.remove(existing);
-                });
-                // Re-add using standard function
-                createArm(-0.06, -0.16, -0.55, 0.5, 0.3, -0.2, false); // Adjusted for Under-barrel Grip
-                createArm(0.12, -0.15, 0.25, 0.2, -0.2, 0.4, true);
+                // [MOD] Removed override to use the custom defined arms above
 
                 const loader = new THREE.GLTFLoader();
                 // [User Request] Disable GLB Model (Use procedural manual build instead)
@@ -7620,7 +8540,7 @@
                             box.getCenter(center);
                             const muzzleWorld = new THREE.Vector3(center.x, center.y + 0.1, box.min.z - 0.02);
                             weaponModel.worldToLocal(muzzleWorld);
-                            muzzleFlash.position.copy(muzzleWorld);
+                            // muzzleFlash.position.copy(muzzleWorld);
                         }
                     }, undefined, function (error) {
                         console.error('Rifle GLB load failed:', error);
@@ -7654,7 +8574,7 @@
             panel.addEventListener('wheel', stop, { passive: true });
 
             // Elements
-            const ids = ['rifle-x', 'rifle-y', 'rifle-z', 'rifle-scale', 'rifle-rx', 'rifle-ry', 'rifle-rz', 'rifle-x-step'];
+            const ids = ['rifle-x', 'rifle-y', 'rifle-z', 'rifle-scale', 'rifle-rx', 'rifle-ry', 'rifle-rz', 'rifle-x-step', 'rifle-mx', 'rifle-my', 'rifle-mz', 'rifle-lax', 'rifle-lay', 'rifle-laz', 'rifle-larx', 'rifle-lary', 'rifle-larz'];
             const inputs = {};
             const vals = {};
 
@@ -7672,23 +8592,37 @@
                 if (!window.rifleModel) return;
 
                 const v = (id) => inputs[id] ? parseFloat(inputs[id].value) : 0;
+                const w = WEAPONS[curWeaponIdx];
+                if (!w || w.type !== 'RIFLE') return;
 
-                const xv = v('rifle-x');
-                const yv = v('rifle-y');
-                const zv = v('rifle-z');
-                const sv = v('rifle-scale');
-                const rxv = v('rifle-rx');
-                const ryv = v('rifle-ry');
-                const rzv = v('rifle-rz');
+                const xv = v('rifle-x'), yv = v('rifle-y'), zv = v('rifle-z');
+                const sv = v('rifle-scale'), rxv = v('rifle-rx'), ryv = v('rifle-ry'), rzv = v('rifle-rz');
+                const mxv = v('rifle-mx'), myv = v('rifle-my'), mzv = v('rifle-mz');
+                const laxv = v('rifle-lax'), layv = v('rifle-lay'), lazv = v('rifle-laz');
+                const larxv = v('rifle-larx'), laryv = v('rifle-lary'), larzv = v('rifle-larz');
 
-                window.rifleModel.position.set(xv, yv, zv);
-                window.rifleModel.scale.set(sv, sv, sv);
-                window.rifleModel.rotation.set(rxv, ryv, rzv);
+                // ADS-Aware: Update WEAPONS data directly
+                const targetTransform = isAiming ? w.glbAds : w.glbHip;
+                if (targetTransform) {
+                    targetTransform.pos.set(xv, yv, zv);
+                    targetTransform.scale.set(sv, sv, sv);
+                    targetTransform.rot.set(rxv, ryv, rzv);
+                }
+
+                const targetMuzzle = isAiming ? w.muzzleAds : w.muzzleHip;
+                if (targetMuzzle) {
+                    targetMuzzle.set(mxv, myv, mzv);
+                }
+
+                const targetArm = isAiming ? w.lArmAds : w.lArmHip;
+                if (targetArm) {
+                    targetArm.pos.set(laxv, layv, lazv);
+                    targetArm.rot.set(larxv, laryv, larzv);
+                }
 
                 // Update text displays
                 ids.forEach(id => {
                     if (vals[id] && inputs[id]) {
-                        // Use more precision for small steps
                         const prec = (inputs[id].step && parseFloat(inputs[id].step) < 0.01) ? 3 : 2;
                         vals[id].textContent = parseFloat(inputs[id].value).toFixed(prec);
                     }
@@ -7698,7 +8632,71 @@
                 if (xNudgeVal && inputs['rifle-x-step']) {
                     xNudgeVal.textContent = parseFloat(inputs['rifle-x-step'].value).toFixed(3);
                 }
+
+                // Immediate visual update
+                window.rifleModel.position.set(xv, yv, zv);
+                window.rifleModel.scale.set(sv, sv, sv);
+                window.rifleModel.rotation.set(rxv, ryv, rzv);
+                if (muzzleFlash) muzzleFlash.position.set(mxv, myv, mzv);
+
+                const lArm = weaponModel.getObjectByName('LeftArmGroup');
+                if (lArm) {
+                    lArm.position.set(laxv, layv, lazv);
+                    lArm.rotation.set(larxv, laryv, larzv);
+                }
             };
+
+            // Sync from current state
+            const syncFromState = () => {
+                const w = WEAPONS[curWeaponIdx];
+                if (!w || w.type !== 'RIFLE') return;
+                const t = isAiming ? w.glbAds : w.glbHip;
+                const m = isAiming ? w.muzzleAds : w.muzzleHip;
+                const a = isAiming ? w.lArmAds : w.lArmHip;
+
+                if (t && inputs['rifle-x']) {
+                    inputs['rifle-x'].value = t.pos.x.toFixed(3);
+                    inputs['rifle-y'].value = t.pos.y.toFixed(3);
+                    inputs['rifle-z'].value = t.pos.z.toFixed(3);
+                    inputs['rifle-scale'].value = t.scale.x.toFixed(3);
+                    inputs['rifle-rx'].value = t.rot.x.toFixed(3);
+                    inputs['rifle-ry'].value = t.rot.y.toFixed(3);
+                    inputs['rifle-rz'].value = t.rot.z.toFixed(3);
+                }
+                if (m && inputs['rifle-mx']) {
+                    inputs['rifle-mx'].value = m.x.toFixed(3);
+                    inputs['rifle-my'].value = m.y.toFixed(3);
+                    inputs['rifle-mz'].value = m.z.toFixed(3);
+                }
+                if (a && inputs['rifle-lax']) {
+                    inputs['rifle-lax'].value = a.pos.x.toFixed(3);
+                    inputs['rifle-lay'].value = a.pos.y.toFixed(3);
+                    inputs['rifle-laz'].value = a.pos.z.toFixed(3);
+                    inputs['rifle-larx'].value = a.rot.x.toFixed(3);
+                    inputs['rifle-lary'].value = a.rot.y.toFixed(3);
+                    inputs['rifle-larz'].value = a.rot.z.toFixed(3);
+                }
+                apply(); // Refresh displays
+            };
+
+            syncFromState();
+            let lastAiming = isAiming;
+            setInterval(() => {
+                if (panel.style.display === 'block' && lastAiming !== isAiming) {
+                    syncFromState();
+                    lastAiming = isAiming;
+                }
+            }, 100);
+
+            if (copy) {
+                copy.addEventListener('click', () => {
+                    const w = WEAPONS[curWeaponIdx];
+                    console.log('[Rifle GLB] Hip:', w.glbHip, 'Ads:', w.glbAds, 'MuzzleHip:', w.muzzleHip, 'MuzzleAds:', w.muzzleAds, 'LArmHip:', w.lArmHip, 'LArmAds:', w.lArmAds);
+                    const original = copy.textContent;
+                    copy.textContent = "Copied to Console";
+                    setTimeout(() => copy.textContent = original, 1000);
+                });
+            }
 
             // Attach input listeners
             ids.forEach(id => {
@@ -7763,12 +8761,605 @@
                 inputs['rifle-ry'].value = window.rifleModel.rotation.y.toFixed(3);
                 inputs['rifle-rz'].value = window.rifleModel.rotation.z.toFixed(3);
             }
+            if (muzzleFlash) {
+                inputs['rifle-mx'].value = muzzleFlash.position.x.toFixed(3);
+                inputs['rifle-my'].value = muzzleFlash.position.y.toFixed(3);
+                inputs['rifle-mz'].value = muzzleFlash.position.z.toFixed(3);
+            }
             apply();
 
         }
 
-        function buildSniper() {
+        function setupPistolDebugUI() {
+            const panel = document.getElementById('pistol-debug-panel');
+            if (!panel || !window.pistolModel || panel.dataset.bound === '1') return;
+            panel.dataset.bound = '1';
 
+            const stop = (e) => { e.stopPropagation(); };
+            panel.addEventListener('pointerdown', stop);
+            panel.addEventListener('pointermove', stop);
+            panel.addEventListener('pointerup', stop);
+            panel.addEventListener('click', stop);
+            panel.addEventListener('mousedown', stop);
+            panel.addEventListener('touchstart', stop, { passive: true });
+            panel.addEventListener('touchmove', stop, { passive: true });
+            panel.addEventListener('touchend', stop, { passive: true });
+            panel.addEventListener('wheel', stop, { passive: true });
+
+            // Elements
+            const ids = ['pistol-x', 'pistol-x-step', 'pistol-y', 'pistol-z', 'pistol-scale', 'pistol-rx', 'pistol-ry', 'pistol-rz', 'pistol-mx', 'pistol-my', 'pistol-mz'];
+            const inputs = {};
+            const vals = {};
+
+            ids.forEach(id => {
+                inputs[id] = document.getElementById(id);
+                vals[id] = document.getElementById(id + '-val');
+            });
+
+            const xMinus = document.getElementById('pistol-x-minus');
+            const xPlus = document.getElementById('pistol-x-plus');
+            const xNudgeVal = document.getElementById('pistol-x-nudge-val');
+            const copy = document.getElementById('pistol-copy');
+
+            const apply = () => {
+                if (!window.pistolModel) return;
+
+                const v = (id) => inputs[id] ? parseFloat(inputs[id].value) : 0;
+                const w = WEAPONS[curWeaponIdx];
+                if (!w || w.type !== 'PISTOL') return;
+
+                const xv = v('pistol-x'), yv = v('pistol-y'), zv = v('pistol-z');
+                const sv = v('pistol-scale'), rxv = v('pistol-rx'), ryv = v('pistol-ry'), rzv = v('pistol-rz');
+                const mxv = v('pistol-mx'), myv = v('pistol-my'), mzv = v('pistol-mz');
+
+                // [User Request] ADS-Aware: Update WEAPONS data directly
+                const targetTransform = isAiming ? w.glbAds : w.glbHip;
+                if (targetTransform) {
+                    targetTransform.pos.set(xv, yv, zv);
+                    targetTransform.scale.set(sv, sv, sv);
+                    targetTransform.rot.set(rxv, ryv, rzv);
+                }
+
+                const targetMuzzle = isAiming ? w.muzzleAds : w.muzzleHip;
+                if (targetMuzzle) {
+                    targetMuzzle.set(mxv, myv, mzv);
+                }
+
+                // Update text displays
+                ids.forEach(id => {
+                    if (vals[id] && inputs[id]) {
+                        const prec = (inputs[id].step && parseFloat(inputs[id].step) < 0.01) ? 3 : 2;
+                        vals[id].textContent = parseFloat(inputs[id].value).toFixed(prec);
+                    }
+                });
+                if (xNudgeVal && inputs['pistol-x-step']) {
+                    xNudgeVal.textContent = parseFloat(inputs['pistol-x-step'].value).toFixed(3);
+                }
+
+                // Immediate visual update (lerp will handle the rest in next frame, but this makes it snappy)
+                window.pistolModel.position.set(xv, yv, zv);
+                window.pistolModel.scale.set(sv, sv, sv);
+                window.pistolModel.rotation.set(rxv, ryv, rzv);
+                if (muzzleFlash) muzzleFlash.position.set(mxv, myv, mzv);
+            };
+
+            // Attach input listeners
+            ids.forEach(id => {
+                if (inputs[id]) inputs[id].addEventListener('input', apply);
+            });
+
+            // Nudge button delegation
+            panel.addEventListener('pointerdown', (e) => {
+                const btn = e.target.closest('.nudge-btn');
+                if (!btn) return;
+
+                const targetId = btn.dataset.target;
+                const dir = parseFloat(btn.dataset.dir || 0);
+                const input = inputs[targetId];
+
+                if (input && dir !== 0) {
+                    const step = parseFloat(input.step) || 0.01;
+                    const val = parseFloat(input.value);
+                    const stepStr = input.step.toString();
+                    const decimals = stepStr.includes('.') ? stepStr.split('.')[1].length : 3;
+                    input.value = (val + (step * dir)).toFixed(decimals);
+                    apply();
+                }
+            });
+
+            // Fine nudge logic
+            if (xMinus && inputs['pistol-x'] && inputs['pistol-x-step']) {
+                xMinus.addEventListener('click', () => {
+                    const step = parseFloat(inputs['pistol-x-step'].value);
+                    const x = inputs['pistol-x'];
+                    x.value = (parseFloat(x.value) - step).toFixed(3);
+                    apply();
+                });
+            }
+            if (xPlus && inputs['pistol-x'] && inputs['pistol-x-step']) {
+                xPlus.addEventListener('click', () => {
+                    const step = parseFloat(inputs['pistol-x-step'].value);
+                    const x = inputs['pistol-x'];
+                    x.value = (parseFloat(x.value) + step).toFixed(3);
+                    apply();
+                });
+            }
+
+            if (copy) {
+                copy.addEventListener('click', () => {
+                    const w = WEAPONS[curWeaponIdx];
+                    console.log('[Pistol GLB] Hip:', w.glbHip, 'Ads:', w.glbAds, 'MuzzleHip:', w.muzzleHip, 'MuzzleAds:', w.muzzleAds);
+                    const original = copy.textContent;
+                    copy.textContent = "Copied to Console";
+                    setTimeout(() => copy.textContent = original, 1000);
+                });
+            }
+
+            // Sync from current state
+            const syncFromState = () => {
+                const w = WEAPONS[curWeaponIdx];
+                if (!w || w.type !== 'PISTOL') return;
+                const t = isAiming ? w.glbAds : w.glbHip;
+                const m = isAiming ? w.muzzleAds : w.muzzleHip;
+
+                if (t && inputs['pistol-x']) {
+                    inputs['pistol-x'].value = t.pos.x.toFixed(3);
+                    inputs['pistol-y'].value = t.pos.y.toFixed(3);
+                    inputs['pistol-z'].value = t.pos.z.toFixed(3);
+                    inputs['pistol-scale'].value = t.scale.x.toFixed(3);
+                    inputs['pistol-rx'].value = t.rot.x.toFixed(3);
+                    inputs['pistol-ry'].value = t.rot.y.toFixed(3);
+                    inputs['pistol-rz'].value = t.rot.z.toFixed(3);
+                }
+                if (m && inputs['pistol-mx']) {
+                    inputs['pistol-mx'].value = m.x.toFixed(3);
+                    inputs['pistol-my'].value = m.y.toFixed(3);
+                    inputs['pistol-mz'].value = m.z.toFixed(3);
+                }
+                apply(); // Refresh displays
+            };
+
+            // Call sync whenever panel is shown or state changes?
+            // For now, just sync once on load, but in a real app would need a listener.
+            syncFromState();
+            let lastAiming = isAiming;
+            setInterval(() => {
+                if (panel.style.display === 'block' && lastAiming !== isAiming) {
+                    syncFromState();
+                    lastAiming = isAiming;
+                }
+            }, 100);
+        }
+
+        function buildSniper() {
+            // [User Request] Load Sniper.glb model instead of procedural mesh
+            console.log("Attempting to load Sniper GLB...");
+            if (typeof THREE.GLTFLoader !== 'undefined') {
+                // Remove existing arms if any
+                const oldLArm = weaponModel.getObjectByName('LeftArmGroup');
+                if (oldLArm) weaponModel.remove(oldLArm);
+                const oldRArm = weaponModel.getObjectByName('RightArmGroup');
+                if (oldRArm) weaponModel.remove(oldRArm);
+
+                const loader = new THREE.GLTFLoader();
+                loader.load('gun/Sniper.glb', function (gltf) {
+                    const model = gltf.scene;
+
+                    model.traverse(function (child) {
+                        if (child.isMesh) {
+                            child.castShadow = true;
+                            child.receiveShadow = true;
+                        }
+                    });
+
+                    // Initial transform (use glbHip from config if available, else defaults)
+                    const wData = WEAPONS.find(w => w.type === 'SNIPER');
+                    if (wData && wData.glbHip) {
+                        model.position.copy(wData.glbHip.pos);
+                        model.rotation.set(wData.glbHip.rot.x, wData.glbHip.rot.y, wData.glbHip.rot.z);
+                        model.scale.copy(wData.glbHip.scale);
+                    } else {
+                        model.scale.set(0.2, 0.2, 0.2);
+                        model.rotation.set(0, 3.14, 0);
+                        model.position.set(0.15, -0.3, 1.0);
+                    }
+
+                    // Remove any previous GLB sniper model
+                    if (window.sniperModel) {
+                        weaponModel.remove(window.sniperModel);
+                    }
+
+                    window.sniperModel = model;
+                    weaponModel.add(model);
+                    weaponModel.updateMatrixWorld(true);
+
+                    // Show debug panel for adjusting Sniper GLB position
+                    setupSniperDebugUI();
+                    const sniperPanel = document.getElementById('sniper-debug-panel');
+                    if (sniperPanel) sniperPanel.style.display = 'none';
+
+                    console.log("Sniper GLB loaded successfully");
+                }, undefined, function (error) {
+                    console.error('Sniper GLB load failed:', error);
+                    // Fallback to procedural geometry
+                    buildSniperGeometry();
+                });
+            } else {
+                // GLTFLoader not available, use procedural geometry
+                buildSniperGeometry();
+            }
+
+            // Arms for Sniper (Standardized Scale 2.5)
+            const w = WEAPONS.find(weapon => weapon.type === 'SNIPER');
+            const targetLArm = isAiming ? (w.lArmAds || w.lArmHip) : w.lArmHip;
+            const targetRArm = isAiming ? (w.rArmAds || w.rArmHip) : w.rArmHip;
+
+            const lArm = createArm(targetLArm.pos.x, targetLArm.pos.y, targetLArm.pos.z, targetLArm.rot.x, targetLArm.rot.y, targetLArm.rot.z, false);
+            lArm.name = 'LeftArmGroup';
+            const rArm = createArm(targetRArm.pos.x, targetRArm.pos.y, targetRArm.pos.z, targetRArm.rot.x, targetRArm.rot.y, targetRArm.rot.z, true);
+            rArm.name = 'RightArmGroup';
+        }
+
+        function setupSniperDebugUI() {
+            const panel = document.getElementById('sniper-debug-panel');
+            if (!panel || !window.sniperModel || panel.dataset.bound === '1') return;
+            panel.dataset.bound = '1';
+
+            const stop = (e) => { e.stopPropagation(); };
+            panel.addEventListener('pointerdown', stop);
+            panel.addEventListener('pointermove', stop);
+            panel.addEventListener('pointerup', stop);
+            panel.addEventListener('click', stop);
+            panel.addEventListener('mousedown', stop);
+            panel.addEventListener('touchstart', stop, { passive: true });
+            panel.addEventListener('touchmove', stop, { passive: true });
+            panel.addEventListener('touchend', stop, { passive: true });
+            panel.addEventListener('wheel', stop, { passive: true });
+
+            // Elements
+            const ids = ['sniper-x', 'sniper-x-step', 'sniper-y', 'sniper-z', 'sniper-scale', 'sniper-rx', 'sniper-ry', 'sniper-rz', 'sniper-mx', 'sniper-my', 'sniper-mz',
+                'sniper-lax', 'sniper-lay', 'sniper-laz', 'sniper-larx', 'sniper-lary', 'sniper-larz',
+                'sniper-rax', 'sniper-ray', 'sniper-raz', 'sniper-rarx', 'sniper-rary', 'sniper-rarz'];
+            const inputs = {};
+            const vals = {};
+
+            ids.forEach(id => {
+                inputs[id] = document.getElementById(id);
+                vals[id] = document.getElementById(id + '-val');
+            });
+
+            const xMinus = document.getElementById('sniper-x-minus');
+            const xPlus = document.getElementById('sniper-x-plus');
+            const xNudgeVal = document.getElementById('sniper-x-nudge-val');
+            const copy = document.getElementById('sniper-copy');
+
+            const apply = () => {
+                if (!window.sniperModel) return;
+
+                const v = (id) => inputs[id] ? parseFloat(inputs[id].value) : 0;
+                const w = WEAPONS[curWeaponIdx];
+                if (!w || w.type !== 'SNIPER') return;
+
+                const xv = v('sniper-x'), yv = v('sniper-y'), zv = v('sniper-z');
+                const sv = v('sniper-scale'), rxv = v('sniper-rx'), ryv = v('sniper-ry'), rzv = v('sniper-rz');
+                const mxv = v('sniper-mx'), myv = v('sniper-my'), mzv = v('sniper-mz');
+                const laxv = v('sniper-lax'), layv = v('sniper-lay'), lazv = v('sniper-laz');
+                const larxv = v('sniper-larx'), laryv = v('sniper-lary'), larzv = v('sniper-larz');
+                const raxv = v('sniper-rax'), rayv = v('sniper-ray'), razv = v('sniper-raz');
+                const rarxv = v('sniper-rarx'), raryv = v('sniper-rary'), rarzv = v('sniper-rarz');
+
+                // ADS-Aware: Update WEAPONS data directly
+                const targetTransform = isAiming ? w.glbAds : w.glbHip;
+                if (targetTransform) {
+                    targetTransform.pos.set(xv, yv, zv);
+                    targetTransform.scale.set(sv, sv, sv);
+                    targetTransform.rot.set(rxv, ryv, rzv);
+                }
+
+                const targetMuzzle = isAiming ? w.muzzleAds : w.muzzleHip;
+                if (targetMuzzle) {
+                    targetMuzzle.set(mxv, myv, mzv);
+                }
+
+                const targetLArm = isAiming ? w.lArmAds : w.lArmHip;
+                if (targetLArm) {
+                    targetLArm.pos.set(laxv, layv, lazv);
+                    targetLArm.rot.set(larxv, laryv, larzv);
+                }
+
+                const targetRArm = isAiming ? w.rArmAds : w.rArmHip;
+                if (targetRArm) {
+                    targetRArm.pos.set(raxv, rayv, razv);
+                    targetRArm.rot.set(rarxv, raryv, rarzv);
+                }
+
+                // Update text displays
+                ids.forEach(id => {
+                    if (vals[id] && inputs[id]) {
+                        const prec = (inputs[id].step && parseFloat(inputs[id].step) < 0.01) ? 3 : 2;
+                        vals[id].textContent = parseFloat(inputs[id].value).toFixed(prec);
+                    }
+                });
+                if (xNudgeVal && inputs['sniper-x-step']) {
+                    xNudgeVal.textContent = parseFloat(inputs['sniper-x-step'].value).toFixed(3);
+                }
+
+                // Immediate visual update
+                window.sniperModel.position.set(xv, yv, zv);
+                window.sniperModel.scale.set(sv, sv, sv);
+                window.sniperModel.rotation.set(rxv, ryv, rzv);
+                if (muzzleFlash) muzzleFlash.position.set(mxv, myv, mzv);
+
+                const lArm = weaponModel.getObjectByName('LeftArmGroup');
+                if (lArm) {
+                    lArm.position.set(laxv, layv, lazv);
+                    lArm.rotation.set(larxv, laryv, larzv);
+                }
+                const rArm = weaponModel.getObjectByName('RightArmGroup');
+                if (rArm) {
+                    rArm.position.set(raxv, rayv, razv);
+                    rArm.rotation.set(rarxv, raryv, rarzv);
+                }
+            };
+
+            // Attach input listeners
+            ids.forEach(id => {
+                if (inputs[id]) inputs[id].addEventListener('input', apply);
+            });
+
+            // Nudge button delegation
+            panel.addEventListener('pointerdown', (e) => {
+                const btn = e.target.closest('.nudge-btn');
+                if (!btn) return;
+
+                const targetId = btn.dataset.target;
+                const dir = parseFloat(btn.dataset.dir || 0);
+                const input = inputs[targetId];
+
+                if (input && dir !== 0) {
+                    const step = parseFloat(input.step) || 0.01;
+                    const val = parseFloat(input.value);
+                    const stepStr = input.step.toString();
+                    const decimals = stepStr.includes('.') ? stepStr.split('.')[1].length : 3;
+                    input.value = (val + (step * dir)).toFixed(decimals);
+                    apply();
+                }
+            });
+
+            // Fine nudge logic
+            if (xMinus && inputs['sniper-x'] && inputs['sniper-x-step']) {
+                xMinus.addEventListener('click', () => {
+                    const step = parseFloat(inputs['sniper-x-step'].value);
+                    const x = inputs['sniper-x'];
+                    x.value = (parseFloat(x.value) - step).toFixed(3);
+                    apply();
+                });
+            }
+            if (xPlus && inputs['sniper-x'] && inputs['sniper-x-step']) {
+                xPlus.addEventListener('click', () => {
+                    const step = parseFloat(inputs['sniper-x-step'].value);
+                    const x = inputs['sniper-x'];
+                    x.value = (parseFloat(x.value) + step).toFixed(3);
+                    apply();
+                });
+            }
+
+            if (copy) {
+                copy.addEventListener('click', () => {
+                    const w = WEAPONS[curWeaponIdx];
+                    console.log('[Sniper GLB] Hip:', w.glbHip, 'Ads:', w.glbAds, 'MuzzleHip:', w.muzzleHip, 'MuzzleAds:', w.muzzleAds, 'LArmHip:', w.lArmHip, 'LArmAds:', w.lArmAds, 'RArmHip:', w.rArmHip, 'RArmAds:', w.rArmAds);
+                    const original = copy.textContent;
+                    copy.textContent = "Copied to Console";
+                    setTimeout(() => copy.textContent = original, 1000);
+                });
+            }
+
+            // Sync from current state
+            const syncFromState = () => {
+                const w = WEAPONS[curWeaponIdx];
+                if (!w || w.type !== 'SNIPER') return;
+                const t = isAiming ? w.glbAds : w.glbHip;
+                const m = isAiming ? w.muzzleAds : w.muzzleHip;
+                const la = isAiming ? w.lArmAds : w.lArmHip;
+                const ra = isAiming ? w.rArmAds : w.rArmHip;
+
+                if (t && inputs['sniper-x']) {
+                    inputs['sniper-x'].value = t.pos.x.toFixed(3);
+                    inputs['sniper-y'].value = t.pos.y.toFixed(3);
+                    inputs['sniper-z'].value = t.pos.z.toFixed(3);
+                    inputs['sniper-scale'].value = t.scale.x.toFixed(3);
+                    inputs['sniper-rx'].value = t.rot.x.toFixed(3);
+                    inputs['sniper-ry'].value = t.rot.y.toFixed(3);
+                    inputs['sniper-rz'].value = t.rot.z.toFixed(3);
+                }
+                if (m && inputs['sniper-mx']) {
+                    inputs['sniper-mx'].value = m.x.toFixed(3);
+                    inputs['sniper-my'].value = m.y.toFixed(3);
+                    inputs['sniper-mz'].value = m.z.toFixed(3);
+                }
+                if (la && inputs['sniper-lax']) {
+                    inputs['sniper-lax'].value = la.pos.x.toFixed(3);
+                    inputs['sniper-lay'].value = la.pos.y.toFixed(3);
+                    inputs['sniper-laz'].value = la.pos.z.toFixed(3);
+                    inputs['sniper-larx'].value = la.rot.x.toFixed(3);
+                    inputs['sniper-lary'].value = la.rot.y.toFixed(3);
+                    inputs['sniper-larz'].value = la.rot.z.toFixed(3);
+                }
+                if (ra && inputs['sniper-rax']) {
+                    inputs['sniper-rax'].value = ra.pos.x.toFixed(3);
+                    inputs['sniper-ray'].value = ra.pos.y.toFixed(3);
+                    inputs['sniper-raz'].value = ra.pos.z.toFixed(3);
+                    inputs['sniper-rarx'].value = ra.rot.x.toFixed(3);
+                    inputs['sniper-rary'].value = ra.rot.y.toFixed(3);
+                    inputs['sniper-rarz'].value = ra.rot.z.toFixed(3);
+                }
+                apply(); // Refresh displays
+            };
+
+            syncFromState();
+            let lastAiming = isAiming;
+            setInterval(() => {
+                if (panel.style.display === 'block' && lastAiming !== isAiming) {
+                    syncFromState();
+                    lastAiming = isAiming;
+                }
+            }, 100);
+        }
+
+        function setupKnifeDebugUI() {
+            const panel = document.getElementById('knife-debug-panel');
+            if (!panel || !window.knifeModel || panel.dataset.bound === '1') return;
+            panel.dataset.bound = '1';
+
+            const stop = (e) => { e.stopPropagation(); };
+            panel.addEventListener('pointerdown', stop);
+            panel.addEventListener('pointermove', stop);
+            panel.addEventListener('pointerup', stop);
+            panel.addEventListener('click', stop);
+            panel.addEventListener('mousedown', stop);
+            panel.addEventListener('touchstart', stop, { passive: true });
+            panel.addEventListener('touchmove', stop, { passive: true });
+            panel.addEventListener('touchend', stop, { passive: true });
+            panel.addEventListener('wheel', stop, { passive: true });
+
+            const ids = [
+                'knife-x', 'knife-y', 'knife-z', 'knife-rx', 'knife-ry', 'knife-rz', 'knife-scale',
+                'knife-lax', 'knife-lay', 'knife-laz', 'knife-larx', 'knife-lary', 'knife-larz',
+                'knife-rax', 'knife-ray', 'knife-raz', 'knife-rarx', 'knife-rary', 'knife-rarz'
+            ];
+            const inputs = {};
+            const vals = {};
+
+            ids.forEach(id => {
+                inputs[id] = document.getElementById(id);
+                vals[id] = document.getElementById(id + '-val');
+            });
+
+            const apply = () => {
+                if (!window.knifeModel) return;
+
+                const v = (id) => inputs[id] ? parseFloat(inputs[id].value) : 0;
+                const w = WEAPONS.find(weapon => weapon.type === 'KNIFE');
+                if (!w) return;
+
+                const xv = v('knife-x'), yv = v('knife-y'), zv = v('knife-z');
+                const rxv = v('knife-rx'), ryv = v('knife-ry'), rzv = v('knife-rz');
+                const sv = v('knife-scale');
+
+                const laxv = v('knife-lax'), layv = v('knife-lay'), lazv = v('knife-laz');
+                const larxv = v('knife-larx'), laryv = v('knife-lary'), larzv = v('knife-larz');
+
+                const raxv = v('knife-rax'), rayv = v('knife-ray'), razv = v('knife-raz');
+                const rarxv = v('knife-rarx'), raryv = v('knife-rary'), rarzv = v('knife-rarz');
+
+                // Update WEAPONS data
+                if (w.glbHip) {
+                    w.glbHip.pos.set(xv, yv, zv);
+                    w.glbHip.rot.set(rxv, ryv, rzv);
+                    w.glbHip.scale.set(sv, sv, sv);
+                }
+                if (w.lArmHip) {
+                    w.lArmHip.pos.set(laxv, layv, lazv);
+                    w.lArmHip.rot.set(larxv, laryv, larzv);
+                }
+                if (w.rArmHip) {
+                    w.rArmHip.pos.set(raxv, rayv, razv);
+                    w.rArmHip.rot.set(rarxv, raryv, rarzv);
+                }
+
+                // Update text displays
+                ids.forEach(id => {
+                    if (vals[id] && inputs[id]) {
+                        vals[id].textContent = parseFloat(inputs[id].value).toFixed(2);
+                    }
+                });
+
+                // Immediate visual update
+                window.knifeModel.position.set(xv, yv, zv);
+                window.knifeModel.rotation.set(rxv, ryv, rzv);
+                window.knifeModel.scale.set(sv, sv, sv);
+
+                const lArm = weaponModel.getObjectByName('LeftArmGroup');
+                if (lArm) {
+                    lArm.position.set(laxv, layv, lazv);
+                    lArm.rotation.set(larxv, laryv, larzv);
+                }
+                const rArm = weaponModel.getObjectByName('RightArmGroup');
+                if (rArm) {
+                    rArm.position.set(raxv, rayv, razv);
+                    rArm.rotation.set(rarxv, raryv, rarzv);
+                }
+            };
+
+            const syncFromState = () => {
+                const w = WEAPONS.find(weapon => weapon.type === 'KNIFE');
+                if (!w) return;
+
+                if (w.glbHip && inputs['knife-x']) {
+                    inputs['knife-x'].value = w.glbHip.pos.x;
+                    inputs['knife-y'].value = w.glbHip.pos.y;
+                    inputs['knife-z'].value = w.glbHip.pos.z;
+                    inputs['knife-rx'].value = w.glbHip.rot.x;
+                    inputs['knife-ry'].value = w.glbHip.rot.y;
+                    inputs['knife-rz'].value = w.glbHip.rot.z;
+                    inputs['knife-scale'].value = w.glbHip.scale.x;
+                }
+                if (w.lArmHip && inputs['knife-lax']) {
+                    inputs['knife-lax'].value = w.lArmHip.pos.x;
+                    inputs['knife-lay'].value = w.lArmHip.pos.y;
+                    inputs['knife-laz'].value = w.lArmHip.pos.z;
+                    inputs['knife-larx'].value = w.lArmHip.rot.x;
+                    inputs['knife-lary'].value = w.lArmHip.rot.y;
+                    inputs['knife-larz'].value = w.lArmHip.rot.z;
+                }
+                if (w.rArmHip && inputs['knife-rax']) {
+                    inputs['knife-rax'].value = w.rArmHip.pos.x;
+                    inputs['knife-ray'].value = w.rArmHip.pos.y;
+                    inputs['knife-raz'].value = w.rArmHip.pos.z;
+                    inputs['knife-rarx'].value = w.rArmHip.rot.x;
+                    inputs['knife-rary'].value = w.rArmHip.rot.y;
+                    inputs['knife-rarz'].value = w.rArmHip.rot.z;
+                }
+                apply();
+            };
+
+            ids.forEach(id => {
+                if (inputs[id]) inputs[id].addEventListener('input', apply);
+            });
+
+            // Handler for nudge buttons
+            const handleNudge = (e) => {
+                const btn = e.target.closest('.nudge-btn');
+                if (!btn) return;
+                e.preventDefault();
+                const targetId = btn.dataset.target;
+                const dir = parseFloat(btn.dataset.dir || 0);
+                const input = inputs[targetId];
+                if (input && dir !== 0) {
+                    const step = parseFloat(input.step) || 0.01;
+                    const val = parseFloat(input.value);
+                    input.value = (val + (step * dir)).toFixed(2);
+                    apply();
+                }
+            };
+            panel.addEventListener('pointerdown', handleNudge);
+            panel.addEventListener('click', handleNudge);
+
+            const copy = document.getElementById('knife-copy');
+            if (copy) {
+                copy.addEventListener('click', () => {
+                    const w = WEAPONS.find(weapon => weapon.type === 'KNIFE');
+                    console.log('[Knife GLB] config:', w.glbHip, 'LArmHip:', w.lArmHip, 'RArmHip:', w.rArmHip);
+                    const original = copy.textContent;
+                    copy.textContent = "Copied to Console";
+                    setTimeout(() => copy.textContent = original, 1000);
+                });
+            }
+
+            syncFromState();
+        }
+
+        function buildSniperGeometry() {
             // 리시버 (본체)
             const receiver = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.07, 0.4), matBody);
             weaponModel.add(receiver);
@@ -7868,17 +9459,105 @@
             triggerGuard.rotation.x = Math.PI / 2; triggerGuard.position.set(0, -0.05, 0.08);
             weaponModel.add(triggerGuard);
 
-            // 트리거
-            const trigger = new THREE.Mesh(new THREE.BoxGeometry(0.008, 0.015, 0.02), matParts);
-            trigger.position.set(0, -0.06, 0.08);
-            weaponModel.add(trigger);
+            // 탄창 (Magazine) - NEW for Sniper
+            const magazine = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.09, 0.06), matParts);
+            magazine.name = "magazine";
+            magazine.position.set(0, -0.08, 0.04);
+            weaponModel.add(magazine);
 
-            createArm(-0.08, -0.12, -0.3, 0.7, 0.3, -0.35, false);
-
-            createArm(0.12, -0.15, 0.25, 0.2, -0.2, 0.4, true);
+            const lArm = createArm(-0.15, -0.25, -0.6, 0.7, 0.3, -0.35, false); // Adjusted for Scale 2.5
+            lArm.name = 'LeftArmGroup';
+            const rArm = createArm(0.12, -0.28, 0.1, 0.2, -0.2, 0.4, true);
+            rArm.name = 'RightArmGroup';
         }
 
         function buildPistol() {
+            // [User Request] Load pistol.glb model instead of procedural mesh
+            console.log("Attempting to load Pistol GLB...");
+            if (typeof THREE.GLTFLoader !== 'undefined') {
+                // Define arm materials
+                const armSleeveMat = new THREE.MeshBasicMaterial({ color: 0x2b2b2b });
+                const armSkinMat = new THREE.MeshBasicMaterial({ color: 0xeebb99 });
+
+                // Remove existing arms if any
+                const oldLArm = weaponModel.getObjectByName('LeftArmGroup');
+                if (oldLArm) weaponModel.remove(oldLArm);
+                const oldRArm = weaponModel.getObjectByName('RightArmGroup');
+                if (oldRArm) weaponModel.remove(oldRArm);
+
+                // Right Arm Group (Grip Position)
+                const rArmGroup = new THREE.Group();
+                rArmGroup.name = 'RightArmGroup';
+                const rSleeve = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.14, 0.55), armSleeveMat);
+                rSleeve.position.set(0, 0, 0.25);
+                rArmGroup.add(rSleeve);
+                const rHand = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.1, 0.14), armSkinMat);
+                rHand.position.set(0, 0, -0.05);
+                rArmGroup.add(rHand);
+                rArmGroup.position.set(0.06, -0.15, 0.05);
+                rArmGroup.rotation.set(0.1, 0, 0.05);
+                rArmGroup.scale.set(1.6, 1.6, 1.6);
+                weaponModel.add(rArmGroup);
+
+                // Left Arm Group (Support Hand)
+                const lArmGroup = new THREE.Group();
+                lArmGroup.name = 'LeftArmGroup';
+                const lSleeve = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.14, 0.55), armSleeveMat);
+                lSleeve.position.set(0, 0, 0.25);
+                lArmGroup.add(lSleeve);
+                const lHand = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.1, 0.14), armSkinMat);
+                lHand.position.set(0, 0, -0.05);
+                lArmGroup.add(lHand);
+                lArmGroup.position.set(-0.06, -0.15, 0.05);
+                lArmGroup.rotation.set(0.1, 0, -0.05);
+                lArmGroup.scale.set(1.6, 1.6, 1.6);
+                weaponModel.add(lArmGroup);
+
+                const loader = new THREE.GLTFLoader();
+                loader.load('gun/pistol.glb', function (gltf) {
+                    const model = gltf.scene;
+
+                    model.traverse(function (child) {
+                        if (child.isMesh) {
+                            child.castShadow = true;
+                            child.receiveShadow = true;
+                        }
+                    });
+
+                    // Initial transform - user configured values
+                    model.scale.set(0.20, 0.20, 0.20);
+                    model.rotation.set(0.04, 1.61, 0.05);
+                    model.position.set(-0.02, 0.02, 0.09);
+
+                    // Remove any previous GLB pistol model
+                    if (window.pistolModel) {
+                        weaponModel.remove(window.pistolModel);
+                    }
+
+                    window.pistolModel = model;
+                    weaponModel.add(model);
+                    weaponModel.updateMatrixWorld(true);
+
+                    // Show debug panel for adjusting pistol GLB position
+                    setupPistolDebugUI();
+                    const pistolPanel = document.getElementById('pistol-debug-panel');
+                    // [User Request] Hide debug panel after configuration
+                    if (pistolPanel) pistolPanel.style.display = 'none';
+
+                    console.log("Pistol GLB loaded successfully");
+                }, undefined, function (error) {
+                    console.error('Pistol GLB load failed:', error);
+                    // Fallback to procedural geometry
+                    buildPistolGeometry();
+                });
+            } else {
+                // GLTFLoader not available, use procedural geometry
+                buildPistolGeometry();
+            }
+        }
+
+        // Fallback procedural pistol geometry
+        function buildPistolGeometry() {
             // 슬라이드 (Slide) - 더 상세하게
             const slide = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.04, 0.18), matSilver);
             slide.position.y = 0.02;
@@ -7936,11 +9615,9 @@
             const rsBase = new THREE.Mesh(new THREE.BoxGeometry(0.022, 0.003, 0.008), matParts);
             rsBase.position.set(0, 0.048, 0.08);
             weaponModel.add(rsBase);
-            // 왼쪽 기둥
             const rsL = new THREE.Mesh(new THREE.BoxGeometry(0.01, 0.015, 0.005), matParts);
             rsL.position.set(-0.01, 0.048, 0.08);
             weaponModel.add(rsL);
-            // 오른쪽 기둥
             const rsR = new THREE.Mesh(new THREE.BoxGeometry(0.01, 0.015, 0.005), matParts);
             rsR.position.set(0.01, 0.048, 0.08);
             weaponModel.add(rsR);
@@ -7956,6 +9633,7 @@
 
             // 탄창 (Magazine)
             const magazine = new THREE.Mesh(new THREE.BoxGeometry(0.025, 0.08, 0.04), matParts);
+            magazine.name = "magazine";
             magazine.position.set(0, -0.08, 0.05);
             weaponModel.add(magazine);
 
@@ -7964,136 +9642,109 @@
             magPlate.position.set(0, -0.12, 0.05);
             weaponModel.add(magPlate);
 
-
-            // Arms (Krunker Style - Adjusted for grip alignment)
-            // Right arm (trigger hand) - aligned with pistol grip
-            const rArm = createArm(0.05, -0.06, 0.12, 0.1, 0, 0.05, true);
-            // rArm.scale.set(0.7, 0.7, 0.7); // Removed to match global scale
-
-            // Left arm (support) - cupping the grip
-            const lArm = createArm(-0.05, -0.06, 0.12, 0.1, 0, -0.05, false);
-            // lArm.scale.set(0.7, 0.7, 0.7); // Removed to match global scale
+            // Arms (Standardized Scale 1.6 for Pistol)
+            const rArm = createArm(0.06, -0.15, 0.05, 0.1, 0, 0.05, true);
+            rArm.name = 'RightArmGroup';
+            rArm.scale.set(1.6, 1.6, 1.6);
+            const lArm = createArm(-0.06, -0.15, 0.05, 0.1, 0, -0.05, false);
+            lArm.name = 'LeftArmGroup';
+            lArm.scale.set(1.6, 1.6, 1.6);
         }
 
         function buildKnife() {
+            const w = WEAPONS.find(weapon => weapon.type === 'KNIFE');
+            if (!w) return;
+
             // === KRUNKER-STYLE KNIFE: Centered blade, held by right hand ===
             const knifeGroup = new THREE.Group();
             window.knifeModel = knifeGroup;
 
-            // --- KNIFE BLADE (centered, pointing forward) ---
+            // --- KNIFE BLADE (Sharper, Angled) ---
+            // Main Blade
             const blade = new THREE.Mesh(
-                new THREE.BoxGeometry(0.05, 0.01, 0.45), // Blade wider
-                new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.2, roughness: 0.6 })
+                new THREE.BoxGeometry(0.045, 0.008, 0.35),
+                new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.6, roughness: 0.3 })
             );
 
-            blade.position.set(0, 0, -0.18);
+            blade.position.set(0, 0, -0.15);
             knifeGroup.add(blade);
 
-            // Blade edge
+            // Sharp Edge (Thinner, slightly lower)
             const bladeEdge = new THREE.Mesh(
-                new THREE.BoxGeometry(0.052, 0.003, 0.43),
-                new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.2, roughness: 0.4 })
+                new THREE.BoxGeometry(0.045, 0.002, 0.33),
+                new THREE.MeshStandardMaterial({ color: 0xdddddd, metalness: 0.7, roughness: 0.2 })
             );
 
-            bladeEdge.position.set(0, -0.005, -0.17);
+            bladeEdge.position.set(0, -0.004, -0.15);
             knifeGroup.add(bladeEdge);
 
-            // Tip
+            // Tip (Sharper Cone)
             const tip = new THREE.Mesh(
-                new THREE.ConeGeometry(0.01, 0.05, 4),
-                new THREE.MeshStandardMaterial({ color: 0xdddddd, metalness: 0.9, roughness: 0.2 })
+                new THREE.ConeGeometry(0.024, 0.15, 4),
+                new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.6, roughness: 0.3, flatShading: true })
             );
-            tip.rotation.x = Math.PI / 2;
-            tip.position.set(0, 0, -0.42);
+            tip.rotation.x = -Math.PI / 2;
+            tip.rotation.z = 0;
+            tip.scale.set(1, 1, 0.15);
+            tip.position.set(0, 0, -0.39);
             knifeGroup.add(tip);
 
             // Guard
             const guard = new THREE.Mesh(
-                new THREE.BoxGeometry(0.1, 0.025, 0.025),
-                new THREE.MeshStandardMaterial({ color: 0x222222, metalness: 0.8, roughness: 0.5 })
+                new THREE.BoxGeometry(0.12, 0.03, 0.04),
+                new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.8, roughness: 0.5 })
             );
             guard.position.set(0, 0, 0.05);
             knifeGroup.add(guard);
 
-            // Handle
+            // Handle (Black)
             const handle = new THREE.Mesh(
-                new THREE.BoxGeometry(0.04, 0.04, 0.14),
-                new THREE.MeshStandardMaterial({ color: 0x1a1a1a, metalness: 0.2, roughness: 0.9 })
+                new THREE.BoxGeometry(0.05, 0.045, 0.12),
+                new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 0.2, roughness: 0.8 })
             );
-            handle.position.set(0, 0, 0.13); // Centered on grip
+            handle.position.set(0, 0, 0.12);
             knifeGroup.add(handle);
 
-            // Position knife in center-bottom
-            knifeGroup.scale.set(1.3, 1.3, 1.3); // Reduced scale from 1.5
-            knifeGroup.position.set(0, -0.2, -0.5); // Adjusted position for larger size
-            knifeGroup.rotation.set(0.2, Math.PI / 2, 0); // Tip points left
+            // Position knife from WEAPONS config
+            if (w.glbHip) {
+                knifeGroup.position.copy(w.glbHip.pos);
+                knifeGroup.rotation.set(w.glbHip.rot.x, w.glbHip.rot.y, w.glbHip.rot.z);
+                knifeGroup.scale.copy(w.glbHip.scale);
+            } else {
+                knifeGroup.scale.set(2.5, 2.5, 2.5);
+                knifeGroup.position.set(0, -0.2, -0.5);
+                knifeGroup.rotation.set(0.1, 1.8, -0.2);
+            }
             weaponModel.add(knifeGroup);
             window.knifeModel = knifeGroup;
 
             // --- RIGHT ARM (Holding the knife) ---
-            const rightArm = new THREE.Group();
+            const rArm = createArm(0, 0, 0, 0, 0, 0, true);
+            rArm.name = 'RightArmGroup';
+            const ra = w.rArmHip;
+            if (ra) {
+                rArm.position.copy(ra.pos);
+                rArm.rotation.set(ra.rot.x, ra.rot.y, ra.rot.z);
+            } else {
+                rArm.position.set(0.12, -0.2, -0.15);
+                rArm.rotation.set(0, -0.15, 0.05);
+            }
+            // Overriding createArm's default fingers for knife grip
+            // (Note: createArm already adds sleeve/hand/fingers)
 
-            // Sleeve (Thicker)
-            const rightSleeve = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.14, 0.55), matSleeve);
-            rightSleeve.position.set(0, 0, 0.25);
-            rightArm.add(rightSleeve);
+            // --- LEFT ARM (Supporting/Ready) ---
+            const lArm = createArm(0, 0, 0, 0, 0, 0, false);
+            lArm.name = 'LeftArmGroup';
+            const la = w.lArmHip;
+            if (la) {
+                lArm.position.copy(la.pos);
+                lArm.rotation.set(la.rot.x, la.rot.y, la.rot.z);
+            } else {
+                lArm.position.set(-1.2, -0.35, -0.25);
+                lArm.rotation.set(0.2, 0.3, -0.15);
+            }
 
-            // Hand (Thicker)
-            const rightHand = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.1, 0.14), matGlove);
-            rightHand.position.set(0, 0, -0.05);
-            rightArm.add(rightHand);
-
-            // Fingers (Gripping firmly)
-            // Thumb
-            const rThumb = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.04, 0.1), matSkin);
-            rThumb.position.set(-0.05, 0.03, -0.06);
-            rThumb.rotation.set(0, 0, -0.6);
-            rightArm.add(rThumb);
-
-            // Fingers block
-            const rFingers = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.09, 0.05), matSkin);
-            rFingers.position.set(0.03, -0.015, -0.13);
-            rightArm.add(rFingers);
-
-            // Position Right Arm to connect with Handle
-            // We align the hand position to the knife handle position visually
-            // Arm comes from bottom right corner
-            rightArm.position.set(0.15, -0.22, -0.2);
-            rightArm.rotation.set(0.1, -0.25, 0.1);
-
-            // Refined connection: Move closer to center to grip the handle
-            rightArm.position.set(0.12, -0.2, -0.24); // Adjusted for larger size (Z closer to match handle)
-            rightArm.rotation.set(0, -0.15, 0.05);
-            rightArm.scale.set(1.3, 1.3, 1.3); // Reduced scale from 1.8
-
-            weaponModel.add(rightArm);
-            window.knifeRightArm = rightArm;
-
-            // --- LEFT ARM (Supporting/Ready - WIDER APART) ---
-            const leftArm = new THREE.Group();
-
-            // Sleeve (Thicker)
-            const leftSleeve = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.14, 0.55), matSleeve);
-            leftSleeve.position.set(0, 0, 0.25);
-            leftArm.add(leftSleeve);
-
-            // Hand (Thicker)
-            const leftHand = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.1, 0.14), matGlove);
-            leftHand.position.set(0, 0, -0.05);
-            leftArm.add(leftHand);
-
-            // Fingers (Fist/Ready)
-            const lFingers = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.09, 0.06), matSkin);
-            lFingers.position.set(0, -0.015, -0.13);
-            leftArm.add(lFingers);
-
-            // Position Left Arm FARTHER to the left (Wider Stance)
-            leftArm.position.set(-0.8, -0.35, -0.25); // Adjusted for larger size
-            leftArm.rotation.set(0.2, 0.3, -0.15);
-            leftArm.scale.set(1.3, 1.3, 1.3); // Reduced scale from 1.8
-
-            weaponModel.add(leftArm);
-            window.knifeLeftArm = leftArm;
+            setupKnifeDebugUI();
         }
 
 
@@ -8101,39 +9752,32 @@
         function createArm(x, y, z, rotX, rotY, rotZ, isTrigger) {
             const grp = new THREE.Group();
 
-            // [TASK] Updated Arm Geometry to match Knife Style (Thicker/Larger)
-
-            // Sleeve: BoxGeometry matching knife arm dimensions
+            // Sleeve (Standardized 2.5 Scale Thickness)
             const sleeve = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.14, 0.55), matSleeve);
             sleeve.position.set(0, 0, 0.25);
-            sleeve.castShadow = true; // [Fix] Add Shadow
+            sleeve.castShadow = true;
             grp.add(sleeve);
 
-            // Hand: BoxGeometry matching knife hand dimensions
-            const hand = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.1, 0.14), matGlove);
+            // Hand (Standardized Skin Color)
+            const hand = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.1, 0.14), matSkin); // [MOD] Skin color by default
             hand.position.set(0, 0, -0.05);
-            hand.castShadow = true; // [Fix] Add Shadow
+            hand.castShadow = true;
             grp.add(hand);
 
             if (isTrigger) {
-                // Trigger Finger - Thicker and adjusted position
+                // Trigger Finger
                 const finger = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.03, 0.08), matSkin);
                 finger.position.set(0.04, 0.02, -0.12);
-                finger.castShadow = true; // [Fix] Add Shadow
+                finger.castShadow = true;
                 grp.add(finger);
-            } else {
-                // Supporting Hand Fingers (Fist-like block)
-                const fingers = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.09, 0.06), matSkin);
-                fingers.position.set(0, -0.015, -0.13);
-                fingers.castShadow = true; // [Fix] Add Shadow
-                grp.add(fingers);
             }
+            // [FIX] Removed extra 'fingers' block for left hand to prevent doubled geometry
 
             grp.position.set(x, y, z);
             grp.rotation.set(rotX, rotY, rotZ);
 
-            // [TASK] Apply Uniform Scale (Non-knife arms at half size)
-            grp.scale.set(0.65, 0.65, 0.65);
+            // [MOD] Standardized Scale 2.5 for all weapons
+            grp.scale.set(2.5, 2.5, 2.5);
 
             weaponModel.add(grp);
             return grp;
@@ -9455,7 +11099,7 @@
                 weaponModel.rotation.set(0, 0, 0);
             } else {
                 // CS Style: Lower right, pointing forward
-                weaponModel.position.set(0.2, -0.25, -0.4);
+                weaponModel.position.set(0.35, -0.15, -0.3); // [MOD] Higher and Closer
                 weaponModel.rotation.set(0, 0, 0);
             }
 
@@ -9477,6 +11121,11 @@
             if (activeItem) activeItem.classList.add('active');
 
             updateUI();
+
+            // [Multiplayer] Sync Weapon Switch
+            if (typeof gameMode !== 'undefined' && gameMode === 'multi' && typeof socket !== 'undefined' && socket && socket.connected) {
+                socket.emit('playerAction', { action: 'switch', weaponIdx: idx });
+            }
         }
 
         function updateUI() {
@@ -9588,7 +11237,7 @@
 
         function doReload() {
             const w = WEAPONS[curWeaponIdx];
-            if (w.type === 'KNIFE' || w.type === 'GRENADE') return;
+            if (w.type === 'KNIFE' || w.type === 'GRENADE' || isReloading) return;
             isReloading = true;
 
             const reloadOverlay = document.getElementById('reload-overlay');
@@ -9601,7 +11250,6 @@
                 }, 600);
             }
 
-            // 저격총은 c-rifle.mp3 사용, 다른 무기는 기존 재장전 소리
             if (w.type === 'SNIPER' && SoundGen.audioBuffers['c-rifle']) {
                 SoundGen.playAudioFile('c-rifle', 0.8);
             } else {
@@ -9610,19 +11258,65 @@
 
             if (elWeaponName) elWeaponName.innerText = "RELOADING...";
 
-            // Animation
+            // Find magazine mesh
+            let mag = null;
+            if (weaponModel) {
+                weaponModel.traverse(child => {
+                    if (child.name === "magazine") mag = child;
+                });
+            }
+
+            const initialMagPos = mag ? mag.position.clone() : null;
+
+            // --- RELOAD SEQUENCE ---
+            // Stage 1: Tilt Up & Drop Mag (0ms)
             if (weaponModel) {
                 weaponModel.rotation.z = 0.5;
                 weaponModel.position.y = -0.1;
+                if (mag) {
+                    // Start drop animation (will be handled by lerp in future or simple offset here)
+                    mag.position.y -= 0.2;
+                    mag.visible = true;
+                }
             }
 
+            // Stage 2: Hide dropped mag (400ms)
             setTimeout(() => {
-                w.ammo = w.maxAmmo;
-                isReloading = false;
+                if (mag) mag.visible = false;
+            }, 400);
+
+            // Stage 3: New mag appears from bottom (600ms)
+            setTimeout(() => {
+                if (mag) {
+                    mag.position.y = initialMagPos.y - 0.4;
+                    mag.visible = true;
+                    // Move up to initial position
+                    const animateUp = () => {
+                        const step = 0.05;
+                        if (mag.position.y < initialMagPos.y) {
+                            mag.position.y += step;
+                            requestAnimationFrame(animateUp);
+                        } else {
+                            mag.position.y = initialMagPos.y;
+                        }
+                    };
+                    animateUp();
+                }
+            }, 600);
+
+            // Stage 4: Reset weapon pose (900ms)
+            setTimeout(() => {
                 if (weaponModel) {
                     weaponModel.rotation.z = 0;
                     weaponModel.position.y = 0;
                 }
+            }, 900);
+
+            // Stage 5: Finish reload (1000ms)
+            setTimeout(() => {
+                w.ammo = w.maxAmmo;
+                isReloading = false;
+                if (mag && initialMagPos) mag.position.copy(initialMagPos);
                 updateUI();
             }, 1000);
         }
@@ -10153,16 +11847,18 @@
                     if (w.type === 'RIFLE') {
                         if (isAiming) {
                             // Align with crosshair (Screen Center)
-                            muzzleFlash.position.set(0, 0.062, muzzleFlash.position.z);
+                            muzzleFlash.position.set(0.015, 0.062, muzzleFlash.position.z);
                         } else {
-                            // [User Request] Raised Hip Position Flash (Higher per user request)
-                            muzzleFlash.position.set(0, 0.12, muzzleFlash.position.z);
+                            // [User Request] Move Flash to Center Crosshair in Hip-fire
+                            // Manual offset to align with camera center (-0.06->-0.02 Right)
+                            muzzleFlash.position.set(-0.02, 0.10, -2.0);
                         }
                     }
 
                     // Bright, brief flash
                     // [User Request] 2x Size (Increased from 0.28)
-                    const s = 0.6 + Math.random() * 0.2;
+                    let s = 0.6 + Math.random() * 0.2;
+                    if (w.type === 'SNIPER') s *= 2.0; // Scale up to 2x for sniper
                     muzzleFlash.scale.set(s, s, 1);
                     muzzleFlash.rotation.z = Math.random() * Math.PI * 2;
 
@@ -10348,7 +12044,7 @@
                             c.material.emissiveIntensity = 1.5; // 더 밝게
                         }
                     });
-                    p.userData.flashTimer = 0.15; // 더 오래 지속 
+                    p.userData.flashTimer = 0.15; // 더 오래 지속
 
                     p.userData.hp -= dmg;
                     const hpPercent = Math.max(0, p.userData.hp / p.userData.maxHp);
@@ -10517,7 +12213,7 @@
                     rayOrigin.y += 0.5; // Start slightly above current foot position to detect very close ground
                     const downRay = new THREE.Raycaster(rayOrigin, new THREE.Vector3(0, -1, 0), 0, 10);
                     // Intersect with map objects (collidable)
-                    // Note: We need to traverse mapGroup to find meshes, or use a known list. 
+                    // Note: We need to traverse mapGroup to find meshes, or use a known list.
                     // mapGroup.children contains meshes.
                     const intersects = downRay.intersectObjects(mapGroup.children, true);
 
@@ -10572,7 +12268,7 @@
 
                 const w = WEAPONS[curWeaponIdx];
                 let speed = 9.0; // Default: RUN (User Request)
-                if (keys.shift) speed = 5.0; // Shift: WALK
+                if (keys.shift) speed = 2.0; // Shift: VERY SLOW WALK (reduced from 5.0)
 
                 // Weapon-based movement speed multipliers
                 if (w.type === 'KNIFE') speed *= 1.1;
@@ -10641,6 +12337,10 @@
                         const bobFreq = keys.shift ? 15 : 8; const bobAmp = keys.shift ? 0.05 : 0.02;
                         swayOffset.y = Math.sin(time * 0.001 * bobFreq) * bobAmp;
                         swayOffset.x = Math.cos(time * 0.001 * (bobFreq / 2)) * bobAmp;
+                    } else {
+                        // [FIX] Smoothly reset sway when aiming while moving (fixes pistol crosshair wobble)
+                        swayOffset.x = THREE.MathUtils.lerp(swayOffset.x, 0, 15 * dt);
+                        swayOffset.y = THREE.MathUtils.lerp(swayOffset.y, 0, 15 * dt);
                     }
                 } else {
                     playerVelocity.set(0, 0, 0);
@@ -10739,7 +12439,31 @@
                 currentPos.lerp(targetPos, 15 * dt);
                 currentRot.lerp(targetRot, 15 * dt); // Interpolate rotation
 
-                // [User Request] Dynamic GLB Transform (Idle vs ADS) for Rifle
+                // [User Request] Dynamic Arm Scaling for all weapons (except Knife/Grenade)
+                if (w.type !== 'KNIFE' && w.type !== 'GRENADE') {
+                    const lArm = weaponModel.getObjectByName('LeftArmGroup');
+                    const rArm = weaponModel.getObjectByName('RightArmGroup');
+
+                    // [MOD] Weapon-specific scaling: Pistol is thinner than others
+                    let idleScale = 2.5;
+                    let adsScale = 0.8;
+
+                    if (w.type === 'PISTOL') {
+                        idleScale = 1.6;
+                        adsScale = 0.6;
+                    }
+
+                    const targetArmScale = isAiming ? adsScale : idleScale;
+                    if (lArm) {
+                        const s = THREE.MathUtils.lerp(lArm.scale.x, targetArmScale, 15 * dt);
+                        lArm.scale.set(s, s, s);
+                    }
+                    if (rArm) {
+                        const s = THREE.MathUtils.lerp(rArm.scale.x, targetArmScale, 15 * dt);
+                        rArm.scale.set(s, s, s);
+                    }
+                }
+
                 if (window.rifleModel && w.type === 'RIFLE' && w.glbHip && w.glbAds) {
                     const tPos = isAiming ? w.glbAds.pos : w.glbHip.pos;
                     const tRot = isAiming ? w.glbAds.rot : w.glbHip.rot;
@@ -10752,6 +12476,48 @@
                     window.rifleModel.rotation.z += (tRot.z - window.rifleModel.rotation.z) * 15 * dt;
 
                     window.rifleModel.scale.lerp(tScale, 15 * dt);
+
+                    // [User Request] Dynamic Left Arm Lerping for Rifle
+                    const lArm = weaponModel.getObjectByName('LeftArmGroup');
+                    if (lArm && w.lArmHip && w.lArmAds) {
+                        const aPos = isAiming ? w.lArmAds.pos : w.lArmHip.pos;
+                        const aRot = isAiming ? w.lArmAds.rot : w.lArmHip.rot;
+                        lArm.position.lerp(aPos, 15 * dt);
+                        lArm.rotation.x += (aRot.x - lArm.rotation.x) * 15 * dt;
+                        lArm.rotation.y += (aRot.y - lArm.rotation.y) * 15 * dt;
+                        lArm.rotation.z += (aRot.z - lArm.rotation.z) * 15 * dt;
+                    }
+                }
+
+                if (window.pistolModel && w.type === 'PISTOL' && w.glbHip && w.glbAds) {
+                    const tPos = isAiming ? w.glbAds.pos : w.glbHip.pos;
+                    const tRot = isAiming ? w.glbAds.rot : w.glbHip.rot;
+                    const tScale = isAiming ? w.glbAds.scale : w.glbHip.scale;
+
+                    window.pistolModel.position.lerp(tPos, 15 * dt);
+                    window.pistolModel.rotation.x += (tRot.x - window.pistolModel.rotation.x) * 15 * dt;
+                    window.pistolModel.rotation.y += (tRot.y - window.pistolModel.rotation.y) * 15 * dt;
+                    window.pistolModel.rotation.z += (tRot.z - window.pistolModel.rotation.z) * 15 * dt;
+                    window.pistolModel.scale.lerp(tScale, 15 * dt);
+                }
+
+                // [User Request] ADS-Aware Muzzle Flash Lerping
+                if (muzzleFlash && w.muzzleHip && w.muzzleAds) {
+                    const tMuzzlePos = isAiming ? w.muzzleAds : w.muzzleHip;
+                    muzzleFlash.position.lerp(tMuzzlePos, 15 * dt);
+                }
+
+                if (window.sniperModel && w.type === 'SNIPER' && w.glbHip && w.glbAds) {
+                    const tPos = isAiming ? w.glbAds.pos : w.glbHip.pos;
+                    const tRot = isAiming ? w.glbAds.rot : w.glbHip.rot;
+                    const tScale = isAiming ? w.glbAds.scale : w.glbHip.scale;
+
+                    // [DEBUG] Disable interpolation to allow debug panel to work
+                    // window.sniperModel.position.lerp(tPos, 15 * dt);
+                    // window.sniperModel.rotation.x += (tRot.x - window.sniperModel.rotation.x) * 15 * dt;
+                    // window.sniperModel.rotation.y += (tRot.y - window.sniperModel.rotation.y) * 15 * dt;
+                    // window.sniperModel.rotation.z += (tRot.z - window.sniperModel.rotation.z) * 15 * dt;
+                    // window.sniperModel.scale.lerp(tScale, 15 * dt);
                 }
 
                 camera.fov += (targetFov - camera.fov) * 15 * dt;
@@ -10809,54 +12575,135 @@
                 if (w.type === 'KNIFE') {
                     // Arms Stability: Reset weaponModel (container) to idle pose
                     weaponModel.rotation.set(0, 0, 0);
-                    weaponModel.position.set(0.2, -0.25, -0.4);
+                    weaponModel.position.set(0.35, -0.15, -0.3); // [MOD]
 
-                    if (window.knifeSwing > 0 && window.knifeModel && window.knifeRightArm) {
-                        const swingT = 1 - (window.knifeSwing / window.KNIFE_SWING_DURATION);
-                        const thrust = Math.sin(swingT * Math.PI) * 0.18;
-                        weaponModel.position.set(0.2, -0.25, -0.4 - thrust);
-                        // Fast horizontal slash: Left -> Right
+                    if (window.knifeSwing > 0) {
+                        // [FIX] Independent Right Arm Swing (Left arm stays still)
 
-                        // Arm Sweep: wider right -> left with strong ease
-                        const easeT = swingT < 0.5
-                            ? 4 * swingT * swingT * swingT
-                            : 1 - Math.pow(-2 * swingT + 2, 3) / 2;
-                        const sweepX = 0.55 - (1.1 * easeT);
-                        const arcY = Math.sin(swingT * Math.PI) * 0.03;
-
-                        window.knifeRightArm.position.set(
-                            sweepX,
-                            -0.2 + arcY,
-                            -0.32 - (0.12 * arcY)
-                        );
-
-                        // Arm Rotation: Rotate with the sweep
-                        window.knifeRightArm.rotation.set(
-                            -0.08,
-                            1.1 - (2.2 * easeT),
-                            0.15 - (0.3 * easeT)
-                        );
-
-                        // Knife Follows Arm
-                        window.knifeModel.position.set(
-                            sweepX - 0.08,
-                            -0.2 + arcY,
-                            -0.66
-                        );
-
-                        // Knife Rotation Aligned
-                        window.knifeModel.rotation.set(
-                            0.2,
-                            (1.1 - (2.2 * easeT)) + 1.57,
-                            0.05 - (0.2 * easeT)
-                        );
-                    } else if (window.knifeModel) {
-                        // Reset Knife Local Transform
-                        window.knifeModel.position.set(0, -0.2, -0.5);
-                        window.knifeModel.rotation.set(0.2, Math.PI / 2, 0);
+                        // 1. Reset Internal Parts to Default
+                        if (window.knifeModel) {
+                            window.knifeModel.position.set(0, -0.2, -0.5);
+                            window.knifeModel.rotation.set(0.1, 1.8, -0.2); // [MOD] Updated Idle Rotation
+                        }
                         if (window.knifeRightArm) {
-                            window.knifeRightArm.position.set(0.12, -0.2, -0.24);
+                            window.knifeRightArm.position.set(0.12, -0.2, -0.15); // [MOD] Sync with Shorter Handle
                             window.knifeRightArm.rotation.set(0, -0.15, 0.05);
+                        }
+
+                        const swingT = 1 - (window.knifeSwing / window.KNIFE_SWING_DURATION);
+
+                        // weaponModel STAYS INITIAL (Fix for Left Arm moving)
+                        weaponModel.position.set(0.35, -0.15, -0.3);
+                        weaponModel.rotation.set(0, 0, 0);
+
+                        // Variables for Right Arm & Knife LOCAL transforms
+                        let ax = 0.12, ay = -0.2, az = -0.15;
+                        let arx = 0, ary = -0.15, arz = 0.05;
+
+                        // Variables for LEFT Arm
+                        let lx = -1.63, ly = -0.14, lz = -0.11;
+                        let lrx = 0.56, lry = -0.56, lrz = -1.98;
+
+                        let kx = 0, ky = -0.2, kz = -0.5;
+                        let krx = 0.1, kry = 1.18, krz = -0.1; // [MOD] Start from new idle rotation (approx)
+
+                        if (swingT < 0.2) {
+                            // Phase 1: Wind Up (0% - 20%)
+                            const t = swingT / 0.2;
+                            const et = 1 - (1 - t) * (1 - t);
+
+                            // Right Arm windup
+                            ax = THREE.MathUtils.lerp(0.12, -0.2, et);
+                            ay = THREE.MathUtils.lerp(-0.2, -0.1, et);
+                            az = THREE.MathUtils.lerp(-0.15, 0.0, et);
+                            ary = THREE.MathUtils.lerp(-0.15, 0.8, et);
+
+                            // Left Arm windup (Counter balance)
+                            lx = THREE.MathUtils.lerp(-1.63, -1.5, et);
+                            lry = THREE.MathUtils.lerp(-0.56, -0.4, et);
+
+                            // Knife windup
+                            kx = THREE.MathUtils.lerp(-0.47, -0.6, et); // [MOD] Base -0.47
+                            ky = THREE.MathUtils.lerp(0.11, 0.2, et);   // [MOD] Base 0.11
+                            kz = THREE.MathUtils.lerp(-0.31, -0.1, et);
+                            kry = THREE.MathUtils.lerp(1.18, 2.5, et);  // [MOD] Wind up angle
+                        } else if (swingT < 0.6) {
+                            // Phase 2: Slash (20% - 60%)
+                            const t = (swingT - 0.2) / 0.4;
+                            const et = 1 - Math.pow(1 - t, 3); // Cubic Out
+
+                            // Right Arm Slash
+                            ax = THREE.MathUtils.lerp(-0.2, 0.7, et);
+                            ay = THREE.MathUtils.lerp(-0.1, -0.35, Math.sin(t * Math.PI));
+                            az = THREE.MathUtils.lerp(0.0, -0.5, Math.sin(t * Math.PI));
+                            ary = THREE.MathUtils.lerp(0.8, -1.8, et);
+
+                            // Left Arm Slash (Reaction)
+                            lx = THREE.MathUtils.lerp(-1.5, -1.7, et);
+                            lry = THREE.MathUtils.lerp(-0.4, -0.7, et);
+
+                            // Knife Slash
+                            kx = THREE.MathUtils.lerp(-0.6, 0.5, et);
+                            ky = THREE.MathUtils.lerp(0.2, -0.2, Math.sin(t * Math.PI));
+                            kz = THREE.MathUtils.lerp(-0.1, -0.8, Math.sin(t * Math.PI));
+                            kry = THREE.MathUtils.lerp(2.5, -1.5, et); // [MOD] Slash through
+                        } else {
+                            // Phase 3: Recovery (60% - 100%)
+                            const t = (swingT - 0.6) / 0.4;
+                            const et = t * t; // Quad In
+
+                            // Right Arm Recovery
+                            ax = THREE.MathUtils.lerp(0.7, 0.02, et); // Return to idle 0.02
+                            ay = THREE.MathUtils.lerp(-0.35, 0.02, et); // Return to idle 0.02
+                            az = THREE.MathUtils.lerp(-0.5, -0.15, et); // Return to idle -0.15
+                            ary = THREE.MathUtils.lerp(-1.8, 0.36, et); // Return to idle 0.36
+
+                            // Left Arm Recovery
+                            lx = THREE.MathUtils.lerp(-1.7, -1.63, et);
+                            lry = THREE.MathUtils.lerp(-0.7, -0.56, et);
+
+                            // Knife Recovery
+                            kx = THREE.MathUtils.lerp(0.5, -0.47, et);
+                            ky = THREE.MathUtils.lerp(-0.2, 0.11, et);
+                            kz = THREE.MathUtils.lerp(-0.8, -0.31, et);
+                            kry = THREE.MathUtils.lerp(-1.5, 1.18, et);
+                        }
+
+                        // Apply to Right Arm
+                        const rArm = weaponModel.getObjectByName('RightArmGroup');
+                        if (rArm) {
+                            rArm.position.set(ax, ay, az);
+                            rArm.rotation.set(arx, ary, arz);
+                        }
+                        // Apply to Left Arm
+                        const lArm = weaponModel.getObjectByName('LeftArmGroup');
+                        if (lArm) {
+                            lArm.position.set(lx, ly, lz);
+                            lArm.rotation.set(lrx, lry, lrz);
+                        }
+                        // Apply to Knife
+                        if (window.knifeModel) {
+                            window.knifeModel.position.set(kx, ky, kz);
+                            window.knifeModel.rotation.set(krx, kry, krz);
+                        }
+
+                    } else if (window.knifeModel) {
+                        // [FIX] Use WEAPONS data instead of hardcoded values for debug panel support
+                        const knifeWeapon = WEAPONS.find(weapon => weapon.type === 'KNIFE');
+                        if (knifeWeapon && knifeWeapon.glbHip) {
+                            window.knifeModel.position.copy(knifeWeapon.glbHip.pos);
+                            window.knifeModel.rotation.set(knifeWeapon.glbHip.rot.x, knifeWeapon.glbHip.rot.y, knifeWeapon.glbHip.rot.z);
+                            window.knifeModel.scale.copy(knifeWeapon.glbHip.scale);
+                        }
+                        const rArm = weaponModel.getObjectByName('RightArmGroup');
+                        if (rArm && knifeWeapon && knifeWeapon.rArmHip) {
+                            rArm.position.copy(knifeWeapon.rArmHip.pos);
+                            rArm.rotation.set(knifeWeapon.rArmHip.rot.x, knifeWeapon.rArmHip.rot.y, knifeWeapon.rArmHip.rot.z);
+                        }
+                        const lArm = weaponModel.getObjectByName('LeftArmGroup');
+                        if (lArm && knifeWeapon && knifeWeapon.lArmHip) {
+                            lArm.position.copy(knifeWeapon.lArmHip.pos);
+                            lArm.rotation.set(knifeWeapon.lArmHip.rot.x, knifeWeapon.lArmHip.rot.y, knifeWeapon.lArmHip.rot.z);
                         }
                     }
                 } else {
