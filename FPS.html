@@ -5744,8 +5744,8 @@
 
                     const mesh = otherPlayersMap[p.id];
                     if (mesh) {
-                        // Use server position for all axes (adjust Y for feet - refined from 1.7 to 1.65)
-                        mesh.position.set(p.position.x, p.position.y - 1.65, p.position.z);
+                        // Use server position for all axes (adjust Y for feet - refined to 1.3 to raise further)
+                        mesh.position.set(p.position.x, p.position.y - 1.3, p.position.z);
                         mesh.rotation.y = p.rotation.y;
                     } else {
                         // If player exists but no mesh (e.g. joined mid-game), create it
@@ -6178,8 +6178,8 @@
                 // Scale for visibility (Doubled as requested)
                 group.scale.set(2.0, 2.0, 2.0);
                 // Position: use player position directly (model origin should be at feet)
-                // [FIX] Apply -1.65 offset (refined from 1.7 to raise feet slightly)
-                group.position.set(p.position.x, p.position.y - 1.65, p.position.z);
+                // [FIX] Apply -1.3 offset (refined to raise feet further)
+                group.position.set(p.position.x, p.position.y - 1.3, p.position.z);
 
                 // Rotation: sync with player's facing direction
                 if (p.rotation !== undefined) {
