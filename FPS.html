@@ -6064,8 +6064,8 @@
 
             // Ensure scene exists before adding
             if (window.scene) {
-                // Match player height
-                group.scale.set(0.9, 0.9, 0.9);
+                // Match player height (Doubled size as requested: 0.9 -> 1.8)
+                group.scale.set(1.8, 1.8, 1.8);
                 group.position.set(p.position.x, p.position.y - 1.7, p.position.z);
 
                 scene.add(group);
@@ -6074,6 +6074,65 @@
                 console.log('Low-poly player mesh added for:', p.name); // DEBUG
             } else {
                 console.error('Window.scene is missing in createRemotePlayer!'); // DEBUG
+            }
+        }
+
+        function loadRemoteWeaponObj(playerGroup, weaponIdx) {
+            const w = WEAPONS[weaponIdx];
+            if (!w) return;
+
+            const rArm = playerGroup.userData.rArm;
+            if (!rArm) return;
+
+            // Remove existing weapon
+            if (playerGroup.userData.weaponMesh) {
+                rArm.remove(playerGroup.userData.weaponMesh);
+                playerGroup.userData.weaponMesh = null;
+            }
+
+            // Determine GLB Path based on Weapon Type
+            let glbPath = null;
+            let scale = 1.0;
+
+            if (w.type === 'RIFLE') {
+                glbPath = 'gun/Rifle.glb';
+                scale = 1.2;
+            } else if (w.type === 'PISTOL') {
+                glbPath = 'gun/Pistol.glb';
+                scale = 1.2;
+            } else if (w.type === 'SNIPER') {
+                glbPath = 'gun/Sniper.glb'; // Confirmed path
+                scale = 1.2;
+            } else if (w.type === 'KNIFE') {
+                // For knife, maybe simple box or dedicated model
+                // Skipping for now or create simple mesh
+                const knifeGeo = new THREE.BoxGeometry(0.1, 0.3, 0.05);
+                const knifeMat = new THREE.MeshStandardMaterial({ color: 0x555555 });
+                const knifeMesh = new THREE.Mesh(knifeGeo, knifeMat);
+                knifeMesh.position.set(0, -0.2, 0.1);
+                knifeMesh.rotation.x = -Math.PI / 2;
+                rArm.add(knifeMesh);
+                playerGroup.userData.weaponMesh = knifeMesh;
+                return;
+            }
+
+            if (glbPath) {
+                // Use global loader if available
+                const loader = new THREE.GLTFLoader();
+                loader.load(glbPath, (gltf) => {
+                    const model = gltf.scene;
+                    model.scale.set(scale, scale, scale);
+
+                    // Adjust position to fit hand
+                    model.position.set(0, -0.2, 0.1);
+                    model.rotation.y = Math.PI; // Face forward
+
+                    rArm.add(model);
+                    playerGroup.userData.weaponMesh = model;
+                    console.log('Loaded remote weapon:', glbPath);
+                }, undefined, (err) => {
+                    console.error('Failed to load remote weapon GLB:', glbPath, err);
+                });
             }
         }
 
