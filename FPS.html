@@ -2742,6 +2742,80 @@
                 transform: translateX(0) !important;
             }
         }
+
+        /* Tab Scoreboard Overlay Styles */
+        #tab-scoreboard {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+
+        #tab-scoreboard-content {
+            background: rgba(20, 20, 30, 0.9);
+            border: 2px solid var(--neon-cyan);
+            border-radius: 10px;
+            padding: 30px 40px;
+            min-width: 400px;
+            max-width: 600px;
+            box-shadow: 0 0 30px rgba(0, 243, 255, 0.5);
+        }
+
+        #tab-scoreboard-content h2 {
+            margin: 0 0 20px 0;
+            color: var(--neon-cyan);
+            font-family: var(--font-stack);
+            font-size: 28px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        #tab-scoreboard-players {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .scoreboard-player {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-left: 3px solid rgba(255, 255, 255, 0.3);
+            font-family: var(--font-stack);
+            font-size: 18px;
+            transition: all 0.2s;
+        }
+
+        .scoreboard-player.you {
+            background: rgba(0, 243, 255, 0.15);
+            border-left-color: var(--neon-cyan);
+        }
+
+        .scoreboard-player-name {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .scoreboard-player.you .scoreboard-player-name {
+            color: var(--neon-cyan);
+        }
+
+        .scoreboard-player-kills {
+            color: #ffa500;
+            font-weight: 700;
+            font-size: 20px;
+        }
     </style>
 </head>
 
@@ -2766,6 +2840,14 @@
         style="display: none; position: fixed; top: 35%; left: 50%; transform: translate(-50%, -50%); color: #ff6600; font-size: 60px; font-weight: 900; text-shadow: 0 0 20px #ff0000; z-index: 100; pointer-events: none; font-style: italic;">
         GRENADE KILL!</div>
     <div id="hit-marker"></div>
+
+    <!-- Tab Scoreboard Overlay -->
+    <div id="tab-scoreboard" style="display: none;">
+        <div id="tab-scoreboard-content">
+            <h2>플레이어 목록</h2>
+            <div id="tab-scoreboard-players"></div>
+        </div>
+    </div>
 
     <div id="game-over">
         <div id="game-over-title">YOU DIED</div>
@@ -4425,19 +4507,20 @@
                 // 나이프 휘두르기 오디오 파일 사용, 없으면 기존 소리 생성
                 if (this.audioBuffers['sword']) {
                     this.playAudioFile('sword', 0.8);
-                } else {
-                    // 기존 소리 생성 (폴백)
-                    const t = this.ctx.currentTime;
-                    const osc = this.ctx.createOscillator();
-                    const gain = this.ctx.createGain();
-                    osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(600, t);
-                    osc.frequency.exponentialRampToValueAtTime(100, t + 0.2);
-                    gain.gain.setValueAtTime(0.1, t);
-                    gain.gain.linearRampToValueAtTime(0, t + 0.2);
-                    osc.connect(gain); gain.connect(this.ctx.destination);
-                    osc.start(); osc.stop(t + 0.2);
+                    return; // Prevent fallback sound from playing
                 }
+
+                // 기존 소리 생성 (폴백)
+                const t = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(600, t);
+                osc.frequency.exponentialRampToValueAtTime(100, t + 0.2);
+                gain.gain.setValueAtTime(0.1, t);
+                gain.gain.linearRampToValueAtTime(0, t + 0.2);
+                osc.connect(gain); gain.connect(this.ctx.destination);
+                osc.start(); osc.stop(t + 0.2);
             },
             playJump: function (land) {
                 if (!this.ensureContext()) return;
@@ -5639,6 +5722,14 @@
                                     }, 100);
                                 }
                             });
+                        } else if (data.action === 'switch') {
+                            // Update weapon mesh when remote player switches weapons
+                            const newWeaponIdx = data.weaponIdx;
+                            if (newWeaponIdx !== undefined && mesh.userData.weaponIdx !== newWeaponIdx) {
+                                mesh.userData.weaponIdx = newWeaponIdx;
+                                loadRemoteWeaponObj(mesh, newWeaponIdx);
+                                console.log('Player', data.id, 'switched to weapon index:', newWeaponIdx);
+                            }
                         }
                     }
                 });
@@ -5892,185 +5983,95 @@
         function createRemotePlayer(p) {
             console.log('createRemotePlayer called for:', p); // DEBUG
 
-            // --- Enhanced Materials (Reusing/Refining) ---
-            const matSkin = new THREE.MeshStandardMaterial({ color: 0xffdbac, roughness: 0.7, emissive: 0x553322, emissiveIntensity: 0.1 }); // Skin
-            const matUniform = new THREE.MeshStandardMaterial({ color: 0x2f3542, roughness: 0.8 }); // Dark Grey Uniform
-            const matVest = new THREE.MeshStandardMaterial({ color: 0x1e272e, roughness: 0.6, metalness: 0.1 }); // Black Vest
-            const matPad = new THREE.MeshStandardMaterial({ color: 0x000000, roughness: 0.9 }); // Pads/Boots
-            const matTeam = new THREE.MeshStandardMaterial({ color: 0x3498db, emissive: 0x3498db, emissiveIntensity: 0.2, metalness: 0.3 }); // Team Accent
-            const matWeapon = new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 0.7, roughness: 0.3 }); // Gun Metal
-            const matVisor = new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 0.9, roughness: 0.1, emissive: 0x00d2d3, emissiveIntensity: 0.3 }); // Visor
-
-            const matHpBg = new THREE.MeshBasicMaterial({ color: 0x000000 });
-            const matHpFg = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+            // Simple Low-Poly Materials (Minecraft-style)
+            const matSkin = new THREE.MeshStandardMaterial({ color: 0xffdbac, roughness: 0.8 }); // Skin
+            const matShirt = new THREE.MeshStandardMaterial({ color: 0x3498db, roughness: 0.7 }); // Blue shirt
+            const matPants = new THREE.MeshStandardMaterial({ color: 0x2c3e50, roughness: 0.7 }); // Dark pants
 
             const group = new THREE.Group();
 
-            // --- 1. Legs (Articulated) ---
-            const pelvis = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.15, 0.22), matUniform);
-            pelvis.position.y = 0.95;
-            group.add(pelvis);
-
-            function createLeg(x, zRot) {
-                const leg = new THREE.Group();
-                leg.position.set(x, 0.95, 0);
-
-                // Thigh
-                const thigh = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.09, 0.45, 8), matUniform);
-                thigh.position.y = -0.22;
-                leg.add(thigh);
-
-                // Knee Pad
-                const knee = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.12, 0.12), matPad);
-                knee.position.set(0, -0.45, 0.02);
-                leg.add(knee);
-
-                // Shin
-                const shin = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.07, 0.45, 8), matUniform);
-                shin.position.y = -0.68;
-                leg.add(shin);
-
-                // Boot
-                const boot = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.15, 0.24), matPad);
-                boot.position.set(0, -0.9, 0.05);
-                leg.add(boot);
-
-                if (zRot) leg.rotation.z = zRot; // Slight stance
-                return leg;
-            }
-            group.add(createLeg(-0.16, 0.05));
-            group.add(createLeg(0.16, -0.05));
-
-            // --- 2. Torso (Tactical Vest) ---
-            const torso = new THREE.Group();
-            torso.position.y = 0.95;
-
-            // Abdomen (Shirt)
-            const abs = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.25, 0.2), matUniform);
-            abs.position.y = 0.15;
-            torso.add(abs);
-
-            // Chest (Vest)
-            const chest = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.35, 0.28), matVest);
-            chest.position.y = 0.45;
-            torso.add(chest);
-
-            // Team Plate
-            const plate = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.15, 0.05), matTeam);
-            plate.position.set(0, 0.45, 0.14);
-            torso.add(plate);
-
-            group.add(torso);
-
-            // --- 3. Head & Neck ---
-            const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.07, 0.1, 8), matSkin);
-            neck.position.set(0, 1.6, 0);
-            group.add(neck);
-
-            const head = new THREE.Group();
-            head.position.set(0, 1.7, 0);
-
-            // Head Base
-            const face = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.24, 0.22), matSkin);
-            head.add(face);
-
-            // Helmet
-            const helmet = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.1, 0.24), matPad);
-            helmet.position.y = 0.12;
-            head.add(helmet);
-
-            // Face Features (Eyes, Nose, Mouth) instead of Visor
-            // Eyes
-            const eyeGeo = new THREE.BoxGeometry(0.035, 0.015, 0.01);
-            const eyeMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
-            const leftEye = new THREE.Mesh(eyeGeo, eyeMat);
-            leftEye.position.set(-0.05, 0.02, 0.115);
-            head.add(leftEye);
-            const rightEye = new THREE.Mesh(eyeGeo, eyeMat);
-            rightEye.position.set(0.05, 0.02, 0.115);
-            head.add(rightEye);
-            // Nose
-            const nose = new THREE.Mesh(new THREE.BoxGeometry(0.015, 0.04, 0.015), matSkin);
-            nose.position.set(0, -0.02, 0.12);
-            head.add(nose);
-            // Mouth
-            const mouth = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.008, 0.01), new THREE.MeshBasicMaterial({ color: 0x552222 }));
-            mouth.position.set(0, -0.07, 0.115);
-            head.add(mouth);
-
+            // --- 1. Head (Cubic) ---
+            const head = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.3, 0.3), matSkin);
+            head.position.y = 1.65;
             head.name = 'head';
             group.add(head);
             group.userData.head = head;
 
-            // --- 4. Arms (Holding Weapon) ---
-            function createArm(side) { // side: 1 (right), -1 (left)
-                const arm = new THREE.Group();
-                arm.position.set(side * 0.25, 1.55, 0); // Shoulder
+            // Eyes (simple black pixels)
+            const eyeGeo = new THREE.BoxGeometry(0.08, 0.08, 0.01);
+            const eyeMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+            const leftEye = new THREE.Mesh(eyeGeo, eyeMat);
+            leftEye.position.set(-0.07, 1.68, 0.16);
+            group.add(leftEye);
+            const rightEye = new THREE.Mesh(eyeGeo, eyeMat);
+            rightEye.position.set(0.07, 1.68, 0.16);
+            group.add(rightEye);
 
-                // Shoulder Pad
-                const shoulder = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.14, 0.14), matPad);
-                arm.add(shoulder);
+            // --- 2. Torso (Box) ---
+            const torso = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.45, 0.15), matShirt);
+            torso.position.y = 1.2;
+            group.add(torso);
 
-                // Upper Arm
-                const upper = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.06, 0.3, 8), matUniform);
-                upper.position.y = -0.18;
-                upper.rotation.z = side * 0.2;
-                arm.add(upper);
+            // --- 3. Arms (Simple Boxes) ---
+            const armGeo = new THREE.BoxGeometry(0.12, 0.45, 0.12);
 
-                // Lower Arm (Forearm)
-                const lowerGrp = new THREE.Group();
-                lowerGrp.position.set(side * 0.08, -0.35, 0);
-                lowerGrp.rotation.x = -0.6; // Raise forward
-                lowerGrp.rotation.z = side * -0.6; // Angle inward
+            // Left Arm
+            const leftArm = new THREE.Mesh(armGeo, matShirt);
+            leftArm.position.set(-0.21, 1.2, 0);
+            group.add(leftArm);
 
-                const lower = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.05, 0.3, 8), matSkin);
-                lower.position.y = -0.15;
-                lowerGrp.add(lower);
+            // Right Arm (save reference for weapon attachment)
+            const rightArm = new THREE.Mesh(armGeo, matShirt);
+            rightArm.position.set(0.21, 1.2, 0);
+            group.add(rightArm);
+            group.userData.rArm = rightArm;
 
-                // Hand
-                const hand = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.1, 0.08), matPad); // Gloves
-                hand.position.y = -0.32;
-                lowerGrp.add(hand);
+            // --- 4. Legs (Simple Boxes) ---
+            const legGeo = new THREE.BoxGeometry(0.14, 0.45, 0.14);
 
-                arm.add(lowerGrp);
-                return arm;
-            }
-            group.add(createArm(-1)); // Left
+            // Left Leg
+            const leftLeg = new THREE.Mesh(legGeo, matPants);
+            leftLeg.position.set(-0.08, 0.7, 0);
+            group.add(leftLeg);
 
-            const rArm = createArm(1); // Right
-            group.add(rArm);
-            group.userData.rArm = rArm; // Save for weapon attachment
+            // Right Leg
+            const rightLeg = new THREE.Mesh(legGeo, matPants);
+            rightLeg.position.set(0.08, 0.7, 0);
+            group.add(rightLeg);
 
             // --- 5. Weapon (Load GLB) ---
             const wIdx = p.weaponIdx !== undefined ? p.weaponIdx : 0;
             loadRemoteWeaponObj(group, wIdx);
 
-            // --- HP Bar ---
+            // --- HP Bar (Hidden in multiplayer) ---
+            const matHpBg = new THREE.MeshBasicMaterial({ color: 0x000000 });
+            const matHpFg = new THREE.MeshBasicMaterial({ color: 0xff0000 });
             const hpBg = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.1), matHpBg);
             hpBg.position.y = 2.2;
-            hpBg.visible = false; // Hide HP bar in multiplayer
+            hpBg.visible = false;
             group.add(hpBg);
             const hpFg = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.1), matHpFg);
             hpFg.position.y = 2.2;
             hpFg.position.z = 0.01;
-            hpFg.visible = false; // Hide HP bar in multiplayer
+            hpFg.visible = false;
             group.add(hpFg);
 
             group.userData.hp = p.hp || 100;
             group.userData.maxHp = 100;
             group.userData.hpBar = hpFg;
             group.userData.playerId = p.id;
+            group.userData.weaponIdx = wIdx;
 
             // Ensure scene exists before adding
             if (window.scene) {
-                // Adjust scale and position to match gameplay physics
+                // Match player height
                 group.scale.set(0.9, 0.9, 0.9);
                 group.position.set(p.position.x, p.position.y - 1.7, p.position.z);
 
                 scene.add(group);
                 otherPlayersMap[p.id] = group;
                 if (typeof otherPlayers !== 'undefined') otherPlayers.push(group);
-                console.log('Detailed Player mesh added.'); // DEBUG
+                console.log('Low-poly player mesh added for:', p.name); // DEBUG
             } else {
                 console.error('Window.scene is missing in createRemotePlayer!'); // DEBUG
             }
@@ -10449,6 +10450,56 @@
             }, 4000);
         }
 
+        // Tab Scoreboard Functions
+        function showTabScoreboard() {
+            const scoreboard = document.getElementById('tab-scoreboard');
+            const playersContainer = document.getElementById('tab-scoreboard-players');
+
+            if (!scoreboard || !playersContainer) return;
+
+            // Clear previous content
+            playersContainer.innerHTML = '';
+
+            // Get players from roomPlayersState
+            const players = roomPlayersState ? Object.values(roomPlayersState) : [];
+
+            if (players.length === 0) {
+                playersContainer.innerHTML = '<div style="color: #888; text-align: center;">플레이어 없음</div>';
+            } else {
+                // Sort by kills (descending)
+                players.sort((a, b) => (b.kills || 0) - (a.kills || 0));
+
+                players.forEach(player => {
+                    const playerDiv = document.createElement('div');
+                    playerDiv.className = 'scoreboard-player';
+                    if (player.id === myId) {
+                        playerDiv.classList.add('you');
+                    }
+
+                    const nameSpan = document.createElement('span');
+                    nameSpan.className = 'scoreboard-player-name';
+                    nameSpan.textContent = player.name + (player.id === myId ? ' (나)' : '');
+
+                    const killsSpan = document.createElement('span');
+                    killsSpan.className = 'scoreboard-player-kills';
+                    killsSpan.textContent = `${player.kills || 0} 킬`;
+
+                    playerDiv.appendChild(nameSpan);
+                    playerDiv.appendChild(killsSpan);
+                    playersContainer.appendChild(playerDiv);
+                });
+            }
+
+            scoreboard.style.display = 'flex';
+        }
+
+        function hideTabScoreboard() {
+            const scoreboard = document.getElementById('tab-scoreboard');
+            if (scoreboard) {
+                scoreboard.style.display = 'none';
+            }
+        }
+
         function updateTimerUI(seconds) {
             // Update HUD Timer
             if (elTimer) {
@@ -10701,7 +10752,13 @@
                 if (k === '3') switchWeaponTo(2);
                 if (k === '4') switchWeaponTo(3);
                 if (k === '5') switchWeaponTo(4);
-                if (k === 'tab') { e.preventDefault(); switchWeaponTo((curWeaponIdx + 1) % 5); }
+                if (k === 'tab') {
+                    e.preventDefault();
+                    // Show Tab Scoreboard (only in multiplayer)
+                    if (gameMode === 'multi') {
+                        showTabScoreboard();
+                    }
+                }
                 if (k === 'r') doReload();
             });
 
@@ -10729,6 +10786,10 @@
                 if (k === 'shift') keys.shift = false;
                 if (k === 'control') keys.ctrl = false;
                 if (k === ' ') keys.space = false;
+                // Hide Tab Scoreboard on release
+                if (k === 'tab') {
+                    hideTabScoreboard();
+                }
             });
         }
 
