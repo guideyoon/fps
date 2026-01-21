@@ -1793,7 +1793,10 @@
             /* 120px -> 100px */
             height: 100px;
             z-index: 50;
-            /* background: rgba(255, 0, 0, 0.2); Debug */
+            touch-action: none;
+            /* Prevent browser scrolling */
+            background: rgba(255, 255, 255, 0.1);
+            /* Visible Hint */
         }
 
         #joystick-bg {
@@ -5742,8 +5745,8 @@
 
                     const mesh = otherPlayersMap[p.id];
                     if (mesh) {
-                        // Use server position for all axes
-                        mesh.position.set(p.position.x, p.position.y, p.position.z);
+                        // Use server position for all axes (adjust Y for feet)
+                        mesh.position.set(p.position.x, p.position.y - 1.7, p.position.z);
                         mesh.rotation.y = p.rotation.y;
                     } else {
                         // If player exists but no mesh (e.g. joined mid-game), create it
@@ -6101,7 +6104,7 @@
 
             // Draw red text on transparent background
             context.fillStyle = 'rgba(0, 0, 0, 0.5)';
-            context.fillRect(0, 0, canvas.width, canvas.height);
+            // context.fillRect(0, 0, canvas.width, canvas.height); // Removed background
             context.font = 'bold 32px Arial';
             context.fillStyle = '#ff3333';
             context.textAlign = 'center';
@@ -6116,7 +6119,7 @@
             });
             const nameSprite = new THREE.Sprite(spriteMaterial);
             nameSprite.scale.set(2, 0.5, 1);
-            nameSprite.position.y = 2.5; // Above the character head
+            nameSprite.position.y = 2.0; // Slightly above head
             group.add(nameSprite);
             group.userData.nameSprite = nameSprite;
 
@@ -6176,11 +6179,13 @@
                 // Scale for visibility
                 group.scale.set(1.0, 1.0, 1.0);
                 // Position: use player position directly (model origin should be at feet)
-                group.position.set(p.position.x, p.position.y, p.position.z);
+                // [FIX] Apply -1.7 offset (assuming p.position is eye level)
+                group.position.set(p.position.x, p.position.y - 1.7, p.position.z);
 
                 // Rotation: sync with player's facing direction
                 if (p.rotation !== undefined) {
-                    group.rotation.y = p.rotation;
+                    // [FIX] Use .y property if object, otherwise use value
+                    group.rotation.y = (typeof p.rotation === 'object') ? p.rotation.y : p.rotation;
                 }
 
                 scene.add(group);
@@ -12980,9 +12985,14 @@
                 if (gameMode === 'single') {
                     updateEnemies(dt);
                 } else if (gameMode === 'multi') {
-                    // 원격 플레이어 HP 바가 항상 카메라를 향하게
+                    // [FIX] Update Remote Players: Name Tag Visibility Only (No LookAt override)
                     otherPlayers.forEach(p => {
-                        p.lookAt(camera.position.x, p.position.y, camera.position.z);
+                        // Calculate distance to local player for name tag visibility
+                        const dist = p.position.distanceTo(camera.position);
+                        if (p.userData.nameSprite) {
+                            // Only show name if within 20 meters
+                            p.userData.nameSprite.visible = (dist < 20);
+                        }
                     });
 
                     // 자신의 상태 서버 전송 (초당 약 30~60회 렌더링마다 전송하면 부하가 생길 수 있으므로 최적화 가능)
@@ -13213,6 +13223,32 @@
             window.addEventListener('resize', updateDynamicUI);
             window.addEventListener('orientationchange', () => setTimeout(updateDynamicUI, 100));
         })();
+    </script>
+    <script>
+        // [FIX] Chat Input Logic: Prevent weapon switching and handle Enter key control
+        window.addEventListener('keydown', (e) => {
+            const chatInput = document.getElementById('chat-input');
+            const isChatFocused = (document.activeElement === chatInput);
+
+            if (isChatFocused) {
+                // Prevent number keys from switching weapons
+                if (['1', '2', '3', '4'].includes(e.key)) {
+                    e.stopPropagation();
+                    return;
+                }
+
+                // Enter to close chat and resume (Blur & Lock)
+                if (e.key === 'Enter') {
+                    // Slight delay to ensure any existing "send" logic fires first if it relies on Enter
+                    setTimeout(() => {
+                        chatInput.blur();
+                        if (!window.isMobile && document.body.requestPointerLock) {
+                            document.body.requestPointerLock();
+                        }
+                    }, 10);
+                }
+            }
+        }, true); // Capture phase to handling before game logic
     </script>
 
     <div id="low-health-overlay"></div>
