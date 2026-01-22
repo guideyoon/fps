@@ -6,7 +6,13 @@ export default defineConfig({
     build: {
         outDir: 'dist',
         emptyOutDir: true,
-        sourcemap: true
+        sourcemap: true,
+        rollupOptions: {
+            input: {
+                main: 'index.html',
+                game: 'FPS.html'
+            }
+        }
     },
     server: {
         host: true,
