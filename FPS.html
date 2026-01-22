@@ -759,7 +759,49 @@
                 font-size: 1rem;
             }
 
-            /* Hide crosshair lines on mobile if needed, but keeping for now */
+            /* Mobile Landscape Specific */
+            @media (orientation: landscape) {
+                #weapon-inventory {
+                    gap: 12px;
+                    left: 10px;
+                }
+
+                .weapon-slot {
+                    padding: 12px 20px;
+                }
+
+                .weapon-number {
+                    font-size: 24px;
+                    min-width: 30px;
+                }
+
+                .weapon-name {
+                    font-size: 20px;
+                }
+
+                #hp-container {
+                    left: 10px;
+                    bottom: 10px;
+                    width: 400px;
+                    height: 30px;
+                }
+
+                #hp-text {
+                    left: 10px;
+                    bottom: 45px;
+                    font-size: 28px;
+                }
+
+                #chat-container {
+                    bottom: 100px;
+                    left: 10px;
+                    width: 350px;
+                }
+
+                #chat-messages {
+                    height: 150px;
+                }
+            }
         }
 
 
@@ -1012,15 +1054,16 @@
         #hp-container {
             position: absolute;
             bottom: 25px;
-            left: 50px;
-            /* HP text space */
-            width: 200px;
-            height: 15px;
+            left: 0;
+            /* Align to the LEFT edge */
+            width: 400px;
+            /* Doubled size (from 200px) */
+            height: 30px;
+            /* Doubled size (from 15px) */
             background: rgba(0, 0, 0, 0.6);
             border: 1px solid rgba(255, 255, 255, 0.3);
             border-radius: 4px;
             overflow: visible;
-            /* Allow text outside */
         }
 
         #hp-bar {
@@ -1033,16 +1076,16 @@
 
         #hp-text {
             position: absolute;
-            left: 15px;
-            /* User Request: Left of the bar */
-            bottom: 25px;
-            /* Aligned with bar bottom */
-            line-height: 15px;
-            /* Match bar height */
+            left: 10px;
+            /* Inside the bar or very close to the left */
+            bottom: 40px;
+            /* Above the bar or inside if adjusted */
+            line-height: 30px;
             color: white;
             font-weight: bold;
-            font-size: 14px;
-            text-shadow: 1px 1px 2px black;
+            font-size: 28px;
+            /* Larger font for larger bar */
+            text-shadow: 2px 2px 4px black;
             z-index: 5;
             pointer-events: none;
         }
@@ -1378,6 +1421,35 @@
 
         .status-badge.full {
             background: #f44336;
+        }
+
+        /* Message Toggle Button */
+        #chat-toggle-btn {
+            position: absolute;
+            left: 20px;
+            bottom: 300px;
+            z-index: 101;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: var(--font-stack);
+            font-weight: bold;
+            display: none;
+            /* Only show in mobile landscape */
+        }
+
+        @media (max-width: 768px) and (orientation: landscape) {
+            #chat-toggle-btn {
+                display: block;
+            }
+
+            #chat-container {
+                display: none;
+                /* Initially hidden in mobile landscape */
+            }
         }
 
         #chat-container {
@@ -2140,14 +2212,6 @@
                 z-index: 1000;
             }
 
-            /* [User Request] Reduce Weapon Icon Size (1/2) */
-            #weapon-selector-vertical .weapon-select-btn {
-                width: 25px !important;
-                /* 35px -> 25px */
-                height: 25px !important;
-                font-size: 10px !important;
-            }
-
             /* [User Request] Fixed: Hide PC Weapon List in Mobile Landscape */
             #weapon-list-left,
             #weapon-inventory,
@@ -2365,16 +2429,10 @@
             /* ===== [FIX] 무기 선택기 강제 표시 (모바일 가로 모드) ===== */
             #weapon-selector-vertical {
                 display: flex !important;
-                left: 10px !important;
+                left: 20px !important;
                 top: 50% !important;
                 transform: translateY(-50%) !important;
-                gap: 3px !important;
-            }
-
-            #weapon-selector-vertical .weapon-select-btn {
-                width: 22px !important;
-                height: 22px !important;
-                font-size: 9px !important;
+                gap: 10px !important;
             }
 
             /* ===== [FIX] 조이스틱 및 버튼 강제 표시 (모바일 가로 모드) ===== */
@@ -13534,11 +13592,20 @@
                             #weapon-selector-vertical {
                                 display: ${isGameActive ? 'flex' : 'none'} !important;
                                 flex-direction: column;
-                                top: 40% !important; 
+                                top: 50% !important; 
                                 left: 20px !important;
+                                transform: translateY(-50%) !important;
                                 z-index: 10000 !important;
+                                gap: 10px !important;
                             }
                             
+                            /* [User Request] Increase Weapon Icon Size (2x) */
+                            #weapon-selector-vertical .weapon-select-btn {
+                                width: 50px !important; /* 25px -> 50px */
+                                height: 50px !important; /* 25px -> 50px */
+                                font-size: 20px !important; /* 10px -> 20px */
+                            }
+
                             /* Hide PC Weapon List (Left) in Mobile Landscape */
                             #weapon-list-left {
                                 display: none !important;
@@ -13561,7 +13628,8 @@
                             /* Chat Container Hidden by Default on Mobile */
                             #chat-container {
                                 display: none; /* Toggled via button */
-                                bottom: 120px !important; 
+                                bottom: 40px !important; 
+                                left: 90px !important; /* Clears weapon selector */
                                 width: 350px !important;
                             }
                             
@@ -13569,8 +13637,8 @@
                             #chat-toggle-btn {
                                 display: ${isGameActive ? 'flex' : 'none'} !important;
                                 position: fixed;
-                                left: 20px;
-                                bottom: 120px;
+                                left: 90px; /* Aligned with chat container */
+                                top: 20px; /* Top left area */
                                 width: 50px;
                                 height: 50px;
                                 border-radius: 50%;
