@@ -4503,7 +4503,7 @@
         const CAM_RECOIL_DAMPING = 12;
         const CAM_RECOIL_MAX = 0.55;
         const RIFLE_SHOT_BASE_VOLUME = 0.9;
-        const rifleShotAudio = new Audio('rifle2.MP3');
+        const rifleShotAudio = new Audio('sounds/rifle2.MP3');
         rifleShotAudio.preload = 'auto';
         rifleShotAudio.volume = RIFLE_SHOT_BASE_VOLUME;
         const playRifleShot = () => {
@@ -5343,13 +5343,13 @@
             }
 
             // --- Load User Sounds ---
-            SoundGen.loadAudioFile('uak.mp3', 'damage').catch(e => console.log('Damage sound (uak.mp3) not found or failed to load:', e));
-            SoundGen.loadAudioFile('hit.mp3', 'hit').catch(e => console.log('Hit sound (hit.mp3) not found or failed to load:', e));
-            SoundGen.loadAudioFile('headshot.mp3', 'headshot').catch(e => console.log('Headshot sound (headshot.mp3) not found or failed to load:', e));
-            SoundGen.loadAudioFile('chak.MP3', 'land').catch(e => console.log('Land sound (chak.MP3) not found or failed to load:', e));
-            SoundGen.loadAudioFile('grunt.mp3', 'jump').catch(e => console.log('Jump sound (grunt.mp3) not found or failed to load:', e));
-            SoundGen.loadAudioFile('grenade.mp3', 'grenade_explosion').catch(e => console.log('Grenade sound (grenade.mp3) not found or failed to load:', e));
-            SoundGen.loadAudioFile('remove.mp3', 'grenade_switch').catch(e => console.log('Grenade switch sound (remove.mp3) not found or failed to load:', e));
+            SoundGen.loadAudioFile('sounds/uak.mp3', 'damage').catch(e => console.log('Damage sound (uak.mp3) not found or failed to load:', e));
+            SoundGen.loadAudioFile('sounds/hit.MP3', 'hit').catch(e => console.log('Hit sound (hit.MP3) not found or failed to load:', e));
+            SoundGen.loadAudioFile('sounds/headshot.mp3', 'headshot').catch(e => console.log('Headshot sound (headshot.mp3) not found or failed to load:', e));
+            SoundGen.loadAudioFile('sounds/chak.MP3', 'land').catch(e => console.log('Land sound (chak.MP3) not found or failed to load:', e));
+            SoundGen.loadAudioFile('sounds/grunt.mp3', 'jump').catch(e => console.log('Jump sound (grunt.mp3) not found or failed to load:', e));
+            SoundGen.loadAudioFile('sounds/grenade.mp3', 'grenade_explosion').catch(e => console.log('Grenade sound (grenade.mp3) not found or failed to load:', e));
+            SoundGen.loadAudioFile('sounds/remove.mp3', 'grenade_switch').catch(e => console.log('Grenade switch sound (remove.mp3) not found or failed to load:', e));
 
             // 1. Mode Selection
             modeSelection.style.display = 'flex';
@@ -6554,39 +6554,39 @@
             if (SoundGen.ctx.state === 'suspended') SoundGen.ctx.resume();
 
             // 재장전 오디오 파일 로드
-            SoundGen.loadAudioFile('reload1.mp3', 'reload')
+            SoundGen.loadAudioFile('sounds/reload1.mp3', 'reload')
                 .catch(err => console.warn('Failed to load reload sound:', err));
 
             // 저격총 발사 오디오 파일 로드
-            SoundGen.loadAudioFile('rifle.mp3', 'rifle')
+            SoundGen.loadAudioFile('sounds/rifle.mp3', 'rifle')
                 .catch(err => console.warn('Failed to load rifle sound:', err));
 
             // 나이프 휘두르기 오디오 파일 로드
-            SoundGen.loadAudioFile('sword.mp3', 'sword')
+            SoundGen.loadAudioFile('sounds/sword.mp3', 'sword')
                 .catch(err => console.warn('Failed to load sword sound:', err));
 
             // 나이프 교체 오디오 파일 로드
-            SoundGen.loadAudioFile('c-sword.mp3', 'c-sword')
+            SoundGen.loadAudioFile('sounds/c-sword.mp3', 'c-sword')
                 .catch(err => console.warn('Failed to load c-sword sound:', err));
 
             // 소총 교체 오디오 파일 로드
-            SoundGen.loadAudioFile('c-sochong.mp3', 'c-sochong')
+            SoundGen.loadAudioFile('sounds/c-sochong.mp3', 'c-sochong')
                 .catch(err => console.warn('Failed to load c-sochong sound:', err));
 
             // 권총 교체 오디오 파일 로드
-            SoundGen.loadAudioFile('c-gun.mp3', 'c-gun')
+            SoundGen.loadAudioFile('sounds/c-gun.mp3', 'c-gun')
                 .catch(err => console.warn('Failed to load c-gun sound:', err));
 
             // 저격총 교체 오디오 파일 로드
-            SoundGen.loadAudioFile('c-rifle.mp3', 'c-rifle')
+            SoundGen.loadAudioFile('sounds/c-rifle.mp3', 'c-rifle')
                 .catch(err => console.warn('Failed to load c-rifle sound:', err));
 
             // 빈 격발 오디오 파일 로드
-            SoundGen.loadAudioFile('empty.mp3', 'empty')
+            SoundGen.loadAudioFile('sounds/empty.mp3', 'empty')
                 .catch(err => console.warn('Failed to load empty sound:', err));
 
             // 권총 발사 오디오 파일 로드
-            SoundGen.loadAudioFile('gunshot.mp3', 'gunshot')
+            SoundGen.loadAudioFile('sounds/gunshot.mp3', 'gunshot')
                 .catch(err => console.warn('Failed to load gunshot sound:', err));
         };
 
