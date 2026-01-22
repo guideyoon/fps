@@ -13376,38 +13376,67 @@
         // --- FORCE PC WEAPON ICON STYLE (JS INJECTION) ---
         // CSS 우선순위 문제를 해결하기 위해 JS로 스타일을 직접 주입합니다.
         // --- FORCE UI STYLE BASED ON DEVICE TYPE (JS INJECTION) ---
-        // [FIX] Replaced static viewport check with dynamic mobile check
         (function () {
             const style = document.createElement('style');
             style.id = 'dynamic-ui-style';
             document.head.appendChild(style);
 
+            function checkGameActive() {
+                const modeSelection = document.getElementById('mode-selection');
+                // If mode selection is visible (not none), game is NOT active
+                if (modeSelection && getComputedStyle(modeSelection).display !== 'none') return false;
+
+                // Also check room menu and name setup just in case
+                const roomMenu = document.getElementById('room-menu');
+                if (roomMenu && getComputedStyle(roomMenu).display !== 'none') return false;
+
+                const nameSetup = document.getElementById('name-setup');
+                if (nameSetup && getComputedStyle(nameSetup).display !== 'none') return false;
+
+                return true;
+            }
+
             function updateDynamicUI() {
                 const hasMatchMedia = typeof window.matchMedia === 'function';
                 const hasCoarsePointer = hasMatchMedia && window.matchMedia('(pointer: coarse)').matches;
                 const hasFinePointer = hasMatchMedia && window.matchMedia('(pointer: fine)').matches;
-                const canHover = hasMatchMedia && window.matchMedia('(hover: hover)').matches;
                 const uaMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
                 let mobileCheck = (typeof isMobile !== 'undefined' && isMobile) || uaMobile || hasCoarsePointer;
 
-                // [FIX] Be less aggressive with 'fine' pointer overrides to ensure UI shows on dual-input devices
                 if (hasFinePointer && !uaMobile && !hasCoarsePointer) {
                     mobileCheck = false;
                 }
 
-                // Landscape Check
                 const isLandscape = window.innerWidth > window.innerHeight;
+                const isGameActive = checkGameActive();
 
                 let css = '';
 
-                if (mobileCheck) {
-
-                    // === MOBILE FORCE STYLES ===
-                    console.log('Applying Mobile UI Styles (Landscape: ' + isLandscape + ')');
-
-                    // 1. Hide PC elements that we don't want, but KEEP weapon-list-left for resizing
+                // === 0. GLOBAL FORCE HIDE (If Game Not Active) ===
+                if (!isGameActive) {
                     css += `
-                        #weapon-inventory, #controls-guide, #weapon-label, #weapon-selector-vertical {
+                        .hud-container, 
+                        .mobile-controls, 
+                        #joystick-zone, 
+                        .vitals-panel, 
+                        .weapon-panel, 
+                        #weapon-selector-vertical,
+                        #weapon-list-left,
+                        #chat-toggle-btn,
+                        #light-toggle-btn,
+                        #controls {
+                            display: none !important;
+                        }
+                    `;
+                }
+
+                if (mobileCheck) {
+                    // === MOBILE FORCE STYLES ===
+                    console.log('Mobile UI: Active=' + isGameActive + ', Landscape=' + isLandscape);
+
+                    // 1. Always hide some PC elements on mobile
+                    css += `
+                        #weapon-inventory, #controls-guide, #weapon-label {
                             display: none !important;
                         }
                         /* Remove background from joystick zone */
@@ -13418,35 +13447,48 @@
                         }
                     `;
 
-                    // 2. Mobile Controls Force Visible
-                    css += `
-                        #joystick-zone, 
-                        #fire-btn-zone, 
-                        #jump-btn, 
-                        #reload-btn, 
-                        #crouch-btn,
-                        .mobile-controls {
-                            display: block !important;
-                            visibility: visible !important;
-                            opacity: 0.8 !important;
-                            pointer-events: auto !important;
-                            touch-action: none;
-                            z-index: 9999 !important;
-                        }
-                    `;
+                    // 2. Mobile Controls Force Visible (ONLY IF GAME ACTIVE)
+                    if (isGameActive) {
+                        css += `
+                            #joystick-zone, 
+                            #fire-btn-zone, 
+                            #jump-btn, 
+                            #reload-btn, 
+                            #crouch-btn,
+                            .mobile-controls,
+                            #chat-toggle-btn {
+                                display: block !important;
+                                visibility: visible !important;
+                                opacity: 0.8 !important;
+                                pointer-events: auto !important;
+                                touch-action: none;
+                                z-index: 9999 !important;
+                            }
+                            #controls {
+                                display: flex !important;
+                            }
+                        `;
+                    }
 
                     // 3. Mobile Landscape Specific Adjustments
                     if (isLandscape) {
                         css += `
-                            /* Resize and positioning for Left Weapon Selector */
-                            #weapon-list-left {
-                                display: flex !important;
+                            /* [User Request] Force Vertical Selector in Mobile Landscape */
+                            #weapon-selector-vertical {
+                                display: ${isGameActive ? 'flex' : 'none'} !important;
                                 flex-direction: column;
-                                top: 30% !important;
+                                top: 40% !important; 
                                 left: 20px !important;
-                                transform: scale(2.0); /* 2x Bigger */
-                                transform-origin: top left;
-                                pointer-events: none !important; 
+                                z-index: 10000 !important;
+                            }
+                            
+                            /* Hide PC Weapon List (Left) in Mobile Landscape */
+                            #weapon-list-left {
+                                display: none !important;
+                            }
+                            /* Ensure children are visible */
+                            #weapon-list-left .weapon-item {
+                                pointer-events: auto !important;
                             }
                             
                             /* Adjust Vitals and Buttons positions */
@@ -13455,20 +13497,20 @@
                                 left: 40px !important;
                             }
                             .vitals-panel { 
-                                left: 180px !important; /* Moved right to avoid collision with big weapon list */
+                                left: 180px !important; 
                                 bottom: 20px !important;
                             }
 
                             /* Chat Container Hidden by Default on Mobile */
                             #chat-container {
                                 display: none; /* Toggled via button */
-                                bottom: 120px !important; /* Adjust position */
+                                bottom: 120px !important; 
                                 width: 350px !important;
                             }
                             
                             /* Chat Toggle Button */
                             #chat-toggle-btn {
-                                display: flex !important;
+                                display: ${isGameActive ? 'flex' : 'none'} !important;
                                 position: fixed;
                                 left: 20px;
                                 bottom: 120px;
@@ -13485,12 +13527,28 @@
                                 cursor: pointer;
                             }
                          `;
+                    } else {
+                        // Portrait: Use Vertical Selector
+                        if (isGameActive) {
+                            css += `
+                                #weapon-selector-vertical {
+                                    display: flex !important;
+                                    top: 50% !important;
+                                    transform: translateY(-50%);
+                                    left: 20px;
+                                    z-index: 10000 !important;
+                                }
+                                #weapon-list-left {
+                                    display: none !important;
+                                }
+                            `;
+                        }
                     }
                 } else {
                     // === PC FORCE STYLES (Only if NOT mobile) ===
                     css += `
                         #weapon-list-left {
-                            display: flex !important;
+                            display: ${isGameActive ? 'flex' : 'none'} !important;
                             opacity: 1 !important;
                             transform: scale(1); /* Reset scale */
                         }
@@ -13511,6 +13569,14 @@
             updateDynamicUI();
             window.addEventListener('resize', updateDynamicUI);
             window.addEventListener('orientationchange', () => setTimeout(updateDynamicUI, 100));
+
+            // Observer to detect Game Start (Visibility change of Mode Selection)
+            const observer = new MutationObserver(() => updateDynamicUI());
+            const targets = ['mode-selection', 'room-menu', 'name-setup'];
+            targets.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) observer.observe(el, { attributes: true, attributeFilter: ['style', 'class'] });
+            });
         })();
     </script>
     <script>
