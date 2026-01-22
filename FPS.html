@@ -630,6 +630,65 @@
             min-width: 260px;
         }
 
+        #knife-swing-panel {
+            position: fixed;
+            top: 12px;
+            right: 12px;
+            z-index: 9999;
+            background: rgba(0, 0, 0, 0.85);
+            color: #ffcc66;
+            font-family: ui-monospace, Menlo, Consolas, monospace;
+            font-size: 11px;
+            padding: 10px 12px;
+            border: 1px solid rgba(255, 200, 100, 0.4);
+            border-radius: 6px;
+            display: none;
+            width: 320px;
+            pointer-events: auto;
+        }
+
+        #knife-swing-panel .panel-title {
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #ffdd88;
+            font-size: 13px;
+        }
+
+        #knife-swing-panel .section-title {
+            font-weight: bold;
+            margin: 8px 0 4px 0;
+            padding-top: 6px;
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            color: #ffa;
+        }
+
+        #knife-swing-panel .panel-row {
+            display: grid;
+            grid-template-columns: 40px 1fr 40px;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 4px;
+        }
+
+        #knife-swing-panel input[type="range"] {
+            flex: 1;
+            min-width: 0;
+            cursor: pointer;
+        }
+
+        #knife-swing-panel button {
+            background: #8f6f1f;
+            color: #fff;
+            border: none;
+            padding: 5px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+
+        #knife-swing-panel button:hover {
+            background: #af8f3f;
+        }
 
 
         .weapon-slot {
@@ -3921,6 +3980,83 @@
         <button id="knife-copy" style="width:100%;margin-top:6px;">Copy values</button>
     </div>
 
+    <!-- Knife Swing Debug Panel - Toggle with ] key -->
+    <div id="knife-swing-panel">
+        <div class="panel-title">🗡️ Knife Swing Adjust (] key)</div>
+
+        <div class="panel-row">
+            <label>Freeze</label>
+            <input id="swing-freeze" type="range" min="-0.01" max="1" step="0.01" value="-0.01">
+            <span id="swing-freeze-val">OFF</span>
+        </div>
+
+        <div class="section-title">Phase 1 (Wind-up End)</div>
+        <div class="panel-row">
+            <label>P1 X</label>
+            <input id="swing-p1-kx" type="range" min="-1" max="1" step="0.02" value="-0.2">
+            <span id="swing-p1-kx-val">-0.20</span>
+        </div>
+        <div class="panel-row">
+            <label>P1 Y</label>
+            <input id="swing-p1-ky" type="range" min="-1" max="1" step="0.02" value="0.0">
+            <span id="swing-p1-ky-val">0.00</span>
+        </div>
+        <div class="panel-row">
+            <label>P1 Z</label>
+            <input id="swing-p1-kz" type="range" min="-1" max="0" step="0.02" value="-0.35">
+            <span id="swing-p1-kz-val">-0.35</span>
+        </div>
+        <div class="panel-row">
+            <label>P1 RX</label>
+            <input id="swing-p1-krx" type="range" min="-3.14" max="3.14" step="0.05" value="1.57">
+            <span id="swing-p1-krx-val">1.57</span>
+        </div>
+        <div class="panel-row">
+            <label>P1 RY</label>
+            <input id="swing-p1-kry" type="range" min="-3.14" max="3.14" step="0.05" value="1.57">
+            <span id="swing-p1-kry-val">1.57</span>
+        </div>
+        <div class="panel-row">
+            <label>P1 RZ</label>
+            <input id="swing-p1-krz" type="range" min="-3.14" max="3.14" step="0.05" value="0.0">
+            <span id="swing-p1-krz-val">0.00</span>
+        </div>
+
+        <div class="section-title">Phase 2 (Slash End)</div>
+        <div class="panel-row">
+            <label>P2 X</label>
+            <input id="swing-p2-kx" type="range" min="-1" max="1" step="0.02" value="0.4">
+            <span id="swing-p2-kx-val">0.40</span>
+        </div>
+        <div class="panel-row">
+            <label>P2 Y</label>
+            <input id="swing-p2-ky" type="range" min="-1" max="1" step="0.02" value="-0.1">
+            <span id="swing-p2-ky-val">-0.10</span>
+        </div>
+        <div class="panel-row">
+            <label>P2 Z</label>
+            <input id="swing-p2-kz" type="range" min="-1" max="0" step="0.02" value="-0.5">
+            <span id="swing-p2-kz-val">-0.50</span>
+        </div>
+        <div class="panel-row">
+            <label>P2 RX</label>
+            <input id="swing-p2-krx" type="range" min="-3.14" max="3.14" step="0.05" value="1.5">
+            <span id="swing-p2-krx-val">1.50</span>
+        </div>
+        <div class="panel-row">
+            <label>P2 RY</label>
+            <input id="swing-p2-kry" type="range" min="-3.14" max="3.14" step="0.05" value="-0.5">
+            <span id="swing-p2-kry-val">-0.50</span>
+        </div>
+        <div class="panel-row">
+            <label>P2 RZ</label>
+            <input id="swing-p2-krz" type="range" min="-3.14" max="3.14" step="0.05" value="0.3">
+            <span id="swing-p2-krz-val">0.30</span>
+        </div>
+
+        <button id="swing-copy" style="width:100%;margin-top:8px;">Copy Values</button>
+    </div>
+
 
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
@@ -3955,6 +4091,82 @@
                 }, 150);
             }
         };
+
+        // ===== KNIFE SWING DEBUG PANEL INITIALIZATION =====
+        (function setupKnifeSwingPanel() {
+            // Initialize config if not exists
+            if (!window.KNIFE_SWING_CONFIG) {
+                window.KNIFE_SWING_CONFIG = {
+                    p1_kx: 0.26, p1_ky: 0.00, p1_kz: -0.48,
+                    p1_krx: 1.57, p1_kry: 1.57, p1_krz: 2.41,
+                    p2_kx: 0.40, p2_ky: -0.10, p2_kz: -0.50,
+                    p2_krx: 1.50, p2_kry: 0.21, p2_krz: -2.24,
+                    freezeAt: -1
+                };
+            }
+            const cfg = window.KNIFE_SWING_CONFIG;
+
+            document.addEventListener('DOMContentLoaded', function () {
+                const panel = document.getElementById('knife-swing-panel');
+                if (!panel) return;
+
+                // Slider IDs to config key mapping
+                const sliderMap = {
+                    'swing-freeze': { key: 'freezeAt', valId: 'swing-freeze-val', isFreeze: true },
+                    'swing-p1-kx': { key: 'p1_kx', valId: 'swing-p1-kx-val' },
+                    'swing-p1-ky': { key: 'p1_ky', valId: 'swing-p1-ky-val' },
+                    'swing-p1-kz': { key: 'p1_kz', valId: 'swing-p1-kz-val' },
+                    'swing-p1-krx': { key: 'p1_krx', valId: 'swing-p1-krx-val' },
+                    'swing-p1-kry': { key: 'p1_kry', valId: 'swing-p1-kry-val' },
+                    'swing-p1-krz': { key: 'p1_krz', valId: 'swing-p1-krz-val' },
+                    'swing-p2-kx': { key: 'p2_kx', valId: 'swing-p2-kx-val' },
+                    'swing-p2-ky': { key: 'p2_ky', valId: 'swing-p2-ky-val' },
+                    'swing-p2-kz': { key: 'p2_kz', valId: 'swing-p2-kz-val' },
+                    'swing-p2-krx': { key: 'p2_krx', valId: 'swing-p2-krx-val' },
+                    'swing-p2-kry': { key: 'p2_kry', valId: 'swing-p2-kry-val' },
+                    'swing-p2-krz': { key: 'p2_krz', valId: 'swing-p2-krz-val' }
+                };
+
+                // Bind sliders to config
+                Object.entries(sliderMap).forEach(([sliderId, info]) => {
+                    const slider = document.getElementById(sliderId);
+                    const valSpan = document.getElementById(info.valId);
+                    if (!slider || !valSpan) return;
+
+                    slider.addEventListener('input', function () {
+                        const v = parseFloat(this.value);
+                        cfg[info.key] = v;
+                        if (info.isFreeze) {
+                            valSpan.textContent = v < 0 ? 'OFF' : v.toFixed(2);
+                        } else {
+                            valSpan.textContent = v.toFixed(2);
+                        }
+                    });
+                });
+
+                // Copy button
+                const copyBtn = document.getElementById('swing-copy');
+                if (copyBtn) {
+                    copyBtn.addEventListener('click', function () {
+                        const txt = `p1_kx: ${cfg.p1_kx}, p1_ky: ${cfg.p1_ky}, p1_kz: ${cfg.p1_kz}, p1_krx: ${cfg.p1_krx}, p1_kry: ${cfg.p1_kry}, p1_krz: ${cfg.p1_krz}, p2_kx: ${cfg.p2_kx}, p2_ky: ${cfg.p2_ky}, p2_kz: ${cfg.p2_kz}, p2_krx: ${cfg.p2_krx}, p2_kry: ${cfg.p2_kry}, p2_krz: ${cfg.p2_krz}`;
+                        navigator.clipboard.writeText(txt).then(() => {
+                            copyBtn.textContent = 'Copied!';
+                            setTimeout(() => copyBtn.textContent = 'Copy Values', 1500);
+                        });
+                    });
+                }
+
+                // Toggle panel with ] key
+                document.addEventListener('keydown', function (e) {
+                    if (e.code === 'BracketRight') {
+                        const isVisible = panel.style.display === 'block';
+                        panel.style.display = isVisible ? 'none' : 'block';
+                    }
+                });
+
+                console.log('[Knife Swing] Debug panel ready. Press ] to toggle.');
+            });
+        })();
 
         let camera, scene, renderer;
         let postProcessingCanvas, postProcessingCtx; // Global declaration
@@ -4239,14 +4451,14 @@
                 switchSound: 'c-rifle'
             },
             {
-                id: 3, name: "KARAMBIT",
+                id: 3, name: "KNIFE",
                 type: 'KNIFE', maxAmmo: 0, ammo: 0, automatic: true,
                 posHip: new THREE.Vector3(0.25, -0.25, -0.5),
                 posAds: new THREE.Vector3(0.25, -0.25, -0.45),
                 glbHip: {
-                    pos: new THREE.Vector3(-0.47, 0.11, -0.31),
-                    rot: new THREE.Vector3(1.16, 1.18, -0.10),
-                    scale: new THREE.Vector3(2.70, 2.70, 2.70)
+                    pos: new THREE.Vector3(0.01, 0.00, -0.29),
+                    rot: new THREE.Vector3(2.16, -0.06, 2.08),
+                    scale: new THREE.Vector3(1.90, 1.90, 1.90)
                 },
                 lArmHip: { pos: new THREE.Vector3(-1.63, -0.14, -0.11), rot: new THREE.Vector3(0.56, -0.56, -1.98) },
                 rArmHip: { pos: new THREE.Vector3(0.02, 0.02, -0.15), rot: new THREE.Vector3(0.18, 0.36, 3.14) },
@@ -6227,16 +6439,9 @@
                 glbPath = 'gun/Sniper.glb'; // Confirmed path
                 scale = 1.2;
             } else if (w.type === 'KNIFE') {
-                // For knife, maybe simple box or dedicated model
-                // Skipping for now or create simple mesh
-                const knifeGeo = new THREE.BoxGeometry(0.1, 0.3, 0.05);
-                const knifeMat = new THREE.MeshStandardMaterial({ color: 0x555555 });
-                const knifeMesh = new THREE.Mesh(knifeGeo, knifeMat);
-                knifeMesh.position.set(0, -0.2, 0.1);
-                knifeMesh.rotation.x = -Math.PI / 2;
-                rArm.add(knifeMesh);
-                playerGroup.userData.weaponMesh = knifeMesh;
-                return;
+                // Use model instead of box
+                glbPath = 'gun/Knife.glb';
+                scale = 1.0;
             }
 
             if (glbPath) {
@@ -9389,9 +9594,121 @@
             }, 100);
         }
 
+        function applyKnifeDebug() {
+            if (!window.knifeModel) return;
+
+            const v = (id) => {
+                const el = document.getElementById(id);
+                return el ? parseFloat(el.value) : 0;
+            };
+            const w = WEAPONS.find(weapon => weapon.type === 'KNIFE');
+            if (!w) return;
+
+            const xv = v('knife-x'), yv = v('knife-y'), zv = v('knife-z');
+            const rxv = v('knife-rx'), ryv = v('knife-ry'), rzv = v('knife-rz');
+            const sv = v('knife-scale');
+
+            const laxv = v('knife-lax'), layv = v('knife-lay'), lazv = v('knife-laz');
+            const larxv = v('knife-larx'), laryv = v('knife-lary'), larzv = v('knife-larz');
+
+            const raxv = v('knife-rax'), rayv = v('knife-ray'), razv = v('knife-raz');
+            const rarxv = v('knife-rarx'), raryv = v('knife-rary'), rarzv = v('knife-rarz');
+
+            // Update WEAPONS data
+            if (w.glbHip) {
+                w.glbHip.pos.set(xv, yv, zv);
+                w.glbHip.rot.set(rxv, ryv, rzv);
+                w.glbHip.scale.set(sv, sv, sv);
+            }
+            if (w.lArmHip) {
+                w.lArmHip.pos.set(laxv, layv, lazv);
+                w.lArmHip.rot.set(larxv, laryv, larzv);
+            }
+            if (w.rArmHip) {
+                w.rArmHip.pos.set(raxv, rayv, razv);
+                w.rArmHip.rot.set(rarxv, raryv, rarzv);
+            }
+
+            // Update text displays
+            const ids = [
+                'knife-x', 'knife-y', 'knife-z', 'knife-rx', 'knife-ry', 'knife-rz', 'knife-scale',
+                'knife-lax', 'knife-lay', 'knife-laz', 'knife-larx', 'knife-lary', 'knife-larz',
+                'knife-rax', 'knife-ray', 'knife-raz', 'knife-rarx', 'knife-rary', 'knife-rarz'
+            ];
+            ids.forEach(id => {
+                const valEl = document.getElementById(id + '-val');
+                const inputEl = document.getElementById(id);
+                if (valEl && inputEl) {
+                    valEl.textContent = parseFloat(inputEl.value).toFixed(2);
+                }
+            });
+
+            // Immediate visual update
+            window.knifeModel.position.set(xv, yv, zv);
+            window.knifeModel.rotation.set(rxv, ryv, rzv);
+            window.knifeModel.scale.set(sv, sv, sv);
+            window.knifeModel.updateMatrix();
+
+            const lArm = weaponModel.getObjectByName('LeftArmGroup');
+            if (lArm) {
+                lArm.position.set(laxv, layv, lazv);
+                lArm.rotation.set(larxv, laryv, larzv);
+            }
+            const rArm = weaponModel.getObjectByName('RightArmGroup');
+            if (rArm) {
+                rArm.position.set(raxv, rayv, razv);
+                rArm.rotation.set(rarxv, raryv, rarzv);
+            }
+        }
+
+        function syncKnifeFromState() {
+            const w = WEAPONS.find(weapon => weapon.type === 'KNIFE');
+            const panel = document.getElementById('knife-debug-panel');
+            if (!w || !panel) return;
+
+            const setEl = (id, val) => {
+                const el = document.getElementById(id);
+                if (el) el.value = val;
+            };
+
+            if (w.glbHip) {
+                setEl('knife-x', w.glbHip.pos.x);
+                setEl('knife-y', w.glbHip.pos.y);
+                setEl('knife-z', w.glbHip.pos.z);
+                setEl('knife-rx', w.glbHip.rot.x);
+                setEl('knife-ry', w.glbHip.rot.y);
+                setEl('knife-rz', w.glbHip.rot.z);
+                setEl('knife-scale', w.glbHip.scale.x);
+            }
+            if (w.lArmHip) {
+                setEl('knife-lax', w.lArmHip.pos.x);
+                setEl('knife-lay', w.lArmHip.pos.y);
+                setEl('knife-laz', w.lArmHip.pos.z);
+                setEl('knife-larx', w.lArmHip.rot.x);
+                setEl('knife-lary', w.lArmHip.rot.y);
+                setEl('knife-larz', w.lArmHip.rot.z);
+            }
+            if (w.rArmHip) {
+                setEl('knife-rax', w.rArmHip.pos.x);
+                setEl('knife-ray', w.rArmHip.pos.y);
+                setEl('knife-raz', w.rArmHip.pos.z);
+                setEl('knife-rarx', w.rArmHip.rot.x);
+                setEl('knife-rary', w.rArmHip.rot.y);
+                setEl('knife-rarz', w.rArmHip.rot.z);
+            }
+            applyKnifeDebug();
+        }
+
         function setupKnifeDebugUI() {
             const panel = document.getElementById('knife-debug-panel');
-            if (!panel || !window.knifeModel || panel.dataset.bound === '1') return;
+            if (!panel || !window.knifeModel) return;
+
+            if (panel.dataset.bound === '1') {
+                console.log('[Knife Debug] Re-syncing panel');
+                syncKnifeFromState();
+                return;
+            }
+            console.log('[Knife Debug] Binding panel');
             panel.dataset.bound = '1';
 
             const stop = (e) => { e.stopPropagation(); };
@@ -9410,104 +9727,10 @@
                 'knife-lax', 'knife-lay', 'knife-laz', 'knife-larx', 'knife-lary', 'knife-larz',
                 'knife-rax', 'knife-ray', 'knife-raz', 'knife-rarx', 'knife-rary', 'knife-rarz'
             ];
-            const inputs = {};
-            const vals = {};
 
             ids.forEach(id => {
-                inputs[id] = document.getElementById(id);
-                vals[id] = document.getElementById(id + '-val');
-            });
-
-            const apply = () => {
-                if (!window.knifeModel) return;
-
-                const v = (id) => inputs[id] ? parseFloat(inputs[id].value) : 0;
-                const w = WEAPONS.find(weapon => weapon.type === 'KNIFE');
-                if (!w) return;
-
-                const xv = v('knife-x'), yv = v('knife-y'), zv = v('knife-z');
-                const rxv = v('knife-rx'), ryv = v('knife-ry'), rzv = v('knife-rz');
-                const sv = v('knife-scale');
-
-                const laxv = v('knife-lax'), layv = v('knife-lay'), lazv = v('knife-laz');
-                const larxv = v('knife-larx'), laryv = v('knife-lary'), larzv = v('knife-larz');
-
-                const raxv = v('knife-rax'), rayv = v('knife-ray'), razv = v('knife-raz');
-                const rarxv = v('knife-rarx'), raryv = v('knife-rary'), rarzv = v('knife-rarz');
-
-                // Update WEAPONS data
-                if (w.glbHip) {
-                    w.glbHip.pos.set(xv, yv, zv);
-                    w.glbHip.rot.set(rxv, ryv, rzv);
-                    w.glbHip.scale.set(sv, sv, sv);
-                }
-                if (w.lArmHip) {
-                    w.lArmHip.pos.set(laxv, layv, lazv);
-                    w.lArmHip.rot.set(larxv, laryv, larzv);
-                }
-                if (w.rArmHip) {
-                    w.rArmHip.pos.set(raxv, rayv, razv);
-                    w.rArmHip.rot.set(rarxv, raryv, rarzv);
-                }
-
-                // Update text displays
-                ids.forEach(id => {
-                    if (vals[id] && inputs[id]) {
-                        vals[id].textContent = parseFloat(inputs[id].value).toFixed(2);
-                    }
-                });
-
-                // Immediate visual update
-                window.knifeModel.position.set(xv, yv, zv);
-                window.knifeModel.rotation.set(rxv, ryv, rzv);
-                window.knifeModel.scale.set(sv, sv, sv);
-
-                const lArm = weaponModel.getObjectByName('LeftArmGroup');
-                if (lArm) {
-                    lArm.position.set(laxv, layv, lazv);
-                    lArm.rotation.set(larxv, laryv, larzv);
-                }
-                const rArm = weaponModel.getObjectByName('RightArmGroup');
-                if (rArm) {
-                    rArm.position.set(raxv, rayv, razv);
-                    rArm.rotation.set(rarxv, raryv, rarzv);
-                }
-            };
-
-            const syncFromState = () => {
-                const w = WEAPONS.find(weapon => weapon.type === 'KNIFE');
-                if (!w) return;
-
-                if (w.glbHip && inputs['knife-x']) {
-                    inputs['knife-x'].value = w.glbHip.pos.x;
-                    inputs['knife-y'].value = w.glbHip.pos.y;
-                    inputs['knife-z'].value = w.glbHip.pos.z;
-                    inputs['knife-rx'].value = w.glbHip.rot.x;
-                    inputs['knife-ry'].value = w.glbHip.rot.y;
-                    inputs['knife-rz'].value = w.glbHip.rot.z;
-                    inputs['knife-scale'].value = w.glbHip.scale.x;
-                }
-                if (w.lArmHip && inputs['knife-lax']) {
-                    inputs['knife-lax'].value = w.lArmHip.pos.x;
-                    inputs['knife-lay'].value = w.lArmHip.pos.y;
-                    inputs['knife-laz'].value = w.lArmHip.pos.z;
-                    inputs['knife-larx'].value = w.lArmHip.rot.x;
-                    inputs['knife-lary'].value = w.lArmHip.rot.y;
-                    inputs['knife-larz'].value = w.lArmHip.rot.z;
-                }
-                if (w.rArmHip && inputs['knife-rax']) {
-                    inputs['knife-rax'].value = w.rArmHip.pos.x;
-                    inputs['knife-ray'].value = w.rArmHip.pos.y;
-                    inputs['knife-raz'].value = w.rArmHip.pos.z;
-                    inputs['knife-rarx'].value = w.rArmHip.rot.x;
-                    inputs['knife-rary'].value = w.rArmHip.rot.y;
-                    inputs['knife-rarz'].value = w.rArmHip.rot.z;
-                }
-                apply();
-            };
-
-            ids.forEach(id => {
-                if (inputs[id]) inputs[id].addEventListener('input', apply);
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('input', applyKnifeDebug);
             });
 
             // Handler for nudge buttons
@@ -9517,29 +9740,33 @@
                 e.preventDefault();
                 const targetId = btn.dataset.target;
                 const dir = parseFloat(btn.dataset.dir || 0);
-                const input = inputs[targetId];
+                const input = document.getElementById(targetId);
                 if (input && dir !== 0) {
                     const step = parseFloat(input.step) || 0.01;
                     const val = parseFloat(input.value);
                     input.value = (val + (step * dir)).toFixed(2);
-                    apply();
+                    applyKnifeDebug();
                 }
             };
-            panel.addEventListener('pointerdown', handleNudge);
-            panel.addEventListener('click', handleNudge);
+            panel.addEventListener('pointerdown', (e) => {
+                if (e.target.closest('.nudge-btn')) handleNudge(e);
+            });
+            panel.addEventListener('click', (e) => {
+                if (e.target.closest('.nudge-btn')) handleNudge(e);
+            });
 
-            const copy = document.getElementById('knife-copy');
-            if (copy) {
-                copy.addEventListener('click', () => {
+            const copyBtn = document.getElementById('knife-copy');
+            if (copyBtn) {
+                copyBtn.addEventListener('click', () => {
                     const w = WEAPONS.find(weapon => weapon.type === 'KNIFE');
                     console.log('[Knife GLB] config:', w.glbHip, 'LArmHip:', w.lArmHip, 'RArmHip:', w.rArmHip);
-                    const original = copy.textContent;
-                    copy.textContent = "Copied to Console";
-                    setTimeout(() => copy.textContent = original, 1000);
+                    const original = copyBtn.textContent;
+                    copyBtn.textContent = "Copied to Console";
+                    setTimeout(() => copyBtn.textContent = original, 1000);
                 });
             }
 
-            syncFromState();
+            syncKnifeFromState();
         }
 
         function buildSniperGeometry() {
@@ -9838,68 +10065,26 @@
             const w = WEAPONS.find(weapon => weapon.type === 'KNIFE');
             if (!w) return;
 
-            // === KRUNKER-STYLE KNIFE: Centered blade, held by right hand ===
-            const knifeGroup = new THREE.Group();
-            window.knifeModel = knifeGroup;
+            // Clear previous
+            if (window.knifeModel) weaponModel.remove(window.knifeModel);
 
-            // --- KNIFE BLADE (Sharper, Angled) ---
-            // Main Blade
-            const blade = new THREE.Mesh(
-                new THREE.BoxGeometry(0.045, 0.008, 0.35),
-                new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.6, roughness: 0.3 })
-            );
+            const loader = new THREE.GLTFLoader();
+            loader.load('gun/Knife.glb', (gltf) => {
+                const knifeGroup = gltf.scene;
+                window.knifeModel = knifeGroup;
 
-            blade.position.set(0, 0, -0.15);
-            knifeGroup.add(blade);
-
-            // Sharp Edge (Thinner, slightly lower)
-            const bladeEdge = new THREE.Mesh(
-                new THREE.BoxGeometry(0.045, 0.002, 0.33),
-                new THREE.MeshStandardMaterial({ color: 0xdddddd, metalness: 0.7, roughness: 0.2 })
-            );
-
-            bladeEdge.position.set(0, -0.004, -0.15);
-            knifeGroup.add(bladeEdge);
-
-            // Tip (Sharper Cone)
-            const tip = new THREE.Mesh(
-                new THREE.ConeGeometry(0.024, 0.15, 4),
-                new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.6, roughness: 0.3, flatShading: true })
-            );
-            tip.rotation.x = -Math.PI / 2;
-            tip.rotation.z = 0;
-            tip.scale.set(1, 1, 0.15);
-            tip.position.set(0, 0, -0.39);
-            knifeGroup.add(tip);
-
-            // Guard
-            const guard = new THREE.Mesh(
-                new THREE.BoxGeometry(0.12, 0.03, 0.04),
-                new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.8, roughness: 0.5 })
-            );
-            guard.position.set(0, 0, 0.05);
-            knifeGroup.add(guard);
-
-            // Handle (Black)
-            const handle = new THREE.Mesh(
-                new THREE.BoxGeometry(0.05, 0.045, 0.12),
-                new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 0.2, roughness: 0.8 })
-            );
-            handle.position.set(0, 0, 0.12);
-            knifeGroup.add(handle);
-
-            // Position knife from WEAPONS config
-            if (w.glbHip) {
-                knifeGroup.position.copy(w.glbHip.pos);
-                knifeGroup.rotation.set(w.glbHip.rot.x, w.glbHip.rot.y, w.glbHip.rot.z);
-                knifeGroup.scale.copy(w.glbHip.scale);
-            } else {
-                knifeGroup.scale.set(2.5, 2.5, 2.5);
-                knifeGroup.position.set(0, -0.2, -0.5);
-                knifeGroup.rotation.set(0.1, 1.8, -0.2);
-            }
-            weaponModel.add(knifeGroup);
-            window.knifeModel = knifeGroup;
+                // Position knife from WEAPONS config
+                if (w.glbHip) {
+                    knifeGroup.position.copy(w.glbHip.pos);
+                    knifeGroup.rotation.set(w.glbHip.rot.x, w.glbHip.rot.y, w.glbHip.rot.z);
+                    knifeGroup.scale.copy(w.glbHip.scale);
+                } else {
+                    knifeGroup.scale.set(1.0, 1.0, 1.0);
+                    knifeGroup.position.set(0.1, -0.2, 0.1);
+                }
+                weaponModel.add(knifeGroup);
+                setupKnifeDebugUI();
+            });
 
             // --- RIGHT ARM (Holding the knife) ---
             const rArm = createArm(0, 0, 0, 0, 0, 0, true);
@@ -9927,7 +10112,6 @@
                 lArm.rotation.set(0.2, 0.3, -0.15);
             }
 
-            setupKnifeDebugUI();
         }
 
 
@@ -10871,6 +11055,33 @@
                 // [FIX] Block Ctrl+W browser shortcut (closes tab) to allow crouch+forward
                 if (e.ctrlKey && (e.key === 'w' || e.key === 'W')) {
                     e.preventDefault();
+                }
+
+                // Toggle current weapon debug panel with '[' key
+                if (e.code === 'BracketLeft') {
+                    const w = WEAPONS[curWeaponIdx];
+                    let panelId = '';
+                    if (w.type === 'RIFLE') panelId = 'rifle-debug-panel';
+                    else if (w.type === 'PISTOL') panelId = 'pistol-debug-panel';
+                    else if (w.type === 'SNIPER') panelId = 'sniper-debug-panel';
+                    else if (w.type === 'KNIFE') panelId = 'knife-debug-panel';
+
+                    if (panelId) {
+                        const p = document.getElementById(panelId);
+                        if (p) {
+                            const isVisible = p.style.display === 'block';
+
+                            // Hide all panels first
+                            const allPanels = ['rifle-debug-panel', 'pistol-debug-panel', 'sniper-debug-panel', 'knife-debug-panel'];
+                            allPanels.forEach(id => {
+                                const el = document.getElementById(id);
+                                if (el) el.style.display = 'none';
+                            });
+
+                            // Toggle only the current one
+                            p.style.display = isVisible ? 'none' : 'block';
+                        }
+                    }
                 }
 
                 // ESC 키 처리 - key와 code 모두 체크
@@ -12856,66 +13067,100 @@
                         let kx = 0, ky = -0.2, kz = -0.5;
                         let krx = 0.1, kry = 1.18, krz = -0.1; // [MOD] Start from new idle rotation (approx)
 
-                        if (swingT < 0.2) {
-                            // Phase 1: Wind Up (0% - 20%)
-                            const t = swingT / 0.2;
-                            const et = 1 - (1 - t) * (1 - t);
+                        // ===== CONFIGURABLE SWING PARAMETERS =====
+                        // Adjust these via console: window.KNIFE_SWING_CONFIG
+                        if (!window.KNIFE_SWING_CONFIG) {
+                            window.KNIFE_SWING_CONFIG = {
+                                // Phase 1 End (Wind-up) - Knife position/rotation
+                                p1_kx: -0.2, p1_ky: 0.0, p1_kz: -0.35,
+                                p1_krx: 1.57, p1_kry: 1.57, p1_krz: 0.0,
+                                // Phase 2 End (Slash) - Knife position/rotation
+                                p2_kx: 0.4, p2_ky: -0.1, p2_kz: -0.5,
+                                p2_krx: 1.5, p2_kry: -0.5, p2_krz: 0.3,
+                                // Debug: freeze at specific swingT value (0-1), set to -1 to disable
+                                freezeAt: -1
+                            };
+                            console.log('[Knife Swing] Config loaded. Adjust via window.KNIFE_SWING_CONFIG');
+                        }
+                        const cfg = window.KNIFE_SWING_CONFIG;
 
-                            // Right Arm windup
-                            ax = THREE.MathUtils.lerp(0.12, -0.2, et);
-                            ay = THREE.MathUtils.lerp(-0.2, -0.1, et);
-                            az = THREE.MathUtils.lerp(-0.15, 0.0, et);
-                            ary = THREE.MathUtils.lerp(-0.15, 0.8, et);
+                        // Debug freeze mode
+                        if (cfg.freezeAt >= 0 && cfg.freezeAt <= 1) {
+                            swingT = cfg.freezeAt;
+                        }
 
-                            // Left Arm windup (Counter balance)
-                            lx = THREE.MathUtils.lerp(-1.63, -1.5, et);
-                            lry = THREE.MathUtils.lerp(-0.56, -0.4, et);
+                        // New idle values from user's settings
+                        const idleX = 0.01, idleY = 0.00, idleZ = -0.29;
+                        const idleRX = 2.16, idleRY = -0.06, idleRZ = 2.08;
 
-                            // Knife windup
-                            kx = THREE.MathUtils.lerp(-0.47, -0.6, et); // [MOD] Base -0.47
-                            ky = THREE.MathUtils.lerp(0.11, 0.2, et);   // [MOD] Base 0.11
-                            kz = THREE.MathUtils.lerp(-0.31, -0.1, et);
-                            kry = THREE.MathUtils.lerp(1.18, 2.5, et);  // [MOD] Wind up angle
-                        } else if (swingT < 0.6) {
-                            // Phase 2: Slash (20% - 60%)
-                            const t = (swingT - 0.2) / 0.4;
+                        if (swingT < 0.12) {
+                            // Phase 1: Wind Up (0% - 12%) - Pull blade to center/left
+                            const t = swingT / 0.12;
+                            const et = 1 - (1 - t) * (1 - t); // Quad Out
+
+                            // Right Arm wind up - pull toward center
+                            ax = THREE.MathUtils.lerp(0.12, 0.0, et);
+                            ay = THREE.MathUtils.lerp(-0.2, -0.15, et);
+                            az = THREE.MathUtils.lerp(-0.15, -0.35, et); // Extend arm forward
+                            arx = THREE.MathUtils.lerp(0, 0.1, et);
+                            ary = THREE.MathUtils.lerp(-0.15, 0.3, et);
+                            arz = THREE.MathUtils.lerp(0.05, -0.05, et);
+
+                            // Knife wind up - uses config values
+                            kx = THREE.MathUtils.lerp(idleX, cfg.p1_kx, et);
+                            ky = THREE.MathUtils.lerp(idleY, cfg.p1_ky, et);
+                            kz = THREE.MathUtils.lerp(idleZ, cfg.p1_kz, et);
+                            krx = THREE.MathUtils.lerp(idleRX, cfg.p1_krx, et);
+                            kry = THREE.MathUtils.lerp(idleRY, cfg.p1_kry, et);
+                            krz = THREE.MathUtils.lerp(idleRZ, cfg.p1_krz, et);
+                        } else if (swingT < 0.45) {
+                            // Phase 2: Outward Slash (12% - 45%)
+                            const t = (swingT - 0.12) / 0.33;
                             const et = 1 - Math.pow(1 - t, 3); // Cubic Out
 
-                            // Right Arm Slash
-                            ax = THREE.MathUtils.lerp(-0.2, 0.7, et);
-                            ay = THREE.MathUtils.lerp(-0.1, -0.35, Math.sin(t * Math.PI));
-                            az = THREE.MathUtils.lerp(0.0, -0.5, Math.sin(t * Math.PI));
-                            ary = THREE.MathUtils.lerp(0.8, -1.8, et);
+                            // Right Arm outward slash - reduced X movement, extended Z
+                            ax = THREE.MathUtils.lerp(0.0, 0.25, et);  // Reduced from 0.5 to 0.25
+                            ay = THREE.MathUtils.lerp(-0.15, -0.2, et);
+                            az = THREE.MathUtils.lerp(-0.35, -0.55, et); // Extended arm forward more
+                            arx = THREE.MathUtils.lerp(0.1, -0.05, et);
+                            ary = THREE.MathUtils.lerp(0.3, -0.8, et);  // Reduced rotation
+                            arz = THREE.MathUtils.lerp(-0.05, 0.15, et);
 
-                            // Left Arm Slash (Reaction)
-                            lx = THREE.MathUtils.lerp(-1.5, -1.7, et);
-                            lry = THREE.MathUtils.lerp(-0.4, -0.7, et);
+                            // Left Arm reaction
+                            lx = THREE.MathUtils.lerp(-1.63, -1.8, et);
+                            lry = THREE.MathUtils.lerp(-0.56, -0.7, et);
 
-                            // Knife Slash
-                            kx = THREE.MathUtils.lerp(-0.6, 0.5, et);
-                            ky = THREE.MathUtils.lerp(0.2, -0.2, Math.sin(t * Math.PI));
-                            kz = THREE.MathUtils.lerp(-0.1, -0.8, Math.sin(t * Math.PI));
-                            kry = THREE.MathUtils.lerp(2.5, -1.5, et); // [MOD] Slash through
+                            // Knife slash - uses config values
+                            kx = THREE.MathUtils.lerp(cfg.p1_kx, cfg.p2_kx, et);
+                            ky = THREE.MathUtils.lerp(cfg.p1_ky, cfg.p2_ky, et);
+                            kz = THREE.MathUtils.lerp(cfg.p1_kz, cfg.p2_kz, et);
+                            krx = THREE.MathUtils.lerp(cfg.p1_krx, cfg.p2_krx, et);
+                            kry = THREE.MathUtils.lerp(cfg.p1_kry, cfg.p2_kry, et);
+                            krz = THREE.MathUtils.lerp(cfg.p1_krz, cfg.p2_krz, et);
                         } else {
-                            // Phase 3: Recovery (60% - 100%)
-                            const t = (swingT - 0.6) / 0.4;
+                            // Phase 3: Recovery (45% - 100%)
+                            const t = (swingT - 0.45) / 0.55;
                             const et = t * t; // Quad In
 
-                            // Right Arm Recovery
-                            ax = THREE.MathUtils.lerp(0.7, 0.02, et); // Return to idle 0.02
-                            ay = THREE.MathUtils.lerp(-0.35, 0.02, et); // Return to idle 0.02
-                            az = THREE.MathUtils.lerp(-0.5, -0.15, et); // Return to idle -0.15
-                            ary = THREE.MathUtils.lerp(-1.8, 0.36, et); // Return to idle 0.36
+                            // Right Arm recovery - from new values
+                            ax = THREE.MathUtils.lerp(0.25, 0.02, et);
+                            ay = THREE.MathUtils.lerp(-0.2, 0.02, et);
+                            az = THREE.MathUtils.lerp(-0.55, -0.15, et); // Return from extended position
+                            arx = THREE.MathUtils.lerp(-0.05, 0, et);
+                            ary = THREE.MathUtils.lerp(-0.8, 0.36, et);
+                            arz = THREE.MathUtils.lerp(0.15, 0.05, et);
 
-                            // Left Arm Recovery
-                            lx = THREE.MathUtils.lerp(-1.7, -1.63, et);
+                            // Left Arm recovery
+                            lx = THREE.MathUtils.lerp(-1.8, -1.63, et);
                             lry = THREE.MathUtils.lerp(-0.7, -0.56, et);
 
-                            // Knife Recovery
-                            kx = THREE.MathUtils.lerp(0.5, -0.47, et);
-                            ky = THREE.MathUtils.lerp(-0.2, 0.11, et);
-                            kz = THREE.MathUtils.lerp(-0.8, -0.31, et);
-                            kry = THREE.MathUtils.lerp(-1.5, 1.18, et);
+                            // Knife recovery - from config p2 to idle
+                            kx = THREE.MathUtils.lerp(cfg.p2_kx, idleX, et);
+                            ky = THREE.MathUtils.lerp(cfg.p2_ky, idleY, et);
+                            kz = THREE.MathUtils.lerp(cfg.p2_kz, idleZ, et);
+                            krx = THREE.MathUtils.lerp(cfg.p2_krx, idleRX, et);
+                            kry = THREE.MathUtils.lerp(cfg.p2_kry, idleRY, et);
+                            krz = THREE.MathUtils.lerp(cfg.p2_krz, idleRZ, et);
                         }
 
                         // Apply to Right Arm
@@ -13160,14 +13405,20 @@
                     // === MOBILE FORCE STYLES ===
                     console.log('Applying Mobile UI Styles (Landscape: ' + isLandscape + ')');
 
-                    // 1. Hide PC Weapon List ALWAYS on Mobile
+                    // 1. Hide PC elements that we don't want, but KEEP weapon-list-left for resizing
                     css += `
-                        #weapon-list-left, #weapon-inventory, #controls-guide, #weapon-label {
+                        #weapon-inventory, #controls-guide, #weapon-label, #weapon-selector-vertical {
                             display: none !important;
+                        }
+                        /* Remove background from joystick zone */
+                        #joystick-zone {
+                            background: none !important;
+                            border: none !important;
+                            box-shadow: none !important;
                         }
                     `;
 
-                    // 2. Mobile Controls Force Visible (Especially in Landscape)
+                    // 2. Mobile Controls Force Visible
                     css += `
                         #joystick-zone, 
                         #fire-btn-zone, 
@@ -13187,19 +13438,51 @@
                     // 3. Mobile Landscape Specific Adjustments
                     if (isLandscape) {
                         css += `
-                            #weapon-selector-vertical {
+                            /* Resize and positioning for Left Weapon Selector */
+                            #weapon-list-left {
                                 display: flex !important;
                                 flex-direction: column;
-                                top: 40% !important;
+                                top: 30% !important;
                                 left: 20px !important;
+                                transform: scale(2.0); /* 2x Bigger */
+                                transform-origin: top left;
+                                pointer-events: none !important; 
                             }
+                            
+                            /* Adjust Vitals and Buttons positions */
                             #joystick-zone {
                                 bottom: 40px !important; 
                                 left: 40px !important;
                             }
                             .vitals-panel { 
-                                left: 170px !important; 
+                                left: 180px !important; /* Moved right to avoid collision with big weapon list */
                                 bottom: 20px !important;
+                            }
+
+                            /* Chat Container Hidden by Default on Mobile */
+                            #chat-container {
+                                display: none; /* Toggled via button */
+                                bottom: 120px !important; /* Adjust position */
+                                width: 350px !important;
+                            }
+                            
+                            /* Chat Toggle Button */
+                            #chat-toggle-btn {
+                                display: flex !important;
+                                position: fixed;
+                                left: 20px;
+                                bottom: 120px;
+                                width: 50px;
+                                height: 50px;
+                                border-radius: 50%;
+                                background: rgba(0,0,0,0.6);
+                                border: 2px solid rgba(255,255,255,0.3);
+                                color: white;
+                                font-size: 24px;
+                                z-index: 101;
+                                justify-content: center;
+                                align-items: center;
+                                cursor: pointer;
                             }
                          `;
                     }
@@ -13209,11 +13492,13 @@
                         #weapon-list-left {
                             display: flex !important;
                             opacity: 1 !important;
+                            transform: scale(1); /* Reset scale */
                         }
                         /* Hide Mobile Controls on PC */
                         #joystick-zone, 
                         .mobile-controls,
-                        .weapon-select-btn {
+                        .weapon-select-btn,
+                        #chat-toggle-btn {
                             display: none !important;
                         }
                     `;
@@ -13255,6 +13540,44 @@
         }, true); // Capture phase to handling before game logic
     </script>
 
+    <button id="chat-toggle-btn">💬</button>
+
+    <script>
+        // Chat Toggle Logic for Mobile
+        document.addEventListener('DOMContentLoaded', () => {
+            const chatToggleBtn = document.getElementById('chat-toggle-btn');
+            const chatContainer = document.getElementById('chat-container');
+            const chatInput = document.getElementById('chat-input');
+
+            if (chatToggleBtn && chatContainer) {
+                chatToggleBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    const isHidden = getComputedStyle(chatContainer).display === 'none';
+                    if (isHidden) {
+                        chatContainer.style.display = 'flex';
+                        // Optional: Auto-focus input if user wants to type immediately
+                        // chatInput.focus(); 
+                    } else {
+                        chatContainer.style.display = 'none';
+                        chatInput.blur();
+                    }
+                });
+
+                // Hide chat when touching outside (optional, but good for UX)
+                document.addEventListener('touchstart', (e) => {
+                    if (window.innerWidth < 1024 && // Only on mobile logic
+                        chatContainer.style.display === 'flex' &&
+                        !chatContainer.contains(e.target) &&
+                        !chatToggleBtn.contains(e.target)) {
+                        chatContainer.style.display = 'none';
+                        if (chatInput) chatInput.blur();
+                    }
+                });
+            }
+        });
+    </script>
     <div id="low-health-overlay"></div>
 </body>
 

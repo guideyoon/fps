@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>FPS Game (Vite+TS)</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script type="module" crossorigin src="/assets/index-78ZBw3xy.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-Br4EPs8c.css">
+</head>
+
+<body>
+    <div id="app"></div>
+
+    <!-- UI DOM (Ported from FPS.html) -->
+    <div id="shoot-flash"></div>
+    <div id="reload-overlay">RELOADING</div>
+    <div id="loading-screen">
+        <div class="glitch-wrapper"></div>
+    </div>
+    <div id="game-container"></div>
+    <div id="vignette"></div>
+    <div id="damage-overlay"></div>
+    <div id="mobile-player-name"></div>
+    <button id="chat-toggle-btn"><i class="fas fa-comment"></i></button>
+    <div id="scope-overlay">
+        <div id="scope-line-h"></div>
+        <div id="scope-line-v"></div>
+        <div id="scope-dot"></div>
+    </div>
+    <div id="hit-marker"></div>
+
+    <div id="game-over" style="display:none">
+        <div id="game-over-title">YOU DIED</div>
+        <div id="game-over-stats">Kills: <span id="final-kill-count">0</span></div>
+        <button id="restart-btn">TRY AGAIN</button>
+        <button id="exit-to-menu-btn">EXIT</button>
+    </div>
+
+    <!-- Lobby/Menu -->
+    <div id="mode-selection">
+        <img src="/background.png" alt="DELULU Logo"
+            style="max-width: 80%; max-height: 200px; margin-bottom: 30px; object-fit: contain;">
+        <button class="mode-btn" id="btn-single-player">혼자하기</button>
+        <button class="mode-btn" id="btn-multi-player">함께하기</button>
+    </div>
+
+    <!-- HUD -->
+    <div class="hud-container">
+        <div class="scoreboard-mini">
+            <div class="score ally" id="hud-score-ally">0</div>
+            <div class="timer" id="hud-timer">10:00</div>
+            <div class="score enemy" id="hud-score-enemy">0</div>
+            <div id="hud-kill-count">Kills: 0</div>
+        </div>
+        <div class="kill-feed" id="hud-kill-feed"></div>
+        <div class="crosshair" id="hud-crosshair">
+            <div class="line horizontal"></div>
+            <div class="line vertical"></div>
+            <div class="dot"></div>
+        </div>
+        <div class="vitals-panel" id="hud-vitals">
+            <div class="value-group">
+                <span class="label">HP</span>
+                <span class="value health-text" id="hud-hp-text">100</span>
+            </div>
+            <div class="bar-container">
+                <div class="health-bar" id="hud-hp-bar" style="width: 100%;"></div>
+            </div>
+        </div>
+        <div class="weapon-panel" id="hud-weapon">
+            <div class="ammo-group">
+                <span class="ammo-current" id="hud-ammo-current">30</span>
+                <span class="ammo-reserve" id="hud-ammo-reserve">/ 120</span>
+            </div>
+            <div class="weapon-name" id="hud-weapon-name">RIFLE</div>
+        </div>
+    </div>
+
+    <!-- Mobile Controls -->
+    <div id="weapon-selector-vertical" style="display:none">
+        <div class="weapon-select-btn" data-idx="0"><i class="fas fa-person-rifle"></i></div>
+        <div class="weapon-select-btn" data-idx="1"><i class="fas fa-gun"></i></div>
+        <div class="weapon-select-btn" data-idx="2"><i class="fas fa-crosshairs"></i></div>
+    </div>
+
+    <div id="joystick-zone" style="display:none">
+        <div id="joystick-bg"></div>
+        <div id="joystick-handle"></div>
+    </div>
+
+    <div id="chat-container" style="display:none">
+        <div id="chat-messages"></div>
+        <div class="chat-input-area">
+            <input type="text" id="chat-input" placeholder="메시지 입력 (Enter)" autocomplete="off">
+            <button id="btn-send-chat"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+</body>
+
+</html>
