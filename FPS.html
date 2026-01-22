@@ -7034,11 +7034,19 @@
                     const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
                     scene.add(ambientLight);
                     const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-                    dirLight.position.set(50, 50, 50);
+                    dirLight.position.set(50, 100, 50);
                     dirLight.castShadow = true;
+                    // Expand shadow camera frustum for larger map coverage
+                    dirLight.shadow.camera.left = -100;
+                    dirLight.shadow.camera.right = 100;
+                    dirLight.shadow.camera.top = 100;
+                    dirLight.shadow.camera.bottom = -100;
+                    dirLight.shadow.camera.near = 0.5;
+                    dirLight.shadow.camera.far = 300;
                     dirLight.shadow.mapSize.width = 2048;
                     dirLight.shadow.mapSize.height = 2048;
                     scene.add(dirLight);
+                    window.sunLight = dirLight; // Expose for following player
                 }
 
                 console.log("Game engine partially initialized, repaired missing components");
@@ -7074,11 +7082,19 @@
             scene.add(ambientLight);
 
             const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-            dirLight.position.set(50, 50, 50);
+            dirLight.position.set(50, 100, 50);
             dirLight.castShadow = true;
+            // Expand shadow camera frustum for larger map coverage around the player
+            dirLight.shadow.camera.left = -100;
+            dirLight.shadow.camera.right = 100;
+            dirLight.shadow.camera.top = 100;
+            dirLight.shadow.camera.bottom = -100;
+            dirLight.shadow.camera.near = 0.5;
+            dirLight.shadow.camera.far = 300;
             dirLight.shadow.mapSize.width = 2048;
             dirLight.shadow.mapSize.height = 2048;
             scene.add(dirLight);
+            window.sunLight = dirLight; // Expose for following player
 
             // 5.5) 맵 전용 그룹 생성 및 추가
             mapGroup = new THREE.Group();
@@ -7810,6 +7826,13 @@
 
             // [FIX] 상세한 무기 모델을 buildWeapon으로 생성 (단순 박스 대신)
             buildWeapon(curWeaponIdx);
+
+            // [FIX] Ensure all weapon parts cast shadows
+            weaponContainer.traverse(child => {
+                if (child.isMesh) {
+                    child.castShadow = true;
+                }
+            });
         }
 
         function initDecalSystem() {
@@ -8842,11 +8865,13 @@
                 lArmGroup.name = 'LeftArmGroup'; // Tag for cleanup
                 const lSleeve = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.14, 0.55), armSleeveMat); // Standard Knife-style sleeve
                 lSleeve.position.set(0, 0, 0.25);
+                lSleeve.castShadow = true; // [FIX] Shadow
                 lArmGroup.add(lSleeve);
 
                 // Left Hand
                 const lHand = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.1, 0.14), armSkinMat); // [MOD] Skin Color Hand
                 lHand.position.set(0, 0, -0.05);
+                lHand.castShadow = true; // [FIX] Shadow
                 lArmGroup.add(lHand);
 
                 // [User Request] Position Left Arm using WEAPONS data
@@ -8867,11 +8892,13 @@
                 rArmGroup.name = 'RightArmGroup'; // Tag for cleanup
                 const rSleeve = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.14, 0.55), armSleeveMat);
                 rSleeve.position.set(0, 0, 0.25);
+                rSleeve.castShadow = true; // [FIX] Shadow
                 rArmGroup.add(rSleeve);
 
                 // Right Hand
                 const rHand = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.1, 0.14), armSkinMat); // [MOD] Skin Color Hand
                 rHand.position.set(0, 0, -0.05);
+                rHand.castShadow = true; // [FIX] Shadow
                 rArmGroup.add(rHand);
 
                 // Position Right Arm (Grip Position for Scale 2.5)
@@ -10174,6 +10201,13 @@
             grp.add(forearm);
 
 
+            grp.traverse(child => {
+                if (child.isMesh) {
+                    child.castShadow = true;
+                    child.receiveShadow = true;
+                }
+            });
+
             weaponModel.add(grp);
             return grp;
         }
@@ -10371,6 +10405,14 @@
 
             scene.add(enemy);
             enemies.push(enemy);
+
+            // [FIX] Ensure all meshes in the enemy model cast and receive shadows
+            enemy.traverse(child => {
+                if (child.isMesh) {
+                    child.castShadow = true;
+                    child.receiveShadow = true;
+                }
+            });
         }
 
         function showHitMarker() {
@@ -11585,6 +11627,13 @@
             if (activeItem) activeItem.classList.add('active');
 
             updateUI();
+
+            // [FIX] Apply shadows after weapon switch
+            weaponContainer.traverse(child => {
+                if (child.isMesh) {
+                    child.castShadow = true;
+                }
+            });
 
             // [Multiplayer] Sync Weapon Switch
             if (typeof gameMode !== 'undefined' && gameMode === 'multi' && typeof socket !== 'undefined' && socket && socket.connected) {
@@ -13276,6 +13325,13 @@
                     cameraRecoilApplied.x = cameraRecoil.x;
                     cameraRecoilApplied.y = cameraRecoil.y;
 
+                    // Update sun light to follow player for consistent shadows
+                    if (window.sunLight) {
+                        window.sunLight.position.set(position.x + 50, position.y + 120, position.z + 50);
+                        window.sunLight.target.position.set(position.x, position.y, position.z);
+                        window.sunLight.target.updateMatrixWorld();
+                    }
+
                     // 렌더링
                     renderer.render(scene, camera);
                 }  // 후처리 효과 적용 (렌더링 후)
@@ -13423,6 +13479,7 @@
                         #weapon-selector-vertical,
                         #weapon-list-left,
                         #chat-toggle-btn,
+                        #chat-container,
                         #light-toggle-btn,
                         #controls {
                             display: none !important;
