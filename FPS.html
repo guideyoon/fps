@@ -2886,6 +2886,17 @@
             }
         }
 
+        #ingame-players-list {
+            position: fixed;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: 'Rajdhani', sans-serif;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
         /* --- TASK: Hide Game UI by Default --- */
         /* Initially hide all game HUD/UI elements */
         .hud-container,
@@ -3281,8 +3292,7 @@
     <button id="exit-game-btn" class="exit-game-btn" title="게임 나가기" style="display: none;">🚪</button>
 
     <!-- 인게임 플레이어 리스트 (스코어보드) -->
-    <div id="ingame-players-list"
-        style="display: none; position: fixed; top: 170px; left: 10px; background: rgba(0,0,0,0.5); color: white; padding: 10px; border-radius: 5px; font-family: monospace; z-index: 1000; pointer-events: none;">
+    <div id="ingame-players-list" style="display: none;">
         <div
             style="font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.3); margin-bottom: 5px; padding-bottom: 2px;">
             PLAYERS</div>
@@ -6609,6 +6619,9 @@
                 otherPlayersMap[p.id] = group;
                 if (typeof otherPlayers !== 'undefined') otherPlayers.push(group);
                 console.log('Remote player group added for:', p.name);
+
+                // [FIX] Ensure visibility logic runs
+                if (window.refreshUI) window.refreshUI();
             } else {
                 console.error('Window.scene is missing in createRemotePlayer!');
             }
