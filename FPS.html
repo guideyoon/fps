@@ -2832,8 +2832,12 @@
         /* Multiplayer HUD Adjustments */
         @media (min-width: 769px) {
             body.multi-player #chat-container {
-                bottom: auto;
-                top: 120px;
+                bottom: 20px;
+                top: auto;
+                left: auto;
+                right: 20px;
+                /* Move chat to right side */
+                width: 320px;
             }
 
             body.multi-player #weapon-selector-vertical {
@@ -2843,13 +2847,17 @@
             /* Move weapon list to top for multiplayer PC */
             body.multi-player.game-active #weapon-list-left {
                 top: 20px;
+                left: 20px;
                 transform: scale(0.7) !important;
                 transform-origin: top left !important;
             }
 
-            /* Move ingame players list below weapon list */
+            /* Move ingame players list to TOP RIGHT for PC */
             body.multi-player #ingame-players-list {
-                top: 180px;
+                top: 20px;
+                left: auto;
+                right: 20px;
+                z-index: 1000;
             }
         }
 
@@ -6439,6 +6447,12 @@
         }
 
         function createRemotePlayer(p) {
+            // [FIX] Prevent multiple meshes for the same player
+            if (otherPlayersMap[p.id]) {
+                console.warn(`[RemotePlayer] Mesh for ${p.id} already exists. Skipping.`);
+                return;
+            }
+
             console.log('createRemotePlayer called for:', p); // DEBUG
 
             const group = new THREE.Group();
