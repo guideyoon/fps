@@ -2858,6 +2858,31 @@
                 left: auto;
                 right: 20px;
                 z-index: 1000;
+                max-width: 250px;
+                /* Constrain width */
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
+                align-items: flex-end;
+                /* Right align text */
+            }
+
+            body.multi-player #ingame-players-list>div {
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                width: 100%;
+                text-align: right;
+            }
+
+            /* Move chat to BOTTOM LEFT (Above HP) */
+            body.multi-player #chat-container {
+                bottom: 140px;
+                /* Above standard 100px HP bar area */
+                left: 20px;
+                right: auto;
+                top: auto;
+                width: 320px;
             }
         }
 
@@ -6596,12 +6621,29 @@
             const rArm = playerGroup.userData.rArm;
             if (!rArm) return;
 
-            // Remove existing weapon
+            // Remove existing weapon (Aggressive cleanup)
+            // 1. Remove tracked mesh
             if (playerGroup.userData.weaponMesh) {
                 if (playerGroup.userData.weaponMesh.parent) {
                     playerGroup.userData.weaponMesh.parent.remove(playerGroup.userData.weaponMesh);
                 }
                 playerGroup.userData.weaponMesh = null;
+            }
+            // 2. Remove ANY other children that might be weapons (safety net)
+            // Loop backwards to remove safely
+            for (let i = rArm.children.length - 1; i >= 0; i--) {
+                const child = rArm.children[i];
+                // Assuming weapons are the only things added to rArm in this context
+                // Or check for specificUserData/Name if possible. 
+                // For now, removing everything except if it has a specific 'keep' flag?
+                // Actually, rArm might be a bone. We should only remove meshes we added.
+                // Let's rely on the fact that we add weapons as Groups or Meshes directly to rArm.
+                if (child.type === 'Group' || child.type === 'Mesh') {
+                    // Check if it looks like a weapon (maybe add a flag when creating)
+                    if (child.userData.isWeapon) {
+                        rArm.remove(child);
+                    }
+                }
             }
 
             // Define Model Path & Transforms
@@ -6644,6 +6686,10 @@
                     m.scale.set(scale, scale, scale);
                     m.position.copy(offset);
                     m.rotation.set(rotation.x, rotation.y, rotation.z);
+
+                    // Mark as weapon for cleanup
+                    m.userData.isWeapon = true;
+
                     rArm.add(m);
                     playerGroup.userData.weaponMesh = m;
                 }
@@ -6660,6 +6706,7 @@
                         const geo = new THREE.BoxGeometry(0.08, 0.08, 0.4);
                         const mesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: 0x333333 }));
                         mesh.position.set(0, -0.4, 0.2);
+                        mesh.userData.isWeapon = true; // Mark fallback too
                         rArm.add(mesh);
                         playerGroup.userData.weaponMesh = mesh;
                     });
