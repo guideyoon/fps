@@ -146,14 +146,15 @@
         /* Top Right: Kill Feed */
         .kill-feed {
             position: absolute;
-            top: 5rem;
-            /* Below scoreboard */
-            right: 2rem;
+            top: 280px;
+            /* Far below scoreboard to avoid overlap */
+            right: 20px;
             display: flex;
             flex-direction: column;
             gap: 5px;
             text-align: right;
             align-items: flex-end;
+            pointer-events: none;
         }
 
         .feed-item {
@@ -2852,19 +2853,22 @@
                 transform-origin: top left !important;
             }
 
-            /* Move ingame players list to TOP RIGHT for PC */
+            /* Move ingame players list to TOP RIGHT for PC (Stacked below Exit Button) */
             body.multi-player #ingame-players-list {
-                top: 20px;
+                top: 80px;
+                /* Below Exit Button */
                 left: auto;
                 right: 20px;
                 z-index: 1000;
-                max-width: 250px;
-                /* Constrain width */
+                max-width: 220px;
+                /* More compact */
+                background: rgba(0, 0, 0, 0.7);
+                border: 1px solid rgba(0, 255, 128, 0.3);
+                /* Neon green border */
                 overflow: hidden;
                 display: flex;
                 flex-direction: column;
                 align-items: flex-end;
-                /* Right align text */
             }
 
             body.multi-player #ingame-players-list>div {
@@ -2878,11 +2882,22 @@
             /* Move chat to BOTTOM LEFT (Above HP) */
             body.multi-player #chat-container {
                 bottom: 140px;
-                /* Above standard 100px HP bar area */
                 left: 20px;
                 right: auto;
                 top: auto;
                 width: 320px;
+            }
+
+            /* Adjust Exit Game Button position */
+            #exit-game-btn {
+                top: 20px;
+                right: 20px;
+                /* Pinned to right corner */
+                width: 50px;
+                height: 50px;
+                z-index: 1001;
+                display: flex;
+                /* Ensure it's visible when game-active if toggled */
             }
         }
 
@@ -6412,13 +6427,22 @@
                         elDamage.style.opacity = 0;
                     } else {
                         // Remote player respawned - completely recreate to avoid transparent material bug
-                        if (otherPlayersMap[data.id]) {
-                            // Remove old mesh (might be transparent from death animation)
-                            scene.remove(otherPlayersMap[data.id]);
+                        const oldMesh = otherPlayersMap[data.id];
+                        if (oldMesh) {
+                            scene.remove(oldMesh);
+                            // Deep cleanup to prevent memory leaks and "invisible" ghosts
+                            oldMesh.traverse(child => {
+                                if (child.geometry) child.geometry.dispose();
+                                if (child.material) {
+                                    if (Array.isArray(child.material)) child.material.forEach(m => m.dispose());
+                                    else child.material.dispose();
+                                }
+                            });
                             delete otherPlayersMap[data.id];
                         }
                         // Create fresh player mesh
                         createRemotePlayer(data);
+                        console.log('Re-created mesh for respawned player:', data.id);
                     }
                 });
 
@@ -6482,15 +6506,14 @@
         }
 
         function createRemotePlayer(p) {
-            // [FIX] Prevent multiple meshes for the same player
-            if (otherPlayersMap[p.id]) {
-                console.warn(`[RemotePlayer] Mesh for ${p.id} already exists. Skipping.`);
-                return;
-            }
+            // [FIX] Prevent multiple meshes and race conditions
+            if (otherPlayersMap[p.id]) return;
 
-            console.log('createRemotePlayer called for:', p); // DEBUG
+            console.log('createRemotePlayer called for:', p);
 
             const group = new THREE.Group();
+            // Register IMMEDIATELY to prevent duplicate calls during async loads
+            otherPlayersMap[p.id] = group;
 
             // Set user data immediately
             group.userData.hp = p.hp || 100;
@@ -6498,6 +6521,8 @@
             group.userData.playerId = p.id;
             group.userData.weaponIdx = p.weaponIdx !== undefined ? p.weaponIdx : 0;
             group.userData.playerName = p.name || 'Unknown';
+
+            // ... (rest of the username label creation remains same) ...
 
             // Create username label sprite (red text above player)
             const canvas = document.createElement('canvas');
@@ -6616,9 +6641,8 @@
                 }
 
                 scene.add(group);
-                otherPlayersMap[p.id] = group;
-                if (typeof otherPlayers !== 'undefined') otherPlayers.push(group);
-                console.log('Remote player group added for:', p.name);
+                if (typeof otherPlayers !== 'undefined' && !otherPlayers.includes(group)) otherPlayers.push(group);
+                console.log('Remote player group added to scene for:', p.name);
 
                 // [FIX] Ensure visibility logic runs
                 if (window.refreshUI) window.refreshUI();
@@ -6643,19 +6667,17 @@
                 playerGroup.userData.weaponMesh = null;
             }
             // 2. Remove ANY other children that might be weapons (safety net)
-            // Loop backwards to remove safely
+            // Search the entire playerGroup just in case a weapon was parented elsewhere
+            playerGroup.traverse(child => {
+                if (child.userData && child.userData.isWeapon) {
+                    if (child.parent) child.parent.remove(child);
+                }
+            });
+            // 3. Specific cleanup for rArm just to be triple sure
             for (let i = rArm.children.length - 1; i >= 0; i--) {
                 const child = rArm.children[i];
-                // Assuming weapons are the only things added to rArm in this context
-                // Or check for specificUserData/Name if possible. 
-                // For now, removing everything except if it has a specific 'keep' flag?
-                // Actually, rArm might be a bone. We should only remove meshes we added.
-                // Let's rely on the fact that we add weapons as Groups or Meshes directly to rArm.
-                if (child.type === 'Group' || child.type === 'Mesh') {
-                    // Check if it looks like a weapon (maybe add a flag when creating)
-                    if (child.userData.isWeapon) {
-                        rArm.remove(child);
-                    }
+                if (child.userData && child.userData.isWeapon) {
+                    rArm.remove(child);
                 }
             }
 
