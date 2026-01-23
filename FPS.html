@@ -13622,11 +13622,17 @@
                             /* Adjust Vitals and Buttons positions */
                             #joystick-zone {
                                 bottom: 40px !important; 
-                                left: 40px !important;
+                                left: 60px !important; /* Moved right */
                             }
                             .vitals-panel { 
-                                left: 180px !important; 
+                                left: 200px !important; /* Adjusted for joystick move */
                                 bottom: 20px !important;
+                            }
+                            
+                            /* Hide chat in single player mode */
+                            body.single-player #chat-container,
+                            body.single-player #chat-toggle-btn {
+                                display: none !important;
                             }
 
                             /* Chat Container Hidden by Default on Mobile */
