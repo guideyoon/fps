@@ -2854,11 +2854,12 @@
             }
 
             /* Move ingame players list to TOP RIGHT for PC (Stacked below Exit Button) */
+            /* Move ingame players list to TOP RIGHT for PC (Stacked below Exit Button) */
             body.multi-player #ingame-players-list {
-                top: 80px;
-                /* Below Exit Button */
-                left: auto;
-                right: 20px;
+                top: 80px !important;
+                /* Force below Exit Button */
+                left: auto !important;
+                right: 20px !important;
                 z-index: 1000;
                 max-width: 220px;
                 /* More compact */
@@ -4236,7 +4237,21 @@
             }
             // Use SkeletonUtils.clone for rigged models (characters/weapons)
             // If it's not a rigged model, regular clone is fine, but SkeletonUtils is safer for both.
-            return THREE.SkeletonUtils ? THREE.SkeletonUtils.clone(model) : model.clone();
+            const clone = THREE.SkeletonUtils ? THREE.SkeletonUtils.clone(model) : model.clone();
+
+            // [FIX] Deep clone materials to prevent shared state issues (e.g. invisible respawn)
+            if (clone) {
+                clone.traverse((child) => {
+                    if (child.isMesh && child.material) {
+                        if (Array.isArray(child.material)) {
+                            child.material = child.material.map(m => m.clone());
+                        } else {
+                            child.material = child.material.clone();
+                        }
+                    }
+                });
+            }
+            return clone;
         }
 
         /**
