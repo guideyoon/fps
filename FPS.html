@@ -5998,12 +5998,6 @@
 
                         // Then start countdown overlay
                         startCountdown();
-
-                        // Show chat container for multiplayer
-                        const chatContainer = document.getElementById('chat-container');
-                        if (chatContainer) {
-                            chatContainer.style.display = 'flex';
-                        }
                     } catch (e) {
                         console.error('ERROR in startCountdown:', e);
                         isGameStarted = true;
@@ -7068,6 +7062,11 @@
                 animate();
             } else {
                 console.error('animate function not found!');
+            }
+
+            // Force UI Refresh (Ensure HUD shows up on PC)
+            if (typeof window.refreshUI === 'function') {
+                window.refreshUI();
             }
         }
 
@@ -13712,6 +13711,13 @@
                             opacity: 1 !important;
                             transform: scale(1); /* Reset scale */
                         }
+                        .hud-container {
+                            display: ${isGameActive ? 'block' : 'none'} !important;
+                            opacity: 1 !important;
+                        }
+                        #chat-container {
+                            display: ${isGameActive ? 'flex' : 'none'} !important;
+                        }
                         /* Hide Mobile Controls on PC */
                         #joystick-zone, 
                         .mobile-controls,
@@ -13723,7 +13729,16 @@
                 }
 
                 style.innerHTML = css;
+
+                // Sync chat container inline style as well if needed
+                if (isGameActive && !mobileCheck) {
+                    const chatContainer = document.getElementById('chat-container');
+                    if (chatContainer) chatContainer.style.display = 'flex';
+                }
             }
+
+            // Expose for forcing update
+            window.refreshUI = updateDynamicUI;
 
             // Init and Listen
             updateDynamicUI();
