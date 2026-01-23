@@ -2832,11 +2832,24 @@
         /* Multiplayer HUD Adjustments */
         @media (min-width: 769px) {
             body.multi-player #chat-container {
-                bottom: 120px;
+                bottom: auto;
+                top: 120px;
             }
 
             body.multi-player #weapon-selector-vertical {
                 top: 25%;
+            }
+
+            /* Move weapon list to top for multiplayer PC */
+            body.multi-player.game-active #weapon-list-left {
+                top: 20px;
+                transform: scale(0.7) !important;
+                transform-origin: top left !important;
+            }
+
+            /* Move ingame players list below weapon list */
+            body.multi-player #ingame-players-list {
+                top: 180px;
             }
         }
 
@@ -5985,6 +5998,12 @@
 
                         // Then start countdown overlay
                         startCountdown();
+
+                        // Show chat container for multiplayer
+                        const chatContainer = document.getElementById('chat-container');
+                        if (chatContainer) {
+                            chatContainer.style.display = 'flex';
+                        }
                     } catch (e) {
                         console.error('ERROR in startCountdown:', e);
                         isGameStarted = true;
@@ -13500,6 +13519,9 @@
             document.head.appendChild(style);
 
             function checkGameActive() {
+                // Primary check: body.game-active class (set by startGame())
+                if (document.body.classList.contains('game-active')) return true;
+
                 const modeSelection = document.getElementById('mode-selection');
                 // If mode selection is visible (not none), game is NOT active
                 if (modeSelection && getComputedStyle(modeSelection).display !== 'none') return false;
@@ -13510,6 +13532,9 @@
 
                 const nameSetup = document.getElementById('name-setup');
                 if (nameSetup && getComputedStyle(nameSetup).display !== 'none') return false;
+
+                const roomWaiting = document.getElementById('room-waiting');
+                if (roomWaiting && getComputedStyle(roomWaiting).display !== 'none') return false;
 
                 return true;
             }
@@ -13707,11 +13732,13 @@
 
             // Observer to detect Game Start (Visibility change of Mode Selection)
             const observer = new MutationObserver(() => updateDynamicUI());
-            const targets = ['mode-selection', 'room-menu', 'name-setup'];
+            const targets = ['mode-selection', 'room-menu', 'name-setup', 'room-waiting'];
             targets.forEach(id => {
                 const el = document.getElementById(id);
                 if (el) observer.observe(el, { attributes: true, attributeFilter: ['style', 'class'] });
             });
+            // Also observe body for game-active class changes
+            observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
         })();
     </script>
     <script>
