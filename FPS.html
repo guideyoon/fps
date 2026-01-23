@@ -6683,15 +6683,30 @@
             }
             // 2. Remove ANY other children that might be weapons (safety net)
             // Search the entire playerGroup just in case a weapon was parented elsewhere
+            // Also check by NAME in case isWeapon tag was missed
+            const weaponNames = ['Assault Rifle', 'pistol', 'Sniper', 'Knife', 'gun'];
             playerGroup.traverse(child => {
-                if (child.userData && child.userData.isWeapon) {
-                    if (child.parent) child.parent.remove(child);
+                const cName = child.name ? child.name.toLowerCase() : '';
+                const isWeaponName = weaponNames.some(w => cName.includes(w.toLowerCase()));
+
+                if ((child.userData && child.userData.isWeapon) || isWeaponName) {
+                    // Don't remove the group itself or the player model parts (if they happen to be named weirdly, unlikely)
+                    // But 'Assault Rifle' etc are specific enough.
+                    if (child.parent) {
+                        console.log('Removing ghost weapon:', child.name);
+                        child.parent.remove(child);
+                    }
                 }
             });
+
             // 3. Specific cleanup for rArm just to be triple sure
             for (let i = rArm.children.length - 1; i >= 0; i--) {
                 const child = rArm.children[i];
-                if (child.userData && child.userData.isWeapon) {
+                // Check name again
+                const cName = child.name ? child.name.toLowerCase() : '';
+                const isWeaponName = weaponNames.some(w => cName.includes(w.toLowerCase()));
+
+                if ((child.userData && child.userData.isWeapon) || isWeaponName) {
                     rArm.remove(child);
                 }
             }
