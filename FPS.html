@@ -5795,7 +5795,11 @@
                     // Update UI to Waiting Room
                     document.getElementById('room-menu').style.display = 'none';
                     document.getElementById('room-waiting').style.display = 'flex';
-                    document.getElementById('chat-container').style.display = 'flex';
+                    // Show chat only on PC; on mobile landscape it stays hidden (toggle via button)
+                    const isMobileLandscape = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) && window.innerWidth > window.innerHeight;
+                    if (!isMobileLandscape) {
+                        document.getElementById('chat-container').style.display = 'flex';
+                    }
 
                     document.getElementById('room-title').innerText = data.roomName;
                     maxPlayers = data.maxPlayers || 4; // Save maxPlayers from server
