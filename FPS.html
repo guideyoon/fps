@@ -13627,7 +13627,7 @@
 
                             /* Chat Container Hidden by Default on Mobile */
                             #chat-container {
-                                display: none; /* Toggled via button */
+                                display: none !important; /* Toggled via button */
                                 bottom: 40px !important; 
                                 left: 90px !important; /* Clears weapon selector */
                                 width: 350px !important;
@@ -13747,11 +13747,11 @@
 
                     const isHidden = getComputedStyle(chatContainer).display === 'none';
                     if (isHidden) {
-                        chatContainer.style.display = 'flex';
+                        chatContainer.style.setProperty('display', 'flex', 'important');
                         // Optional: Auto-focus input if user wants to type immediately
                         // chatInput.focus(); 
                     } else {
-                        chatContainer.style.display = 'none';
+                        chatContainer.style.setProperty('display', 'none', 'important');
                         chatInput.blur();
                     }
                 });
@@ -13762,7 +13762,7 @@
                         chatContainer.style.display === 'flex' &&
                         !chatContainer.contains(e.target) &&
                         !chatToggleBtn.contains(e.target)) {
-                        chatContainer.style.display = 'none';
+                        chatContainer.style.setProperty('display', 'none', 'important');
                         if (chatInput) chatInput.blur();
                     }
                 });
