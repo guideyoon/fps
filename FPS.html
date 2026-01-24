@@ -4705,7 +4705,7 @@
         const CAM_RECOIL_SPRING = 70;
         const CAM_RECOIL_DAMPING = 12;
         const CAM_RECOIL_MAX = 0.55;
-        const RIFLE_SHOT_BASE_VOLUME = 0.9;
+        const RIFLE_SHOT_BASE_VOLUME = 0.72; // Reduced by 20% (0.9 -> 0.72)
         const rifleShotAudio = new Audio('sounds/rifle2.MP3');
         rifleShotAudio.preload = 'auto';
         rifleShotAudio.volume = RIFLE_SHOT_BASE_VOLUME;
@@ -4886,7 +4886,7 @@
 
                 // 소총(어썰트라이플)은 오디오 파일 사용 (User Request: 50% volume)
                 if (type === 'RIFLE' && this.audioBuffers['gunshot']) {
-                    this.playAudioFile('gunshot', 0.5); // 볼륨 50%
+                    this.playAudioFile('gunshot', 0.4); // Reduced by 20% (0.5 -> 0.4)
                     return;
                 }
 
@@ -12545,8 +12545,9 @@
 
         function isHitPart(obj, partName) {
             let current = obj;
+            const searchName = partName.toLowerCase();
             while (current) {
-                if (current.name === partName) return true;
+                if (current.name && current.name.toLowerCase().includes(searchName)) return true;
                 current = current.parent;
             }
             return false;
