@@ -5098,9 +5098,9 @@
             playStep: function () {
                 if (!this.ensureContext()) return;
 
-                // User Request: Use chak.mp3 (land) for walking
-                if (this.audioBuffers['land']) {
-                    this.playAudioFile('land', 0.3); // Lower volume for footsteps
+                // User Request: Use walking.MP3 for walking
+                if (this.audioBuffers['walking']) {
+                    this.playAudioFile('walking', 0.6); // Slightly louder for footsteps
                     return;
                 }
 
@@ -5565,6 +5565,7 @@
             SoundGen.loadAudioFile('sounds/hit.MP3', 'hit').catch(e => console.log('Hit sound (hit.MP3) not found or failed to load:', e));
             SoundGen.loadAudioFile('sounds/headshot.mp3', 'headshot').catch(e => console.log('Headshot sound (headshot.mp3) not found or failed to load:', e));
             SoundGen.loadAudioFile('sounds/chak.MP3', 'land').catch(e => console.log('Land sound (chak.MP3) not found or failed to load:', e));
+            SoundGen.loadAudioFile('sounds/walking.MP3', 'walking').catch(e => console.log('Walking sound (walking.MP3) not found or failed to load:', e));
             SoundGen.loadAudioFile('sounds/grunt.mp3', 'jump').catch(e => console.log('Jump sound (grunt.mp3) not found or failed to load:', e));
             SoundGen.loadAudioFile('sounds/grenade.mp3', 'grenade_explosion').catch(e => console.log('Grenade sound (grenade.mp3) not found or failed to load:', e));
             SoundGen.loadAudioFile('sounds/remove.mp3', 'grenade_switch').catch(e => console.log('Grenade switch sound (remove.mp3) not found or failed to load:', e));
