@@ -6187,7 +6187,7 @@
                     const mesh = otherPlayersMap[data.id];
                     if (mesh) {
                         if (data.action === 'switch') {
-                            loadRemoteWeaponObj(mesh, data.weaponIdx);
+                            // loadRemoteWeaponObj(mesh, data.weaponIdx); // Disabled per user request (embedded weapon)
                         } else if (data.action === 'shoot') {
                             SoundGen.playShoot(WEAPONS[data.weaponIdx].type);
 
@@ -6258,7 +6258,7 @@
                             const newWeaponIdx = data.weaponIdx;
                             if (newWeaponIdx !== undefined && mesh.userData.weaponIdx !== newWeaponIdx) {
                                 mesh.userData.weaponIdx = newWeaponIdx;
-                                loadRemoteWeaponObj(mesh, newWeaponIdx);
+                                // loadRemoteWeaponObj(mesh, newWeaponIdx); // Disabled per user request
                                 console.log('Player', data.id, 'switched to weapon index:', newWeaponIdx);
                             }
                         }
@@ -6628,11 +6628,13 @@
                 group.add(m);
                 group.userData.model = m;
 
-                // Load initial weapon
+                // Load initial weapon - DISABLED: User confirmed model has embedded weapon
+                /* 
                 if (typeof loadRemoteWeaponObj === 'function') {
                     const wIdx = p.weaponIdx !== undefined ? p.weaponIdx : 0;
                     loadRemoteWeaponObj(group, wIdx);
                 }
+                */
             }
 
             if (model) {
