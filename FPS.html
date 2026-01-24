@@ -6172,8 +6172,8 @@
 
                     const mesh = otherPlayersMap[p.id];
                     if (mesh) {
-                        // Use server position for all axes (Removed -1.3 offset which caused sinking)
-                        mesh.position.set(p.position.x, p.position.y, p.position.z);
+                        // Use server position for all axes (Adjusted to -0.8: -1.3 was sinking, 0 was floating)
+                        mesh.position.set(p.position.x, p.position.y - 0.8, p.position.z);
                         // [FIX] Rotate 90 degrees (Math.PI / 2) to face correct direction relative to camera
                         mesh.rotation.y = p.rotation.y + Math.PI / 2;
                     } else {
@@ -6663,7 +6663,7 @@
             // Ensure scene exists before adding
             if (window.scene) {
                 group.scale.set(2.0, 2.0, 2.0);
-                group.position.set(p.position.x, p.position.y, p.position.z);
+                group.position.set(p.position.x, p.position.y - 0.8, p.position.z);
 
                 if (p.rotation !== undefined) {
                     const rotY = (typeof p.rotation === 'object') ? p.rotation.y : p.rotation;
