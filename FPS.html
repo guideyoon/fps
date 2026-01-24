@@ -13141,13 +13141,19 @@
                         }
 
                         if (!isAiming) {
-                            if (isGrounded) {
+                            if (isGrounded && !keys.shift) {
                                 SoundGen.playStep();
                             }
 
-                            const bobFreq = keys.shift ? 15 : 8; const bobAmp = keys.shift ? 0.05 : 0.02;
-                            swayOffset.y = Math.sin(time * 0.001 * bobFreq) * bobAmp;
-                            swayOffset.x = Math.cos(time * 0.001 * (bobFreq / 2)) * bobAmp;
+                            if (keys.shift) {
+                                // [User Request] Remove bobbing while sneaking with Shift
+                                swayOffset.set(0, 0, 0);
+                            } else {
+                                const bobFreq = 8;
+                                const bobAmp = 0.02;
+                                swayOffset.y = Math.sin(time * 0.001 * bobFreq) * bobAmp;
+                                swayOffset.x = Math.cos(time * 0.001 * (bobFreq / 2)) * bobAmp;
+                            }
                         } else {
                             // [FIX] Smoothly reset sway when aiming while moving (fixes pistol crosshair wobble)
                             swayOffset.x = THREE.MathUtils.lerp(swayOffset.x, 0, 15 * dt);
