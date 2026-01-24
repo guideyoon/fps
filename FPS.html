@@ -6174,7 +6174,8 @@
                     if (mesh) {
                         // Use server position for all axes (adjust Y for feet - refined to 1.3 to raise further)
                         mesh.position.set(p.position.x, p.position.y - 1.3, p.position.z);
-                        mesh.rotation.y = p.rotation.y;
+                        // [FIX] Rotate 180 degrees (Math.PI) to face correct direction relative to camera
+                        mesh.rotation.y = p.rotation.y + Math.PI;
                     } else {
                         // If player exists but no mesh (e.g. joined mid-game), create it
                         if (p.id !== myId) createRemotePlayer(p);
@@ -6665,7 +6666,8 @@
                 group.position.set(p.position.x, p.position.y - 1.3, p.position.z);
 
                 if (p.rotation !== undefined) {
-                    group.rotation.y = (typeof p.rotation === 'object') ? p.rotation.y : p.rotation;
+                    const rotY = (typeof p.rotation === 'object') ? p.rotation.y : p.rotation;
+                    group.rotation.y = rotY + Math.PI; // [FIX] Align with camera
                 }
 
                 scene.add(group);
