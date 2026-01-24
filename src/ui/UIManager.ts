@@ -8,7 +8,7 @@ export class UIManager {
         weaponSlots: document.querySelectorAll('.weapon-slot'),
         crosshair: document.getElementById('hud-crosshair'),
         damageOverlay: document.querySelector('.damage-vignette') as HTMLElement,
-        headshotText: document.getElementById('headshot-text'),
+        headshotText: document.getElementById('headshot-msg'),
         hitMarker: document.getElementById('hit-marker'),
         scopeOverlay: document.getElementById('scope-overlay'),
         deathOverlay: document.getElementById('death-overlay'),

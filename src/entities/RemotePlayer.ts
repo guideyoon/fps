@@ -24,6 +24,13 @@ export class RemotePlayer {
 
             this.mesh.add(model);
 
+            // Auto-detect head mesh for headshot detection
+            model.traverse((child: any) => {
+                if (child.isMesh && child.name.toLowerCase().includes('head')) {
+                    child.userData.isHead = true;
+                }
+            });
+
             // Add hit info to the mesh
             this.mesh.userData = {
                 hp: 100,

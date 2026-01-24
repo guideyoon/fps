@@ -86,7 +86,7 @@ export class AudioManager {
     }
 
     static playShoot(type: string) {
-        if (type === 'RIFLE') this.play('rifle-shoot', 0.8);
+        if (type === 'RIFLE') this.play('rifle-shoot', 0.64);
         else if (type === 'PISTOL') this.play('pistol-shoot', 0.8);
         else if (type === 'SNIPER') this.play('rifle-shoot', 1.0); // Reuse rifle for now or specific
     }
