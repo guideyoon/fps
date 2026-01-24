@@ -13100,7 +13100,7 @@
                     else if (w.type === 'GRENADE') speed *= 0.95;
 
                     // Overrides (Crouch & Aim take priority)
-                    if (keys.ctrl) speed = 2.5;
+                    if (keys.ctrl) speed = 0.0; // [User Request] No movement when Crouched
                     if (isAiming) speed = 2.0;
 
                     const q = new THREE.Quaternion();
@@ -13147,13 +13147,14 @@
                         }
 
                         if (!isAiming) {
-                            if (isGrounded && !keys.shift) {
+                            if (isGrounded && !keys.shift && !keys.ctrl) {
                                 SoundGen.playStep();
                             }
 
-                            if (keys.shift) {
-                                // [User Request] Remove bobbing while sneaking with Shift
-                                swayOffset.set(0, 0, 0);
+                            if (keys.shift || keys.ctrl) {
+                                // [User Request] Remove bobbing while sneaking or crouching
+                                swayOffset.x = 0;
+                                swayOffset.y = 0;
                             } else {
                                 const bobFreq = 8;
                                 const bobAmp = 0.02;
