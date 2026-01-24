@@ -13100,7 +13100,7 @@
                     else if (w.type === 'GRENADE') speed *= 0.95;
 
                     // Overrides (Crouch & Aim take priority)
-                    if (keys.ctrl) speed = 0.0; // [User Request] No movement when Crouched
+                    if (keys.ctrl) speed = 3.0; // [User Request] Slow movement when Crouched
                     if (isAiming) speed = 2.0;
 
                     const q = new THREE.Quaternion();
