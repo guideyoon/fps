@@ -4804,6 +4804,7 @@
             audioBuffers: {}, // 로드된 오디오 파일 캐시
             masterVolume: 1.0, // 마스터 볼륨 (0.0 ~ 1.0)
             reloadVolume: 0.8, // 재장전 볼륨 (0.0 ~ 1.0)
+            isStepPlaying: false, // 이동 소리 재생 중 여부
             init: function () {
                 try {
                     window.AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -5097,10 +5098,19 @@
             },
             playStep: function () {
                 if (!this.ensureContext()) return;
+                if (this.isStepPlaying) return; // 이미 재생 중이면 중복 재생 방지
 
                 // User Request: Use walking.MP3 for walking
                 if (this.audioBuffers['walking']) {
-                    this.playAudioFile('walking', 0.6); // Slightly louder for footsteps
+                    this.isStepPlaying = true;
+                    const source = this.playAudioFile('walking', 0.6);
+                    if (source) {
+                        source.onended = () => {
+                            this.isStepPlaying = false;
+                        };
+                    } else {
+                        this.isStepPlaying = false;
+                    }
                     return;
                 }
 
@@ -13132,11 +13142,7 @@
 
                         if (!isAiming) {
                             if (isGrounded) {
-                                moveDistance += speed * dt;
-                                if (moveDistance > STEP_INTERVAL) {
-                                    SoundGen.playStep();
-                                    moveDistance = 0;
-                                }
+                                SoundGen.playStep();
                             }
 
                             const bobFreq = keys.shift ? 15 : 8; const bobAmp = keys.shift ? 0.05 : 0.02;
