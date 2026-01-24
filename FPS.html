@@ -4377,10 +4377,16 @@
         let postProcessingEnabled = false;
         let mapGroup; // Global group for map-specific objects
 
-        let isMobile = /Android|webOS|iPhone|iPad|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-            ('ontouchstart' in window) ||
-            (navigator.maxTouchPoints > 0) ||
-            (window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+        // Improved mobile detection: Focus on actual mobile platforms rather than just touch support
+        let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+        // Secondary check: if it has touch but also a fine pointer (mouse), consider it desktop
+        const hasCoarsePointer = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+        const hasFinePointer = window.matchMedia && window.matchMedia('(pointer: fine)').matches;
+
+        // If we have both, or just fine pointer, it's a PC with touch or standard PC
+        if (hasFinePointer) isMobile = false;
+        else if (hasCoarsePointer && !hasFinePointer) isMobile = true;
 
         let ceilingLight = null;
         let lastTime = performance.now();
@@ -11290,15 +11296,14 @@
         let isAimingHeld = false;
 
         function setupControls() {
-            // 모바일 터치 컨트롤 설정 - 다시 한번 확인
-            const isMobileDevice = isMobile ||
-                ('ontouchstart' in window) ||
-                (navigator.maxTouchPoints > 0) ||
-                (window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+            // Re-detect or confirm if we should use desktop controls
+            // Priority: If it has a mouse (fine pointer), use desktop controls regardless of touch
+            const hasFinePointer = window.matchMedia && window.matchMedia('(pointer: fine)').matches;
+            const isActuallyMobile = isMobile && !hasFinePointer;
 
-            usePointerLock = !isMobileDevice;
+            usePointerLock = !isActuallyMobile;
 
-            if (isMobileDevice) {
+            if (!usePointerLock) {
                 setupMobileControls();
                 console.log('Mobile controls enabled');
                 // 모바일에서는 포인터 락 사용 안 함
