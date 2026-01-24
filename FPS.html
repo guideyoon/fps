@@ -11903,12 +11903,7 @@
             isReloading = false;
             const w = WEAPONS[idx];
 
-            // 모바일에서 권총으로 변경 시 자동으로 조준 모드 활성화
-            if (isMobile && w.type === 'PISTOL') {
-                isAiming = true;
-            } else {
-                isAiming = false;
-            }
+            isAiming = false;
             curWeaponIdx = idx;
             buildWeapon(curWeaponIdx);
 
