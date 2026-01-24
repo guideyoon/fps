@@ -6594,6 +6594,9 @@
                 // Find right arm for weapon attachment
                 m.traverse((child) => {
                     const n = child.name ? child.name.toLowerCase() : "";
+                    // DEBUG: Log bone names to find the correct one
+                    // if (child.isBone) console.log('Bone found:', child.name);
+
                     if (n.includes('rightarm') || n.includes('arm.r') || n.includes('hand.r') || n.includes('rhand')) {
                         if (!group.userData.rArm) group.userData.rArm = child;
                     }
@@ -6608,10 +6611,15 @@
                     });
                 }
 
-                // If still no rArm, use the model itself or group
+                // If still no rArm, do NOT use the model root directly as it puts gun at feet.
+                // Try to find ANY bone that is somewhat high up, or create a dummy holder.
                 if (!group.userData.rArm) {
-                    group.userData.rArm = m;
-                    console.warn(`[RemotePlayer] Could not find right arm bone in model for ${p.name}, using model root`);
+                    console.warn(`[RemotePlayer] Right arm bone not found for ${p.name}. Creating dummy anchor.`);
+                    // Create a dummy object at approximate hand height
+                    const dummyArm = new THREE.Object3D();
+                    dummyArm.position.set(0.2, 1.3, 0.3); // Approximate right hand position
+                    m.add(dummyArm);
+                    group.userData.rArm = dummyArm;
                 }
 
                 group.add(m);
