@@ -4740,7 +4740,7 @@
         const matHealthPill = new THREE.MeshStandardMaterial({ color: 0xff00ff, roughness: 0.2, metalness: 0.8, emissive: 0xff00ff, emissiveIntensity: 0.5 });
 
         let grenades = []; // Active grenades in the world
-        let rifleLoadToken = 0;
+        let weaponLoadToken = 0; // Global token to prevent async weapon double-load
 
         const matGrenade = new THREE.MeshStandardMaterial({ color: 0x4caf50, roughness: 0.7, metalness: 0.4 });
         const GRAVITY = -3.5; // Reduced from -5.0 for even more airtime
@@ -9215,18 +9215,15 @@
                 rArmGroup.scale.set(2.5, 2.5, 2.5); // [MOD] Standardized Scale 2.5
                 weaponModel.add(rArmGroup);
 
-                // Clear any previous async load results
-                const token = ++rifleLoadToken;
-
-
-                // [MOD] Removed override to use the custom defined arms above
+                // Clear any previous async load results using global token
+                const token = weaponLoadToken;
 
                 const loader = new THREE.GLTFLoader();
                 // [User Request] Disable GLB Model (Use procedural manual build instead)
                 if (true) {
                     loader.load('gun/Assault Rifle.glb', function (gltf) {
 
-                        if (token !== rifleLoadToken) return;
+                        if (token !== weaponLoadToken) return;
                         const model = gltf.scene;
 
                         model.traverse(function (child) {
@@ -9664,8 +9661,12 @@
                 const oldRArm = weaponModel.getObjectByName('RightArmGroup');
                 if (oldRArm) weaponModel.remove(oldRArm);
 
+                // Global token check for async load
+                const token = weaponLoadToken;
+
                 const loader = new THREE.GLTFLoader();
                 loader.load('gun/Sniper.glb', function (gltf) {
+                    if (token !== weaponLoadToken) return;
                     const model = gltf.scene;
 
                     model.traverse(function (child) {
@@ -10258,8 +10259,12 @@
                 lArmGroup.scale.set(1.6, 1.6, 1.6);
                 weaponModel.add(lArmGroup);
 
+                // Global token check for async load
+                const token = weaponLoadToken;
+
                 const loader = new THREE.GLTFLoader();
                 loader.load('gun/pistol.glb', function (gltf) {
+                    if (token !== weaponLoadToken) return;
                     const model = gltf.scene;
 
                     model.traverse(function (child) {
@@ -11894,6 +11899,7 @@
 
         function switchWeaponTo(idx) {
             if (curWeaponIdx === idx) return;
+            weaponLoadToken++; // Increment global token on every switch
             isReloading = false;
             const w = WEAPONS[idx];
 
