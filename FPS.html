@@ -5079,10 +5079,8 @@
             },
             playLand: function () {
                 if (!this.ensureContext()) return;
-                // User Request: Use uak.mp3 (damage) for landing
-                if (this.audioBuffers['damage']) {
-                    this.playAudioFile('damage', 0.8);
-                } else if (this.audioBuffers['land']) {
+                // User Request: Use chak.mp3 (land) for landing
+                if (this.audioBuffers['land']) {
                     this.playAudioFile('land', 0.8);
                 } else {
                     // Fallback to synthetic thud if file missing
@@ -5100,9 +5098,9 @@
             playStep: function () {
                 if (!this.ensureContext()) return;
 
-                // User Request: Use uak.mp3 (damage) for walking
-                if (this.audioBuffers['damage']) {
-                    this.playAudioFile('damage', 0.3); // Lower volume for footsteps
+                // User Request: Use chak.mp3 (land) for walking
+                if (this.audioBuffers['land']) {
+                    this.playAudioFile('land', 0.3); // Lower volume for footsteps
                     return;
                 }
 
