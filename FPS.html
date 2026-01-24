@@ -4891,9 +4891,9 @@
                     return;
                 }
 
-                // 소총(어썰트라이플)은 오디오 파일 사용 (User Request: 50% volume)
+                // 소총(어썰트라이플)은 오디오 파일 사용 (User Request: 40% volume -> 32% volume)
                 if (type === 'RIFLE' && this.audioBuffers['gunshot']) {
-                    this.playAudioFile('gunshot', 0.4); // Reduced by 20% (0.5 -> 0.4)
+                    this.playAudioFile('gunshot', 0.32); // Reduced by 20% (0.4 -> 0.32)
                     return;
                 }
 
@@ -5079,7 +5079,10 @@
             },
             playLand: function () {
                 if (!this.ensureContext()) return;
-                if (this.audioBuffers['land']) {
+                // User Request: Use uak.mp3 (damage) for landing
+                if (this.audioBuffers['damage']) {
+                    this.playAudioFile('damage', 0.8);
+                } else if (this.audioBuffers['land']) {
                     this.playAudioFile('land', 0.8);
                 } else {
                     // Fallback to synthetic thud if file missing
@@ -5096,6 +5099,13 @@
             },
             playStep: function () {
                 if (!this.ensureContext()) return;
+
+                // User Request: Use uak.mp3 (damage) for walking
+                if (this.audioBuffers['damage']) {
+                    this.playAudioFile('damage', 0.3); // Lower volume for footsteps
+                    return;
+                }
+
                 const t = this.ctx.currentTime;
                 const osc = this.ctx.createOscillator();
                 const gain = this.ctx.createGain();
