@@ -1,7 +1,9 @@
 @import "https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&display=swap";
+
 * {
 	box-sizing: border-box;
 }
+
 html,
 body {
 	margin: 0;
@@ -22,25 +24,31 @@ body {
 	position: fixed;
 	inset: 0;
 }
+
 @media (orientation: landscape) and (max-height: 500px) {
+
 	html,
 	body {
 		height: 100vh;
 		height: 100dvh;
 	}
+
 	@supports (height: -webkit-fill-available) {
+
 		html,
 		body {
 			height: -webkit-fill-available;
 		}
 	}
 }
+
 :root {
 	--neon-cyan: #00f3ff;
 	--neon-red: #ff003c;
 	--dark-bg: rgba(9, 9, 11, 0.65);
 	--font-stack: "Rajdhani", sans-serif;
 }
+
 .hud-container {
 	position: absolute;
 	top: 0;
@@ -52,6 +60,7 @@ body {
 	font-family: var(--font-stack);
 	color: #fff;
 }
+
 .vitals-panel,
 .weapon-panel,
 .scoreboard-mini {
@@ -64,6 +73,7 @@ body {
 	padding: 1rem;
 	position: absolute;
 }
+
 .scoreboard-mini {
 	top: 1rem;
 	left: 50%;
@@ -74,27 +84,34 @@ body {
 	font-size: 1.5rem;
 	font-weight: 700;
 }
-.scoreboard-mini > div {
+
+.scoreboard-mini>div {
 	transform: skew(10deg);
 }
+
 .score.ally {
 	color: var(--neon-cyan);
 }
+
 .score.enemy {
 	color: var(--neon-red);
 }
+
 body.single-player #hud-score-ally,
 body.single-player #hud-score-enemy {
 	display: none;
 }
+
 body.single-player #hud-kill-count {
 	display: block;
 }
+
 #hud-score-ally,
 #hud-score-enemy,
 #hud-kill-count {
 	display: none !important;
 }
+
 .kill-feed {
 	position: absolute;
 	top: 5rem;
@@ -105,6 +122,7 @@ body.single-player #hud-kill-count {
 	text-align: right;
 	align-items: flex-end;
 }
+
 .feed-item {
 	background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.8));
 	padding: 5px 10px;
@@ -115,13 +133,16 @@ body.single-player #hud-kill-count {
 	color: #fff;
 	animation: slideIn 0.3s ease-out;
 }
+
 .feed-item .killer {
 	color: var(--neon-cyan);
 	font-weight: 700;
 }
+
 .feed-item .victim {
 	color: var(--neon-red);
 }
+
 #weapon-list-left {
 	position: absolute;
 	left: 20px;
@@ -132,6 +153,7 @@ body.single-player #hud-kill-count {
 	gap: 10px;
 	pointer-events: none;
 }
+
 .weapon-item {
 	display: flex;
 	align-items: center;
@@ -139,10 +161,12 @@ body.single-player #hud-kill-count {
 	transition: all 0.2s ease-out;
 	transform: translate(-10px);
 }
+
 .weapon-item.active {
 	opacity: 1;
 	transform: translate(0) scale(1.1);
 }
+
 .weapon-item .key-hint {
 	width: 32px;
 	height: 32px;
@@ -157,11 +181,13 @@ body.single-player #hud-kill-count {
 	font-weight: 700;
 	margin-right: 10px;
 }
+
 .weapon-item.active .key-hint {
 	background: var(--neon-cyan);
 	border-color: var(--neon-cyan);
 	color: #000;
 }
+
 .weapon-item .icon-box {
 	width: 110px;
 	height: 110px;
@@ -172,18 +198,22 @@ body.single-player #hud-kill-count {
 	border-radius: 8px;
 	border: 2px solid rgba(255, 255, 255, 0.1);
 }
+
 .weapon-item.active .icon-box {
 	border-color: var(--neon-cyan);
 	background: #00ffff1a;
 	box-shadow: 0 0 10px #00ffff4d;
 }
+
 .weapon-item i {
 	font-size: 54px;
 	color: #fff;
 }
+
 .weapon-item.active i {
 	color: var(--neon-cyan);
 }
+
 .crosshair {
 	position: absolute;
 	top: 50%;
@@ -195,8 +225,9 @@ body.single-player #hud-kill-count {
 	pointer-events: none;
 	z-index: 20;
 }
-.crosshair .line {
-	background: #fffc;
+
+.crosshair .hair {
+	background: #fff !important;
 	position: absolute;
 	top: 50%;
 	left: 50%;
@@ -204,50 +235,61 @@ body.single-player #hud-kill-count {
 	transition: all 0.1s ease-out;
 	box-shadow: 0 0 2px #000;
 }
+
 .crosshair .horizontal {
-	width: 20px;
-	height: 2px;
+	width: 14px;
+	height: 3px;
 }
+
 .crosshair .vertical {
-	width: 2px;
-	height: 20px;
+	width: 3px;
+	height: 14px;
 }
+
 .crosshair .dot {
-	width: 4px;
-	height: 4px;
-	background: var(--neon-red);
+	width: 5px;
+	height: 5px;
+	background: #fff !important;
 	border-radius: 50%;
+	box-shadow: 0 0 4px #000;
 }
+
 .crosshair.firing .horizontal {
 	width: 35px;
 	opacity: 0.5;
 }
+
 .crosshair.firing .vertical {
 	height: 35px;
 	opacity: 0.5;
 }
-.crosshair.enemy-detected .line {
-	background: var(--neon-red);
-	box-shadow: 0 0 5px red;
+
+.crosshair.enemy-detected .hair {
+	background: #fff !important;
+	box-shadow: 0 0 5px #fff;
 }
+
 .vitals-panel {
 	bottom: 2rem;
 	left: 2rem;
 	width: 300px;
 	border-left: 4px solid var(--neon-cyan);
 }
+
 .value-group {
 	display: flex;
 	align-items: baseline;
 	gap: 10px;
 	transform: skew(10deg);
 }
+
 .health-text {
 	font-size: 3rem;
 	font-weight: 700;
 	line-height: 0.8;
 	text-shadow: 0 0 10px var(--neon-cyan);
 }
+
 .bar-container {
 	margin-top: 10px;
 	height: 8px;
@@ -256,6 +298,7 @@ body.single-player #hud-kill-count {
 	transform: skew(10deg);
 	overflow: hidden;
 }
+
 .health-bar {
 	height: 100%;
 	background: var(--neon-cyan);
@@ -264,6 +307,7 @@ body.single-player #hud-kill-count {
 	z-index: 2;
 	position: relative;
 }
+
 .health-bar-ghost {
 	position: absolute;
 	top: 0;
@@ -273,6 +317,7 @@ body.single-player #hud-kill-count {
 	transition: width 1s ease-out 0.2s;
 	z-index: 1;
 }
+
 .weapon-panel {
 	bottom: 2rem;
 	right: 2rem;
@@ -282,21 +327,26 @@ body.single-player #hud-kill-count {
 	flex-direction: column;
 	align-items: flex-end;
 }
+
 .ammo-group {
 	transform: skew(10deg);
 }
+
 .ammo-current {
 	font-size: 4rem;
 	font-weight: 700;
 	line-height: 0.8;
 }
+
 .ammo-reserve {
 	font-size: 1.5rem;
 	color: #aaa;
 }
+
 .weapon-selector {
 	display: none;
 }
+
 #rifle-debug-panel {
 	position: fixed;
 	top: 12px;
@@ -311,11 +361,13 @@ body.single-player #hud-kill-count {
 	border-radius: 6px;
 	display: none;
 }
+
 #rifle-debug-panel .panel-title {
 	font-weight: 700;
 	margin-bottom: 8px;
 	color: #c9ffd1;
 }
+
 #rifle-debug-panel .panel-row {
 	display: grid;
 	grid-template-columns: 25px 1fr 45px;
@@ -323,17 +375,20 @@ body.single-player #hud-kill-count {
 	gap: 4px;
 	margin-bottom: 6px;
 }
+
 .slider-group {
 	display: flex;
 	align-items: center;
 	gap: 4px;
 	width: 100%;
 }
+
 #rifle-debug-panel input[type="range"] {
 	flex: 1;
 	min-width: 0;
 	cursor: pointer;
 }
+
 #rifle-debug-panel button {
 	background: #1f8f4a;
 	color: #fff;
@@ -342,6 +397,7 @@ body.single-player #hud-kill-count {
 	border-radius: 4px;
 	cursor: pointer;
 }
+
 .nudge-btn {
 	width: 22px;
 	height: 22px;
@@ -354,9 +410,11 @@ body.single-player #hud-kill-count {
 	font-size: 16px;
 	line-height: 1;
 }
+
 .nudge-btn:hover {
 	background: #666 !important;
 }
+
 #rifle-debug-panel #rifle-x-minus,
 #rifle-debug-panel #rifle-x-plus {
 	width: 34px;
@@ -368,6 +426,7 @@ body.single-player #hud-kill-count {
 	border-radius: 4px;
 	cursor: pointer;
 }
+
 #pistol-debug-panel {
 	position: fixed;
 	top: 12px;
@@ -382,11 +441,13 @@ body.single-player #hud-kill-count {
 	border-radius: 6px;
 	display: none;
 }
+
 #pistol-debug-panel .panel-title {
 	font-weight: 700;
 	margin-bottom: 8px;
 	color: #ffd1c9;
 }
+
 #pistol-debug-panel .panel-row {
 	display: grid;
 	grid-template-columns: 25px 1fr 45px;
@@ -394,11 +455,13 @@ body.single-player #hud-kill-count {
 	gap: 4px;
 	margin-bottom: 6px;
 }
+
 #pistol-debug-panel input[type="range"] {
 	flex: 1;
 	min-width: 0;
 	cursor: pointer;
 }
+
 #pistol-debug-panel button {
 	background: #8f4a1f;
 	color: #fff;
@@ -407,6 +470,7 @@ body.single-player #hud-kill-count {
 	border-radius: 4px;
 	cursor: pointer;
 }
+
 #sniper-debug-panel {
 	position: fixed;
 	top: 12px;
@@ -421,11 +485,13 @@ body.single-player #hud-kill-count {
 	border-radius: 6px;
 	display: none;
 }
+
 #sniper-debug-panel .panel-title {
 	font-weight: 700;
 	margin-bottom: 8px;
 	color: #c9e1ff;
 }
+
 #sniper-debug-panel .panel-row {
 	display: grid;
 	grid-template-columns: 25px 1fr 45px;
@@ -433,11 +499,13 @@ body.single-player #hud-kill-count {
 	gap: 4px;
 	margin-bottom: 6px;
 }
+
 #sniper-debug-panel input[type="range"] {
 	flex: 1;
 	min-width: 0;
 	cursor: pointer;
 }
+
 #sniper-debug-panel button {
 	background: #1f4a8f;
 	color: #fff;
@@ -446,6 +514,7 @@ body.single-player #hud-kill-count {
 	border-radius: 4px;
 	cursor: pointer;
 }
+
 #sniper-debug-panel .arms-flex-container {
 	display: flex;
 	gap: 15px;
@@ -453,16 +522,19 @@ body.single-player #hud-kill-count {
 	padding-top: 10px;
 	border-top: 1px solid rgba(255, 255, 255, 0.2);
 }
+
 #sniper-debug-panel .arm-column {
 	flex: 1;
 	min-width: 260px;
 }
+
 #sniper-debug-panel .section-title,
 #knife-debug-panel .section-title {
 	font-weight: 700;
 	margin-bottom: 8px;
 	font-size: 13px;
 }
+
 #knife-debug-panel {
 	position: fixed;
 	top: 12px;
@@ -477,11 +549,13 @@ body.single-player #hud-kill-count {
 	border-radius: 6px;
 	display: none;
 }
+
 #knife-debug-panel .panel-title {
 	font-weight: 700;
 	margin-bottom: 8px;
 	color: #ffc9e1;
 }
+
 #knife-debug-panel .panel-row {
 	display: grid;
 	grid-template-columns: 25px 1fr 45px;
@@ -489,11 +563,13 @@ body.single-player #hud-kill-count {
 	gap: 4px;
 	margin-bottom: 6px;
 }
+
 #knife-debug-panel input[type="range"] {
 	flex: 1;
 	min-width: 0;
 	cursor: pointer;
 }
+
 #knife-debug-panel button {
 	background: #8f1f4a;
 	color: #fff;
@@ -502,6 +578,7 @@ body.single-player #hud-kill-count {
 	border-radius: 4px;
 	cursor: pointer;
 }
+
 #knife-debug-panel .arms-flex-container {
 	display: flex;
 	gap: 15px;
@@ -509,10 +586,12 @@ body.single-player #hud-kill-count {
 	padding-top: 10px;
 	border-top: 1px solid rgba(255, 255, 255, 0.2);
 }
+
 #knife-debug-panel .arm-column {
 	flex: 1;
 	min-width: 260px;
 }
+
 .weapon-slot {
 	width: 30px;
 	height: 6px;
@@ -521,11 +600,13 @@ body.single-player #hud-kill-count {
 	color: transparent;
 	font-size: 0;
 }
+
 .weapon-slot.active {
 	background: #fff;
 	box-shadow: 0 0 10px #fff;
 	transform: scaleY(1.5);
 }
+
 .damage-vignette {
 	position: absolute;
 	inset: 0;
@@ -536,16 +617,19 @@ body.single-player #hud-kill-count {
 	pointer-events: none;
 	z-index: 5;
 }
+
 @keyframes slideIn {
 	0% {
 		transform: translate(20px);
 		opacity: 0;
 	}
+
 	to {
 		transform: translate(0);
 		opacity: 0.9;
 	}
 }
+
 @media (max-width: 768px) {
 	.vitals-panel {
 		width: 200px;
@@ -553,22 +637,27 @@ body.single-player #hud-kill-count {
 		left: 1rem;
 		padding: 0.5rem;
 	}
+
 	.health-text {
 		font-size: 2rem;
 	}
+
 	.weapon-panel {
 		bottom: 1rem;
 		right: 1rem;
 		padding: 0.5rem;
 	}
+
 	.ammo-current {
 		font-size: 2.5rem;
 	}
+
 	.scoreboard-mini {
 		top: 0.5rem;
 		font-size: 1rem;
 	}
 }
+
 #ui-layer {
 	position: absolute;
 	top: 0;
@@ -578,6 +667,7 @@ body.single-player #hud-kill-count {
 	pointer-events: none;
 	z-index: 10;
 }
+
 #crosshair {
 	position: absolute;
 	top: 50%;
@@ -586,6 +676,7 @@ body.single-player #hud-kill-count {
 	height: 0;
 	transition: opacity 0.1s;
 }
+
 #crosshair:before,
 #crosshair:after {
 	content: "";
@@ -594,19 +685,23 @@ body.single-player #hud-kill-count {
 	transform: translate(-50%, -50%);
 	box-shadow: 0 0 2px #000;
 }
+
 #crosshair:before {
 	width: 16px;
 	height: 1.5px;
 }
+
 #crosshair:after {
 	width: 1.5px;
 	height: 16px;
 }
+
 #crosshair.enemy-detected:before,
 #crosshair.enemy-detected:after {
 	background: red;
 	box-shadow: 0 0 4px red;
 }
+
 #hit-marker {
 	position: absolute;
 	top: 50%;
@@ -622,6 +717,7 @@ body.single-player #hud-kill-count {
 		filter 0.1s;
 	z-index: 10;
 }
+
 #hit-marker:before,
 #hit-marker:after {
 	content: "";
@@ -634,14 +730,17 @@ body.single-player #hud-kill-count {
 		0 0 8px red,
 		0 0 12px #f009;
 }
+
 #hit-marker:before {
 	width: 28px;
 	height: 4px;
 }
+
 #hit-marker:after {
 	width: 4px;
 	height: 28px;
 }
+
 #scope-overlay {
 	position: absolute;
 	top: 0;
@@ -650,14 +749,13 @@ body.single-player #hud-kill-count {
 	height: 100%;
 	display: none;
 	z-index: 20;
-	background: radial-gradient(
-		circle,
-		transparent 20%,
-		rgba(0, 0, 0, 0.7) 21%,
-		rgba(0, 0, 0, 0.85) 100%
-	);
+	background: radial-gradient(circle,
+			transparent 20%,
+			rgba(0, 0, 0, 0.7) 21%,
+			rgba(0, 0, 0, 0.85) 100%);
 	pointer-events: none;
 }
+
 #scope-line-h {
 	position: absolute;
 	top: 50%;
@@ -667,6 +765,7 @@ body.single-player #hud-kill-count {
 	background-color: #000c;
 	transform: translateY(-50%);
 }
+
 #scope-line-v {
 	position: absolute;
 	top: 0;
@@ -676,6 +775,7 @@ body.single-player #hud-kill-count {
 	background-color: #000c;
 	transform: translate(-50%);
 }
+
 #scope-dot {
 	position: absolute;
 	top: 50%;
@@ -686,6 +786,7 @@ body.single-player #hud-kill-count {
 	border-radius: 50%;
 	transform: translate(-50%, -50%);
 }
+
 #vignette {
 	position: absolute;
 	top: 0;
@@ -698,22 +799,22 @@ body.single-player #hud-kill-count {
 	z-index: 5;
 	pointer-events: none;
 }
+
 #damage-overlay {
 	position: absolute;
 	top: 0;
 	left: 0;
 	width: 100%;
 	height: 100%;
-	background: radial-gradient(
-		circle,
-		transparent 50%,
-		rgba(255, 0, 0, 0.5) 100%
-	);
+	background: radial-gradient(circle,
+			transparent 50%,
+			rgba(255, 0, 0, 0.5) 100%);
 	opacity: 0;
 	transition: opacity 0.1s;
 	z-index: 6;
 	pointer-events: none;
 }
+
 #low-health-overlay {
 	position: absolute;
 	top: 0;
@@ -722,26 +823,28 @@ body.single-player #hud-kill-count {
 	height: 100%;
 	pointer-events: none;
 	z-index: 1;
-	background: radial-gradient(
-		circle at center,
-		transparent 40%,
-		rgba(255, 0, 0, 0.4) 80%,
-		rgba(255, 0, 0, 0.7) 100%
-	);
+	background: radial-gradient(circle at center,
+			transparent 40%,
+			rgba(255, 0, 0, 0.4) 80%,
+			rgba(255, 0, 0, 0.7) 100%);
 	opacity: 0;
 	transition: opacity 0.5s;
 }
+
 #low-health-overlay.active {
 	animation: lowHealthPulse 1s infinite alternate ease-in-out;
 }
+
 @keyframes lowHealthPulse {
 	0% {
 		opacity: 0.5;
 	}
+
 	to {
 		opacity: 1;
 	}
 }
+
 #headshot-msg {
 	position: absolute;
 	top: 20%;
@@ -761,10 +864,12 @@ body.single-player #hud-kill-count {
 	z-index: 15;
 	pointer-events: none;
 }
+
 #headshot-msg.active {
 	opacity: 1;
 	transform: translate(-50%, -50%) scale(1.2);
 }
+
 #ammo-info {
 	position: absolute;
 	bottom: 25px;
@@ -778,33 +883,41 @@ body.single-player #hud-kill-count {
 	text-align: right;
 	pointer-events: none;
 }
+
 #weapon-label {
 	font-size: 18px;
 	color: #fbbc05;
 	display: block;
 	margin-bottom: 5px;
 }
+
 #ammo-val {
 	display: block;
 }
+
 .no-ammo {
 	color: #f33;
 	animation: shake 0.2s;
 }
+
 @keyframes shake {
 	0% {
 		transform: translate(0);
 	}
+
 	25% {
 		transform: translate(-5px);
 	}
+
 	75% {
 		transform: translate(5px);
 	}
+
 	to {
 		transform: translate(0);
 	}
 }
+
 #hp-container {
 	position: absolute;
 	bottom: 25px;
@@ -816,6 +929,7 @@ body.single-player #hud-kill-count {
 	border-radius: 4px;
 	overflow: visible;
 }
+
 #hp-bar {
 	width: 100%;
 	height: 100%;
@@ -825,6 +939,7 @@ body.single-player #hud-kill-count {
 		background-color 0.2s;
 	border-radius: 2px;
 }
+
 #hp-text {
 	position: absolute;
 	left: 15px;
@@ -837,6 +952,7 @@ body.single-player #hud-kill-count {
 	z-index: 5;
 	pointer-events: none;
 }
+
 #game-over {
 	position: absolute;
 	top: 0;
@@ -853,6 +969,7 @@ body.single-player #hud-kill-count {
 	font-size: 60px;
 	font-weight: 900;
 }
+
 #pause-overlay {
 	position: absolute;
 	top: 0;
@@ -871,6 +988,7 @@ body.single-player #hud-kill-count {
 	cursor: default;
 	pointer-events: auto;
 }
+
 #mode-selection {
 	position: absolute;
 	top: 0;
@@ -889,11 +1007,13 @@ body.single-player #hud-kill-count {
 	cursor: default;
 	pointer-events: auto;
 }
+
 #mode-selection h1 {
 	font-size: 48px;
 	margin-bottom: 50px;
 	text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
 }
+
 .mode-btn {
 	margin: 20px;
 	padding: 20px 60px;
@@ -906,14 +1026,17 @@ body.single-player #hud-kill-count {
 	border-radius: 8px;
 	min-width: 250px;
 }
+
 .mode-btn:hover {
 	background: #fff3;
 	border-color: #fffc;
 	transform: scale(1.05);
 }
+
 .mode-btn:active {
 	transform: scale(0.98);
 }
+
 #weapon-inventory {
 	position: absolute;
 	left: 20px;
@@ -925,6 +1048,7 @@ body.single-player #hud-kill-count {
 	pointer-events: auto;
 	z-index: 100;
 }
+
 .weapon-slot {
 	display: flex;
 	align-items: center;
@@ -935,31 +1059,38 @@ body.single-player #hud-kill-count {
 	transition: all 0.3s;
 	cursor: pointer;
 }
+
 .weapon-slot:hover {
 	background: #4caf5033;
 }
+
 .weapon-slot.active {
 	background: #4caf504d;
 	border-left-color: #4caf50;
 }
+
 .weapon-number {
 	font-size: 18px;
 	font-weight: 700;
 	color: #fff9;
 	min-width: 20px;
 }
+
 .weapon-slot.active .weapon-number {
 	color: #4caf50;
 }
+
 .weapon-name {
 	font-size: 14px;
 	font-weight: 700;
 	color: #ffffffb3;
 	letter-spacing: 1px;
 }
+
 .weapon-slot.active .weapon-name {
 	color: #fff;
 }
+
 #name-setup,
 #room-menu,
 #create-room-modal,
@@ -979,28 +1110,34 @@ body.single-player #hud-kill-count {
 	font-size: 18px;
 	pointer-events: auto;
 }
+
 @media (max-width: 1024px) {
+
 	#room-menu,
 	#create-room-modal,
 	#room-waiting {
 		pointer-events: auto;
 	}
+
 	#room-menu button,
 	#create-room-modal button,
 	#room-waiting button {
 		pointer-events: auto;
 		touch-action: manipulation;
 	}
+
 	#room-menu .menu-actions,
 	#room-menu #room-list-container,
 	#create-room-modal .modal-content {
 		pointer-events: auto;
 	}
 }
+
 #create-room-modal {
 	background: #000000b3;
 	z-index: 202;
 }
+
 .modal-content {
 	background: #222;
 	padding: 30px;
@@ -1011,6 +1148,7 @@ body.single-player #hud-kill-count {
 	gap: 20px;
 	min-width: 400px;
 }
+
 h2 {
 	font-size: 32px;
 	margin-bottom: 30px;
@@ -1018,6 +1156,7 @@ h2 {
 	text-transform: uppercase;
 	letter-spacing: 2px;
 }
+
 .input-group {
 	margin: 10px 0;
 	display: flex;
@@ -1025,6 +1164,7 @@ h2 {
 	gap: 10px;
 	align-items: center;
 }
+
 input[type="text"],
 select {
 	padding: 12px 20px;
@@ -1037,11 +1177,13 @@ select {
 	text-align: center;
 	transition: border-color 0.3s;
 }
+
 input[type="text"]:focus,
 select:focus {
 	outline: none;
 	border-color: #4caf50;
 }
+
 button {
 	padding: 12px 30px;
 	font-size: 18px;
@@ -1054,21 +1196,26 @@ button {
 	margin: 10px;
 	font-weight: 700;
 }
+
 button:hover {
 	background: #45a049;
 	transform: translateY(-2px);
 }
+
 button.cancel {
 	background: #f44336;
 }
+
 button.cancel:hover {
 	background: #d32f2f;
 }
+
 .menu-actions {
 	display: flex;
 	gap: 20px;
 	margin-bottom: 20px;
 }
+
 #room-list-container {
 	width: 60%;
 	height: 400px;
@@ -1079,6 +1226,7 @@ button.cancel:hover {
 	margin-bottom: 20px;
 	border: 1px solid rgba(255, 255, 255, 0.1);
 }
+
 .room-item {
 	background: #ffffff0d;
 	padding: 15px 20px;
@@ -1089,39 +1237,48 @@ button.cancel:hover {
 	align-items: center;
 	transition: background 0.2s;
 }
+
 .room-item:hover {
 	background: #ffffff1a;
 }
+
 .room-info h3 {
 	margin: 0 0 5px;
 	font-size: 18px;
 	color: #fff;
 }
+
 .room-info p {
 	margin: 0;
 	font-size: 14px;
 	color: #aaa;
 }
+
 .room-status {
 	display: flex;
 	align-items: center;
 	gap: 15px;
 }
+
 .status-badge {
 	padding: 5px 10px;
 	border-radius: 20px;
 	font-size: 12px;
 	font-weight: 700;
 }
+
 .status-badge.waiting {
 	background: #2196f3;
 }
+
 .status-badge.playing {
 	background: #ff9800;
 }
+
 .status-badge.full {
 	background: #f44336;
 }
+
 #chat-container {
 	position: absolute;
 	left: 20px;
@@ -1136,6 +1293,7 @@ button.cancel:hover {
 	pointer-events: auto;
 	bottom: 150px;
 }
+
 #chat-messages {
 	height: 100px;
 	overflow-y: auto;
@@ -1144,31 +1302,38 @@ button.cancel:hover {
 	flex-direction: column;
 	gap: 4px;
 }
+
 #chat-messages::-webkit-scrollbar {
 	width: 5px;
 }
+
 #chat-messages::-webkit-scrollbar-thumb {
 	background: #fff3;
 	border-radius: 3px;
 }
+
 .chat-msg {
 	font-size: 14px;
 	line-height: 1.4;
 	word-wrap: break-word;
 }
+
 .chat-msg .sender {
 	font-weight: 700;
 	color: #4caf50;
 	margin-right: 5px;
 }
+
 .chat-msg.system {
 	color: #ffeb3b;
 	font-style: italic;
 }
+
 .chat-input-area {
 	display: flex;
 	gap: 10px;
 }
+
 #chat-input {
 	flex: 1;
 	background: #ffffff1a;
@@ -1179,12 +1344,14 @@ button.cancel:hover {
 	font-size: 14px;
 	width: auto;
 }
+
 #btn-send-chat {
 	padding: 8px 15px;
 	border-radius: 20px;
 	margin: 0;
 	background: #2196f3;
 }
+
 #room-waiting {
 	position: absolute;
 	top: 0;
@@ -1201,10 +1368,12 @@ button.cancel:hover {
 	font-size: 24px;
 	pointer-events: auto;
 }
+
 #room-waiting h2 {
 	font-size: 36px;
 	margin-bottom: 30px;
 }
+
 #players-list {
 	margin: 30px;
 	min-width: 300px;
@@ -1213,18 +1382,21 @@ button.cancel:hover {
 	border-radius: 8px;
 	border: 2px solid rgba(255, 255, 255, 0.3);
 }
+
 .player-item {
 	padding: 10px;
 	margin: 5px 0;
 	background: #ffffff0d;
 	border-radius: 5px;
 }
+
 #countdown {
 	font-size: 72px;
 	color: #f33;
 	text-shadow: 0 0 20px rgba(255, 51, 51, 0.8);
 	margin: 30px;
 }
+
 #restart-btn {
 	margin-top: 20px;
 	padding: 15px 40px;
@@ -1238,6 +1410,7 @@ button.cancel:hover {
 	border-radius: 8px;
 	box-shadow: 0 0 10px #00000080;
 }
+
 #exit-to-menu-btn {
 	margin-top: 15px;
 	padding: 10px 30px;
@@ -1252,17 +1425,20 @@ button.cancel:hover {
 	border-radius: 8px;
 	transition: all 0.2s;
 }
+
 #exit-to-menu-btn:hover {
 	background: #f333;
 	color: #fff;
 	transform: scale(1.05);
 }
+
 #game-over-stats {
 	font-size: 32px;
 	color: #fff;
 	margin-bottom: 10px;
 	text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
 }
+
 #stats-info {
 	position: absolute;
 	top: 20px;
@@ -1276,6 +1452,7 @@ button.cancel:hover {
 	gap: 30px;
 	z-index: 10;
 }
+
 #play-time,
 #kill-count {
 	background: #00000080;
@@ -1283,6 +1460,7 @@ button.cancel:hover {
 	border-radius: 5px;
 	border: 1px solid rgba(255, 255, 255, 0.3);
 }
+
 #controls-guide {
 	position: absolute;
 	top: 20px;
@@ -1296,10 +1474,12 @@ button.cancel:hover {
 	padding: 10px;
 	border-radius: 5px;
 }
+
 .key {
 	color: #fbbc05;
 	font-weight: 700;
 }
+
 #sensitivity-control,
 #volume-control {
 	background: #00000080;
@@ -1312,17 +1492,20 @@ button.cancel:hover {
 	align-items: center;
 	justify-content: center;
 }
+
 #sensitivity-control label,
 #volume-control label {
 	color: #fff;
 	font-size: 14px;
 	margin-right: 10px;
 }
+
 #sensitivity-slider,
 #volume-slider {
 	width: 150px;
 	margin-right: 10px;
 }
+
 #sensitivity-value,
 #volume-value {
 	color: #fbbc05;
@@ -1331,6 +1514,7 @@ button.cancel:hover {
 	min-width: 40px;
 	display: inline-block;
 }
+
 #light-toggle-btn {
 	position: fixed;
 	top: 20px;
@@ -1353,16 +1537,19 @@ button.cancel:hover {
 	pointer-events: auto;
 	-webkit-tap-highlight-color: transparent;
 }
+
 #light-toggle-btn:hover {
 	background: #000c;
 	border-color: #fff9;
 }
+
 #light-toggle-btn.active {
 	background: #ffaa004d;
 	border-color: #fa0;
 	color: #fc4;
 	box-shadow: 0 0 15px #ffaa0080;
 }
+
 #death-overlay {
 	position: absolute;
 	top: 0;
@@ -1377,6 +1564,7 @@ button.cancel:hover {
 	z-index: 150;
 	pointer-events: none;
 }
+
 #respawn-timer {
 	font-size: 96px;
 	font-weight: 700;
@@ -1387,46 +1575,51 @@ button.cancel:hover {
 	margin-bottom: 30px;
 	animation: pulse 1s ease-in-out infinite;
 }
+
 @keyframes pulse {
+
 	0%,
 	to {
 		transform: scale(1);
 		opacity: 1;
 	}
+
 	50% {
 		transform: scale(1.05);
 		opacity: 0.9;
 	}
 }
+
 #killed-by-label {
 	font-size: 28px;
 	color: #fff;
 	text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
 	margin-bottom: 10px;
 }
+
 #killer-name {
 	font-size: 48px;
 	font-weight: 700;
 	color: #fa0;
 	text-shadow: 0 0 20px rgba(255, 170, 0, 0.8);
 }
+
 #sniper-scope {
 	position: fixed;
 	top: 0;
 	left: 0;
 	width: 100%;
 	height: 100%;
-	background: radial-gradient(
-		circle at center,
-		transparent 0%,
-		transparent 24%,
-		rgba(0, 0, 0, 0.5) 26%,
-		rgba(0, 0, 0, 0.75) 100%
-	);
+	background: radial-gradient(circle at center,
+			transparent 0%,
+			transparent 24%,
+			rgba(0, 0, 0, 0.5) 26%,
+			rgba(0, 0, 0, 0.75) 100%);
 	display: none;
 	z-index: 100;
 	pointer-events: none;
 }
+
 #scope-circle {
 	position: absolute;
 	top: 50%;
@@ -1441,12 +1634,14 @@ button.cancel:hover {
 		inset 0 0 20px #0009,
 		0 0 30px #000c;
 }
+
 .scope-crosshair-h,
 .scope-crosshair-v {
 	position: absolute;
 	background: #fffc;
 	box-shadow: 0 0 2px #000c;
 }
+
 .scope-crosshair-h {
 	top: 50%;
 	left: 0;
@@ -1454,6 +1649,7 @@ button.cancel:hover {
 	height: 1px;
 	transform: translateY(-50%);
 }
+
 .scope-crosshair-v {
 	left: 50%;
 	top: 0;
@@ -1461,6 +1657,7 @@ button.cancel:hover {
 	height: 100%;
 	transform: translate(-50%);
 }
+
 .scope-center-dot {
 	position: absolute;
 	top: 50%;
@@ -1472,22 +1669,26 @@ button.cancel:hover {
 	border-radius: 50%;
 	box-shadow: 0 0 4px #ff3232cc;
 }
+
 .scope-tick {
 	position: absolute;
 	background: #fff9;
 }
+
 .scope-tick-h {
 	height: 1px;
 	width: 10px;
 	top: 50%;
 	transform: translateY(-50%);
 }
+
 .scope-tick-v {
 	width: 1px;
 	height: 10px;
 	left: 50%;
 	transform: translate(-50%);
 }
+
 #controls {
 	position: absolute;
 	top: 0;
@@ -1498,12 +1699,14 @@ button.cancel:hover {
 	display: flex;
 	pointer-events: none;
 }
+
 #touch-left,
 #touch-right {
 	width: 50%;
 	height: 100%;
 	pointer-events: auto;
 }
+
 .mobile-btn {
 	position: absolute;
 	width: 35px;
@@ -1523,10 +1726,12 @@ button.cancel:hover {
 	user-select: none;
 	-webkit-tap-highlight-color: transparent;
 }
+
 .mobile-btn:active {
 	background: #ffffff80;
 	transform: scale(0.95);
 }
+
 #joystick-zone {
 	position: absolute;
 	bottom: 40px;
@@ -1537,6 +1742,7 @@ button.cancel:hover {
 	touch-action: none;
 	background: #ffffff1a;
 }
+
 #joystick-bg {
 	position: absolute;
 	top: 0;
@@ -1548,6 +1754,7 @@ button.cancel:hover {
 	border-radius: 50%;
 	pointer-events: none;
 }
+
 #joystick-handle {
 	position: absolute;
 	top: 50%;
@@ -1560,6 +1767,7 @@ button.cancel:hover {
 	pointer-events: none;
 	box-shadow: 0 0 10px #00000080;
 }
+
 #weapon-selector-vertical {
 	position: absolute;
 	left: 20px;
@@ -1571,6 +1779,7 @@ button.cancel:hover {
 	z-index: 1000;
 	pointer-events: auto;
 }
+
 .weapon-select-btn {
 	width: 35px;
 	height: 35px;
@@ -1583,16 +1792,19 @@ button.cancel:hover {
 	justify-content: center;
 	font-size: 16px;
 }
+
 .weapon-select-btn.active {
 	background: #fa09;
 	border-color: #fa0;
 }
+
 #btn-weapon1,
 #btn-weapon2,
 #btn-weapon3,
 #btn-weapon4 {
 	display: none;
 }
+
 #btn-shoot {
 	bottom: 80px;
 	right: 80px;
@@ -1602,6 +1814,7 @@ button.cancel:hover {
 	font-size: 24px;
 	border-width: 3px;
 }
+
 #btn-aim {
 	bottom: 180px;
 	right: 20px;
@@ -1609,6 +1822,7 @@ button.cancel:hover {
 	height: 60px;
 	font-size: 24px;
 }
+
 #btn-jump {
 	bottom: 110px;
 	right: 20px;
@@ -1616,6 +1830,7 @@ button.cancel:hover {
 	height: 60px;
 	font-size: 24px;
 }
+
 #btn-reload {
 	bottom: 20px;
 	right: 140px;
@@ -1623,6 +1838,7 @@ button.cancel:hover {
 	height: 60px;
 	font-size: 24px;
 }
+
 #btn-weapon-cycle {
 	bottom: 20px;
 	right: 220px;
@@ -1632,6 +1848,7 @@ button.cancel:hover {
 	background: #fbbc054d;
 	border-color: #fbbc05;
 }
+
 @media (max-width: 768px) {
 	#ammo-info {
 		bottom: 20px;
@@ -1641,12 +1858,15 @@ button.cancel:hover {
 		text-align: right;
 		transform: none;
 	}
+
 	#ammo-val {
 		font-size: 18px;
 	}
+
 	#weapon-label {
 		display: none;
 	}
+
 	#hp-container {
 		width: 120px;
 		height: 8px;
@@ -1655,59 +1875,72 @@ button.cancel:hover {
 		transform: none;
 		background: #0009;
 	}
+
 	#hp-text {
 		display: block;
 		font-size: 12px;
 		left: -28px;
 		bottom: -3px;
 	}
+
 	.mobile-btn {
 		bottom: 150px;
 	}
+
 	#btn-shoot {
 		bottom: 170px;
 		right: 40px;
 		width: 45px;
 		height: 45px;
 	}
+
 	#btn-jump {
 		bottom: 230px;
 		right: 20px;
 	}
+
 	#btn-reload {
 		bottom: 290px;
 		right: 20px;
 	}
+
 	#btn-aim {
 		bottom: 110px;
 		right: 100px;
 	}
+
 	#joystick-zone {
 		bottom: 150px;
 		left: 40px;
 		display: block !important;
 	}
+
 	#weapon-selector-vertical {
 		top: 30%;
 		left: 20px;
 	}
+
 	#controls-guide {
 		display: none;
 	}
+
 	#stats-info {
 		top: 5px;
 		gap: 10px;
 		font-size: 12px;
 	}
+
 	#play-time,
 	#kill-count {
 		padding: 2px 8px;
 		background: #0000004d;
 		border: none;
 	}
+
 	.mobile-btn {
 		display: flex;
 	}
+
 	#btn-weapon1,
 	#btn-weapon2,
 	#btn-weapon3,
@@ -1715,35 +1948,43 @@ button.cancel:hover {
 	#btn-weapon-cycle {
 		display: none;
 	}
+
 	#weapon-selector-vertical {
 		display: flex;
 	}
+
 	#joystick-zone {
 		display: block;
 	}
 }
+
 @media (orientation: landscape) and (max-width: 1280px) {
+
 	#controls-guide,
 	#weapon-label {
 		display: none;
 	}
+
 	#joystick-zone {
 		display: block !important;
 		bottom: 40px;
 		left: 40px;
 		z-index: 1000;
 	}
+
 	#weapon-selector-vertical .weapon-select-btn {
 		width: 25px !important;
 		height: 25px !important;
 		font-size: 10px !important;
 	}
+
 	#weapon-list-left,
 	#weapon-inventory,
 	#controls-guide,
 	#weapon-label {
 		display: none !important;
 	}
+
 	#joystick-zone,
 	#fire-btn-zone,
 	#jump-btn,
@@ -1755,18 +1996,21 @@ button.cancel:hover {
 		opacity: 0.8 !important;
 		pointer-events: auto !important;
 	}
+
 	#weapon-selector-vertical {
 		display: flex !important;
 		flex-direction: column;
 		top: 40% !important;
 		left: 20px;
 	}
+
 	#btn-weapon1,
 	#btn-weapon2,
 	#btn-weapon3,
 	#btn-weapon4 {
 		display: none;
 	}
+
 	.vitals-panel {
 		display: flex !important;
 		flex-direction: row;
@@ -1783,19 +2027,23 @@ button.cancel:hover {
 		border-radius: 4px;
 		z-index: 90;
 	}
+
 	.vitals-panel .value-group {
 		transform: none;
 		margin-right: 15px;
 		gap: 5px;
 	}
+
 	.vitals-panel .label {
 		font-size: 12px;
 		color: #aaa;
 	}
+
 	.vitals-panel .health-text {
 		font-size: 24px;
 		line-height: 1;
 	}
+
 	.vitals-panel .bar-container {
 		width: 120px;
 		height: 10px;
@@ -1803,6 +2051,7 @@ button.cancel:hover {
 		transform: none;
 		background: #00000080;
 	}
+
 	.weapon-panel {
 		display: flex !important;
 		flex-direction: column;
@@ -1818,16 +2067,20 @@ button.cancel:hover {
 		align-items: flex-end;
 		z-index: 90;
 	}
+
 	.weapon-panel .ammo-group {
 		transform: none;
 	}
+
 	.weapon-panel .ammo-current {
 		font-size: 24px;
 		line-height: 1;
 	}
+
 	.weapon-panel .ammo-reserve {
 		font-size: 14px;
 	}
+
 	#hud-weapon-selector,
 	#hud-weapon-name,
 	#hp-container,
@@ -1835,28 +2088,34 @@ button.cancel:hover {
 	#ammo-info {
 		display: none !important;
 	}
+
 	.mobile-btn {
 		display: flex;
 		width: 50px;
 		height: 50px;
 		font-size: 18px;
 	}
+
 	#btn-shoot {
 		bottom: 80px;
 		right: 120px;
 	}
+
 	#btn-jump {
 		bottom: 40px;
 		right: 50px;
 	}
+
 	#btn-reload {
 		bottom: 110px;
 		right: 50px;
 	}
+
 	#btn-aim {
 		bottom: 40px;
 		right: 190px;
 	}
+
 	#chat-container {
 		display: flex !important;
 		bottom: 110px !important;
@@ -1864,6 +2123,7 @@ button.cancel:hover {
 		width: 240px !important;
 		z-index: 10000 !important;
 	}
+
 	#light-toggle-btn {
 		top: 3px;
 		right: 3px;
@@ -1871,6 +2131,7 @@ button.cancel:hover {
 		height: 35px;
 		font-size: 16px;
 	}
+
 	.vitals-panel {
 		padding: 3px 8px !important;
 		left: 130px !important;
@@ -1878,13 +2139,16 @@ button.cancel:hover {
 		transform: scale(0.7) !important;
 		transform-origin: left bottom;
 	}
+
 	.vitals-panel .health-text {
 		font-size: 16px !important;
 	}
+
 	.vitals-panel .bar-container {
 		width: 80px !important;
 		height: 6px !important;
 	}
+
 	.weapon-panel {
 		padding: 3px 8px !important;
 		right: 130px !important;
@@ -1892,12 +2156,15 @@ button.cancel:hover {
 		transform: scale(0.7) !important;
 		transform-origin: right bottom;
 	}
+
 	.weapon-panel .ammo-current {
 		font-size: 16px !important;
 	}
+
 	.weapon-panel .ammo-reserve {
 		font-size: 10px !important;
 	}
+
 	#weapon-selector-vertical {
 		display: flex !important;
 		left: 10px !important;
@@ -1905,11 +2172,13 @@ button.cancel:hover {
 		transform: translateY(-50%) !important;
 		gap: 3px !important;
 	}
+
 	#weapon-selector-vertical .weapon-select-btn {
 		width: 22px !important;
 		height: 22px !important;
 		font-size: 9px !important;
 	}
+
 	#joystick-zone {
 		display: block !important;
 		bottom: 20px !important;
@@ -1917,14 +2186,17 @@ button.cancel:hover {
 		width: 100px !important;
 		height: 100px !important;
 	}
+
 	#joystick-base {
 		width: 100% !important;
 		height: 100% !important;
 	}
+
 	#joystick-handle {
 		width: 35px !important;
 		height: 35px !important;
 	}
+
 	#btn-shoot {
 		display: flex !important;
 		bottom: 50px !important;
@@ -1932,6 +2204,7 @@ button.cancel:hover {
 		width: 45px !important;
 		height: 45px !important;
 	}
+
 	#btn-jump {
 		display: flex !important;
 		bottom: 20px !important;
@@ -1939,6 +2212,7 @@ button.cancel:hover {
 		width: 40px !important;
 		height: 40px !important;
 	}
+
 	#btn-reload {
 		display: flex !important;
 		bottom: 80px !important;
@@ -1946,6 +2220,7 @@ button.cancel:hover {
 		width: 40px !important;
 		height: 40px !important;
 	}
+
 	#btn-aim {
 		display: flex !important;
 		bottom: 20px !important;
@@ -1954,25 +2229,30 @@ button.cancel:hover {
 		height: 40px !important;
 	}
 }
+
 @media (orientation: portrait) and (max-width: 768px) {
 	#btn-jump {
 		bottom: 15px;
 		right: 15px;
 	}
+
 	#btn-reload {
 		bottom: 15px;
 		right: 75px;
 	}
+
 	#btn-aim {
 		bottom: 15px;
 		right: 135px;
 	}
+
 	#btn-weapon1,
 	#btn-weapon2,
 	#btn-weapon3,
 	#btn-weapon4 {
 		top: 8px;
 	}
+
 	#light-toggle-btn {
 		top: 15px;
 		right: 15px;
@@ -1981,6 +2261,7 @@ button.cancel:hover {
 		font-size: 22px;
 	}
 }
+
 @media (max-width: 1024px) {
 	#light-toggle-btn {
 		top: 15px;
@@ -1989,6 +2270,7 @@ button.cancel:hover {
 		height: 45px;
 		font-size: 22px;
 	}
+
 	.exit-game-btn {
 		top: 15px;
 		right: 70px;
@@ -1996,12 +2278,15 @@ button.cancel:hover {
 		height: 45px;
 	}
 }
+
 @media (hover: hover) and (pointer: fine) {
+
 	#controls,
 	.mobile-btn {
 		display: none;
 	}
 }
+
 #mobile-player-name {
 	display: none;
 	position: fixed;
@@ -2014,6 +2299,7 @@ button.cancel:hover {
 	text-shadow: 1px 1px 2px #000;
 	pointer-events: none;
 }
+
 #chat-toggle-btn {
 	display: none;
 	position: fixed;
@@ -2031,6 +2317,7 @@ button.cancel:hover {
 	justify-content: center;
 	cursor: pointer;
 }
+
 .exit-game-btn {
 	position: fixed;
 	top: 20px;
@@ -2049,16 +2336,20 @@ button.cancel:hover {
 	z-index: 1000;
 	transition: all 0.3s;
 }
+
 body.paused #exit-game-btn {
 	display: flex !important;
 	opacity: 1;
 	pointer-events: auto;
 }
+
 .exit-game-btn:hover {
 	background: #f44336b3;
 	transform: scale(1.1);
 }
+
 @media (min-width: 1025px) {
+
 	.mobile-btn,
 	#joystick-zone,
 	#weapon-selector-vertical,
@@ -2066,13 +2357,16 @@ body.paused #exit-game-btn {
 		display: none;
 	}
 }
+
 @media (max-width: 768px) {
 	#mobile-player-name {
 		display: block;
 	}
+
 	body.game-active.multi-player #chat-toggle-btn {
 		display: flex;
 	}
+
 	#chat-container {
 		display: none;
 		width: 60%;
@@ -2080,10 +2374,12 @@ body.paused #exit-game-btn {
 		bottom: 220px;
 		left: 10px;
 	}
+
 	#chat-container.visible,
 	body.game-active #weapon-selector-vertical {
 		display: flex;
 	}
+
 	body #weapon-inventory,
 	body #weapon-list-left {
 		display: none !important;
@@ -2091,41 +2387,51 @@ body.paused #exit-game-btn {
 		opacity: 0;
 	}
 }
+
 @media (orientation: landscape) and (hover: none) and (pointer: coarse) {
+
 	#room-menu h2,
 	#create-room-modal h2 {
 		font-size: 22px;
 		margin-bottom: 16px;
 	}
+
 	#room-menu .menu-actions {
 		gap: 10px;
 		margin-bottom: 10px;
 	}
+
 	#room-menu .menu-actions button,
 	#create-room-modal button {
 		padding: 8px 18px;
 		font-size: 14px;
 		margin: 6px;
 	}
+
 	#room-list-container {
 		width: 80%;
 		height: 220px;
 		padding: 10px;
 	}
+
 	.room-item {
 		padding: 10px 12px;
 		gap: 10px;
 	}
+
 	.room-info h3 {
 		font-size: 14px;
 	}
+
 	.room-info p {
 		font-size: 12px;
 	}
+
 	.status-badge {
 		font-size: 10px;
 		padding: 4px 8px;
 	}
+
 	#create-room-modal .modal-content {
 		min-width: 260px;
 		padding: 14px;
@@ -2135,13 +2441,16 @@ body.paused #exit-game-btn {
 		transform: scale(0.9);
 		transform-origin: center;
 	}
+
 	#create-room-modal .input-group {
 		gap: 4px;
 		margin: 6px 0;
 	}
+
 	#create-room-modal label {
 		font-size: 11px;
 	}
+
 	#create-room-modal input[type="text"],
 	#create-room-modal select {
 		width: 210px;
@@ -2149,6 +2458,7 @@ body.paused #exit-game-btn {
 		font-size: 12px;
 	}
 }
+
 body:not(.game-active) #mode-selection {
 	display: flex !important;
 	flex-direction: column;
@@ -2156,18 +2466,23 @@ body:not(.game-active) #mode-selection {
 	align-items: center;
 	padding: 10px;
 }
+
 #mode-selection img {
 	max-height: 100px !important;
 	max-width: 80% !important;
 	margin-bottom: 15px !important;
 }
+
 .mode-btn {
 	padding: 12px 35px !important;
 	font-size: 18px !important;
 	margin: 8px !important;
 	min-width: 200px !important;
 }
-@media (pointer: coarse), (hover: none) {
+
+@media (pointer: coarse),
+(hover: none) {
+
 	body #weapon-inventory,
 	body #weapon-list-left {
 		display: none !important;
@@ -2175,31 +2490,38 @@ body:not(.game-active) #mode-selection {
 		opacity: 0;
 	}
 }
+
 #ammo-info {
 	top: auto !important;
 	bottom: 30px !important;
 	right: 20px !important;
 }
+
 #hp-container {
 	top: auto !important;
 	bottom: 30px !important;
 	left: 20px !important;
 }
+
 .weapon-slot {
 	padding: 6px 10px;
 }
+
 .weapon-number {
 	font-size: 16px;
 }
+
 .weapon-name {
 	font-size: 12px;
 }
+
 body.game-active #weapon-selector-vertical {
 	display: flex;
 	top: 40%;
 	z-index: 1000;
 	pointer-events: auto;
 }
+
 #exit-game-btn {
 	top: 15px;
 	right: 70px;
@@ -2207,6 +2529,7 @@ body.game-active #weapon-selector-vertical {
 	height: 45px;
 	font-size: 22px;
 }
+
 body.game-active #mode-selection,
 body.game-active #name-setup,
 body.game-active #room-menu,
@@ -2217,14 +2540,17 @@ body.game-active #room-waiting {
 	pointer-events: none;
 	visibility: hidden;
 }
+
 @media (min-width: 769px) {
 	body.multi-player #chat-container {
 		bottom: 120px;
 	}
+
 	body.multi-player #weapon-selector-vertical {
 		top: 25%;
 	}
 }
+
 .hud-container,
 .crosshair,
 #mobile-player-name,
@@ -2236,38 +2562,46 @@ body.game-active #room-waiting {
 	opacity: 0;
 	transition: opacity 0.5s ease;
 }
+
 body.game-active .hud-container {
 	display: block !important;
 	opacity: 1;
 }
+
 body.game-active .crosshair {
 	display: flex !important;
 	opacity: 1;
 }
+
 body.game-active #light-toggle-btn {
 	display: none !important;
 }
+
 body.game-active #weapon-list-left {
 	display: flex !important;
 	opacity: 1;
 	pointer-events: auto;
 }
+
 @media (max-width: 1024px) and (pointer: coarse) {
 	body.game-active #controls {
 		display: flex !important;
 		opacity: 1;
 	}
+
 	body.game-active #mobile-player-name {
 		display: block !important;
 		opacity: 1;
 	}
 }
+
 @media (max-width: 768px) {
 	body.game-active.multi-player #chat-toggle-btn {
 		display: flex !important;
 		opacity: 1;
 	}
 }
+
 #shoot-flash {
 	position: absolute;
 	top: 0;
@@ -2281,6 +2615,7 @@ body.game-active #weapon-list-left {
 	transition: opacity 0.05s ease-out;
 	mix-blend-mode: overlay;
 }
+
 #reload-overlay {
 	position: fixed;
 	left: 50%;
@@ -2297,6 +2632,7 @@ body.game-active #weapon-list-left {
 	z-index: 1001;
 	pointer-events: none;
 }
+
 @media (min-width: 800px) {
 	body.game-active #weapon-list-left {
 		display: flex !important;
@@ -2306,16 +2642,19 @@ body.game-active #weapon-list-left {
 		gap: 5px !important;
 		z-index: 9999 !important;
 	}
+
 	.weapon-item .key-hint {
 		font-size: 14px;
 		width: 20px;
 		height: 20px;
 		line-height: 20px;
 	}
+
 	.weapon-item.active {
 		opacity: 1 !important;
 		transform: translate(10px) !important;
 	}
+
 	.weapon-item.active .icon-box {
 		border: 2px solid var(--neon-cyan) !important;
 		background: #00f3ff4d !important;
@@ -2323,11 +2662,13 @@ body.game-active #weapon-list-left {
 			0 0 30px var(--neon-cyan),
 			inset 0 0 10px var(--neon-cyan) !important;
 	}
+
 	.weapon-item:not(.active) {
 		opacity: 0.3 !important;
 		transform: translate(0) !important;
 	}
 }
+
 #tab-scoreboard {
 	position: fixed;
 	top: 0;
@@ -2343,6 +2684,7 @@ body.game-active #weapon-list-left {
 	justify-content: center;
 	pointer-events: none;
 }
+
 #tab-scoreboard-content {
 	background: #14141ee6;
 	border: 2px solid var(--neon-cyan);
@@ -2352,6 +2694,7 @@ body.game-active #weapon-list-left {
 	max-width: 600px;
 	box-shadow: 0 0 30px #00f3ff80;
 }
+
 #tab-scoreboard-content h2 {
 	margin: 0 0 20px;
 	color: var(--neon-cyan);
@@ -2361,11 +2704,13 @@ body.game-active #weapon-list-left {
 	text-transform: uppercase;
 	letter-spacing: 2px;
 }
+
 #tab-scoreboard-players {
 	display: flex;
 	flex-direction: column;
 	gap: 12px;
 }
+
 .scoreboard-player {
 	display: flex;
 	justify-content: space-between;
@@ -2377,42 +2722,48 @@ body.game-active #weapon-list-left {
 	font-size: 18px;
 	transition: all 0.2s;
 }
+
 .scoreboard-player.you {
 	background: #00f3ff26;
 	border-left-color: var(--neon-cyan);
 }
+
 .scoreboard-player-name {
 	color: #fff;
 	font-weight: 600;
 }
+
 .scoreboard-player.you .scoreboard-player-name {
 	color: var(--neon-cyan);
 }
+
 .scoreboard-player-kills {
 	color: orange;
 	font-weight: 700;
 	font-size: 20px;
 }
+
 /* test append */
-@
-#kill-streak-overlay {
-    position: absolute;
-    top: 25%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 48px;
-    font-weight: 900;
-    color: #ffaa00;
-    text-shadow: 0 0 20px rgba(255, 170, 0, 0.8), 2px 2px 0px #000;
-    pointer-events: none;
-    text-align: center;
-    opacity: 0;
-    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    z-index: 100;
-    font-family: 'Outfit', sans-serif;
+@ #kill-streak-overlay {
+	position: absolute;
+	top: 25%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	font-size: 48px;
+	font-weight: 900;
+	color: #ffaa00;
+	text-shadow: 0 0 20px rgba(255, 170, 0, 0.8), 2px 2px 0px #000;
+	pointer-events: none;
+	text-align: center;
+	opacity: 0;
+	transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+	z-index: 100;
+	font-family: 'Outfit', sans-serif;
 }
+
 #kill-streak-overlay.show {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1.2);
+	opacity: 1;
+	transform: translate(-50%, -50%) scale(1.2);
 }
+
 @
