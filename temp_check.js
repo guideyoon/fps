@@ -1,4430 +1,4 @@
-<!DOCTYPE html>
-<!-- DEPLOY TRIGGER: 2026-01-24 -->
-<!-- VERSION: 2026-01-19-FORCE-UPDATE -->
-<html lang="ko">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- Cache Control to prevent old version persistence on Vercel -->
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
-    <title>FPS Game</title>
-
-    <!-- PWA / Standalone 모드 설정 - 주소창 숨기기 -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#000000">
-
-    <title>FPS Multiplayer - Room System</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Favicon fix to prevent 404 -->
-    <link rel="icon" href="data:,">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&display=swap');
-
-        * {
-            box-sizing: border-box;
-        }
-
-        html,
-        body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100dvh;
-            overflow: hidden;
-            background-color: #000;
-            touch-action: none;
-            user-select: none;
-            -webkit-user-select: none;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            /* 모바일 가로 모드 대응 */
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-        }
-
-        /* 모바일 가로 모드 최적화 */
-        @media (orientation: landscape) and (max-height: 500px) {
-
-            html,
-            body {
-                height: 100vh;
-                height: 100dvh;
-            }
-
-
-            @supports (height: -webkit-fill-available) {
-
-                html,
-                body {
-                    height: -webkit-fill-available;
-                }
-            }
-        }
-
-
-        /* --- NEON TACTICAL HUD CSS --- */
-
-        :root {
-            --neon-cyan: #00f3ff;
-            --neon-red: #ff003c;
-            --dark-bg: rgba(9, 9, 11, 0.65);
-            --font-stack: 'Rajdhani', sans-serif;
-        }
-
-        /* Utility & Layout */
-        .hud-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 10;
-            font-family: var(--font-stack);
-            color: white;
-        }
-
-        /* Glassmorphism Panels */
-        .vitals-panel,
-        .weapon-panel,
-        .scoreboard-mini {
-            background: var(--dark-bg);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
-            transform: skewX(-10deg);
-            padding: 1rem;
-            position: absolute;
-        }
-
-        /* Top Center: Scoreboard */
-        .scoreboard-mini {
-            top: 1rem;
-            left: 50%;
-            transform: translateX(-50%) skewX(-10deg);
-            display: flex;
-            gap: 20px;
-            align-items: center;
-            font-size: 1.5rem;
-            font-weight: 700;
-        }
-
-        .scoreboard-mini>div {
-            transform: skewX(10deg);
-        }
-
-        .score.ally {
-            color: var(--neon-cyan);
-        }
-
-        .score.enemy {
-            color: var(--neon-red);
-        }
-
-        /* Single Player HUD Overrides */
-        body.single-player #hud-score-ally,
-        body.single-player #hud-score-enemy {
-            display: none;
-        }
-
-        body.single-player #hud-kill-count {
-            display: block;
-        }
-
-        #hud-score-ally,
-        #hud-score-enemy,
-        #hud-kill-count {
-            display: none !important;
-        }
-
-        /* Top Right: Kill Feed */
-        .kill-feed {
-            position: absolute;
-            top: 280px;
-            /* Far below scoreboard to avoid overlap */
-            right: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            text-align: right;
-            align-items: flex-end;
-            pointer-events: none;
-        }
-
-        .feed-item {
-            background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.8));
-            padding: 5px 10px;
-            border-right: 2px solid var(--neon-red);
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            opacity: 0.9;
-            color: white;
-            animation: slideIn 0.3s ease-out;
-        }
-
-        .feed-item .killer {
-            color: var(--neon-cyan);
-            font-weight: bold;
-        }
-
-        .feed-item .victim {
-            color: var(--neon-red);
-        }
-
-
-        /* Vertical Weapon List (Left Side) */
-        #weapon-list-left {
-            position: absolute;
-            left: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            pointer-events: none;
-            /* Just for display */
-        }
-
-        .weapon-item {
-            display: flex;
-            align-items: center;
-            opacity: 0.4;
-            transition: all 0.2s ease-out;
-            transform: translateX(-10px);
-        }
-
-        .weapon-item.active {
-            opacity: 1;
-            transform: translateX(0) scale(1.1);
-        }
-
-        .weapon-item .key-hint {
-            width: 32px;
-            height: 32px;
-            background: rgba(0, 0, 0, 0.5);
-            color: #fff;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            font-weight: bold;
-            margin-right: 10px;
-        }
-
-        .weapon-item.active .key-hint {
-            background: var(--neon-cyan);
-            border-color: var(--neon-cyan);
-            color: #000;
-        }
-
-        .weapon-item .icon-box {
-            width: 110px;
-            height: 110px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 8px;
-            border: 2px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .weapon-item.active .icon-box {
-            border-color: var(--neon-cyan);
-            background: rgba(0, 255, 255, 0.1);
-            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
-        }
-
-        .weapon-item i {
-            font-size: 54px;
-            color: #fff;
-        }
-
-        .weapon-item.active i {
-            color: var(--neon-cyan);
-        }
-
-        .crosshair {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 60px;
-            height: 60px;
-            z-index: 100;
-            pointer-events: none;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            /* Transition for container if needed, but mainly for children */
-        }
-
-        .crosshair .dot {
-            position: absolute;
-            width: 4px;
-            height: 4px;
-            background-color: white;
-            border-radius: 50%;
-            box-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
-            z-index: 102;
-        }
-
-        .crosshair .hair {
-            position: absolute;
-            background-color: white;
-            box-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
-            transition: transform 0.1s ease-out;
-            /* Smooth spread */
-            z-index: 101;
-        }
-
-        /* Vertical Lines (Top/Bottom) - Width 2px, Height 10px */
-        .crosshair .hair.top,
-        .crosshair .hair.bottom {
-            width: 2px;
-            height: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            /* Center horizontally */
-        }
-
-        /* Horizontal Lines (Left/Right) - Width 10px, Height 2px */
-        .crosshair .hair.left,
-        .crosshair .hair.right {
-            width: 10px;
-            height: 2px;
-            top: 50%;
-            transform: translateY(-50%);
-            /* Center vertically */
-        }
-
-        /* Initial Positions (will be overridden by JS, but good defaults) */
-        .crosshair .hair.top {
-            top: 15px;
-            /* Offset from container top (center is 30) -> Gap */
-        }
-
-        .crosshair .hair.bottom {
-            bottom: 15px;
-        }
-
-        .crosshair .hair.left {
-            left: 15px;
-        }
-
-        .crosshair .hair.right {
-            right: 15px;
-        }
-
-        .crosshair.firing .horizontal {
-            width: 35px;
-            opacity: 0.5;
-        }
-
-        .crosshair.firing .vertical {
-            height: 35px;
-            opacity: 0.5;
-        }
-
-        .crosshair.enemy-detected .line {
-            background: var(--neon-red);
-            box-shadow: 0 0 5px red;
-        }
-
-        /* Bottom Left: Vitals */
-        .vitals-panel {
-            bottom: 2rem;
-            left: 2rem;
-            width: 300px;
-            border-left: 4px solid var(--neon-cyan);
-        }
-
-        .value-group {
-            display: flex;
-            align-items: baseline;
-            gap: 10px;
-            transform: skewX(10deg);
-        }
-
-        .health-text {
-            font-size: 3rem;
-            font-weight: 700;
-            line-height: 0.8;
-            text-shadow: 0 0 10px var(--neon-cyan);
-        }
-
-        .bar-container {
-            margin-top: 10px;
-            height: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            position: relative;
-            transform: skewX(10deg);
-            overflow: hidden;
-        }
-
-        .health-bar {
-            height: 100%;
-            background: var(--neon-cyan);
-            box-shadow: 0 0 15px var(--neon-cyan);
-            transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 2;
-            position: relative;
-        }
-
-        .health-bar-ghost {
-            position: absolute;
-            top: 0;
-            left: 0;
-            height: 100%;
-            background: white;
-            transition: width 1s ease-out 0.2s;
-            z-index: 1;
-        }
-
-        /* Bottom Right: Weapon */
-        .weapon-panel {
-            bottom: 2rem;
-            right: 2rem;
-            text-align: right;
-            border-right: 4px solid white;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-        }
-
-        .ammo-group {
-            transform: skewX(10deg);
-        }
-
-        .ammo-current {
-            font-size: 4rem;
-            font-weight: 700;
-            line-height: 0.8;
-        }
-
-        .ammo-reserve {
-            font-size: 1.5rem;
-            color: #aaa;
-        }
-
-        .weapon-selector {
-            display: none;
-            /* Hide old selector */
-        }
-
-        #rifle-debug-panel {
-            position: fixed;
-            top: 12px;
-            right: 12px;
-            z-index: 9999;
-            background: rgba(0, 0, 0, 0.75);
-            color: #9eff9e;
-            font-family: ui-monospace, Menlo, Consolas, monospace;
-            font-size: 12px;
-            padding: 10px 12px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 6px;
-            display: none;
-        }
-
-        #rifle-debug-panel .panel-title {
-            font-weight: 700;
-            margin-bottom: 8px;
-            color: #c9ffd1;
-        }
-
-        #rifle-debug-panel .panel-row {
-            display: grid;
-            grid-template-columns: 25px 1fr 45px;
-            align-items: center;
-            gap: 4px;
-            margin-bottom: 6px;
-        }
-
-        .slider-group {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            width: 100%;
-        }
-
-        #rifle-debug-panel input[type="range"] {
-            flex: 1;
-            min-width: 0;
-            cursor: pointer;
-        }
-
-        #rifle-debug-panel button {
-            background: #1f8f4a;
-            color: #fff;
-            border: none;
-            padding: 6px 8px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .nudge-btn {
-            width: 22px;
-            height: 22px;
-            padding: 0 !important;
-            background: #444 !important;
-            border: 1px solid rgba(255, 255, 255, 0.2) !important;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            line-height: 1;
-        }
-
-        .nudge-btn:hover {
-            background: #666 !important;
-        }
-
-        #rifle-debug-panel #rifle-x-minus,
-        #rifle-debug-panel #rifle-x-plus {
-            width: 34px;
-            height: 24px;
-            padding: 0;
-            background: #2b2b2b;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: #fff;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        #pistol-debug-panel {
-            position: fixed;
-            top: 12px;
-            left: 12px;
-            z-index: 9999;
-            background: rgba(0, 0, 0, 0.75);
-            color: #ffcc9e;
-            font-family: ui-monospace, Menlo, Consolas, monospace;
-            font-size: 12px;
-            padding: 10px 12px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 6px;
-            display: none;
-        }
-
-        #pistol-debug-panel .panel-title {
-            font-weight: 700;
-            margin-bottom: 8px;
-            color: #ffd1c9;
-        }
-
-        #pistol-debug-panel .panel-row {
-            display: grid;
-            grid-template-columns: 25px 1fr 45px;
-            align-items: center;
-            gap: 4px;
-            margin-bottom: 6px;
-        }
-
-        #pistol-debug-panel input[type="range"] {
-            flex: 1;
-            min-width: 0;
-            cursor: pointer;
-        }
-
-        #pistol-debug-panel button {
-            background: #8f4a1f;
-            color: #fff;
-            border: none;
-            padding: 6px 8px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        #sniper-debug-panel {
-            position: fixed;
-            top: 12px;
-            left: 12px;
-            z-index: 9999;
-            background: rgba(0, 0, 0, 0.75);
-            color: #9eccff;
-            font-family: ui-monospace, Menlo, Consolas, monospace;
-            font-size: 12px;
-            padding: 10px 12px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 6px;
-            display: none;
-        }
-
-        #sniper-debug-panel .panel-title {
-            font-weight: 700;
-            margin-bottom: 8px;
-            color: #c9e1ff;
-        }
-
-        #sniper-debug-panel .panel-row {
-            display: grid;
-            grid-template-columns: 25px 1fr 45px;
-            align-items: center;
-            gap: 4px;
-            margin-bottom: 6px;
-        }
-
-        #sniper-debug-panel input[type="range"] {
-            flex: 1;
-            min-width: 0;
-            cursor: pointer;
-        }
-
-        #sniper-debug-panel button {
-            background: #1f4a8f;
-            color: #fff;
-            border: none;
-            padding: 6px 8px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        #sniper-debug-panel .arms-flex-container {
-            display: flex;
-            gap: 15px;
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        #sniper-debug-panel .arm-column {
-            flex: 1;
-            min-width: 260px;
-        }
-
-        #sniper-debug-panel .section-title,
-        #knife-debug-panel .section-title {
-            font-weight: bold;
-            margin-bottom: 8px;
-            font-size: 13px;
-        }
-
-        #knife-debug-panel {
-            position: fixed;
-            top: 12px;
-            left: 12px;
-            z-index: 9999;
-            background: rgba(0, 0, 0, 0.75);
-            color: #ff9ecc;
-            font-family: ui-monospace, Menlo, Consolas, monospace;
-            font-size: 12px;
-            padding: 10px 12px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 6px;
-            display: none;
-        }
-
-        #knife-debug-panel .panel-title {
-            font-weight: 700;
-            margin-bottom: 8px;
-            color: #ffc9e1;
-        }
-
-        #knife-debug-panel .panel-row {
-            display: grid;
-            grid-template-columns: 25px 1fr 45px;
-            align-items: center;
-            gap: 4px;
-            margin-bottom: 6px;
-        }
-
-        #knife-debug-panel input[type="range"] {
-            flex: 1;
-            min-width: 0;
-            cursor: pointer;
-        }
-
-        #knife-debug-panel button {
-            background: #8f1f4a;
-            color: #fff;
-            border: none;
-            padding: 6px 8px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        #knife-debug-panel .arms-flex-container {
-            display: flex;
-            gap: 15px;
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        #knife-debug-panel .arm-column {
-            flex: 1;
-            min-width: 260px;
-        }
-
-        #knife-swing-panel {
-            position: fixed;
-            top: 12px;
-            right: 12px;
-            z-index: 9999;
-            background: rgba(0, 0, 0, 0.85);
-            color: #ffcc66;
-            font-family: ui-monospace, Menlo, Consolas, monospace;
-            font-size: 11px;
-            padding: 10px 12px;
-            border: 1px solid rgba(255, 200, 100, 0.4);
-            border-radius: 6px;
-            display: none;
-            width: 320px;
-            pointer-events: auto;
-        }
-
-        #knife-swing-panel .panel-title {
-            font-weight: 700;
-            margin-bottom: 8px;
-            color: #ffdd88;
-            font-size: 13px;
-        }
-
-        #knife-swing-panel .section-title {
-            font-weight: bold;
-            margin: 8px 0 4px 0;
-            padding-top: 6px;
-            border-top: 1px solid rgba(255, 255, 255, 0.15);
-            color: #ffa;
-        }
-
-        #knife-swing-panel .panel-row {
-            display: grid;
-            grid-template-columns: 40px 1fr 40px;
-            align-items: center;
-            gap: 4px;
-            margin-bottom: 4px;
-        }
-
-        #knife-swing-panel input[type="range"] {
-            flex: 1;
-            min-width: 0;
-            cursor: pointer;
-        }
-
-        #knife-swing-panel button {
-            background: #8f6f1f;
-            color: #fff;
-            border: none;
-            padding: 5px 8px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 11px;
-        }
-
-        #knife-swing-panel button:hover {
-            background: #af8f3f;
-        }
-
-
-        .weapon-slot {
-            width: 30px;
-            height: 6px;
-            background: rgba(255, 255, 255, 0.2);
-            transition: all 0.2s;
-            color: transparent;
-            /* Hide number */
-            font-size: 0;
-        }
-
-        .weapon-slot.active {
-            background: white;
-            box-shadow: 0 0 10px white;
-            transform: scaleY(1.5);
-        }
-
-        /* Damage Vignette */
-        .damage-vignette {
-            position: absolute;
-            inset: 0;
-            box-shadow: inset 0 0 100px var(--neon-red);
-            opacity: 0;
-            transition: opacity 0.2s;
-            mix-blend-mode: overlay;
-            pointer-events: none;
-            z-index: 5;
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(20px);
-                opacity: 0;
-            }
-
-            to {
-                transform: translateX(0);
-                opacity: 0.9;
-            }
-        }
-
-        /* Mobile Adjustments */
-        @media (max-width: 768px) {
-            .vitals-panel {
-                width: 200px;
-                bottom: 1rem;
-                left: 1rem;
-                padding: 0.5rem;
-            }
-
-            .health-text {
-                font-size: 2rem;
-            }
-
-            .weapon-panel {
-                bottom: 1rem;
-                right: 1rem;
-                padding: 0.5rem;
-            }
-
-            .ammo-current {
-                font-size: 2.5rem;
-            }
-
-            .scoreboard-mini {
-                top: 0.5rem;
-                font-size: 1rem;
-            }
-
-            /* Mobile Landscape Specific */
-            @media (orientation: landscape) {
-                #weapon-inventory {
-                    gap: 12px;
-                    left: 10px;
-                }
-
-                .weapon-slot {
-                    padding: 12px 20px;
-                }
-
-                .weapon-number {
-                    font-size: 24px;
-                    min-width: 30px;
-                }
-
-                .weapon-name {
-                    font-size: 20px;
-                }
-
-                #hp-container {
-                    left: 10px;
-                    bottom: 10px;
-                    width: 400px;
-                    height: 30px;
-                }
-
-                #hp-text {
-                    left: 10px;
-                    bottom: 45px;
-                    font-size: 28px;
-                }
-
-                #chat-container {
-                    bottom: 100px;
-                    left: 10px;
-                    width: 350px;
-                }
-
-                #chat-messages {
-                    height: 150px;
-                }
-            }
-        }
-
-
-        #ui-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 10;
-        }
-
-        #crosshair {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            transition: opacity 0.1s;
-        }
-
-        #crosshair::before,
-        #crosshair::after {
-            content: '';
-            position: absolute;
-            background: rgba(255, 255, 255, 0.8);
-            transform: translate(-50%, -50%);
-            box-shadow: 0 0 2px black;
-        }
-
-        #crosshair::before {
-            width: 16px;
-            height: 1.5px;
-        }
-
-        #crosshair::after {
-            width: 1.5px;
-            height: 16px;
-        }
-
-        #crosshair.enemy-detected::before,
-        #crosshair.enemy-detected::after {
-            background: #ff0000;
-            box-shadow: 0 0 4px red;
-        }
-
-        #hit-marker {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 40px;
-            height: 40px;
-            transform: translate(-50%, -50%) rotate(45deg);
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.1s, transform 0.1s, filter 0.1s;
-            z-index: 10;
-        }
-
-        #hit-marker::before,
-        #hit-marker::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            background-color: #ff3333;
-            transform: translate(-50%, -50%);
-            box-shadow: 0 0 8px red, 0 0 12px rgba(255, 0, 0, 0.6);
-        }
-
-        #hit-marker::before {
-            width: 28px;
-            height: 4px;
-        }
-
-        #hit-marker::after {
-            width: 4px;
-            height: 28px;
-        }
-
-        #scope-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: none;
-            z-index: 20;
-            /* PUBG 스타일 - 주변도 보이도록 반투명 처리 */
-            background: radial-gradient(circle, transparent 20%, rgba(0, 0, 0, 0.7) 21%, rgba(0, 0, 0, 0.85) 100%);
-            /* Pointer events none to allow clicks if needed, though usually aiming blocks interactions */
-            pointer-events: none;
-        }
-
-        #scope-line-h {
-            position: absolute;
-            top: 50%;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background-color: rgba(0, 0, 0, 0.8);
-            transform: translateY(-50%);
-        }
-
-        #scope-line-v {
-            position: absolute;
-            top: 0;
-            left: 50%;
-            width: 2px;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            transform: translateX(-50%);
-        }
-
-        #scope-dot {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 4px;
-            height: 4px;
-            background: red;
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-        }
-
-        #vignette {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle, transparent 50%, black 150%);
-            opacity: 0;
-            transition: opacity 0.2s;
-            z-index: 5;
-            pointer-events: none;
-        }
-
-        #damage-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle, transparent 50%, rgba(255, 0, 0, 0.5) 100%);
-            opacity: 0;
-            transition: opacity 0.1s;
-            z-index: 6;
-            pointer-events: none;
-        }
-
-        #low-health-overlay {
-            position: fixed;
-            /* [FIX] Force Fixed position to cover screen */
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            pointer-events: none;
-            z-index: 9999;
-            /* [FIX] Max Z-Index */
-            /* Aggressive Red Gradient */
-            background: radial-gradient(circle, transparent 20%, rgba(255, 0, 0, 0.4) 60%, rgba(255, 0, 0, 0.9) 100%);
-            opacity: 0;
-            transition: opacity 0.3s;
-            display: block;
-            /* Ensure it is block */
-        }
-
-        #low-health-overlay.active {
-            animation: lowHealthPulse 1s infinite alternate ease-in-out;
-        }
-
-        @keyframes lowHealthPulse {
-            from {
-                opacity: 0.5;
-            }
-
-            to {
-                opacity: 1;
-            }
-        }
-
-        #headshot-msg {
-            position: absolute;
-            top: 20%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0.5);
-            color: #ff0000;
-            font-size: 40px;
-            font-weight: 900;
-            font-style: italic;
-            text-shadow: 0 0 10px rgba(255, 0, 0, 0.8), 2px 2px 0 #000;
-            opacity: 0;
-            transition: transform 0.1s, opacity 0.1s;
-            z-index: 15;
-            pointer-events: none;
-        }
-
-        #headshot-msg.active {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1.2);
-        }
-
-        #ammo-info {
-            position: absolute;
-            bottom: 25px;
-            right: 25px;
-            color: white;
-            font-size: 24px;
-            font-weight: 900;
-            font-style: italic;
-            text-shadow: 1px 1px 2px #000;
-            letter-spacing: 1px;
-            text-align: right;
-            pointer-events: none;
-        }
-
-        #weapon-label {
-            font-size: 18px;
-            color: #fbbc05;
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        #ammo-val {
-            display: block;
-        }
-
-        .no-ammo {
-            color: #ff3333;
-            animation: shake 0.2s;
-        }
-
-        @keyframes shake {
-            0% {
-                transform: translateX(0);
-            }
-
-            25% {
-                transform: translateX(-5px);
-            }
-
-            75% {
-                transform: translateX(5px);
-            }
-
-            100% {
-                transform: translateX(0);
-            }
-        }
-
-        #hp-container {
-            position: absolute;
-            bottom: 25px;
-            left: 0;
-            /* Align to the LEFT edge */
-            width: 400px;
-            /* Doubled size (from 200px) */
-            height: 30px;
-            /* Doubled size (from 15px) */
-            background: rgba(0, 0, 0, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 4px;
-            overflow: visible;
-        }
-
-        #hp-bar {
-            width: 100%;
-            height: 100%;
-            background: #4caf50;
-            transition: width 0.2s, background-color 0.2s;
-            border-radius: 2px;
-        }
-
-        #hp-text {
-            position: absolute;
-            left: 10px;
-            /* Inside the bar or very close to the left */
-            bottom: 40px;
-            /* Above the bar or inside if adjusted */
-            line-height: 30px;
-            color: white;
-            font-weight: bold;
-            font-size: 28px;
-            /* Larger font for larger bar */
-            text-shadow: 2px 2px 4px black;
-            z-index: 5;
-            pointer-events: none;
-        }
-
-        #game-over {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            color: red;
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-            font-size: 60px;
-            font-weight: 900;
-        }
-
-        #pause-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            color: white;
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 99;
-            font-size: 40px;
-            font-weight: 900;
-            cursor: default;
-            pointer-events: auto;
-        }
-
-        /* --- FRONTLINE TACTICAL UI DESIGN --- */
-        :root {
-            --tactical-cyan: #00f3ff;
-            --tactical-amber: #facc15;
-            --tactical-red: #ff003c;
-            --glass-bg: rgba(9, 9, 11, 0.7);
-            --glass-border: rgba(255, 255, 255, 0.1);
-        }
-
-        #mode-selection {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at 30% 50%, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.8) 100%),
-                url('background.png') center/55% no-repeat black;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            align-items: flex-start;
-            padding: 5vh 10% 2vh 10%;
-            z-index: 200;
-            overflow: hidden;
-            pointer-events: auto;
-        }
-
-        #mode-selection::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
-                linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-            background-size: 100% 2px, 3px 100%;
-            pointer-events: none;
-            z-index: 1;
-            opacity: 0.3;
-        }
-
-
-        .menu-buttons-container {
-            display: flex;
-            flex-direction: column;
-            z-index: 2;
-
-            /* [새로 추가] 위치 강제 지정 */
-            position: absolute;
-            /* 절대 위치 사용 */
-            bottom: 20vh;
-            /* 화면 바닥에서 5% 정도 띄움 (숫자를 줄이면 더 내려갑니다) */
-            width: 100%;
-            /* 너비 꽉 채우기 */
-            align-items: center;
-            /* 버튼 가운데 정렬 (필요시) */
-            padding-left: 0;
-            /* 기존 왼쪽 여백 무시 */
-        }
-
-        .menu-title-container {
-            /* [새로 추가] 위치 강제 지정 */
-            position: absolute;
-            /* 절대 위치 */
-            top: 35vh;
-            /* 화면 천장에서 15% 아래 (숫자를 줄이면 더 위로 갑니다 예: 10vh) */
-            width: 100%;
-            /* 너비 꽉 채우기 */
-            display: flex;
-            /* 중앙 정렬을 위해 필요 */
-            justify-content: center;
-            /* 가로 중앙 정렬 */
-            z-index: 2;
-            margin: 0;
-            /* 기존 여백 제거 */
-        }
-
-        .menu-buttons-container {
-            display: flex;
-            flex-direction: column;
-            z-index: 2;
-        }
-
-        .tactical-logo {
-            max-width: 400px;
-            filter: drop-shadow(0 0 20px var(--tactical-cyan));
-            margin-bottom: 20px;
-        }
-
-        .tactical-subtitle {
-            font-size: 18px;
-            color: var(--tactical-cyan);
-            letter-spacing: 5px;
-            text-transform: uppercase;
-            font-family: var(--font-stack);
-            opacity: 0.8;
-            border-left: 4px solid var(--tactical-cyan);
-            padding-left: 15px;
-        }
-
-        .mode-btn {
-            position: relative;
-            margin: 15px 0;
-            padding: 15px 40px;
-            font-size: 28px;
-            font-family: var(--font-stack);
-            font-weight: 700;
-            text-transform: uppercase;
-            color: white;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            transform: skewX(-15deg);
-            min-width: 320px;
-            text-align: left;
-            overflow: hidden;
-            z-index: 2;
-        }
-
-        .mode-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-            transition: left 0.5s;
-        }
-
-        .mode-btn:hover {
-            background: rgba(0, 243, 255, 0.1);
-            border-color: var(--tactical-cyan);
-            padding-left: 60px;
-            box-shadow: -10px 0 20px rgba(0, 243, 255, 0.2);
-        }
-
-        .mode-btn:hover::before {
-            left: 100%;
-        }
-
-        .mode-btn .btn-text {
-            transform: skewX(15deg);
-            display: inline-block;
-        }
-
-        .mode-btn .btn-icon {
-            margin-right: 15px;
-            color: var(--tactical-cyan);
-        }
-
-        .mode-btn.cancel {
-            border-color: rgba(255, 0, 60, 0.3);
-        }
-
-        .mode-btn.cancel:hover {
-            border-color: var(--tactical-red);
-            background: rgba(255, 0, 60, 0.1);
-            box-shadow: -10px 0 20px rgba(255, 0, 60, 0.2);
-        }
-
-        .mode-btn.cancel .btn-icon {
-            color: var(--tactical-red);
-        }
-
-        /* --- Room System / Overlays Redesign --- */
-        #name-setup,
-        #room-menu,
-        #create-room-modal,
-        #room-waiting,
-        #single-map-selection {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #09090b;
-            color: white;
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 201;
-            font-family: var(--font-stack);
-            backdrop-filter: blur(10px);
-        }
-
-        .tactical-panel {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            padding: 40px;
-            border-radius: 4px;
-            transform: skewX(-5deg);
-            max-width: 90%;
-            width: 600px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-            position: relative;
-        }
-
-        .tactical-panel::after {
-            content: 'SECURE_LINK_ESTABLISHED';
-            position: absolute;
-            bottom: -25px;
-            right: 0;
-            font-size: 10px;
-            letter-spacing: 2px;
-            color: var(--tactical-cyan);
-            opacity: 0.5;
-            transform: skewX(5deg);
-        }
-
-        .tactical-panel>* {
-            transform: skewX(5deg);
-        }
-
-        .tactical-title {
-            font-size: 32px;
-            font-weight: 700;
-            text-transform: uppercase;
-            margin-bottom: 30px;
-            color: var(--tactical-cyan);
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            border-bottom: 1px solid var(--glass-border);
-            padding-bottom: 15px;
-        }
-
-        .tactical-input-group {
-            margin-bottom: 25px;
-        }
-
-        .tactical-input-group label {
-            display: block;
-            font-size: 14px;
-            text-transform: uppercase;
-            color: #aaa;
-            margin-bottom: 8px;
-            letter-spacing: 1px;
-        }
-
-        input[type="text"].tactical-input,
-        select.tactical-input {
-            width: 100%;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--glass-border);
-            padding: 12px 20px;
-            color: white;
-            font-family: var(--font-stack);
-            font-size: 18px;
-            transition: all 0.3s;
-        }
-
-        input[type="text"].tactical-input:focus,
-        select.tactical-input:focus {
-            outline: none;
-            border-color: var(--tactical-cyan);
-            background: rgba(0, 243, 255, 0.05);
-        }
-
-        /* Room List Custom Styling */
-        #room-list-container {
-            width: 100%;
-            height: 350px;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid var(--glass-border);
-            margin: 20px 0;
-            overflow-y: auto;
-            padding: 10px;
-        }
-
-        .room-item {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid transparent;
-            margin-bottom: 10px;
-            padding: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: all 0.2s;
-        }
-
-        .room-item:hover {
-            background: rgba(0, 243, 255, 0.05);
-            border-color: var(--tactical-cyan);
-        }
-
-        .status-badge {
-            padding: 4px 12px;
-            font-size: 12px;
-            font-weight: bold;
-            text-transform: uppercase;
-            border-radius: 2px;
-        }
-
-        .status-badge.waiting {
-            background: var(--tactical-cyan);
-            color: #000;
-        }
-
-        .status-badge.playing {
-            background: var(--tactical-amber);
-            color: #000;
-        }
-
-        .status-badge.full {
-            background: var(--tactical-red);
-            color: white;
-        }
-
-        /* Map Grid Styles */
-        .map-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-            width: 100%;
-            margin-bottom: 30px;
-        }
-
-        .map-card {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            padding: 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .map-card:hover {
-            border-color: var(--tactical-cyan);
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 243, 255, 0.1);
-        }
-
-        .map-card i {
-            font-size: 40px;
-            margin-bottom: 15px;
-            color: var(--tactical-cyan);
-        }
-
-        .map-card.selected {
-            border-color: var(--tactical-cyan);
-            background: rgba(0, 243, 255, 0.1);
-        }
-
-        /* Message Toggle Button */
-        #chat-toggle-btn {
-            position: absolute;
-            left: 20px;
-            bottom: 300px;
-            z-index: 101;
-            background: rgba(0, 0, 0, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: white;
-            padding: 10px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-family: var(--font-stack);
-            font-weight: bold;
-            display: none;
-            /* Only show in mobile landscape */
-        }
-
-        @media (max-width: 768px) and (orientation: landscape) {
-            #chat-toggle-btn {
-                display: block;
-            }
-
-            #chat-container {
-                display: none;
-                /* Initially hidden in mobile landscape */
-            }
-        }
-
-        #chat-container {
-            position: absolute;
-            left: 20px;
-            width: 280px;
-            background: rgba(0, 0, 0, 0.6);
-            border-radius: 10px;
-            padding: 10px;
-            z-index: 100;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            pointer-events: auto;
-            /* HP 바 위, 무기 인벤토리 아래에 배치 */
-            bottom: 150px;
-        }
-
-        #chat-messages {
-            height: 100px;
-            overflow-y: auto;
-            padding-right: 5px;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        #chat-messages::-webkit-scrollbar {
-            width: 5px;
-        }
-
-        #chat-messages::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 3px;
-        }
-
-        .chat-msg {
-            font-size: 14px;
-            line-height: 1.4;
-            word-wrap: break-word;
-        }
-
-        .chat-msg .sender {
-            font-weight: bold;
-            color: #4CAF50;
-            margin-right: 5px;
-        }
-
-        .chat-msg.system {
-            color: #ffeb3b;
-            font-style: italic;
-        }
-
-        .chat-input-area {
-            display: flex;
-            gap: 10px;
-        }
-
-        #chat-input {
-            flex: 1;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 8px 12px;
-            border-radius: 20px;
-            color: white;
-            font-size: 14px;
-            width: auto;
-        }
-
-        #btn-send-chat {
-            padding: 8px 15px;
-            border-radius: 20px;
-            margin: 0;
-            background: #2196F3;
-        }
-
-        #room-waiting {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.95);
-            color: white;
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 202;
-            font-size: 24px;
-            pointer-events: auto;
-        }
-
-        #room-waiting h2 {
-            font-size: 36px;
-            margin-bottom: 30px;
-        }
-
-        #players-list {
-            margin: 30px;
-            min-width: 300px;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 20px;
-            border-radius: 8px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-        }
-
-        .player-item {
-            padding: 10px;
-            margin: 5px 0;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 5px;
-        }
-
-        #countdown {
-            font-size: 72px;
-            color: #ff3333;
-            text-shadow: 0 0 20px rgba(255, 51, 51, 0.8);
-            margin: 30px;
-        }
-
-        #restart-btn {
-            margin-top: 20px;
-            padding: 15px 40px;
-            font-size: 24px;
-            font-weight: bold;
-            background: rgba(255, 255, 255, 0.9);
-            border: 3px solid #444;
-            cursor: pointer;
-            z-index: 2000;
-            /* Ensure visibility */
-            pointer-events: auto;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-        }
-
-        #exit-to-menu-btn {
-            margin-top: 15px;
-            padding: 10px 30px;
-            font-size: 20px;
-            font-weight: bold;
-            background: rgba(50, 0, 0, 0.8);
-            border: 2px solid #ff3333;
-            color: #ff3333;
-            cursor: pointer;
-            z-index: 2000;
-            pointer-events: auto;
-            border-radius: 8px;
-            transition: all 0.2s;
-        }
-
-        #exit-to-menu-btn:hover {
-            background: rgba(255, 51, 51, 0.2);
-            color: white;
-            transform: scale(1.05);
-        }
-
-        #game-over-stats {
-            font-size: 32px;
-            color: white;
-            margin-bottom: 10px;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-        }
-
-        #stats-info {
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: white;
-            font-size: 18px;
-            font-weight: bold;
-            text-shadow: 2px 2px 4px black;
-            display: flex;
-            gap: 30px;
-            z-index: 10;
-        }
-
-        #play-time,
-        #kill-count {
-            background: rgba(0, 0, 0, 0.5);
-            padding: 8px 16px;
-            border-radius: 5px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-
-        #controls-guide {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 13px;
-            line-height: 1.6;
-            text-shadow: 1px 1px 1px black;
-            pointer-events: none;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 10px;
-            border-radius: 5px;
-        }
-
-        .key {
-            color: #fbbc05;
-            font-weight: bold;
-        }
-
-        /* PC 감도 조정 UI */
-        /* PC 감도 조정 UI - Modified for Pause Menu */
-        #sensitivity-control,
-        #volume-control {
-            /* Originally absolute, now static in flex container */
-            background: rgba(0, 0, 0, 0.5);
-            padding: 15px;
-            border-radius: 8px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            margin-top: 20px;
-            pointer-events: auto;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        #sensitivity-control label,
-        #volume-control label {
-            color: white;
-            font-size: 14px;
-            margin-right: 10px;
-        }
-
-        #sensitivity-slider,
-        #volume-slider {
-            width: 150px;
-            margin-right: 10px;
-        }
-
-        #sensitivity-value,
-        #volume-value {
-            color: #fbbc05;
-            font-weight: bold;
-            font-size: 14px;
-            min-width: 40px;
-            display: inline-block;
-        }
-
-        #light-toggle-btn {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            width: 50px;
-            height: 50px;
-            background: rgba(0, 0, 0, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            /* Reduced from 2px for better alignment */
-            border-radius: 50%;
-            display: none;
-            /* Hide by default, show only during gameplay */
-            align-items: center;
-            justify-content: center;
-            color: #ffaa00;
-            font-size: 24px;
-            cursor: pointer;
-            z-index: 1000;
-            user-select: none;
-            transition: all 0.2s;
-            pointer-events: auto;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        #light-toggle-btn:hover {
-            background: rgba(0, 0, 0, 0.8);
-            border-color: rgba(255, 255, 255, 0.6);
-        }
-
-        #light-toggle-btn.active {
-            background: rgba(255, 170, 0, 0.3);
-            border-color: #ffaa00;
-            color: #ffcc44;
-            box-shadow: 0 0 15px rgba(255, 170, 0, 0.5);
-        }
-
-        /* Death Overlay & Killcam UI */
-        #death-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 150;
-            pointer-events: none;
-        }
-
-        #respawn-timer {
-            font-size: 96px;
-            font-weight: bold;
-            color: #ff3333;
-            text-shadow: 0 0 30px rgba(255, 51, 51, 0.9), 0 0 60px rgba(255, 51, 51, 0.5);
-            margin-bottom: 30px;
-            animation: pulse 1s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-
-            0%,
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
-
-            50% {
-                transform: scale(1.05);
-                opacity: 0.9;
-            }
-        }
-
-        #killed-by-label {
-            font-size: 28px;
-            color: #ffffff;
-            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
-            margin-bottom: 10px;
-        }
-
-        #killer-name {
-            font-size: 48px;
-            font-weight: bold;
-            color: #ffaa00;
-            text-shadow: 0 0 20px rgba(255, 170, 0, 0.8);
-        }
-
-        /* Sniper Scope Overlay */
-        #sniper-scope {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at center,
-                    transparent 0%,
-                    transparent 24%,
-                    rgba(0, 0, 0, 0.5) 26%,
-                    rgba(0, 0, 0, 0.75) 100%);
-            display: none;
-            z-index: 100;
-            pointer-events: none;
-        }
-
-        #scope-circle {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: min(600px, 80vh);
-            height: min(600px, 80vh);
-            border: 15px solid #111;
-            border-radius: 50%;
-            box-shadow:
-                inset 0 0 60px rgba(0, 0, 0, 0.9),
-                inset 0 0 20px rgba(0, 0, 0, 0.6),
-                0 0 30px rgba(0, 0, 0, 0.8);
-        }
-
-        .scope-crosshair-h,
-        .scope-crosshair-v {
-            position: absolute;
-            background: rgba(255, 255, 255, 0.8);
-            box-shadow: 0 0 2px rgba(0, 0, 0, 0.8);
-        }
-
-        .scope-crosshair-h {
-            top: 50%;
-            left: 0;
-            width: 100%;
-            height: 1px;
-            transform: translateY(-50%);
-        }
-
-        .scope-crosshair-v {
-            left: 50%;
-            top: 0;
-            width: 1px;
-            height: 100%;
-            transform: translateX(-50%);
-        }
-
-        .scope-center-dot {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 4px;
-            height: 4px;
-            background: rgba(255, 50, 50, 0.9);
-            border-radius: 50%;
-            box-shadow: 0 0 4px rgba(255, 50, 50, 0.8);
-        }
-
-        /* Scope tick marks */
-        .scope-tick {
-            position: absolute;
-            background: rgba(255, 255, 255, 0.6);
-        }
-
-        .scope-tick-h {
-            height: 1px;
-            width: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-        }
-
-        .scope-tick-v {
-            width: 1px;
-            height: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-
-        /* 모바일 컨트롤 */
-        #controls {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 20;
-            display: flex;
-            pointer-events: none;
-        }
-
-        #touch-left,
-        #touch-right {
-            width: 50%;
-            height: 100%;
-            pointer-events: auto;
-        }
-
-        /* 모바일 버튼 */
-        .mobile-btn {
-            position: absolute;
-            width: 35px;
-            /* 40px -> 35px (추가 축소) */
-            height: 35px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
-            border: 2px solid rgba(255, 255, 255, 0.5);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 14px;
-            /* 16px -> 14px */
-            font-weight: bold;
-            pointer-events: auto;
-            z-index: 30;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        .mobile-btn:active {
-            background: rgba(255, 255, 255, 0.5);
-            transform: scale(0.95);
-        }
-
-        /* --- 1. Joystick --- */
-        #joystick-zone {
-            position: absolute;
-            bottom: 40px;
-            left: 40px;
-            width: 100px;
-            /* 120px -> 100px */
-            height: 100px;
-            z-index: 50;
-            touch-action: none;
-            /* Prevent browser scrolling */
-            background: rgba(255, 255, 255, 0.1);
-            /* Visible Hint */
-        }
-
-        #joystick-bg {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.3);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            pointer-events: none;
-        }
-
-        #joystick-handle {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 40px;
-            /* 50px -> 40px */
-            height: 40px;
-            background: rgba(255, 255, 255, 0.5);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            pointer-events: none;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-        }
-
-        /* --- 2. Vertical Weapon Selector (Left) --- */
-        #weapon-selector-vertical {
-            position: absolute;
-            left: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            display: none;
-            /* Mobile only */
-            flex-direction: column;
-            gap: 5px;
-            z-index: 1000;
-            /* Increased to ensure visibility above other layers */
-            pointer-events: auto;
-        }
-
-        .weapon-select-btn {
-            width: 35px;
-            /* 40px -> 35px */
-            height: 35px;
-            background: rgba(0, 0, 0, 0.4);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            /* 18px -> 16px */
-        }
-
-        .weapon-select-btn.active {
-            background: rgba(255, 170, 0, 0.6);
-            border-color: #ffaa00;
-        }
-
-        /* 무기 교체 버튼 (기본적으로 숨김, 미디어 쿼리에서 처리) */
-        #btn-weapon1,
-        #btn-weapon2,
-        #btn-weapon3,
-        #btn-weapon4 {
-            display: none;
-        }
-
-        /* 크런커 스타일 클러스터 배치 */
-        #btn-shoot {
-            bottom: 80px;
-            right: 80px;
-            width: 55px;
-            /* 80px -> 55px */
-            height: 55px;
-            background: rgba(255, 255, 255, 0.2);
-            font-size: 24px;
-            /* 32px -> 24px */
-            border-width: 3px;
-        }
-
-        #btn-aim {
-            bottom: 180px;
-            right: 20px;
-            width: 60px;
-            height: 60px;
-            font-size: 24px;
-        }
-
-        #btn-jump {
-            bottom: 110px;
-            right: 20px;
-            width: 60px;
-            height: 60px;
-            font-size: 24px;
-        }
-
-        #btn-reload {
-            bottom: 20px;
-            right: 140px;
-            width: 60px;
-            height: 60px;
-            font-size: 24px;
-        }
-
-        #btn-weapon-cycle {
-            bottom: 20px;
-            right: 220px;
-            width: 60px;
-            height: 60px;
-            font-size: 24px;
-            background: rgba(251, 188, 5, 0.3);
-            border-color: #fbbc05;
-        }
-
-        /* 모바일 UI 조정 */
-        @media (max-width: 768px) {
-
-            /* 1. HUD 하단 이동 및 축소 - 모바일 전용 오버라이드 */
-            #ammo-info {
-                bottom: 20px;
-                left: auto;
-                /* 기존 중앙 정렬 해제 */
-                right: 90px;
-                /* 오른쪽 버튼 피해서 배치 */
-                font-size: 14px;
-                /* 더 작게 */
-                text-align: right;
-                transform: none;
-            }
-
-            #ammo-val {
-                font-size: 18px;
-            }
-
-            #weapon-label {
-                display: none;
-            }
-
-            /* 공간 절약 */
-
-            #hp-container {
-                width: 120px;
-                /* 150px -> 120px */
-                height: 8px;
-                /* 10px -> 8px */
-                bottom: 22px;
-                left: 45px;
-                /* 60px -> 45px, closer to left */
-                /* HP 텍스트 공간 확보 */
-                transform: none;
-                /* 중앙 정렬 해제 */
-                background: rgba(0, 0, 0, 0.6);
-            }
-
-            #hp-text {
-                display: block;
-                /* 텍스트 표시 */
-                font-size: 12px;
-                /* 14px -> 12px */
-                left: -28px;
-                /* -30px -> -28px */
-                bottom: -3px;
-                /* -4px -> -3px */
-            }
-
-            /* 버튼 위치 상향 조정 (화면 하단 겹침 방지 - 탄약 표시와 겹치지 않도록 추가 상향) */
-            .mobile-btn {
-                bottom: 150px;
-                /* 110px -> 150px (추가 상향) */
-                /* 기본값 상향 */
-            }
-
-            #btn-shoot {
-                bottom: 170px;
-                /* 130px -> 170px */
-                right: 40px;
-                width: 45px;
-                /* 50px -> 45px */
-                /* 70px -> 50px */
-                height: 45px;
-            }
-
-            #btn-jump {
-                bottom: 230px;
-                /* 190px -> 230px */
-                right: 20px;
-            }
-
-            #btn-reload {
-                bottom: 290px;
-                /* 250px -> 290px */
-                right: 20px;
-            }
-
-            #btn-aim {
-                bottom: 110px;
-                /* 70px -> 110px */
-                right: 100px;
-            }
-
-            #joystick-zone {
-                bottom: 150px;
-                /* 110px -> 150px */
-                /* 조이스틱도 상향 */
-                left: 40px;
-                display: block !important;
-                /* Force Visible */
-            }
-
-            #weapon-selector-vertical {
-                top: 30%;
-                /* Move higher up from 45% */
-                left: 20px;
-            }
-
-            #controls-guide {
-                display: none;
-                /* 모바일에서 조작 설명 숨김 */
-            }
-
-            .mobile-btn {
-                display: flex;
-            }
-
-            /* 상단 스탯 정보 최적화 */
-            #stats-info {
-                top: 5px;
-                gap: 10px;
-                font-size: 12px;
-            }
-
-            #play-time,
-            #kill-count {
-                padding: 2px 8px;
-                background: rgba(0, 0, 0, 0.3);
-                border: none;
-            }
-
-            .mobile-btn {
-                display: flex;
-            }
-
-            /* 기존 무기 버튼 및 사이클 버튼 숨김 (새로운 수직 선택기로 대체) */
-            #btn-weapon1,
-            #btn-weapon2,
-            #btn-weapon3,
-            #btn-weapon4,
-            #btn-weapon-cycle {
-                display: none;
-            }
-
-            /* 무기 선택기 표시 */
-            #weapon-selector-vertical {
-                display: flex;
-            }
-
-            /* 조이스틱 표시 */
-            #joystick-zone {
-                display: block;
-            }
-        }
-
-        /* 가로 모드 - 모바일 스타일 적용 (User Request: Like Portrait Mode) */
-        @media (orientation: landscape) and (max-width: 1280px) {
-            #controls-guide {
-                display: none;
-            }
-
-            #weapon-label {
-                display: none;
-            }
-
-            /* [User Request] Force Joystick Visible in Landscape */
-            #joystick-zone {
-                display: block !important;
-                bottom: 40px;
-                left: 40px;
-                z-index: 1000;
-            }
-
-            /* [User Request] Fixed: Hide PC Weapon List in Mobile Landscape */
-            #weapon-list-left,
-            #weapon-inventory,
-            #controls-guide,
-            #weapon-label {
-                display: none !important;
-            }
-
-            /* [User Request] Force Mobile Controls Visible in Landscape */
-            #joystick-zone,
-            #fire-btn-zone,
-            #jump-btn,
-            #reload-btn,
-            #crouch-btn,
-            .mobile-controls {
-                display: block !important;
-                z-index: 9999 !important;
-                opacity: 0.8 !important;
-                pointer-events: auto !important;
-            }
-
-            /* [User Request] Show Mobile Weapon Selector */
-            #weapon-selector-vertical {
-                display: flex !important;
-                flex-direction: column;
-                top: 40% !important;
-                /* Adjust if needed */
-                left: 20px;
-            }
-
-            /* 버튼 숨김 -> 수직 선택기 사용 */
-            #btn-weapon1,
-            #btn-weapon2,
-            #btn-weapon3,
-            #btn-weapon4 {
-                display: none;
-            }
-
-            /* ===== HP & AMMO 상단에 표시 (수정됨) ===== */
-            .vitals-panel {
-                display: flex !important;
-                flex-direction: row;
-                align-items: center;
-                bottom: 20px !important;
-                top: auto;
-                left: 170px;
-                /* 조이스틱 피해서 우측으로 이동 */
-                width: auto;
-                padding: 5px 15px;
-                background: rgba(0, 0, 0, 0.6);
-                border: 1px solid rgba(255, 255, 255, 0.2);
-                border-left: 4px solid var(--neon-cyan);
-                transform: none;
-                border-radius: 4px;
-                z-index: 90;
-            }
-
-            .vitals-panel .value-group {
-                transform: none;
-                margin-right: 15px;
-                gap: 5px;
-            }
-
-            .vitals-panel .label {
-                font-size: 12px;
-                color: #aaa;
-            }
-
-            .vitals-panel .health-text {
-                font-size: 24px;
-                line-height: 1;
-            }
-
-            .vitals-panel .bar-container {
-                width: 120px;
-                height: 10px;
-                margin-top: 0;
-                transform: none;
-                background: rgba(0, 0, 0, 0.5);
-            }
-
-            .weapon-panel {
-                display: flex !important;
-                flex-direction: column;
-                bottom: 20px !important;
-                top: auto;
-                right: 170px;
-                /* 버튼 피해서 좌측으로 이동 */
-                /* exit button(80px) 왼쪽 */
-                padding: 5px 15px;
-                background: rgba(0, 0, 0, 0.6);
-                border: 1px solid rgba(255, 255, 255, 0.2);
-                border-right: 4px solid white;
-                transform: none;
-                border-radius: 4px;
-                align-items: flex-end;
-                z-index: 90;
-            }
-
-            .weapon-panel .ammo-group {
-                transform: none;
-            }
-
-            .weapon-panel .ammo-current {
-                font-size: 24px;
-                line-height: 1;
-            }
-
-            .weapon-panel .ammo-reserve {
-                font-size: 14px;
-            }
-
-            /* Hide unnecessary elements in landscape */
-            #hud-weapon-selector,
-            #hud-weapon-name,
-            #hp-container,
-            #hp-text,
-            #ammo-info {
-                display: none !important;
-            }
-
-            /* ===== 버튼들 - 크기 통일 및 왼쪽 이동 ===== */
-            .mobile-btn {
-                display: flex;
-                width: 50px;
-                /* 60px -> 50px (축소) */
-                height: 50px;
-                /* 60px -> 50px (축소) */
-                font-size: 18px;
-                /* 20px -> 18px */
-            }
-
-            /* 발사 버튼 */
-            #btn-shoot {
-                bottom: 80px;
-                /* 90px -> 80px */
-                right: 120px;
-            }
-
-            /* 점프 버튼 */
-            #btn-jump {
-                bottom: 40px;
-                /* 50px -> 40px */
-                right: 50px;
-            }
-
-            /* 재장전 버튼 */
-            #btn-reload {
-                bottom: 110px;
-                /* 130px -> 110px */
-                right: 50px;
-            }
-
-            /* 조준 버튼 */
-            #btn-aim {
-                bottom: 40px;
-                /* 50px -> 40px */
-                right: 190px;
-                /* 200px -> 190px */
-            }
-
-
-            /* 채팅 가시성 및 위치 조정 (User Request) */
-            #chat-container {
-                display: flex !important;
-                bottom: 110px !important;
-                left: 10px !important;
-                width: 240px !important;
-                z-index: 10000 !important;
-            }
-
-            /* 조명 버튼 위치 조정 */
-            #light-toggle-btn {
-                top: 3px;
-                right: 3px;
-                width: 35px;
-                height: 35px;
-                font-size: 16px;
-            }
-
-            /* ===== [FIX] HP/탄창 UI 크기 축소 (모바일 가로 모드) ===== */
-            .vitals-panel {
-                padding: 3px 8px !important;
-                left: 130px !important;
-                bottom: 10px !important;
-                transform: scale(0.7) !important;
-                transform-origin: left bottom;
-            }
-
-            .vitals-panel .health-text {
-                font-size: 16px !important;
-            }
-
-            .vitals-panel .bar-container {
-                width: 80px !important;
-                height: 6px !important;
-            }
-
-            .weapon-panel {
-                padding: 3px 8px !important;
-                right: 130px !important;
-                bottom: 10px !important;
-                transform: scale(0.7) !important;
-                transform-origin: right bottom;
-            }
-
-            .weapon-panel .ammo-current {
-                font-size: 16px !important;
-            }
-
-            .weapon-panel .ammo-reserve {
-                font-size: 10px !important;
-            }
-
-            /* ===== [FIX] 무기 선택기 강제 표시 (모바일 가로 모드) ===== */
-            #weapon-selector-vertical {
-                display: flex !important;
-                left: 20px !important;
-                top: 50% !important;
-                transform: translateY(-50%) !important;
-                gap: 10px !important;
-            }
-
-            /* ===== [FIX] 조이스틱 및 버튼 강제 표시 (모바일 가로 모드) ===== */
-            #joystick-zone {
-                display: block !important;
-                bottom: 20px !important;
-                left: 20px !important;
-                width: 100px !important;
-                height: 100px !important;
-            }
-
-            #joystick-base {
-                width: 100% !important;
-                height: 100% !important;
-            }
-
-            #joystick-handle {
-                width: 35px !important;
-                height: 35px !important;
-            }
-
-            #btn-shoot {
-                display: flex !important;
-                bottom: 50px !important;
-                right: 80px !important;
-                width: 45px !important;
-                height: 45px !important;
-            }
-
-            #btn-jump {
-                display: flex !important;
-                bottom: 20px !important;
-                right: 30px !important;
-                width: 40px !important;
-                height: 40px !important;
-            }
-
-            #btn-reload {
-                display: flex !important;
-                bottom: 80px !important;
-                right: 30px !important;
-                width: 40px !important;
-                height: 40px !important;
-            }
-
-            #btn-aim {
-                display: flex !important;
-                bottom: 20px !important;
-                right: 140px !important;
-                width: 40px !important;
-                height: 40px !important;
-            }
-        }
-
-        /* 세로 모드 */
-        @media (orientation: portrait) and (max-width: 768px) {
-            #btn-jump {
-                bottom: 15px;
-                right: 15px;
-            }
-
-            #btn-reload {
-                bottom: 15px;
-                right: 75px;
-            }
-
-            #btn-aim {
-                bottom: 15px;
-                right: 135px;
-            }
-
-            #btn-weapon1,
-            #btn-weapon2,
-            #btn-weapon3,
-            #btn-weapon4 {
-                top: 8px;
-            }
-
-            #light-toggle-btn {
-                top: 15px;
-                right: 15px;
-                width: 45px;
-                height: 45px;
-                font-size: 22px;
-            }
-        }
-
-        @media (max-width: 1024px) {
-            #light-toggle-btn {
-                top: 15px;
-                right: 15px;
-                width: 45px;
-                height: 45px;
-                font-size: 22px;
-            }
-
-            .exit-game-btn {
-                top: 15px;
-                right: 70px;
-                width: 45px;
-                height: 45px;
-            }
-        }
-
-        @media (hover: hover) and (pointer: fine) {
-
-            #controls,
-            .mobile-btn {
-                display: none;
-            }
-        }
-
-        /* Mobile specific names and chat toggle */
-        #mobile-player-name {
-            display: none;
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            color: #fff;
-            font-size: 16px;
-            font-weight: bold;
-            z-index: 20;
-            text-shadow: 1px 1px 2px #000;
-            pointer-events: none;
-        }
-
-        #chat-toggle-btn {
-            display: none;
-            position: fixed;
-            bottom: 300px;
-            /* Adjust based on valid area */
-            left: 10px;
-            width: 40px;
-            height: 40px;
-            background: rgba(0, 0, 0, 0.5);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            z-index: 101;
-            /* Higher than chat container z-index if needed */
-            font-size: 20px;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-        }
-
-        /* Exit Game Button (Zombie Mode) - Styled like Light Toggle */
-        .exit-game-btn {
-            position: fixed;
-            top: 20px;
-            /* Match light toggle fixed position */
-            right: 80px;
-            /* Consistently spaced */
-            width: 50px;
-            /* Match light toggle size */
-            height: 50px;
-            background: rgba(0, 0, 0, 0.5);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            display: none;
-            /* Controlled by JS */
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
-            cursor: pointer;
-            z-index: 1000;
-            transition: all 0.3s;
-        }
-
-        body.paused #exit-game-btn {
-            display: flex !important;
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .exit-game-btn:hover {
-            background: rgba(244, 67, 54, 0.7);
-            transform: scale(1.1);
-        }
-
-        /* Desktop/PC - Hide mobile controls */
-        @media (min-width: 1025px) {
-
-            .mobile-btn,
-            #joystick-zone,
-            #weapon-selector-vertical,
-            #chat-toggle-btn {
-                display: none;
-            }
-        }
-
-        @media (max-width: 768px) {
-            #mobile-player-name {
-                display: block;
-            }
-
-            body.game-active.multi-player #chat-toggle-btn {
-                display: flex;
-                /* Force show on mobile during multiplayer gameplay */
-            }
-
-            #chat-container {
-                /* Initially hidden on mobile or small helper mode */
-                display: none;
-                /* Managed by JS toggle */
-                width: 60%;
-                height: 150px;
-                /* 모바일에서도 대폭 위로 올려서 조이스틱/HP 바 피함 */
-                bottom: 220px;
-                left: 10px;
-            }
-
-            #chat-container.visible {
-                display: flex;
-            }
-
-            /* Show icon-based weapon selector on mobile during gameplay */
-            body.game-active #weapon-selector-vertical {
-                display: flex;
-            }
-
-            /* Hide text-based weapon inventory on mobile - FORCE */
-            body #weapon-inventory,
-            body #weapon-list-left {
-                display: none !important;
-                visibility: hidden;
-                opacity: 0;
-            }
-        }
-
-        /* Landscape Orientation Fixes for Mobile - Scaled Down Initial Screen */
-        @media (orientation: landscape) and (hover: none) and (pointer: coarse) {
-
-            /* Lobby & Create Room compact layout */
-            #room-menu h2,
-            #create-room-modal h2 {
-                font-size: 22px;
-                margin-bottom: 16px;
-            }
-
-            #room-menu .menu-actions {
-                gap: 10px;
-                margin-bottom: 10px;
-            }
-
-            #room-menu .menu-actions button,
-            #create-room-modal button {
-                padding: 8px 18px;
-                font-size: 14px;
-                margin: 6px;
-            }
-
-            #room-list-container {
-                width: 80%;
-                height: 220px;
-                padding: 10px;
-            }
-
-            .room-item {
-                padding: 10px 12px;
-                gap: 10px;
-            }
-
-            .room-info h3 {
-                font-size: 14px;
-            }
-
-            .room-info p {
-                font-size: 12px;
-            }
-
-            .status-badge {
-                font-size: 10px;
-                padding: 4px 8px;
-            }
-
-            #create-room-modal .modal-content {
-                min-width: 260px;
-                padding: 14px;
-                gap: 8px;
-                max-height: 85vh;
-                overflow-y: auto;
-                transform: scale(0.9);
-                transform-origin: center;
-            }
-
-            #create-room-modal .input-group {
-                gap: 4px;
-                margin: 6px 0;
-            }
-
-            #create-room-modal label {
-                font-size: 11px;
-            }
-
-            #create-room-modal input[type="text"],
-            #create-room-modal select {
-                width: 210px;
-                padding: 6px 10px;
-                font-size: 12px;
-            }
-        }
-
-
-        /* Ensure mode selection is visible but compact when game is NOT active */
-        body:not(.game-active) #mode-selection {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 10px;
-        }
-
-        /* Scale down logo and buttons when mode selection is shown */
-        #mode-selection img {
-            max-height: 100px !important;
-            max-width: 80% !important;
-            margin-bottom: 15px !important;
-        }
-
-        .mode-btn {
-            padding: 12px 35px !important;
-            font-size: 18px !important;
-            margin: 8px !important;
-            min-width: 200px !important;
-        }
-
-
-        /* Hide text-based weapon inventory in landscape too - FORCE */
-        @media (pointer: coarse),
-        (hover: none) {
-
-            body #weapon-inventory,
-            body #weapon-list-left {
-                display: none !important;
-                visibility: hidden;
-                opacity: 0;
-            }
-        }
-
-        /* HP/Ammo - 하단으로 배치 */
-        #ammo-info {
-            top: auto !important;
-            bottom: 30px !important;
-            right: 20px !important;
-        }
-
-        #hp-container {
-            top: auto !important;
-            bottom: 30px !important;
-            left: 20px !important;
-        }
-
-        /* Make other UI elements more compact */
-        .weapon-slot {
-            padding: 6px 10px;
-        }
-
-        .weapon-number {
-            font-size: 16px;
-        }
-
-        .weapon-name {
-            font-size: 12px;
-        }
-
-        /* Explicitly show weapon selector in landscape during gameplay */
-        body.game-active #weapon-selector-vertical {
-            display: flex;
-            top: 40%;
-            /* 중앙보다 약간 위로 (40%) */
-            z-index: 1000;
-            pointer-events: auto;
-        }
-
-        #exit-game-btn {
-            top: 15px;
-            right: 70px;
-            width: 45px;
-            height: 45px;
-            font-size: 22px;
-        }
-
-        /* Force hide mode-selection when game is active */
-        body.game-active #create-room-modal,
-        body.game-active #room-waiting,
-        body.game-active #single-map-selection {
-            display: none;
-            opacity: 0;
-            pointer-events: none;
-            visibility: hidden;
-        }
-
-        /* Single Player Map Selection UI */
-        #single-map-selection {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #09090b;
-            color: white;
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 200;
-            font-size: 28px;
-            font-weight: 900;
-            cursor: default;
-            pointer-events: auto;
-        }
-
-        .map-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-            margin-top: 30px;
-        }
-
-        .map-card {
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
-            padding: 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            width: 200px;
-        }
-
-        .map-card:hover {
-            background: rgba(255, 255, 255, 0.2);
-            border-color: var(--neon-cyan);
-            transform: scale(1.05);
-            box-shadow: 0 0 20px rgba(0, 243, 255, 0.3);
-        }
-
-        .map-card i {
-            font-size: 48px;
-            margin-bottom: 15px;
-            color: var(--neon-cyan);
-        }
-
-        .map-card h3 {
-            margin: 0;
-            font-size: 20px;
-            text-transform: uppercase;
-        }
-
-        /* Multiplayer HUD Adjustments */
-        @media (min-width: 769px) {
-            body.multi-player #chat-container {
-                bottom: 20px;
-                top: auto;
-                left: auto;
-                right: 20px;
-                /* Move chat to right side */
-                width: 320px;
-            }
-
-            body.multi-player #weapon-selector-vertical {
-                top: 25%;
-            }
-
-            /* Move weapon list to top for multiplayer PC */
-            body.multi-player.game-active #weapon-list-left {
-                top: 20px;
-                left: 20px;
-                transform: scale(0.7) !important;
-                transform-origin: top left !important;
-            }
-
-            /* Move ingame players list to TOP RIGHT for PC (Stacked below Exit Button) */
-            /* Move ingame players list to TOP RIGHT for PC (Stacked below Exit Button) */
-            body.multi-player #ingame-players-list {
-                top: 80px !important;
-                /* Force below Exit Button */
-                left: auto !important;
-                right: 20px !important;
-                z-index: 1000;
-                max-width: 220px;
-                /* More compact */
-                background: rgba(0, 0, 0, 0.7);
-                border: 1px solid rgba(0, 255, 128, 0.3);
-                /* Neon green border */
-                overflow: hidden;
-                display: flex;
-                flex-direction: column;
-                align-items: flex-end;
-            }
-
-            body.multi-player #ingame-players-list>div {
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                width: 100%;
-                text-align: right;
-            }
-
-            /* Move chat to BOTTOM LEFT (Above HP) */
-            body.multi-player #chat-container {
-                bottom: 140px;
-                left: 20px;
-                right: auto;
-                top: auto;
-                width: 320px;
-            }
-
-            /* Adjust Exit Game Button position */
-            #exit-game-btn {
-                top: 20px;
-                right: 20px;
-                /* Pinned to right corner */
-                width: 50px;
-                height: 50px;
-                z-index: 1001;
-                display: flex;
-                /* Ensure it's visible when game-active if toggled */
-            }
-        }
-
-        #ingame-players-list {
-            position: fixed;
-            background: rgba(0, 0, 0, 0.5);
-            color: white;
-            padding: 10px;
-            border-radius: 5px;
-            font-family: 'Rajdhani', sans-serif;
-            pointer-events: none;
-            z-index: 1000;
-        }
-
-        /* --- TASK: Hide Game UI by Default --- */
-        /* Initially hide all game HUD/UI elements */
-        .hud-container,
-        .crosshair,
-        #mobile-player-name,
-        #chat-toggle-btn,
-        #weapon-list-left,
-        #controls,
-        #light-toggle-btn {
-            display: none !important;
-            opacity: 0;
-            transition: opacity 0.5s ease;
-        }
-
-        /* Show HUD elements when game is active */
-        body.game-active .hud-container {
-            display: block !important;
-            opacity: 1;
-        }
-
-        body.game-active .crosshair {
-            display: flex !important;
-            opacity: 1;
-        }
-
-        /* Hide light toggle in all game modes (user request) */
-        body.game-active #light-toggle-btn {
-            display: none !important;
-        }
-
-        /* Weapon list - visible on all platforms if active */
-        body.game-active #weapon-list-left {
-            display: flex !important;
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        /* Mobile specific controls */
-        @media (max-width: 1024px) and (pointer: coarse) {
-            body.game-active #controls {
-                display: flex !important;
-                opacity: 1;
-            }
-
-            body.game-active #mobile-player-name {
-                display: block !important;
-                opacity: 1;
-            }
-        }
-
-        /* Chat toggle - mobile only and respecting multi-player */
-        @media (max-width: 768px) {
-            body.game-active.multi-player #chat-toggle-btn {
-                display: flex !important;
-                opacity: 1;
-            }
-        }
-
-        #shoot-flash {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: white;
-            opacity: 0;
-            pointer-events: none;
-            z-index: 50;
-            transition: opacity 0.05s ease-out;
-            mix-blend-mode: overlay;
-        }
-
-        #reload-overlay {
-            position: fixed;
-            left: 50%;
-            bottom: 28px;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.8);
-            color: #fff;
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-size: 16px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            display: none;
-            z-index: 1001;
-            pointer-events: none;
-        }
-
-        /* --- USER REQUEST: PC Mode Weapon Icon Scale x3 & Active State --- */
-        /* Modified media query to cover smaller PC screens/windowed mode */
-        @media (min-width: 800px) {
-            body.game-active #weapon-list-left {
-                display: flex !important;
-                /* Force display */
-                transform: translateY(-50%) scale(0.7) !important;
-                transform-origin: left center !important;
-                left: 20px !important;
-                gap: 5px !important;
-                z-index: 9999 !important;
-                /* Ensure visibility on top */
-            }
-
-            .weapon-item .key-hint {
-                font-size: 14px;
-                width: 20px;
-                height: 20px;
-                line-height: 20px;
-            }
-
-            .weapon-item.active {
-                opacity: 1 !important;
-                transform: translateX(10px) !important;
-            }
-
-            .weapon-item.active .icon-box {
-                border: 2px solid var(--neon-cyan) !important;
-                background: rgba(0, 243, 255, 0.3) !important;
-                box-shadow: 0 0 30px var(--neon-cyan), inset 0 0 10px var(--neon-cyan) !important;
-            }
-
-            .weapon-item:not(.active) {
-                opacity: 0.3 !important;
-                transform: translateX(0) !important;
-            }
-        }
-
-        /* Tab Scoreboard Overlay Styles */
-        #tab-scoreboard {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(5px);
-            z-index: 10000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            pointer-events: none;
-        }
-
-        #tab-scoreboard-content {
-            background: rgba(20, 20, 30, 0.9);
-            border: 2px solid var(--neon-cyan);
-            border-radius: 10px;
-            padding: 30px 40px;
-            min-width: 400px;
-            max-width: 600px;
-            box-shadow: 0 0 30px rgba(0, 243, 255, 0.5);
-        }
-
-        #tab-scoreboard-content h2 {
-            margin: 0 0 20px 0;
-            color: var(--neon-cyan);
-            font-family: var(--font-stack);
-            font-size: 28px;
-            text-align: center;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        #tab-scoreboard-players {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .scoreboard-player {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 20px;
-            background: rgba(255, 255, 255, 0.05);
-            border-left: 3px solid rgba(255, 255, 255, 0.3);
-            font-family: var(--font-stack);
-            font-size: 18px;
-            transition: all 0.2s;
-        }
-
-        .scoreboard-player.you {
-            background: rgba(0, 243, 255, 0.15);
-            border-left-color: var(--neon-cyan);
-        }
-
-        .scoreboard-player-name {
-            color: #fff;
-            font-weight: 600;
-        }
-
-        .scoreboard-player.you .scoreboard-player-name {
-            color: var(--neon-cyan);
-        }
-
-        .scoreboard-player-kills {
-            color: #ffa500;
-            font-weight: 700;
-            font-size: 20px;
-        }
-    </style>
-</head>
-
-<body>
-    <div id="shoot-flash"></div>
-    <div id="reload-overlay">RELOADING</div>
-    <div id="loading-screen">
-        <div class="glitch-wrapper"></div>
-    </div>
-    <div id="game-container"></div>
-    <div id="vignette"></div>
-    <div id="damage-overlay"></div>
-    <div id="mobile-player-name"></div>
-    <button id="chat-toggle-btn"><i class="fas fa-comment"></i></button>
-    <div id="scope-overlay">
-        <div id="scope-line-h"></div>
-        <div id="scope-line-v"></div>
-        <div id="scope-dot"></div>
-    </div>
-    <div id="headshot-msg">HEADSHOT!</div>
-    <div id="grenade-kill-msg"
-        style="display: none; position: fixed; top: 35%; left: 50%; transform: translate(-50%, -50%); color: #ff6600; font-size: 60px; font-weight: 900; text-shadow: 0 0 20px #ff0000; z-index: 100; pointer-events: none; font-style: italic;">
-        GRENADE KILL!</div>
-    <div id="hit-marker"></div>
-
-    <!-- Tab Scoreboard Overlay -->
-    <div id="tab-scoreboard" style="display: none;">
-        <div id="tab-scoreboard-content">
-            <h2>플레이어 목록</h2>
-            <div id="tab-scoreboard-players"></div>
-        </div>
-    </div>
-
-    <div id="game-over">
-        <div id="game-over-title">YOU DIED</div>
-        <div id="game-over-stats">Kills: <span id="final-kill-count">0</span></div>
-        <button id="restart-btn" onclick="restartGame()">TRY AGAIN</button>
-        <button id="exit-to-menu-btn" onclick="location.reload()">EXIT</button>
-    </div>
-
-    <!-- 모드 선택 화면 (Tactical Side Menu) -->
-    <!-- 모드 선택 화면 (Tactical Side Menu) -->
-    <div id="mode-selection" style="position: relative; z-index: 9999;">
-        <div class="menu-title-container">
-            <div class="tactical-subtitle">POST-APOCALYPSE SURVIVAL PROTOCOL</div>
-        </div>
-        <div class="menu-buttons-container">
-            <button class="mode-btn" id="btn-single-player">
-                <span class="btn-text"><i class="fas fa-user-shield btn-icon"></i>혼자하기 (SINGLE)</span>
-            </button>
-            <button class="mode-btn" id="btn-multi-player">
-                <span class="btn-text"><i class="fas fa-users-rays btn-icon"></i>함께하기 (MULTI)</span>
-            </button>
-        </div>
-    </div>
-
-    <!-- 싱글 플레이어 맵 선택 화면 -->
-    <div id="single-map-selection" style="display: none;">
-        <div class="tactical-panel">
-            <div class="tactical-title"><i class="fas fa-map-location-dot"></i> 맵 선택 (AO SELECTION)</div>
-            <div class="map-grid">
-                <div class="map-card" data-map="factory">
-                    <i class="fas fa-industry"></i>
-                    <h3>창고 (FACTORY)</h3>
-                </div>
-                <div class="map-card" data-map="hotel">
-                    <i class="fas fa-hotel"></i>
-                    <h3>호텔 (HOTEL)</h3>
-                </div>
-                <div class="map-card" data-map="test">
-                    <i class="fas fa-vial"></i>
-                    <h3>C-Map (TEST)</h3>
-                </div>
-                <div class="map-card" data-map="bridge">
-                    <i class="fas fa-road"></i>
-                    <h3>다리 (BRIDGE)</h3>
-                </div>
-            </div>
-            <div style="display: flex; justify-content: center;">
-                <button class="mode-btn cancel" id="btn-back-to-mode-from-map">
-                    <span class="btn-text"><i class="fas fa-arrow-left btn-icon"></i>뒤로가기</span>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- 1. 이름 설정 화면 -->
-    <div id="name-setup" style="display: none;">
-        <div class="tactical-panel">
-            <div class="tactical-title"><i class="fas fa-user-tag"></i> 신원 확인 (IDENTITY)</div>
-            <div class="tactical-input-group">
-                <label>플레이어 닉네임</label>
-                <input type="text" id="player-name-input" class="tactical-input" placeholder="닉네임을 입력하세요"
-                    maxlength="10">
-            </div>
-            <div style="display: flex; gap: 20px;">
-                <button id="btn-single-player" class="mode-btn" onclick="selectSinglePlayer()">
-                    <span class="btn-text">
-                        <i class="fas fa-user mb-2" style="font-size: 24px; display: block;"></i>
-                        혼자하기 (SINGLE OPS)
-                    </span>
-                </button>
-                <button id="btn-multi-player" class="mode-btn" onclick="selectMultiPlayer()">
-                    <span class="btn-text">
-                        <i class="fas fa-users mb-2" style="font-size: 24px; display: block;"></i>
-                        함께하기 (JOINT OPS)
-                    </span>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- 2. 방 목록/메뉴 화면 -->
-    <div id="room-menu" style="display: none;">
-        <div class="tactical-panel" style="width: 800px;">
-            <div class="tactical-title"><i class="fas fa-list"></i> 작전 로비 (OPERATION LOBBY)</div>
-            <div style="display: flex; gap: 15px; margin-bottom: 20px;">
-                <button id="btn-show-create-room" class="mode-btn" style="min-width: 200px; font-size: 18px;"
-                    onclick="openCreateRoomModal()">
-                    <span class="btn-text"><i class="fas fa-plus-circle btn-icon"></i>작전 생성</span>
-                </button>
-                <button id="btn-refresh-rooms" class="mode-btn" style="min-width: 200px; font-size: 18px;">
-                    <span class="btn-text"><i class="fas fa-sync-alt btn-icon"></i>목록 갱신</span>
-                </button>
-                <button class="mode-btn cancel" id="btn-back-to-mode-from-room"
-                    style="min-width: 200px; font-size: 18px;">
-                    <span class="btn-text"><i class="fas fa-arrow-left btn-icon"></i>복귀</span>
-                </button>
-            </div>
-            <div id="room-list-container">
-                <div class="no-rooms-message" style="text-align: center; padding: 50px; opacity: 0.5;">진행 중인 작전이 없습니다.
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 3. 방 생성 모달 -->
-    <div id="create-room-modal" style="display: none;">
-        <div class="tactical-panel" style="width: 500px;">
-            <div class="tactical-title"><i class="fas fa-door-open"></i> 작전 수립 (MISSION PLAN)</div>
-            <div class="tactical-input-group">
-                <label>작전명 (OP NAME)</label>
-                <input type="text" id="new-room-name" class="tactical-input" placeholder="작전명을 입력하세요">
-            </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                <div class="tactical-input-group">
-                    <label>최대 인원 (CAPACITY)</label>
-                    <select id="new-room-max" class="tactical-input">
-                        <option value="2">02 UNIT</option>
-                        <option value="4" selected>04 UNIT</option>
-                        <option value="8">08 UNIT</option>
-                    </select>
-                </div>
-                <div class="tactical-input-group">
-                    <label>전투 모드 (MODE)</label>
-                    <select id="new-room-mode" class="tactical-input">
-                        <option value="ffa" selected>FREE FOR ALL</option>
-                        <option value="tdm">TEAM DEATHMATCH</option>
-                    </select>
-                </div>
-            </div>
-            <div class="tactical-input-group">
-                <label>작전 지역 (AO)</label>
-                <select id="new-room-map" class="tactical-input">
-                    <option value="factory" selected>팩토리 (FACTORY)</option>
-                    <option value="hotel">호텔 (HOTEL)</option>
-                    <option value="test">테스트 구역 (TEST)</option>
-                </select>
-            </div>
-            <div style="display: flex; gap: 20px; margin-top: 20px;">
-                <button id="btn-create-confirm" class="mode-btn" onclick="confirmCreateRoom()">
-                    <span class="btn-text"><i class="fas fa-check btn-icon"></i>생성</span>
-                </button>
-                <button class="mode-btn cancel" id="btn-create-cancel" onclick="closeCreateRoomModal()">
-                    <span class="btn-text"><i class="fas fa-times btn-icon"></i>취소</span>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Game Start Countdown Overlay -->
-    <div id="countdown"
-        style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 120px; color: #fff; text-shadow: 0 0 20px rgba(255,255,255,0.8), 0 0 40px rgba(255,255,255,0.5); font-weight: bold; z-index: 9999; pointer-events: none;">
-    </div>
-
-    <!-- 4. 대기실 화면 -->
-    <div id="room-waiting" style="display: none;">
-        <div class="tactical-panel" style="width: 600px;">
-            <div class="tactical-title"><i class="fas fa-satellite-dish"></i> 브리핑 룸 (BRIEFING)</div>
-            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px;">
-                <div>
-                    <h2 id="room-title" style="margin: 0; color: white;">작전명</h2>
-                    <div id="room-info" style="color: var(--tactical-cyan); font-size: 14px; margin-top: 5px;">
-                        <i class="fas fa-users"></i> 적합성 확인 중: <span id="player-count">0/0</span>
-                    </div>
-                </div>
-            </div>
-
-            <div id="players-list"
-                style="background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); padding: 15px; min-height: 150px; margin-bottom: 30px;">
-            </div>
-
-            <div class="host-controls" style="display: none; margin-bottom: 15px;">
-                <button id="btn-start-game" class="mode-btn" style="width: 100%;">
-                    <span class="btn-text"><i class="fas fa-play btn-icon"></i>작전 개시 (START)</span>
-                </button>
-            </div>
-
-            <button class="mode-btn cancel" id="btn-leave-room" style="width: 100%;">
-                <span class="btn-text"><i class="fas fa-sign-out-alt btn-icon"></i>로그아웃 (LEAVE)</span>
-            </button>
-        </div>
-    </div>
-
-    <!-- 인게임 채팅 -->
-    <div id="chat-container" style="display: none;">
-        <div id="chat-messages"></div>
-        <div class="chat-input-area">
-            <input type="text" id="chat-input" placeholder="메시지 입력 (Enter)" autocomplete="off">
-            <button id="btn-send-chat"><i class="fas fa-paper-plane"></i></button>
-        </div>
-    </div>
-
-    <div class="hud-container">
-        <!-- Top Center: Match Status -->
-        <div class="scoreboard-mini">
-            <div class="score ally" id="hud-score-ally">0</div>
-            <div class="timer" id="hud-timer">10:00</div>
-            <div class="score enemy" id="hud-score-enemy">0</div>
-            <div id="hud-kill-count">Kills: 0</div>
-        </div>
-
-        <!-- Top Right: Kill Feed -->
-        <div class="kill-feed" id="hud-kill-feed"></div>
-
-        <!-- Center: Dynamic Crosshair -->
-        <div class="crosshair" id="hud-crosshair">
-            <div class="hair top"></div>
-            <div class="hair bottom"></div>
-            <div class="hair left"></div>
-            <div class="hair right"></div>
-            <div class="dot"></div>
-        </div>
-
-        <!-- Bottom Left: Vitals -->
-        <div class="vitals-panel" id="hud-vitals">
-            <div class="value-group">
-                <span class="label">HP</span>
-                <span class="value health-text" id="hud-hp-text">100</span>
-            </div>
-            <div class="bar-container">
-                <div class="health-bar" id="hud-hp-bar" style="width: 100%;"></div>
-                <div class="health-bar-ghost" id="hud-hp-bar-ghost" style="width: 100%;"></div>
-            </div>
-        </div>
-
-        <!-- Bottom Right: Weapon & Ammo -->
-        <div class="weapon-panel" id="hud-weapon">
-            <div class="weapon-selector" id="hud-weapon-selector">
-                <div class="weapon-slot" data-slot="0">1</div>
-                <div class="weapon-slot" data-slot="1">2</div>
-                <div class="weapon-slot" data-slot="2">3</div>
-                <div class="weapon-slot" data-slot="3">4</div>
-                <div class="weapon-slot" data-slot="4">5</div>
-            </div>
-            <div class="ammo-group">
-                <span class="ammo-current" id="hud-ammo-current">30</span>
-                <span class="ammo-reserve" id="hud-ammo-reserve">/ 120</span>
-            </div>
-            <div class="weapon-name" id="hud-weapon-name"
-                style="font-size: 1rem; color: #facc15; margin-top:5px; transform: skewX(10deg);">RIFLE</div>
-        </div>
-
-        <!-- Damage Overlay (Vignette) -->
-        <div class="damage-vignette" id="hud-damage-vignette"></div>
-    </div>
-
-
-    <!-- 나가기 버튼 (좀비모드) -->
-    <button id="exit-game-btn" class="exit-game-btn" title="게임 나가기" style="display: none;">🚪</button>
-
-    <!-- 인게임 플레이어 리스트 (스코어보드) -->
-    <div id="ingame-players-list" style="display: none;">
-        <div
-            style="font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.3); margin-bottom: 5px; padding-bottom: 2px;">
-            PLAYERS</div>
-        <div id="ingame-players-content"></div>
-    </div>
-
-    <!-- 조명 토글 버튼 -->
-    <button id="light-toggle-btn" class="light-toggle-btn" title="조명 켜기/끄기">💡</button>
-
-    <div id="controls">
-        <div id="touch-left"></div>
-        <div id="touch-right"></div>
-    </div>
-
-    <!-- 모바일 컨트롤 -->
-    <button class="mobile-btn" id="btn-weapon1">1</button>
-
-    <!-- 모바일 세로모드 전용 무기 교체 UI (숫자 없이 아이콘만) -->
-    <div id="weapon-selector-vertical">
-        <div class="weapon-select-btn" data-idx="0"><i class="fas fa-person-rifle"></i></div>
-        <div class="weapon-select-btn" data-idx="1"><i class="fas fa-gun"></i></div>
-        <div class="weapon-select-btn" data-idx="2"><i class="fas fa-crosshairs"></i></div>
-        <div class="weapon-select-btn" data-idx="3"><i class="fas fa-gavel"></i></div>
-        <div class="weapon-select-btn" data-idx="4"><i class="fas fa-bomb"></i></div>
-    </div>
-
-    <!-- 모바일 컨트롤 (Krunker 스타일 클러스터) -->
-    <div id="joystick-zone">
-        <div id="joystick-bg"></div>
-        <div id="joystick-handle"></div>
-    </div>
-
-
-    <!-- Left Side: Vertical Weapon List -->
-    <div id="weapon-list-left">
-        <div class="weapon-item active" id="weapon-item-0">
-            <div class="key-hint">1</div>
-            <div class="icon-box"><i class="fas fa-person-rifle"></i></div>
-        </div>
-        <div class="weapon-item" id="weapon-item-1">
-            <div class="key-hint">2</div>
-            <div class="icon-box"><i class="fas fa-gun"></i></div>
-        </div>
-        <div class="weapon-item" id="weapon-item-2">
-            <div class="key-hint">3</div>
-            <div class="icon-box"><i class="fas fa-crosshairs"></i></div>
-        </div>
-        <div class="weapon-item" id="weapon-item-3">
-            <div class="key-hint">4</div>
-            <div class="icon-box"><i class="fas fa-gavel"></i></div>
-        </div>
-        <div class="weapon-item" id="weapon-item-4">
-            <div class="key-hint">5</div>
-            <div class="icon-box"><i class="fas fa-bomb"></i></div>
-        </div>
-    </div>
-
-
-    <button class="mobile-btn" id="btn-shoot"><i class="fas fa-crosshairs"></i></button>
-    <button class="mobile-btn" id="btn-aim"><i class="fas fa-eye"></i></button>
-    <button class="mobile-btn" id="btn-jump"><i class="fas fa-chevron-up"></i></button>
-    <button class="mobile-btn" id="btn-reload"><i class="fas fa-redo"></i></button>
-
-    <!-- Pause Overlay (Menu) -->
-    <div id="pause-overlay" style="display:none;">
-        <h1>PAUSE</h1>
-        <p>Click to Continue</p>
-
-        <!-- Sensitivity Control (Inside Pause Menu) -->
-        <div id="sensitivity-control">
-            <label for="sensitivity-slider">Mouse Sensitivity:</label>
-            <input type="range" id="sensitivity-slider" min="0.0005" max="0.01" step="0.0001" value="0.002">
-            <span id="sensitivity-value">1.00</span>
-        </div>
-
-        <!-- Volume Control -->
-        <div id="volume-control">
-            <label for="volume-slider">Master Volume:</label>
-            <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.5">
-            <span id="volume-value">50%</span>
-        </div>
-    </div>
-
-    <!-- Death Overlay (Multiplayer) -->
-    <div id="death-overlay">
-        <div id="respawn-timer">10</div>
-        <div id="killed-by-label">Killed by</div>
-        <div id="killer-name">Unknown</div>
-        <button id="manual-respawn-btn"
-            style="display: none; margin-top: 20px; padding: 10px 20px; font-size: 24px; background: #4caf50; color: white; border: none; border-radius: 5px; cursor: pointer;">RESPAWN
-            NOW</button>
-    </div>
-
-    <!-- Sniper Scope Overlay -->
-    <div id="sniper-scope">
-        <div id="scope-circle">
-            <div class="scope-crosshair-h"></div>
-            <div class="scope-crosshair-v"></div>
-            <div class="scope-center-dot"></div>
-        </div>
-    </div>
-
-    <!-- Rifle GLB Debug Panel -->
-    <div id="rifle-debug-panel">
-        <div class="panel-title">Rifle GLB</div>
-        <div class="panel-row">
-            <label for="rifle-x">X</label>
-            <div class="slider-group">
-                <button class="nudge-btn" type="button" data-target="rifle-x" data-dir="-1">-</button>
-                <input id="rifle-x" type="range" min="-1" max="1" step="0.01" value="0.2">
-                <button class="nudge-btn" type="button" data-target="rifle-x" data-dir="1">+</button>
-            </div>
-            <span id="rifle-x-val">0.20</span>
-        </div>
-        <div class="panel-row">
-            <label for="rifle-x-step">XS</label>
-            <div class="slider-group">
-                <button class="nudge-btn" type="button" data-target="rifle-x-step" data-dir="-1">-</button>
-                <input id="rifle-x-step" type="range" min="0.001" max="0.05" step="0.001" value="0.01">
-                <button class="nudge-btn" type="button" data-target="rifle-x-step" data-dir="1">+</button>
-            </div>
-            <span id="rifle-x-step-val">0.010</span>
-        </div>
-        <div class="panel-row">
-            <label for="rifle-x-nudge">X±</label>
-            <div style="display:flex;gap:6px;align-items:center;justify-content:center;width:100%">
-                <button id="rifle-x-minus" type="button">-</button>
-                <button id="rifle-x-plus" type="button">+</button>
-            </div>
-            <span id="rifle-x-nudge-val">0.01</span>
-        </div>
-        <div class="panel-row">
-            <label for="rifle-y">Y</label>
-            <div class="slider-group">
-                <button class="nudge-btn" type="button" data-target="rifle-y" data-dir="-1">-</button>
-                <input id="rifle-y" type="range" min="-1" max="1" step="0.01" value="-0.2">
-                <button class="nudge-btn" type="button" data-target="rifle-y" data-dir="1">+</button>
-            </div>
-            <span id="rifle-y-val">-0.20</span>
-        </div>
-        <div class="panel-row">
-            <label for="rifle-z">Z</label>
-            <div class="slider-group">
-                <button class="nudge-btn" type="button" data-target="rifle-z" data-dir="-1">-</button>
-                <input id="rifle-z" type="range" min="-1" max="1" step="0.01" value="0.44">
-                <button class="nudge-btn" type="button" data-target="rifle-z" data-dir="1">+</button>
-            </div>
-            <span id="rifle-z-val">0.44</span>
-        </div>
-        <div class="panel-row">
-            <label for="rifle-scale">S</label>
-            <div class="slider-group">
-                <button class="nudge-btn" type="button" data-target="rifle-scale" data-dir="-1">-</button>
-                <input id="rifle-scale" type="range" min="0.05" max="0.5" step="0.01" value="0.50">
-                <button class="nudge-btn" type="button" data-target="rifle-scale" data-dir="1">+</button>
-            </div>
-            <span id="rifle-scale-val">0.50</span>
-        </div>
-        <div class="panel-row">
-            <label for="rifle-rx">RX</label>
-            <div class="slider-group">
-                <button class="nudge-btn" type="button" data-target="rifle-rx" data-dir="-1">-</button>
-                <input id="rifle-rx" type="range" min="-3.14" max="3.14" step="0.01" value="0.43">
-                <button class="nudge-btn" type="button" data-target="rifle-rx" data-dir="1">+</button>
-            </div>
-            <span id="rifle-rx-val">0.43</span>
-        </div>
-        <div class="panel-row">
-            <label for="rifle-ry">RY</label>
-            <div class="slider-group">
-                <button class="nudge-btn" type="button" data-target="rifle-ry" data-dir="-1">-</button>
-                <input id="rifle-ry" type="range" min="-3.14" max="3.14" step="0.01" value="1.69">
-                <button class="nudge-btn" type="button" data-target="rifle-ry" data-dir="1">+</button>
-            </div>
-            <span id="rifle-ry-val">1.69</span>
-        </div>
-        <div class="panel-row">
-            <label for="rifle-rz">RZ</label>
-            <div class="slider-group">
-                <button class="nudge-btn" type="button" data-target="rifle-rz" data-dir="-1">-</button>
-                <input id="rifle-rz" type="range" min="-3.14" max="3.14" step="0.01" value="-0.25">
-                <button class="nudge-btn" type="button" data-target="rifle-rz" data-dir="1">+</button>
-            </div>
-            <span id="rifle-rz-val">-0.25</span>
-        </div>
-        <div class="panel-row">
-            <label for="rifle-mx">MX</label>
-            <div class="slider-group">
-                <button class="nudge-btn" type="button" data-target="rifle-mx" data-dir="-1">-</button>
-                <input id="rifle-mx" type="range" min="-0.5" max="0.5" step="0.001" value="0">
-                <button class="nudge-btn" type="button" data-target="rifle-mx" data-dir="1">+</button>
-            </div>
-            <span id="rifle-mx-val">0.000</span>
-        </div>
-        <div class="panel-row">
-            <label for="rifle-my">MY</label>
-            <div class="slider-group">
-                <button class="nudge-btn" type="button" data-target="rifle-my" data-dir="-1">-</button>
-                <input id="rifle-my" type="range" min="-0.5" max="0.5" step="0.001" value="0.055">
-                <button class="nudge-btn" type="button" data-target="rifle-my" data-dir="1">+</button>
-            </div>
-            <span id="rifle-my-val">0.055</span>
-        </div>
-        <div class="panel-row">
-            <label for="rifle-mz">MZ</label>
-            <div class="slider-group">
-                <button class="nudge-btn" type="button" data-target="rifle-mz" data-dir="-1">-</button>
-                <input id="rifle-mz" type="range" min="-1.5" max="0.3" step="0.005" value="-0.65">
-                <button class="nudge-btn" type="button" data-target="rifle-mz" data-dir="1">+</button>
-            </div>
-            <span id="rifle-mz-val">-0.65</span>
-        </div>
-        <div style="border-top:1px solid #444; margin:8px 0; padding-top:8px; color:#ff9e9e">Left Arm (LA)</div>
-        <div class="panel-row">
-            <label for="rifle-lax">LAX</label>
-            <div class="slider-group">
-                <button class="nudge-btn" type="button" data-target="rifle-lax" data-dir="-1">-</button>
-                <input id="rifle-lax" type="range" min="-1" max="1" step="0.01" value="-0.05">
-                <button class="nudge-btn" type="button" data-target="rifle-lax" data-dir="1">+</button>
-            </div>
-            <span id="rifle-lax-val">-0.05</span>
-        </div>
-        <div class="panel-row">
-            <label for="rifle-lay">LAY</label>
-            <div class="slider-group">
-                <button class="nudge-btn" type="button" data-target="rifle-lay" data-dir="-1">-</button>
-                <input id="rifle-lay" type="range" min="-1" max="1" step="0.01" value="-0.25">
-                <button class="nudge-btn" type="button" data-target="rifle-lay" data-dir="1">+</button>
-            </div>
-            <span id="rifle-lay-val">-0.25</span>
-        </div>
-        <div class="panel-row">
-            <label for="rifle-laz">LAZ</label>
-            <div class="slider-group">
-                <button class="nudge-btn" type="button" data-target="rifle-laz" data-dir="-1">-</button>
-                <input id="rifle-laz" type="range" min="-1.5" max="1" step="0.01" value="-0.44">
-                <button class="nudge-btn" type="button" data-target="rifle-laz" data-dir="1">+</button>
-            </div>
-            <span id="rifle-laz-val">-0.44</span>
-        </div>
-        <div class="panel-row">
-            <label for="rifle-larx">LARX</label>
-            <div class="slider-group">
-                <button class="nudge-btn" type="button" data-target="rifle-larx" data-dir="-1">-</button>
-                <input id="rifle-larx" type="range" min="-3.14" max="3.14" step="0.02" value="0.54">
-                <button class="nudge-btn" type="button" data-target="rifle-larx" data-dir="1">+</button>
-            </div>
-            <span id="rifle-larx-val">0.54</span>
-        </div>
-        <div class="panel-row">
-            <label for="rifle-lary">LARY</label>
-            <div class="slider-group">
-                <button class="nudge-btn" type="button" data-target="rifle-lary" data-dir="-1">-</button>
-                <input id="rifle-lary" type="range" min="-3.14" max="3.14" step="0.02" value="-0.82">
-                <button class="nudge-btn" type="button" data-target="rifle-lary" data-dir="1">+</button>
-            </div>
-            <span id="rifle-lary-val">-0.82</span>
-        </div>
-        <div class="panel-row">
-            <label for="rifle-larz">LARZ</label>
-            <div class="slider-group">
-                <button class="nudge-btn" type="button" data-target="rifle-larz" data-dir="-1">-</button>
-                <input id="rifle-larz" type="range" min="-3.14" max="3.14" step="0.02" value="0.60">
-                <button class="nudge-btn" type="button" data-target="rifle-larz" data-dir="1">+</button>
-            </div>
-            <span id="rifle-larz-val">0.60</span>
-        </div>
-        <button id="rifle-copy" style="width:100%;margin-top:6px;">Copy values</button>
-    </div>
-
-    <!-- Pistol GLB Debug Panel -->
-    <div id="pistol-debug-panel">
-        <div class="panel-title">Pistol GLB</div>
-        <div class="panel-row">
-            <label for="pistol-x">X</label>
-            <div class="slider-group">
-                <button class="nudge-btn" type="button" data-target="pistol-x" data-dir="-1">-</button>
-                <input id="pistol-x" type="range" min="-1" max="1" step="0.01" value="0">
-                <button class="nudge-btn" type="button" data-target="pistol-x" data-dir="1">+</button>
-            </div>
-            <span id="pistol-x-val">0.00</span>
-        </div>
-        <div class="panel-row">
-            <label for="pistol-x-step">XS</label>
-            <div class="slider-group">
-                <button class="nudge-btn" type="button" data-target="pistol-x-step" data-dir="-1">-</button>
-                <input id="pistol-x-step" type="range" min="0.001" max="0.05" step="0.001" value="0.01">
-                <button class="nudge-btn" type="button" data-target="pistol-x-step" data-dir="1">+</button>
-            </div>
-            <span id="pistol-x-step-val">0.010</span>
-        </div>
-        <div class="panel-row">
-            <label for="pistol-x-nudge">X±</label>
-            <div style="display:flex;gap:6px;align-items:center;justify-content:center;width:100%">
-                <button id="pistol-x-minus" type="button">-</button>
-                <button id="pistol-x-plus" type="button">+</button>
-            </div>
-            <span id="pistol-x-nudge-val">0.01</span>
-        </div>
-        <div class="panel-row">
-            <label for="pistol-y">Y</label>
-            <div class="slider-group">
-                <button class="nudge-btn" type="button" data-target="pistol-y" data-dir="-1">-</button>
-                <input id="pistol-y" type="range" min="-1" max="1" step="0.01" value="-0.05">
-                <button class="nudge-btn" type="button" data-target="pistol-y" data-dir="1">+</button>
-            </div>
-            <span id="pistol-y-val">-0.05</span>
-        </div>
-        <div class="panel-row">
-            <label for="pistol-z">Z</label>
-            <div class="slider-group">
-                <button class="nudge-btn" type="button" data-target="pistol-z" data-dir="-1">-</button>
-                <input id="pistol-z" type="range" min="-1" max="1" step="0.01" value="0">
-                <button class="nudge-btn" type="button" data-target="pistol-z" data-dir="1">+</button>
-            </div>
-            <span id="pistol-z-val">0.00</span>
-        </div>
-        <div class="panel-row">
-            <label for="pistol-scale">S</label>
-            <div class="slider-group">
-                <button class="nudge-btn" type="button" data-target="pistol-scale" data-dir="-1">-</button>
-                <input id="pistol-scale" type="range" min="0.01" max="0.5" step="0.01" value="0.15">
-                <button class="nudge-btn" type="button" data-target="pistol-scale" data-dir="1">+</button>
-            </div>
-            <span id="pistol-scale-val">0.15</span>
-        </div>
-        <div class="panel-row">
-            <label for="pistol-rx">RX</label>
-            <div class="slider-group">
-                <button class="nudge-btn" type="button" data-target="pistol-rx" data-dir="-1">-</button>
-                <input id="pistol-rx" type="range" min="-3.14" max="3.14" step="0.01" value="0">
-                <button class="nudge-btn" type="button" data-target="pistol-rx" data-dir="1">+</button>
-            </div>
-            <span id="pistol-rx-val">0.00</span>
-        </div>
-        <div class="panel-row">
-            <label for="pistol-ry">RY</label>
-            <div class="slider-group">
-                <button class="nudge-btn" type="button" data-target="pistol-ry" data-dir="-1">-</button>
-                <input id="pistol-ry" type="range" min="-3.14" max="6.28" step="0.01" value="3.14">
-                <button class="nudge-btn" type="button" data-target="pistol-ry" data-dir="1">+</button>
-            </div>
-            <span id="pistol-ry-val">3.14</span>
-        </div>
-        <div class="panel-row">
-            <label for="pistol-rz">RZ</label>
-            <div class="slider-group">
-                <button class="nudge-btn" type="button" data-target="pistol-rz" data-dir="-1">-</button>
-                <input id="pistol-rz" type="range" min="-3.14" max="3.14" step="0.01" value="0">
-                <button class="nudge-btn" type="button" data-target="pistol-rz" data-dir="1">+</button>
-            </div>
-            <span id="pistol-rz-val">0.00</span>
-        </div>
-        <div class="panel-row">
-            <label for="pistol-mx">MX</label>
-            <div class="slider-group">
-                <button class="nudge-btn" type="button" data-target="pistol-mx" data-dir="-1">-</button>
-                <input id="pistol-mx" type="range" min="-0.5" max="0.5" step="0.001" value="-0.066">
-                <button class="nudge-btn" type="button" data-target="pistol-mx" data-dir="1">+</button>
-            </div>
-            <span id="pistol-mx-val">-0.066</span>
-        </div>
-        <div class="panel-row">
-            <label for="pistol-my">MY</label>
-            <div class="slider-group">
-                <button class="nudge-btn" type="button" data-target="pistol-my" data-dir="-1">-</button>
-                <input id="pistol-my" type="range" min="-0.5" max="0.5" step="0.001" value="0.190">
-                <button class="nudge-btn" type="button" data-target="pistol-my" data-dir="1">+</button>
-            </div>
-            <span id="pistol-my-val">0.190</span>
-        </div>
-        <div class="panel-row">
-            <label for="pistol-mz">MZ</label>
-            <div class="slider-group">
-                <button class="nudge-btn" type="button" data-target="pistol-mz" data-dir="-1">-</button>
-                <input id="pistol-mz" type="range" min="-1" max="0" step="0.001" value="-0.199">
-                <button class="nudge-btn" type="button" data-target="pistol-mz" data-dir="1">+</button>
-            </div>
-            <span id="pistol-mz-val">-0.199</span>
-        </div>
-        <button id="pistol-copy" style="width:100%;margin-top:6px;">Copy values</button>
-    </div>
-
-    <!-- Sniper GLB Debug Panel -->
-    <div id="sniper-debug-panel">
-        <div class="panel-title">Sniper GLB</div>
-        <div class="panel-row">
-            <label for="sniper-x">X</label>
-            <div class="slider-group">
-                <button class="nudge-btn" type="button" data-target="sniper-x" data-dir="-1">-</button>
-                <input id="sniper-x" type="range" min="-5" max="5" step="0.01" value="0.15">
-                <button class="nudge-btn" type="button" data-target="sniper-x" data-dir="1">+</button>
-            </div>
-            <span id="sniper-x-val">0.15</span>
-        </div>
-        <div class="panel-row">
-            <label for="sniper-x-step">XS</label>
-            <div class="slider-group">
-                <button class="nudge-btn" type="button" data-target="sniper-x-step" data-dir="-1">-</button>
-                <input id="sniper-x-step" type="range" min="0.001" max="0.05" step="0.001" value="0.01">
-                <button class="nudge-btn" type="button" data-target="sniper-x-step" data-dir="1">+</button>
-            </div>
-            <span id="sniper-x-step-val">0.010</span>
-        </div>
-        <div class="panel-row">
-            <label for="sniper-x-nudge">X±</label>
-            <div style="display:flex;gap:6px;align-items:center;justify-content:center;width:100%">
-                <button id="sniper-x-minus" type="button">-</button>
-                <button id="sniper-x-plus" type="button">+</button>
-            </div>
-            <span id="sniper-x-nudge-val">0.01</span>
-        </div>
-        <div class="panel-row">
-            <label for="sniper-y">Y</label>
-            <div class="slider-group">
-                <button class="nudge-btn" type="button" data-target="sniper-y" data-dir="-1">-</button>
-                <input id="sniper-y" type="range" min="-5" max="5" step="0.01" value="-0.3">
-                <button class="nudge-btn" type="button" data-target="sniper-y" data-dir="1">+</button>
-            </div>
-            <span id="sniper-y-val">-0.30</span>
-        </div>
-        <div class="panel-row">
-            <label for="sniper-z">Z</label>
-            <div class="slider-group">
-                <button class="nudge-btn" type="button" data-target="sniper-z" data-dir="-1">-</button>
-                <input id="sniper-z" type="range" min="-5" max="5" step="0.01" value="1.0">
-                <button class="nudge-btn" type="button" data-target="sniper-z" data-dir="1">+</button>
-            </div>
-            <span id="sniper-z-val">1.00</span>
-        </div>
-        <div class="panel-row">
-            <label for="sniper-scale">S</label>
-            <div class="slider-group">
-                <button class="nudge-btn" type="button" data-target="sniper-scale" data-dir="-1">-</button>
-                <input id="sniper-scale" type="range" min="0.01" max="10" step="0.01" value="0.2">
-                <button class="nudge-btn" type="button" data-target="sniper-scale" data-dir="1">+</button>
-            </div>
-            <span id="sniper-scale-val">0.20</span>
-        </div>
-        <div class="panel-row">
-            <label for="sniper-rx">RX</label>
-            <div class="slider-group">
-                <button class="nudge-btn" type="button" data-target="sniper-rx" data-dir="-1">-</button>
-                <input id="sniper-rx" type="range" min="-3.14" max="3.14" step="0.01" value="0">
-                <button class="nudge-btn" type="button" data-target="sniper-rx" data-dir="1">+</button>
-            </div>
-            <span id="sniper-rx-val">0.00</span>
-        </div>
-        <div class="panel-row">
-            <label for="sniper-ry">RY</label>
-            <div class="slider-group">
-                <button class="nudge-btn" type="button" data-target="sniper-ry" data-dir="-1">-</button>
-                <input id="sniper-ry" type="range" min="-3.14" max="6.28" step="0.01" value="3.14">
-                <button class="nudge-btn" type="button" data-target="sniper-ry" data-dir="1">+</button>
-            </div>
-            <span id="sniper-ry-val">3.14</span>
-        </div>
-        <div class="panel-row">
-            <label for="sniper-rz">RZ</label>
-            <div class="slider-group">
-                <button class="nudge-btn" type="button" data-target="sniper-rz" data-dir="-1">-</button>
-                <input id="sniper-rz" type="range" min="-3.14" max="3.14" step="0.01" value="0">
-                <button class="nudge-btn" type="button" data-target="sniper-rz" data-dir="1">+</button>
-            </div>
-            <span id="sniper-rz-val">0.00</span>
-        </div>
-        <div class="panel-row">
-            <label for="sniper-mx">MX</label>
-            <div class="slider-group">
-                <button class="nudge-btn" type="button" data-target="sniper-mx" data-dir="-1">-</button>
-                <input id="sniper-mx" type="range" min="-0.5" max="0.5" step="0.001" value="0">
-                <button class="nudge-btn" type="button" data-target="sniper-mx" data-dir="1">+</button>
-            </div>
-            <span id="sniper-mx-val">0.000</span>
-        </div>
-        <div class="panel-row">
-            <label for="sniper-my">MY</label>
-            <div class="slider-group">
-                <button class="nudge-btn" type="button" data-target="sniper-my" data-dir="-1">-</button>
-                <input id="sniper-my" type="range" min="-0.5" max="0.5" step="0.001" value="0">
-                <button class="nudge-btn" type="button" data-target="sniper-my" data-dir="1">+</button>
-            </div>
-            <span id="sniper-my-val">0.000</span>
-        </div>
-        <div class="panel-row">
-            <label for="sniper-mz">MZ</label>
-            <div class="slider-group">
-                <button class="nudge-btn" type="button" data-target="sniper-mz" data-dir="-1">-</button>
-                <input id="sniper-mz" type="range" min="-1.5" max="0" step="0.001" value="-0.85">
-                <button class="nudge-btn" type="button" data-target="sniper-mz" data-dir="1">+</button>
-            </div>
-            <span id="sniper-mz-val">-0.850</span>
-        </div>
-        <div class="arms-flex-container">
-            <div class="arm-column">
-                <div class="section-title" style="color:#ff9e9e">Left Arm (LA)</div>
-                <div class="panel-row">
-                    <label for="sniper-lax">LAX</label>
-                    <div class="slider-group">
-                        <button class="nudge-btn" type="button" data-target="sniper-lax" data-dir="-1">-</button>
-                        <input id="sniper-lax" type="range" min="-1" max="1" step="0.01" value="0.01">
-                        <button class="nudge-btn" type="button" data-target="sniper-lax" data-dir="1">+</button>
-                    </div>
-                    <span id="sniper-lax-val">0.01</span>
-                </div>
-                <div class="panel-row">
-                    <label for="sniper-lay">LAY</label>
-                    <div class="slider-group">
-                        <button class="nudge-btn" type="button" data-target="sniper-lay" data-dir="-1">-</button>
-                        <input id="sniper-lay" type="range" min="-1" max="1" step="0.01" value="-0.24">
-                        <button class="nudge-btn" type="button" data-target="sniper-lay" data-dir="1">+</button>
-                    </div>
-                    <span id="sniper-lay-val">-0.24</span>
-                </div>
-                <div class="panel-row">
-                    <label for="sniper-laz">LAZ</label>
-                    <div class="slider-group">
-                        <button class="nudge-btn" type="button" data-target="sniper-laz" data-dir="-1">-</button>
-                        <input id="sniper-laz" type="range" min="-2" max="1" step="0.01" value="-0.60">
-                        <button class="nudge-btn" type="button" data-target="sniper-laz" data-dir="1">+</button>
-                    </div>
-                    <span id="sniper-laz-val">-0.60</span>
-                </div>
-                <div class="panel-row">
-                    <label for="sniper-larx">LARX</label>
-                    <div class="slider-group">
-                        <button class="nudge-btn" type="button" data-target="sniper-larx" data-dir="-1">-</button>
-                        <input id="sniper-larx" type="range" min="-3.14" max="3.14" step="0.02" value="0.72">
-                        <button class="nudge-btn" type="button" data-target="sniper-larx" data-dir="1">+</button>
-                    </div>
-                    <span id="sniper-larx-val">0.72</span>
-                </div>
-                <div class="panel-row">
-                    <label for="sniper-lary">LARY</label>
-                    <div class="slider-group">
-                        <button class="nudge-btn" type="button" data-target="sniper-lary" data-dir="-1">-</button>
-                        <input id="sniper-lary" type="range" min="-3.14" max="3.14" step="0.02" value="-0.76">
-                        <button class="nudge-btn" type="button" data-target="sniper-lary" data-dir="1">+</button>
-                    </div>
-                    <span id="sniper-lary-val">-0.76</span>
-                </div>
-                <div class="panel-row">
-                    <label for="sniper-larz">LARZ</label>
-                    <div class="slider-group">
-                        <button class="nudge-btn" type="button" data-target="sniper-larz" data-dir="-1">-</button>
-                        <input id="sniper-larz" type="range" min="-3.14" max="3.14" step="0.02" value="-0.02">
-                        <button class="nudge-btn" type="button" data-target="sniper-larz" data-dir="1">+</button>
-                    </div>
-                    <span id="sniper-larz-val">-0.02</span>
-                </div>
-            </div>
-            <div class="arm-column">
-                <div class="section-title" style="color:#9eff9e">Right Arm (RA)</div>
-                <div class="panel-row">
-                    <label for="sniper-rax">RAX</label>
-                    <div class="slider-group">
-                        <button class="nudge-btn" type="button" data-target="sniper-rax" data-dir="-1">-</button>
-                        <input id="sniper-rax" type="range" min="-1" max="1" step="0.01" value="0.15">
-                        <button class="nudge-btn" type="button" data-target="sniper-rax" data-dir="1">+</button>
-                    </div>
-                    <span id="sniper-rax-val">0.15</span>
-                </div>
-                <div class="panel-row">
-                    <label for="sniper-ray">RAY</label>
-                    <div class="slider-group">
-                        <button class="nudge-btn" type="button" data-target="sniper-ray" data-dir="-1">-</button>
-                        <input id="sniper-ray" type="range" min="-1" max="1" step="0.01" value="-0.17">
-                        <button class="nudge-btn" type="button" data-target="sniper-ray" data-dir="1">+</button>
-                    </div>
-                    <span id="sniper-ray-val">-0.17</span>
-                </div>
-                <div class="panel-row">
-                    <label for="sniper-raz">RAZ</label>
-                    <div class="slider-group">
-                        <button class="nudge-btn" type="button" data-target="sniper-raz" data-dir="-1">-</button>
-                        <input id="sniper-raz" type="range" min="-1" max="1" step="0.01" value="0.08">
-                        <button class="nudge-btn" type="button" data-target="sniper-raz" data-dir="1">+</button>
-                    </div>
-                    <span id="sniper-raz-val">0.08</span>
-                </div>
-                <div class="panel-row">
-                    <label for="sniper-rarx">RARX</label>
-                    <div class="slider-group">
-                        <button class="nudge-btn" type="button" data-target="sniper-rarx" data-dir="-1">-</button>
-                        <input id="sniper-rarx" type="range" min="-3.14" max="3.14" step="0.02" value="-0.02">
-                        <button class="nudge-btn" type="button" data-target="sniper-rarx" data-dir="1">+</button>
-                    </div>
-                    <span id="sniper-rarx-val">-0.02</span>
-                </div>
-                <div class="panel-row">
-                    <label for="sniper-rary">RARY</label>
-                    <div class="slider-group">
-                        <button class="nudge-btn" type="button" data-target="sniper-rary" data-dir="-1">-</button>
-                        <input id="sniper-rary" type="range" min="-3.14" max="3.14" step="0.02" value="0.02">
-                        <button class="nudge-btn" type="button" data-target="sniper-rary" data-dir="1">+</button>
-                    </div>
-                    <span id="sniper-rary-val">0.02</span>
-                </div>
-                <div class="panel-row">
-                    <label for="sniper-rarz">RARZ</label>
-                    <div class="slider-group">
-                        <button class="nudge-btn" type="button" data-target="sniper-rarz" data-dir="-1">-</button>
-                        <input id="sniper-rarz" type="range" min="-3.14" max="3.14" step="0.02" value="0.58">
-                        <button class="nudge-btn" type="button" data-target="sniper-rarz" data-dir="1">+</button>
-                    </div>
-                    <span id="sniper-rarz-val">0.58</span>
-                </div>
-            </div>
-        </div>
-        <button id="sniper-copy" style="width:100%;margin-top:6px;">Copy values</button>
-    </div>
-
-    <div id="knife-debug-panel">
-        <div class="panel-title">Knife GLB/Arm Adjustment</div>
-
-        <div class="panel-row">
-            <label for="knife-x">X</label>
-            <div class="slider-group">
-                <button class="nudge-btn" type="button" data-target="knife-x" data-dir="-1">-</button>
-                <input id="knife-x" type="range" min="-1" max="1" step="0.01" value="0">
-                <button class="nudge-btn" type="button" data-target="knife-x" data-dir="1">+</button>
-            </div>
-            <span id="knife-x-val">0</span>
-        </div>
-        <div class="panel-row">
-            <label for="knife-y">Y</label>
-            <div class="slider-group">
-                <button class="nudge-btn" type="button" data-target="knife-y" data-dir="-1">-</button>
-                <input id="knife-y" type="range" min="-1" max="1" step="0.01" value="-0.2">
-                <button class="nudge-btn" type="button" data-target="knife-y" data-dir="1">+</button>
-            </div>
-            <span id="knife-y-val">-0.2</span>
-        </div>
-        <div class="panel-row">
-            <label for="knife-z">Z</label>
-            <div class="slider-group">
-                <button class="nudge-btn" type="button" data-target="knife-z" data-dir="-1">-</button>
-                <input id="knife-z" type="range" min="-2" max="1" step="0.01" value="-0.5">
-                <button class="nudge-btn" type="button" data-target="knife-z" data-dir="1">+</button>
-            </div>
-            <span id="knife-z-val">-0.5</span>
-        </div>
-        <div class="panel-row">
-            <label for="knife-rx">Rot X</label>
-            <div class="slider-group">
-                <button class="nudge-btn" type="button" data-target="knife-rx" data-dir="-1">-</button>
-                <input id="knife-rx" type="range" min="-3.14" max="3.14" step="0.02" value="0.1">
-                <button class="nudge-btn" type="button" data-target="knife-rx" data-dir="1">+</button>
-            </div>
-            <span id="knife-rx-val">0.1</span>
-        </div>
-        <div class="panel-row">
-            <label for="knife-ry">Rot Y</label>
-            <div class="slider-group">
-                <button class="nudge-btn" type="button" data-target="knife-ry" data-dir="-1">-</button>
-                <input id="knife-ry" type="range" min="-3.14" max="3.14" step="0.02" value="1.8">
-                <button class="nudge-btn" type="button" data-target="knife-ry" data-dir="1">+</button>
-            </div>
-            <span id="knife-ry-val">1.8</span>
-        </div>
-        <div class="panel-row">
-            <label for="knife-rz">Rot Z</label>
-            <div class="slider-group">
-                <button class="nudge-btn" type="button" data-target="knife-rz" data-dir="-1">-</button>
-                <input id="knife-rz" type="range" min="-3.14" max="3.14" step="0.02" value="-0.2">
-                <button class="nudge-btn" type="button" data-target="knife-rz" data-dir="1">+</button>
-            </div>
-            <span id="knife-rz-val">-0.2</span>
-        </div>
-        <div class="panel-row">
-            <label for="knife-scale">S</label>
-            <div class="slider-group">
-                <button class="nudge-btn" type="button" data-target="knife-scale" data-dir="-1">-</button>
-                <input id="knife-scale" type="range" min="0.1" max="5" step="0.05" value="2.5">
-                <button class="nudge-btn" type="button" data-target="knife-scale" data-dir="1">+</button>
-            </div>
-            <span id="knife-scale-val">2.5</span>
-        </div>
-
-        <div class="arms-flex-container">
-            <!-- Left Arm Column -->
-            <div class="arm-column">
-                <div class="section-title" style="color:#ff9e9e">Left Arm (LA)</div>
-                <div class="panel-row">
-                    <label for="knife-lax">LAX</label>
-                    <div class="slider-group">
-                        <button class="nudge-btn" type="button" data-target="knife-lax" data-dir="-1">-</button>
-                        <input id="knife-lax" type="range" min="-3" max="1" step="0.01" value="-1.2">
-                        <button class="nudge-btn" type="button" data-target="knife-lax" data-dir="1">+</button>
-                    </div>
-                    <span id="knife-lax-val">-1.2</span>
-                </div>
-                <div class="panel-row">
-                    <label for="knife-lay">LAY</label>
-                    <div class="slider-group">
-                        <button class="nudge-btn" type="button" data-target="knife-lay" data-dir="-1">-</button>
-                        <input id="knife-lay" type="range" min="-2" max="1" step="0.01" value="-0.35">
-                        <button class="nudge-btn" type="button" data-target="knife-lay" data-dir="1">+</button>
-                    </div>
-                    <span id="knife-lay-val">-0.35</span>
-                </div>
-                <div class="panel-row">
-                    <label for="knife-laz">LAZ</label>
-                    <div class="slider-group">
-                        <button class="nudge-btn" type="button" data-target="knife-laz" data-dir="-1">-</button>
-                        <input id="knife-laz" type="range" min="-2" max="1" step="0.01" value="-0.25">
-                        <button class="nudge-btn" type="button" data-target="knife-laz" data-dir="1">+</button>
-                    </div>
-                    <span id="knife-laz-val">-0.25</span>
-                </div>
-                <div class="panel-row">
-                    <label for="knife-larx">LARX</label>
-                    <div class="slider-group">
-                        <button class="nudge-btn" type="button" data-target="knife-larx" data-dir="-1">-</button>
-                        <input id="knife-larx" type="range" min="-3.14" max="3.14" step="0.02" value="0.2">
-                        <button class="nudge-btn" type="button" data-target="knife-larx" data-dir="1">+</button>
-                    </div>
-                    <span id="knife-larx-val">0.2</span>
-                </div>
-                <div class="panel-row">
-                    <label for="knife-lary">LARY</label>
-                    <div class="slider-group">
-                        <button class="nudge-btn" type="button" data-target="knife-lary" data-dir="-1">-</button>
-                        <input id="knife-lary" type="range" min="-3.14" max="3.14" step="0.02" value="0.3">
-                        <button class="nudge-btn" type="button" data-target="knife-lary" data-dir="1">+</button>
-                    </div>
-                    <span id="knife-lary-val">0.3</span>
-                </div>
-                <div class="panel-row">
-                    <label for="knife-larz">LARZ</label>
-                    <div class="slider-group">
-                        <button class="nudge-btn" type="button" data-target="knife-larz" data-dir="-1">-</button>
-                        <input id="knife-larz" type="range" min="-3.14" max="3.14" step="0.02" value="-0.15">
-                        <button class="nudge-btn" type="button" data-target="knife-larz" data-dir="1">+</button>
-                    </div>
-                    <span id="knife-larz-val">-0.15</span>
-                </div>
-            </div>
-
-            <!-- Right Arm Column -->
-            <div class="arm-column">
-                <div class="section-title" style="color:#9eff9e">Right Arm (RA)</div>
-                <div class="panel-row">
-                    <label for="knife-rax">RAX</label>
-                    <div class="slider-group">
-                        <button class="nudge-btn" type="button" data-target="knife-rax" data-dir="-1">-</button>
-                        <input id="knife-rax" type="range" min="-1" max="1" step="0.01" value="0.12">
-                        <button class="nudge-btn" type="button" data-target="knife-rax" data-dir="1">+</button>
-                    </div>
-                    <span id="knife-rax-val">0.12</span>
-                </div>
-                <div class="panel-row">
-                    <label for="knife-ray">RAY</label>
-                    <div class="slider-group">
-                        <button class="nudge-btn" type="button" data-target="knife-ray" data-dir="-1">-</button>
-                        <input id="knife-ray" type="range" min="-1" max="1" step="0.01" value="-0.2">
-                        <button class="nudge-btn" type="button" data-target="knife-ray" data-dir="1">+</button>
-                    </div>
-                    <span id="knife-ray-val">-0.2</span>
-                </div>
-                <div class="panel-row">
-                    <label for="knife-raz">RAZ</label>
-                    <div class="slider-group">
-                        <button class="nudge-btn" type="button" data-target="knife-raz" data-dir="-1">-</button>
-                        <input id="knife-raz" type="range" min="-1" max="1" step="0.01" value="-0.15">
-                        <button class="nudge-btn" type="button" data-target="knife-raz" data-dir="1">+</button>
-                    </div>
-                    <span id="knife-raz-val">-0.15</span>
-                </div>
-                <div class="panel-row">
-                    <label for="knife-rarx">RARX</label>
-                    <div class="slider-group">
-                        <button class="nudge-btn" type="button" data-target="knife-rarx" data-dir="-1">-</button>
-                        <input id="knife-rarx" type="range" min="-3.14" max="3.14" step="0.02" value="0">
-                        <button class="nudge-btn" type="button" data-target="knife-rarx" data-dir="1">+</button>
-                    </div>
-                    <span id="knife-rarx-val">0</span>
-                </div>
-                <div class="panel-row">
-                    <label for="knife-rary">RARY</label>
-                    <div class="slider-group">
-                        <button class="nudge-btn" type="button" data-target="knife-rary" data-dir="-1">-</button>
-                        <input id="knife-rary" type="range" min="-3.14" max="3.14" step="0.02" value="-0.15">
-                        <button class="nudge-btn" type="button" data-target="knife-rary" data-dir="1">+</button>
-                    </div>
-                    <span id="knife-rary-val">-0.15</span>
-                </div>
-                <div class="panel-row">
-                    <label for="knife-rarz">RARZ</label>
-                    <div class="slider-group">
-                        <button class="nudge-btn" type="button" data-target="knife-rarz" data-dir="-1">-</button>
-                        <input id="knife-rarz" type="range" min="-3.14" max="3.14" step="0.02" value="0.05">
-                        <button class="nudge-btn" type="button" data-target="knife-rarz" data-dir="1">+</button>
-                    </div>
-                    <span id="knife-rarz-val">0.05</span>
-                </div>
-            </div>
-        </div>
-        <button id="knife-copy" style="width:100%;margin-top:6px;">Copy values</button>
-    </div>
-
-    <!-- Knife Swing Debug Panel - Toggle with ] key -->
-    <div id="knife-swing-panel">
-        <div class="panel-title">🗡️ Knife Swing Adjust (] key)</div>
-
-        <div class="panel-row">
-            <label>Freeze</label>
-            <input id="swing-freeze" type="range" min="-0.01" max="1" step="0.01" value="-0.01">
-            <span id="swing-freeze-val">OFF</span>
-        </div>
-
-        <div class="section-title">Phase 1 (Wind-up End)</div>
-        <div class="panel-row">
-            <label>P1 X</label>
-            <input id="swing-p1-kx" type="range" min="-1" max="1" step="0.02" value="-0.2">
-            <span id="swing-p1-kx-val">-0.20</span>
-        </div>
-        <div class="panel-row">
-            <label>P1 Y</label>
-            <input id="swing-p1-ky" type="range" min="-1" max="1" step="0.02" value="0.0">
-            <span id="swing-p1-ky-val">0.00</span>
-        </div>
-        <div class="panel-row">
-            <label>P1 Z</label>
-            <input id="swing-p1-kz" type="range" min="-1" max="0" step="0.02" value="-0.35">
-            <span id="swing-p1-kz-val">-0.35</span>
-        </div>
-        <div class="panel-row">
-            <label>P1 RX</label>
-            <input id="swing-p1-krx" type="range" min="-3.14" max="3.14" step="0.05" value="1.57">
-            <span id="swing-p1-krx-val">1.57</span>
-        </div>
-        <div class="panel-row">
-            <label>P1 RY</label>
-            <input id="swing-p1-kry" type="range" min="-3.14" max="3.14" step="0.05" value="1.57">
-            <span id="swing-p1-kry-val">1.57</span>
-        </div>
-        <div class="panel-row">
-            <label>P1 RZ</label>
-            <input id="swing-p1-krz" type="range" min="-3.14" max="3.14" step="0.05" value="0.0">
-            <span id="swing-p1-krz-val">0.00</span>
-        </div>
-
-        <div class="section-title">Phase 2 (Slash End)</div>
-        <div class="panel-row">
-            <label>P2 X</label>
-            <input id="swing-p2-kx" type="range" min="-1" max="1" step="0.02" value="0.4">
-            <span id="swing-p2-kx-val">0.40</span>
-        </div>
-        <div class="panel-row">
-            <label>P2 Y</label>
-            <input id="swing-p2-ky" type="range" min="-1" max="1" step="0.02" value="-0.1">
-            <span id="swing-p2-ky-val">-0.10</span>
-        </div>
-        <div class="panel-row">
-            <label>P2 Z</label>
-            <input id="swing-p2-kz" type="range" min="-1" max="0" step="0.02" value="-0.5">
-            <span id="swing-p2-kz-val">-0.50</span>
-        </div>
-        <div class="panel-row">
-            <label>P2 RX</label>
-            <input id="swing-p2-krx" type="range" min="-3.14" max="3.14" step="0.05" value="1.5">
-            <span id="swing-p2-krx-val">1.50</span>
-        </div>
-        <div class="panel-row">
-            <label>P2 RY</label>
-            <input id="swing-p2-kry" type="range" min="-3.14" max="3.14" step="0.05" value="-0.5">
-            <span id="swing-p2-kry-val">-0.50</span>
-        </div>
-        <div class="panel-row">
-            <label>P2 RZ</label>
-            <input id="swing-p2-krz" type="range" min="-3.14" max="3.14" step="0.05" value="0.3">
-            <span id="swing-p2-krz-val">0.30</span>
-        </div>
-
-        <button id="swing-copy" style="width:100%;margin-top:8px;">Copy Values</button>
-    </div>
-
-
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/utils/SkeletonUtils.js"></script>
-    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-    <script>
         // Global Error Handler to debug Black Screen issues
         window.onerror = function (msg, url, line, col, error) {
             alert("JS Error: " + msg + "\nLine: " + line + "\nCol: " + col);
@@ -7536,16 +3110,10 @@
 
             // 0. 게임 통계 초기화
             gameStartTime = performance.now();
-            lastTime = gameStartTime; // [FIX] Reset delta time calculator
-            isDead = false; // [FIX] Ensure player is alive
             killCount = 0;
             playTime = 0;
             const gameOverTitle = document.getElementById('game-over-title');
             if (gameOverTitle) gameOverTitle.innerText = 'YOU DIED';
-
-            // [FIX] Ensure Game Over screens are hidden on start
-            if (elGameOver) elGameOver.style.display = 'none';
-            if (document.getElementById('death-overlay')) document.getElementById('death-overlay').style.display = 'none';
             const gameOverKills = document.getElementById('final-kill-count');
             if (gameOverKills) gameOverKills.innerText = killCount;
 
@@ -11680,6 +7248,16 @@
 
 
 
+        function updateTimerUI(seconds) {
+            // Update HUD Timer
+            if (elTimer) {
+                if (seconds < 0) seconds = 0;
+                const mins = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                const timeStr = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                elTimer.innerText = timeStr;
+            }
+        }
 
 
         function updatePlayersList() {
@@ -13464,7 +9042,7 @@
         function animate() {
             requestAnimationFrame(animate);
             const time = performance.now();
-            var dt = Math.min((time - lastTime) / 1000, 0.1);
+            const dt = Math.min((time - lastTime) / 1000, 0.1);
             lastTime = time;
 
             // 플레이 시간 업데이트 (싱글플레이어 전용)
@@ -13493,7 +9071,7 @@
             // 2. Jumping Spread (In Air)
             // Assuming 'playerVelocity.y' or height check. 
             // Simplified check: if jump button pressed or in air (needs 'canJump' variable context)
-            if (!isGrounded) { // Start with jump button/state if available, fall back to logic
+            if (!canJump) { // Start with jump button/state if available, fall back to logic
                 targetSpread += 15; // +15px when jumping/falling
             }
 
@@ -13521,711 +9099,709 @@
                 // Right: Move Right (positive X)
                 hairRight.style.transform = `translate(${finalGap}px, -50%)`;
             }
-            if (isDead) {
-                const gameOverKills = document.getElementById('final-kill-count');
-                if (gameOverKills) gameOverKills.innerText = killCount;
-                if (elGameOver) elGameOver.style.display = 'flex';
-                const exitBtn = document.getElementById('exit-game-btn');
-                if (exitBtn) exitBtn.style.display = 'none';
-                if (!isMobile && document.pointerLockElement === document.body) {
-                    document.exitPointerLock();
-                }
+            const gameOverKills = document.getElementById('final-kill-count');
+            if (gameOverKills) gameOverKills.innerText = killCount;
+            if (elGameOver) elGameOver.style.display = 'flex';
+            const exitBtn = document.getElementById('exit-game-btn');
+            if (exitBtn) exitBtn.style.display = 'none';
+            if (!isMobile && document.pointerLockElement === document.body) {
+                document.exitPointerLock();
             }
+        }
 
 
 
 
 
-            // Spectator Camera (Killcam) - 3rd Person Follow Camera
-            if (isSpectating && spectatingPlayerId && gameMode === 'multi') {
-                // Hide 1st person weapon model during 3rd person killcam
-                if (weaponContainer) weaponContainer.visible = false;
+        // Spectator Camera (Killcam) - 3rd Person Follow Camera
+        if (isSpectating && spectatingPlayerId && gameMode === 'multi') {
+            // Hide 1st person weapon model during 3rd person killcam
+            if (weaponContainer) weaponContainer.visible = false;
 
-                const killerMesh = otherPlayersMap[spectatingPlayerId];
-                if (killerMesh) {
-                    // Get killer's rotation (Y-axis = horizontal facing direction)
-                    const killerRotY = killerMesh.rotation.y || 0;
+            const killerMesh = otherPlayersMap[spectatingPlayerId];
+            if (killerMesh) {
+                // Get killer's rotation (Y-axis = horizontal facing direction)
+                const killerRotY = killerMesh.rotation.y || 0;
 
-                    // Camera offset: 5m behind, 3m above the killer
-                    const offsetDistance = 5;
-                    const offsetHeight = 3;
+                // Camera offset: 5m behind, 3m above the killer
+                const offsetDistance = 5;
+                const offsetHeight = 3;
 
-                    // Calculate camera position behind the killer
-                    const camX = killerMesh.position.x - Math.sin(killerRotY) * offsetDistance;
-                    const camY = killerMesh.position.y + offsetHeight;
-                    const camZ = killerMesh.position.z - Math.cos(killerRotY) * offsetDistance;
+                // Calculate camera position behind the killer
+                const camX = killerMesh.position.x - Math.sin(killerRotY) * offsetDistance;
+                const camY = killerMesh.position.y + offsetHeight;
+                const camZ = killerMesh.position.z - Math.cos(killerRotY) * offsetDistance;
 
-                    // Smoothly interpolate camera position for smoother following
-                    camera.position.lerp(new THREE.Vector3(camX, camY, camZ), 0.1);
+                // Smoothly interpolate camera position for smoother following
+                camera.position.lerp(new THREE.Vector3(camX, camY, camZ), 0.1);
 
-                    // Make camera look at the killer
-                    camera.lookAt(
-                        killerMesh.position.x,
-                        killerMesh.position.y + 1.0, // Look at chest/head level
-                        killerMesh.position.z
-                    );
-                }
-                // Skip normal player control during spectating
-            } else {
-                // Not spectating - ensure weapon is visible (if alive)
-                if (weaponContainer && !isDead) weaponContainer.visible = true;
+                // Make camera look at the killer
+                camera.lookAt(
+                    killerMesh.position.x,
+                    killerMesh.position.y + 1.0, // Look at chest/head level
+                    killerMesh.position.z
+                );
             }
+            // Skip normal player control during spectating
+        } else {
+            // Not spectating - ensure weapon is visible (if alive)
+            if (weaponContainer && !isDead) weaponContainer.visible = true;
+        }
 
 
-            if (!isDead && !isPaused) {
-                const w = WEAPONS[curWeaponIdx];
-                if (isGameStarted) {
-                    handleShooting(dt);
-                    // Redundant checkLowHealth call removed (handled at end of loop)
+        if (!isDead && !isPaused) {
+            const w = WEAPONS[curWeaponIdx];
+            if (isGameStarted) {
+                handleShooting(dt);
+                // Redundant checkLowHealth call removed (handled at end of loop)
 
-                    // --- Improved Physics with Raycasting (Fix for Jumping on Objects) ---
-                    const eyeHeight = keys.ctrl ? 1.0 : 1.7; // 1.7 is standard eye level
+                // --- Improved Physics with Raycasting (Fix for Jumping on Objects) ---
+                const eyeHeight = keys.ctrl ? 1.0 : 1.7; // 1.7 is standard eye level
 
-                    // Raycast down to find "ground"
-                    let groundY = 0.5; // Base floor level
+                // Raycast down to find "ground"
+                let groundY = 0.5; // Base floor level
 
-                    // Only cast ray if mapGroup exists
-                    if (mapGroup) {
-                        const rayOrigin = position.clone();
-                        rayOrigin.y += 0.5; // Start slightly above current foot position to detect very close ground
-                        const downRay = new THREE.Raycaster(rayOrigin, new THREE.Vector3(0, -1, 0), 0, 10);
-                        // Intersect with map objects (collidable)
-                        // Note: We need to traverse mapGroup to find meshes, or use a known list.
-                        // mapGroup.children contains meshes.
-                        const intersects = downRay.intersectObjects(mapGroup.children, true);
+                // Only cast ray if mapGroup exists
+                if (mapGroup) {
+                    const rayOrigin = position.clone();
+                    rayOrigin.y += 0.5; // Start slightly above current foot position to detect very close ground
+                    const downRay = new THREE.Raycaster(rayOrigin, new THREE.Vector3(0, -1, 0), 0, 10);
+                    // Intersect with map objects (collidable)
+                    // Note: We need to traverse mapGroup to find meshes, or use a known list.
+                    // mapGroup.children contains meshes.
+                    const intersects = downRay.intersectObjects(mapGroup.children, true);
 
-                        if (intersects.length > 0) {
-                            // Find highest valid intersection below player
-                            let bestGroundY = groundY;
-                            for (const hit of intersects) {
-                                if (!hit.face) continue;
-                                const worldNormal = hit.face.normal.clone().transformDirection(hit.object.matrixWorld);
-                                if (worldNormal.y > 0.3) {
-                                    bestGroundY = Math.max(bestGroundY, hit.point.y);
-                                }
+                    if (intersects.length > 0) {
+                        // Find highest valid intersection below player
+                        let bestGroundY = groundY;
+                        for (const hit of intersects) {
+                            if (!hit.face) continue;
+                            const worldNormal = hit.face.normal.clone().transformDirection(hit.object.matrixWorld);
+                            if (worldNormal.y > 0.3) {
+                                bestGroundY = Math.max(bestGroundY, hit.point.y);
                             }
-                            groundY = bestGroundY;
                         }
+                        groundY = bestGroundY;
                     }
+                }
 
-                    const targetY = groundY + eyeHeight;
-                    playerVelocity.copy(position).sub(lastPlayerPosition).multiplyScalar(1 / dt);
+                const targetY = groundY + eyeHeight;
+                playerVelocity.copy(position).sub(lastPlayerPosition).multiplyScalar(1 / dt);
 
-                    // Apply Gravity
-                    velocityY -= 30.0 * dt; // Stronger gravity for snappier feel
-                    let nextY = position.y + velocityY * dt;
+                // Apply Gravity
+                velocityY -= 30.0 * dt; // Stronger gravity for snappier feel
+                let nextY = position.y + velocityY * dt;
 
-                    // Ground Collision / Landing
-                    // We allow a small tolerance to "snap" to ground
-                    const groundTolerance = 0.15; // Allow small height difference for grounded state
+                // Ground Collision / Landing
+                // We allow a small tolerance to "snap" to ground
+                const groundTolerance = 0.15; // Allow small height difference for grounded state
 
-                    if (velocityY < 0 && nextY <= targetY) {
-                        // Landed
-                        position.y = targetY;
-                        velocityY = 0;
-                        isGrounded = true;
-                    } else if (Math.abs(position.y - targetY) < groundTolerance && velocityY <= 0) {
-                        // Very close to ground (within tolerance) - still considered grounded
-                        // This helps with walking on uneven surfaces or objects
-                        position.y = targetY;
-                        velocityY = 0;
-                        isGrounded = true;
+                if (velocityY < 0 && nextY <= targetY) {
+                    // Landed
+                    position.y = targetY;
+                    velocityY = 0;
+                    isGrounded = true;
+                } else if (Math.abs(position.y - targetY) < groundTolerance && velocityY <= 0) {
+                    // Very close to ground (within tolerance) - still considered grounded
+                    // This helps with walking on uneven surfaces or objects
+                    position.y = targetY;
+                    velocityY = 0;
+                    isGrounded = true;
+                } else {
+                    position.y = nextY;
+                    // Only set isGrounded to false if we're actually above ground by more than tolerance
+                    if (position.y > targetY + groundTolerance) {
+                        isGrounded = false;
+                    }
+                }
+
+                // Landing Sound Trigger
+                if (isGrounded && !lastGroundedState && velocityY <= 0) {
+                    SoundGen.playLand();
+                }
+                lastGroundedState = isGrounded;
+
+                let speed = 15.0; // Default: RUN (User Request - Increased from 9.0)
+                if (keys.shift) speed = 4.0; // Shift: SLOW WALK (increased from 2.0)
+
+                // Weapon-based movement speed multipliers
+                if (w.type === 'KNIFE') speed *= 1.1;
+                else if (w.type === 'PISTOL') speed *= 1.05;
+                else if (w.type === 'SNIPER') speed *= 0.9;
+                else if (w.type === 'GRENADE') speed *= 0.95;
+
+                // Overrides (Crouch & Aim take priority)
+                if (keys.ctrl) speed = 3.0; // [User Request] Slow movement when Crouched
+                if (isAiming) speed = 2.0;
+
+                const q = new THREE.Quaternion();
+                q.setFromEuler(new THREE.Euler(rotation.x, rotation.y, 0, 'YXZ'));
+                camera.quaternion.copy(q);
+
+                const dx = keys.d - keys.a; const dy = keys.s - keys.w;
+                if (dx !== 0 || dy !== 0) {
+                    const fwd = new THREE.Vector3(0, 0, -1).applyAxisAngle(new THREE.Vector3(0, 1, 0), rotation.y);
+                    const rgt = new THREE.Vector3(1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), rotation.y);
+                    const moveDir = fwd.multiplyScalar(-dy).add(rgt.multiplyScalar(dx)).normalize();
+                    const moveStep = moveDir.clone().multiplyScalar(speed * dt);
+
+                    const stepHeight = 0.6; // 등반 가능한 최대 높이 (계단 등)
+
+                    // X축 이동 및 Step Climbing
+                    let nextPosX = position.clone();
+                    nextPosX.x += moveStep.x;
+                    if (!checkCollision(nextPosX)) {
+                        position.x = nextPosX.x;
                     } else {
-                        position.y = nextY;
-                        // Only set isGrounded to false if we're actually above ground by more than tolerance
-                        if (position.y > targetY + groundTolerance) {
-                            isGrounded = false;
-                        }
-                    }
-
-                    // Landing Sound Trigger
-                    if (isGrounded && !lastGroundedState && velocityY <= 0) {
-                        SoundGen.playLand();
-                    }
-                    lastGroundedState = isGrounded;
-
-                    let speed = 15.0; // Default: RUN (User Request - Increased from 9.0)
-                    if (keys.shift) speed = 4.0; // Shift: SLOW WALK (increased from 2.0)
-
-                    // Weapon-based movement speed multipliers
-                    if (w.type === 'KNIFE') speed *= 1.1;
-                    else if (w.type === 'PISTOL') speed *= 1.05;
-                    else if (w.type === 'SNIPER') speed *= 0.9;
-                    else if (w.type === 'GRENADE') speed *= 0.95;
-
-                    // Overrides (Crouch & Aim take priority)
-                    if (keys.ctrl) speed = 3.0; // [User Request] Slow movement when Crouched
-                    if (isAiming) speed = 2.0;
-
-                    const q = new THREE.Quaternion();
-                    q.setFromEuler(new THREE.Euler(rotation.x, rotation.y, 0, 'YXZ'));
-                    camera.quaternion.copy(q);
-
-                    const dx = keys.d - keys.a; const dy = keys.s - keys.w;
-                    if (dx !== 0 || dy !== 0) {
-                        const fwd = new THREE.Vector3(0, 0, -1).applyAxisAngle(new THREE.Vector3(0, 1, 0), rotation.y);
-                        const rgt = new THREE.Vector3(1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), rotation.y);
-                        const moveDir = fwd.multiplyScalar(-dy).add(rgt.multiplyScalar(dx)).normalize();
-                        const moveStep = moveDir.clone().multiplyScalar(speed * dt);
-
-                        const stepHeight = 0.6; // 등반 가능한 최대 높이 (계단 등)
-
-                        // X축 이동 및 Step Climbing
-                        let nextPosX = position.clone();
-                        nextPosX.x += moveStep.x;
-                        if (!checkCollision(nextPosX)) {
+                        // 장애물 발견 시 위쪽 공간 체크
+                        let stepUpPos = nextPosX.clone();
+                        stepUpPos.y += stepHeight;
+                        if (!checkCollision(stepUpPos)) {
                             position.x = nextPosX.x;
-                        } else {
-                            // 장애물 발견 시 위쪽 공간 체크
-                            let stepUpPos = nextPosX.clone();
-                            stepUpPos.y += stepHeight;
-                            if (!checkCollision(stepUpPos)) {
-                                position.x = nextPosX.x;
-                                position.y += 0.1; // 살짝 들어올려줌 (부드러운 등반)
-                            }
+                            position.y += 0.1; // 살짝 들어올려줌 (부드러운 등반)
                         }
+                    }
 
-                        // Z축 이동 및 Step Climbing
-                        let nextPosZ = position.clone();
-                        nextPosZ.z += moveStep.z;
-                        if (!checkCollision(nextPosZ)) {
+                    // Z축 이동 및 Step Climbing
+                    let nextPosZ = position.clone();
+                    nextPosZ.z += moveStep.z;
+                    if (!checkCollision(nextPosZ)) {
+                        position.z = nextPosZ.z;
+                    } else {
+                        // 장애물 발견 시 위쪽 공간 체크
+                        let stepUpPos = nextPosZ.clone();
+                        stepUpPos.y += stepHeight;
+                        if (!checkCollision(stepUpPos)) {
                             position.z = nextPosZ.z;
-                        } else {
-                            // 장애물 발견 시 위쪽 공간 체크
-                            let stepUpPos = nextPosZ.clone();
-                            stepUpPos.y += stepHeight;
-                            if (!checkCollision(stepUpPos)) {
-                                position.z = nextPosZ.z;
-                                position.y += 0.1; // 살짝 들어올려줌
-                            }
+                            position.y += 0.1; // 살짝 들어올려줌
+                        }
+                    }
+
+                    if (!isAiming) {
+                        if (isGrounded && !keys.shift && !keys.ctrl) {
+                            SoundGen.playStep();
                         }
 
-                        if (!isAiming) {
-                            if (isGrounded && !keys.shift && !keys.ctrl) {
-                                SoundGen.playStep();
-                            }
-
-                            if (keys.shift || keys.ctrl) {
-                                // [User Request] Remove bobbing while sneaking or crouching
-                                swayOffset.x = 0;
-                                swayOffset.y = 0;
-                            } else {
-                                const bobFreq = 8;
-                                const bobAmp = 0.02;
-                                swayOffset.y = Math.sin(time * 0.001 * bobFreq) * bobAmp;
-                                swayOffset.x = Math.cos(time * 0.001 * (bobFreq / 2)) * bobAmp;
-                            }
+                        if (keys.shift || keys.ctrl) {
+                            // [User Request] Remove bobbing while sneaking or crouching
+                            swayOffset.x = 0;
+                            swayOffset.y = 0;
                         } else {
-                            // [FIX] Smoothly reset sway when aiming while moving (fixes pistol crosshair wobble)
-                            swayOffset.x = THREE.MathUtils.lerp(swayOffset.x, 0, 15 * dt);
-                            swayOffset.y = THREE.MathUtils.lerp(swayOffset.y, 0, 15 * dt);
+                            const bobFreq = 8;
+                            const bobAmp = 0.02;
+                            swayOffset.y = Math.sin(time * 0.001 * bobFreq) * bobAmp;
+                            swayOffset.x = Math.cos(time * 0.001 * (bobFreq / 2)) * bobAmp;
                         }
                     } else {
-                        playerVelocity.set(0, 0, 0);
-                        // [User Request] Idle sway animation when standing still (all weapons)
-                        // Stop sway when aiming
-                        if (!isAiming) {
-                            const swayFreqX = 1.2; const swayFreqY = 0.9;
-                            const swayAmpX = 0.015; const swayAmpY = 0.012;
-                            swayOffset.x = Math.sin(time * 0.001 * swayFreqX) * swayAmpX;
-                            swayOffset.y = Math.sin(time * 0.001 * swayFreqY) * swayAmpY;
-                        } else {
-                            // Reset sway smoothly when aiming
-                            swayOffset.x = THREE.MathUtils.lerp(swayOffset.x, 0, 10 * dt);
-                            swayOffset.y = THREE.MathUtils.lerp(swayOffset.y, 0, 10 * dt);
-                        }
+                        // [FIX] Smoothly reset sway when aiming while moving (fixes pistol crosshair wobble)
+                        swayOffset.x = THREE.MathUtils.lerp(swayOffset.x, 0, 15 * dt);
+                        swayOffset.y = THREE.MathUtils.lerp(swayOffset.y, 0, 15 * dt);
                     }
-
-                    lastPlayerPosition.copy(position);
+                } else {
+                    playerVelocity.set(0, 0, 0);
+                    // [User Request] Idle sway animation when standing still (all weapons)
+                    // Stop sway when aiming
+                    if (!isAiming) {
+                        const swayFreqX = 1.2; const swayFreqY = 0.9;
+                        const swayAmpX = 0.015; const swayAmpY = 0.012;
+                        swayOffset.x = Math.sin(time * 0.001 * swayFreqX) * swayAmpX;
+                        swayOffset.y = Math.sin(time * 0.001 * swayFreqY) * swayAmpY;
+                    } else {
+                        // Reset sway smoothly when aiming
+                        swayOffset.x = THREE.MathUtils.lerp(swayOffset.x, 0, 10 * dt);
+                        swayOffset.y = THREE.MathUtils.lerp(swayOffset.y, 0, 10 * dt);
+                    }
                 }
 
+                lastPlayerPosition.copy(position);
+            }
 
-                // --- Visual Updates (Runs even during countdown) ---
-                const isSniperAiming = isAiming && w.type === 'SNIPER';
+
+            // --- Visual Updates (Runs even during countdown) ---
+            const isSniperAiming = isAiming && w.type === 'SNIPER';
 
 
-                if (isSniperAiming) {
-                    if (weaponContainer) weaponContainer.visible = false;
-                    if (elScope) {
-                        elScope.style.display = 'block';
-                        // PC vs Mobile Scope Style Logic
-                        // PC/Mobile Common Scope Style (User Request: Mobile should look like PC)
-                        elScope.style.background = 'radial-gradient(circle, transparent 20%, rgba(0, 0, 0, 0.7) 21%, rgba(0, 0, 0, 0.9) 100%)';
+            if (isSniperAiming) {
+                if (weaponContainer) weaponContainer.visible = false;
+                if (elScope) {
+                    elScope.style.display = 'block';
+                    // PC vs Mobile Scope Style Logic
+                    // PC/Mobile Common Scope Style (User Request: Mobile should look like PC)
+                    elScope.style.background = 'radial-gradient(circle, transparent 20%, rgba(0, 0, 0, 0.7) 21%, rgba(0, 0, 0, 0.9) 100%)';
+                }
+                if (elCrosshair) {
+                    if (isMobile) {
+                        elCrosshair.style.display = 'block';
+                    } else {
+                        elCrosshair.style.display = 'none';
                     }
-                    if (elCrosshair) {
-                        if (isMobile) {
-                            elCrosshair.style.display = 'block';
-                        } else {
+                }
+            } else {
+                if (weaponContainer) weaponContainer.visible = true;
+                if (elScope) elScope.style.display = 'none';
+
+                // Sniper Scope - Show circular scope only for SNIPER when aiming
+                const sniperScope = document.getElementById('sniper-scope');
+                if (sniperScope) {
+                    if (isAiming && w.type === 'SNIPER' && !isMobile) {
+                        sniperScope.style.display = 'block';
+                    } else {
+                        sniperScope.style.display = 'none';
+                    }
+                }
+
+                // Crosshair Logic
+                if (elCrosshair) {
+                    if (isMobile) {
+                        // 모바일: 항상 조준선 표시 (사용자 요청)
+                        elCrosshair.style.display = 'block';
+                        elCrosshair.style.opacity = 0.7; // 상시 표시는 약간 투명하게
+                    } else if (w.type === 'PISTOL' || (!isAiming && w.type !== 'KNIFE')) {
+                        // PC: 권총이거나 비조준 상태(칼 제외)일 때 표시
+                        // Mobile PISTOL update: Aiming hidden crosshair logic same as PC now?
+                        // Actually, if mobile pistol behaves like rifle now (ADS available), hide crosshair when aiming
+                        if (isMobile && w.type === 'PISTOL' && isAiming) {
                             elCrosshair.style.display = 'none';
-                        }
-                    }
-                } else {
-                    if (weaponContainer) weaponContainer.visible = true;
-                    if (elScope) elScope.style.display = 'none';
-
-                    // Sniper Scope - Show circular scope only for SNIPER when aiming
-                    const sniperScope = document.getElementById('sniper-scope');
-                    if (sniperScope) {
-                        if (isAiming && w.type === 'SNIPER' && !isMobile) {
-                            sniperScope.style.display = 'block';
                         } else {
-                            sniperScope.style.display = 'none';
-                        }
-                    }
-
-                    // Crosshair Logic
-                    if (elCrosshair) {
-                        if (isMobile) {
-                            // 모바일: 항상 조준선 표시 (사용자 요청)
                             elCrosshair.style.display = 'block';
-                            elCrosshair.style.opacity = 0.7; // 상시 표시는 약간 투명하게
-                        } else if (w.type === 'PISTOL' || (!isAiming && w.type !== 'KNIFE')) {
-                            // PC: 권총이거나 비조준 상태(칼 제외)일 때 표시
-                            // Mobile PISTOL update: Aiming hidden crosshair logic same as PC now?
-                            // Actually, if mobile pistol behaves like rifle now (ADS available), hide crosshair when aiming
-                            if (isMobile && w.type === 'PISTOL' && isAiming) {
-                                elCrosshair.style.display = 'none';
-                            } else {
-                                elCrosshair.style.display = 'block';
-                                elCrosshair.style.opacity = 1;
-                            }
-                        } else {
-                            elCrosshair.style.display = 'none';
+                            elCrosshair.style.opacity = 1;
                         }
+                    } else {
+                        elCrosshair.style.display = 'none';
                     }
                 }
+            }
 
-                // Hide/Show front sight based on aiming
-                if (weaponModel) {
-                    weaponModel.traverse((child) => {
-                        if (child.userData && child.userData.isSight) {
-                            // 모바일에서 권총 강제 조준 제거 - 사용자 요청 (평상시에는 들고 있는 모습)
-                            const shouldAim = isAiming;
-                            child.visible = shouldAim;
-                        }
-                    });
-                }
-
-                let targetPos = w.posHip; let targetFov = 70;
-                // [User Request] Rotation Interpolation
-                let targetRot = w.rotHip || new THREE.Vector3(0, 0, 0);
-
-                if (isAiming) {
-                    if (w.type === 'SNIPER') targetFov = w.fovAds;
-                    else if (w.type !== 'KNIFE') {
-                        targetPos = w.posAds;
-                        targetFov = w.fovAds;
-                        targetRot = w.rotAds || new THREE.Vector3(0, 0, 0);
+            // Hide/Show front sight based on aiming
+            if (weaponModel) {
+                weaponModel.traverse((child) => {
+                    if (child.userData && child.userData.isSight) {
+                        // 모바일에서 권총 강제 조준 제거 - 사용자 요청 (평상시에는 들고 있는 모습)
+                        const shouldAim = isAiming;
+                        child.visible = shouldAim;
                     }
-                    else targetPos = w.posAds;
+                });
+            }
+
+            let targetPos = w.posHip; let targetFov = 70;
+            // [User Request] Rotation Interpolation
+            let targetRot = w.rotHip || new THREE.Vector3(0, 0, 0);
+
+            if (isAiming) {
+                if (w.type === 'SNIPER') targetFov = w.fovAds;
+                else if (w.type !== 'KNIFE') {
+                    targetPos = w.posAds;
+                    targetFov = w.fovAds;
+                    targetRot = w.rotAds || new THREE.Vector3(0, 0, 0);
+                }
+                else targetPos = w.posAds;
+            }
+
+            currentPos.lerp(targetPos, 0.2);
+            currentRot.lerp(targetRot, 0.2); // Interpolate rotation
+
+            // [User Request] Dynamic Arm Scaling for all weapons (except Knife/Grenade)
+            if (w.type !== 'KNIFE' && w.type !== 'GRENADE' && weaponModel) {
+                const lArm = weaponModel.getObjectByName('LeftArmGroup');
+                const rArm = weaponModel.getObjectByName('RightArmGroup');
+
+                // [MOD] Weapon-specific scaling: Pistol is thinner than others
+                let idleScale = 2.5;
+                let adsScale = 0.8;
+
+                if (w.type === 'PISTOL') {
+                    idleScale = 1.6;
+                    adsScale = 0.6;
                 }
 
-                currentPos.lerp(targetPos, 15 * dt);
-                currentRot.lerp(targetRot, 15 * dt); // Interpolate rotation
+                const targetArmScale = isAiming ? adsScale : idleScale;
+                if (lArm) {
+                    let currentTargetScale = new THREE.Vector3(targetArmScale, targetArmScale, targetArmScale);
 
-                // [User Request] Dynamic Arm Scaling for all weapons (except Knife/Grenade)
-                if (w.type !== 'KNIFE' && w.type !== 'GRENADE' && weaponModel) {
-                    const lArm = weaponModel.getObjectByName('LeftArmGroup');
-                    const rArm = weaponModel.getObjectByName('RightArmGroup');
-
-                    // [MOD] Weapon-specific scaling: Pistol is thinner than others
-                    let idleScale = 2.5;
-                    let adsScale = 0.8;
-
-                    if (w.type === 'PISTOL') {
-                        idleScale = 1.6;
-                        adsScale = 0.6;
+                    // [MOD] Special compensation for Rifle ADS Reload to hide gaps/separation
+                    if (w.type === 'RIFLE' && isAiming && isReloading) {
+                        // Make it slightly thicker (X, Z) and longer (Y) - Adjusted down from (1.2, 2.2, 1.2)
+                        currentTargetScale.set(0.9, 1.5, 0.9);
                     }
 
-                    const targetArmScale = isAiming ? adsScale : idleScale;
-                    if (lArm) {
-                        let currentTargetScale = new THREE.Vector3(targetArmScale, targetArmScale, targetArmScale);
-
-                        // [MOD] Special compensation for Rifle ADS Reload to hide gaps/separation
-                        if (w.type === 'RIFLE' && isAiming && isReloading) {
-                            // Make it slightly thicker (X, Z) and longer (Y) - Adjusted down from (1.2, 2.2, 1.2)
-                            currentTargetScale.set(0.9, 1.5, 0.9);
-                        }
-
-                        const sx = THREE.MathUtils.lerp(lArm.scale.x, currentTargetScale.x, 15 * dt);
-                        const sy = THREE.MathUtils.lerp(lArm.scale.y, currentTargetScale.y, 15 * dt);
-                        const sz = THREE.MathUtils.lerp(lArm.scale.z, currentTargetScale.z, 15 * dt);
-                        lArm.scale.set(sx, sy, sz);
-                    }
-                    if (rArm) {
-                        const s = THREE.MathUtils.lerp(rArm.scale.x, targetArmScale, 15 * dt);
-                        rArm.scale.set(s, s, s);
-                    }
+                    const sx = THREE.MathUtils.lerp(lArm.scale.x, currentTargetScale.x, 15 * dt);
+                    const sy = THREE.MathUtils.lerp(lArm.scale.y, currentTargetScale.y, 15 * dt);
+                    const sz = THREE.MathUtils.lerp(lArm.scale.z, currentTargetScale.z, 15 * dt);
+                    lArm.scale.set(sx, sy, sz);
                 }
-
-                if (window.rifleModel && w.type === 'RIFLE' && w.glbHip && w.glbAds) {
-                    const tPos = isAiming ? w.glbAds.pos : w.glbHip.pos;
-                    const tRot = isAiming ? w.glbAds.rot : w.glbHip.rot;
-                    const tScale = isAiming ? w.glbAds.scale : w.glbHip.scale;
-
-                    window.rifleModel.position.lerp(tPos, 15 * dt);
-                    // Manually lerp rotation euler
-                    window.rifleModel.rotation.x += (tRot.x - window.rifleModel.rotation.x) * 15 * dt;
-                    window.rifleModel.rotation.y += (tRot.y - window.rifleModel.rotation.y) * 15 * dt;
-                    window.rifleModel.rotation.z += (tRot.z - window.rifleModel.rotation.z) * 15 * dt;
-
-                    window.rifleModel.scale.lerp(tScale, 15 * dt);
-
-                    // [User Request] Dynamic Left Arm Lerping for Rifle
-                    const lArm = weaponModel.getObjectByName('LeftArmGroup');
-                    if (lArm && w.lArmHip && w.lArmAds) {
-                        const aPos = isAiming ? w.lArmAds.pos : w.lArmHip.pos;
-                        const aRot = isAiming ? w.lArmAds.rot : w.lArmHip.rot;
-                        lArm.position.lerp(aPos, 15 * dt);
-                        lArm.rotation.x += (aRot.x - lArm.rotation.x) * 15 * dt;
-                        lArm.rotation.y += (aRot.y - lArm.rotation.y) * 15 * dt;
-                        lArm.rotation.z += (aRot.z - lArm.rotation.z) * 15 * dt;
-                    }
+                if (rArm) {
+                    const s = THREE.MathUtils.lerp(rArm.scale.x, targetArmScale, 15 * dt);
+                    rArm.scale.set(s, s, s);
                 }
+            }
 
-                if (window.pistolModel && w.type === 'PISTOL' && w.glbHip && w.glbAds) {
-                    const tPos = isAiming ? w.glbAds.pos : w.glbHip.pos;
-                    const tRot = isAiming ? w.glbAds.rot : w.glbHip.rot;
-                    const tScale = isAiming ? w.glbAds.scale : w.glbHip.scale;
+            if (window.rifleModel && w.type === 'RIFLE' && w.glbHip && w.glbAds) {
+                const tPos = isAiming ? w.glbAds.pos : w.glbHip.pos;
+                const tRot = isAiming ? w.glbAds.rot : w.glbHip.rot;
+                const tScale = isAiming ? w.glbAds.scale : w.glbHip.scale;
 
-                    window.pistolModel.position.lerp(tPos, 15 * dt);
-                    window.pistolModel.rotation.x += (tRot.x - window.pistolModel.rotation.x) * 15 * dt;
-                    window.pistolModel.rotation.y += (tRot.y - window.pistolModel.rotation.y) * 15 * dt;
-                    window.pistolModel.rotation.z += (tRot.z - window.pistolModel.rotation.z) * 15 * dt;
-                    window.pistolModel.scale.lerp(tScale, 15 * dt);
+                window.rifleModel.position.lerp(tPos, 15 * dt);
+                // Manually lerp rotation euler
+                window.rifleModel.rotation.x += (tRot.x - window.rifleModel.rotation.x) * 15 * dt;
+                window.rifleModel.rotation.y += (tRot.y - window.rifleModel.rotation.y) * 15 * dt;
+                window.rifleModel.rotation.z += (tRot.z - window.rifleModel.rotation.z) * 15 * dt;
+
+                window.rifleModel.scale.lerp(tScale, 15 * dt);
+
+                // [User Request] Dynamic Left Arm Lerping for Rifle
+                const lArm = weaponModel.getObjectByName('LeftArmGroup');
+                if (lArm && w.lArmHip && w.lArmAds) {
+                    const aPos = isAiming ? w.lArmAds.pos : w.lArmHip.pos;
+                    const aRot = isAiming ? w.lArmAds.rot : w.lArmHip.rot;
+                    lArm.position.lerp(aPos, 15 * dt);
+                    lArm.rotation.x += (aRot.x - lArm.rotation.x) * 15 * dt;
+                    lArm.rotation.y += (aRot.y - lArm.rotation.y) * 15 * dt;
+                    lArm.rotation.z += (aRot.z - lArm.rotation.z) * 15 * dt;
                 }
+            }
 
-                // [User Request] ADS-Aware Muzzle Flash Lerping
-                if (muzzleFlash && w.muzzleHip && w.muzzleAds) {
-                    const tMuzzlePos = isAiming ? w.muzzleAds : w.muzzleHip;
-                    muzzleFlash.position.lerp(tMuzzlePos, 15 * dt);
+            if (window.pistolModel && w.type === 'PISTOL' && w.glbHip && w.glbAds) {
+                const tPos = isAiming ? w.glbAds.pos : w.glbHip.pos;
+                const tRot = isAiming ? w.glbAds.rot : w.glbHip.rot;
+                const tScale = isAiming ? w.glbAds.scale : w.glbHip.scale;
+
+                window.pistolModel.position.lerp(tPos, 15 * dt);
+                window.pistolModel.rotation.x += (tRot.x - window.pistolModel.rotation.x) * 15 * dt;
+                window.pistolModel.rotation.y += (tRot.y - window.pistolModel.rotation.y) * 15 * dt;
+                window.pistolModel.rotation.z += (tRot.z - window.pistolModel.rotation.z) * 15 * dt;
+                window.pistolModel.scale.lerp(tScale, 15 * dt);
+            }
+
+            // [User Request] ADS-Aware Muzzle Flash Lerping
+            if (muzzleFlash && w.muzzleHip && w.muzzleAds) {
+                const tMuzzlePos = isAiming ? w.muzzleAds : w.muzzleHip;
+                muzzleFlash.position.lerp(tMuzzlePos, 15 * dt);
+            }
+
+            if (window.sniperModel && w.type === 'SNIPER' && w.glbHip && w.glbAds) {
+                const tPos = isAiming ? w.glbAds.pos : w.glbHip.pos;
+                const tRot = isAiming ? w.glbAds.rot : w.glbHip.rot;
+                const tScale = isAiming ? w.glbAds.scale : w.glbHip.scale;
+
+                // [DEBUG] Disable interpolation to allow debug panel to work
+                // window.sniperModel.position.lerp(tPos, 15 * dt);
+                // window.sniperModel.rotation.x += (tRot.x - window.sniperModel.rotation.x) * 15 * dt;
+                // window.sniperModel.rotation.y += (tRot.y - window.sniperModel.rotation.y) * 15 * dt;
+                // window.sniperModel.rotation.z += (tRot.z - window.sniperModel.rotation.z) * 15 * dt;
+                // window.sniperModel.scale.lerp(tScale, 15 * dt);
+            }
+
+            camera.fov += (targetFov - camera.fov) * 15 * dt;
+            camera.updateProjectionMatrix();
+
+            // 화면 흔들림 효과 적용 (피격 감각)
+            if (hitShake.intensity > 0) {
+                hitShake.x = (Math.random() - 0.5) * hitShake.intensity;
+                hitShake.y = (Math.random() - 0.5) * hitShake.intensity;
+                hitShake.intensity *= 0.85; // 점진적으로 감소
+                if (hitShake.intensity < 0.01) {
+                    hitShake.intensity = 0;
+                    hitShake.x = 0;
+                    hitShake.y = 0;
                 }
+            }
 
-                if (window.sniperModel && w.type === 'SNIPER' && w.glbHip && w.glbAds) {
-                    const tPos = isAiming ? w.glbAds.pos : w.glbHip.pos;
-                    const tRot = isAiming ? w.glbAds.rot : w.glbHip.rot;
-                    const tScale = isAiming ? w.glbAds.scale : w.glbHip.scale;
+            camera.position.copy(position);
+            camera.position.x += hitShake.x;
+            camera.position.y += hitShake.y;
 
-                    // [DEBUG] Disable interpolation to allow debug panel to work
-                    // window.sniperModel.position.lerp(tPos, 15 * dt);
-                    // window.sniperModel.rotation.x += (tRot.x - window.sniperModel.rotation.x) * 15 * dt;
-                    // window.sniperModel.rotation.y += (tRot.y - window.sniperModel.rotation.y) * 15 * dt;
-                    // window.sniperModel.rotation.z += (tRot.z - window.sniperModel.rotation.z) * 15 * dt;
-                    // window.sniperModel.scale.lerp(tScale, 15 * dt);
-                }
+            // [FIX] weaponContainer가 camera의 자식인지 확인하여 위치 업데이트 방식 결정
+            if (weaponContainer.parent === camera) {
+                // 카메라의 자식일 경우: 로컬 오프셋만 설정 (카메라를 자동으로 따라감)
+                weaponContainer.position.set(
+                    currentPos.x + hitShake.x + swayOffset.x,
+                    currentPos.y + hitShake.y + swayOffset.y,
+                    currentPos.z
+                );
+                // [User Request] Apply interpolated rotation to weapon container
+                weaponContainer.rotation.set(currentRot.x, currentRot.y, currentRot.z);
+            } else {
+                // scene의 자식일 경우: 월드 좌표 직접 업데이트 (기존 로직)
+                weaponContainer.position.copy(position);
+                weaponContainer.position.x += hitShake.x;
+                weaponContainer.position.y += hitShake.y;
+                weaponContainer.quaternion.copy(camera.quaternion);
+                weaponContainer.translateX(currentPos.x + swayOffset.x);
+                weaponContainer.translateY(currentPos.y + swayOffset.y);
+                weaponContainer.translateZ(currentPos.z);
+            }
 
-                camera.fov += (targetFov - camera.fov) * 15 * dt;
-                camera.updateProjectionMatrix();
+            const recoilAccelX = -RECOIL_SPRING * recoil.x - RECOIL_DAMPING * recoilVel.x;
+            recoilVel.x += recoilAccelX * dt;
+            recoil.x += recoilVel.x * dt;
+            recoil.x = THREE.MathUtils.clamp(recoil.x, -RECOIL_MAX, RECOIL_MAX);
 
-                // 화면 흔들림 효과 적용 (피격 감각)
-                if (hitShake.intensity > 0) {
-                    hitShake.x = (Math.random() - 0.5) * hitShake.intensity;
-                    hitShake.y = (Math.random() - 0.5) * hitShake.intensity;
-                    hitShake.intensity *= 0.85; // 점진적으로 감소
-                    if (hitShake.intensity < 0.01) {
-                        hitShake.intensity = 0;
-                        hitShake.x = 0;
-                        hitShake.y = 0;
-                    }
-                }
-
-                camera.position.copy(position);
-                camera.position.x += hitShake.x;
-                camera.position.y += hitShake.y;
-
-                // [FIX] weaponContainer가 camera의 자식인지 확인하여 위치 업데이트 방식 결정
-                if (weaponContainer.parent === camera) {
-                    // 카메라의 자식일 경우: 로컬 오프셋만 설정 (카메라를 자동으로 따라감)
-                    weaponContainer.position.set(
-                        currentPos.x + hitShake.x + swayOffset.x,
-                        currentPos.y + hitShake.y + swayOffset.y,
-                        currentPos.z
-                    );
-                    // [User Request] Apply interpolated rotation to weapon container
-                    weaponContainer.rotation.set(currentRot.x, currentRot.y, currentRot.z);
-                } else {
-                    // scene의 자식일 경우: 월드 좌표 직접 업데이트 (기존 로직)
-                    weaponContainer.position.copy(position);
-                    weaponContainer.position.x += hitShake.x;
-                    weaponContainer.position.y += hitShake.y;
-                    weaponContainer.quaternion.copy(camera.quaternion);
-                    weaponContainer.translateX(currentPos.x + swayOffset.x);
-                    weaponContainer.translateY(currentPos.y + swayOffset.y);
-                    weaponContainer.translateZ(currentPos.z);
-                }
-
-                const recoilAccelX = -RECOIL_SPRING * recoil.x - RECOIL_DAMPING * recoilVel.x;
-                recoilVel.x += recoilAccelX * dt;
-                recoil.x += recoilVel.x * dt;
-                recoil.x = THREE.MathUtils.clamp(recoil.x, -RECOIL_MAX, RECOIL_MAX);
-
-                const recoilAccelZ = -RECOIL_SPRING * recoil.z - RECOIL_DAMPING * recoilVel.z;
-                recoilVel.z += recoilAccelZ * dt;
-                recoil.z += recoilVel.z * dt;
-                recoil.z = THREE.MathUtils.clamp(recoil.z, -RECOIL_POS_MAX, RECOIL_POS_MAX);
+            const recoilAccelZ = -RECOIL_SPRING * recoil.z - RECOIL_DAMPING * recoilVel.z;
+            recoilVel.z += recoilAccelZ * dt;
+            recoil.z += recoilVel.z * dt;
+            recoil.z = THREE.MathUtils.clamp(recoil.z, -RECOIL_POS_MAX, RECOIL_POS_MAX);
 
 
-                // 나이프일 때만 특별한 위치/회전 처리
-                if (w.type === 'KNIFE') {
-                    // Arms Stability: Reset weaponModel (container) to idle pose
-                    weaponModel.rotation.set(0, 0, 0);
-                    weaponModel.position.set(0.35, -0.15, -0.3); // [MOD]
-
-                    if (window.knifeSwing > 0) {
-                        // [FIX] Independent Right Arm Swing (Left arm stays still)
-
-                        // 1. Reset Internal Parts to Default
-                        if (window.knifeModel) {
-                            window.knifeModel.position.set(0, -0.2, -0.5);
-                            window.knifeModel.rotation.set(0.1, 1.8, -0.2); // [MOD] Updated Idle Rotation
-                        }
-                        if (window.knifeRightArm) {
-                            window.knifeRightArm.position.set(0.12, -0.2, -0.15); // [MOD] Sync with Shorter Handle
-                            window.knifeRightArm.rotation.set(0, -0.15, 0.05);
-                        }
-
-                        const swingT = 1 - (window.knifeSwing / window.KNIFE_SWING_DURATION);
-
-                        // weaponModel STAYS INITIAL (Fix for Left Arm moving)
-                        weaponModel.position.set(0.35, -0.15, -0.3);
-                        weaponModel.rotation.set(0, 0, 0);
-
-                        // Variables for Right Arm & Knife LOCAL transforms
-                        let ax = 0.12, ay = -0.2, az = -0.15;
-                        let arx = 0, ary = -0.15, arz = 0.05;
-
-                        // Variables for LEFT Arm
-                        let lx = -1.63, ly = -0.14, lz = -0.11;
-                        let lrx = 0.56, lry = -0.56, lrz = -1.98;
-
-                        let kx = 0, ky = -0.2, kz = -0.5;
-                        let krx = 0.1, kry = 1.18, krz = -0.1; // [MOD] Start from new idle rotation (approx)
-
-                        // ===== CONFIGURABLE SWING PARAMETERS =====
-                        // Adjust these via console: window.KNIFE_SWING_CONFIG
-                        if (!window.KNIFE_SWING_CONFIG) {
-                            window.KNIFE_SWING_CONFIG = {
-                                // Phase 1 End (Wind-up) - Knife position/rotation
-                                p1_kx: -0.2, p1_ky: 0.0, p1_kz: -0.35,
-                                p1_krx: 1.57, p1_kry: 1.57, p1_krz: 0.0,
-                                // Phase 2 End (Slash) - Knife position/rotation
-                                p2_kx: 0.4, p2_ky: -0.1, p2_kz: -0.5,
-                                p2_krx: 1.5, p2_kry: -0.5, p2_krz: 0.3,
-                                // Debug: freeze at specific swingT value (0-1), set to -1 to disable
-                                freezeAt: -1
-                            };
-                            console.log('[Knife Swing] Config loaded. Adjust via window.KNIFE_SWING_CONFIG');
-                        }
-                        const cfg = window.KNIFE_SWING_CONFIG;
-
-                        // Debug freeze mode
-                        if (cfg.freezeAt >= 0 && cfg.freezeAt <= 1) {
-                            swingT = cfg.freezeAt;
-                        }
-
-                        // New idle values from user's settings
-                        const idleX = 0.01, idleY = 0.00, idleZ = -0.29;
-                        const idleRX = 2.16, idleRY = -0.06, idleRZ = 2.08;
-
-                        if (swingT < 0.12) {
-                            // Phase 1: Wind Up (0% - 12%) - Pull blade to center/left
-                            const t = swingT / 0.12;
-                            const et = 1 - (1 - t) * (1 - t); // Quad Out
-
-                            // Right Arm wind up - pull toward center
-                            ax = THREE.MathUtils.lerp(0.12, 0.0, et);
-                            ay = THREE.MathUtils.lerp(-0.2, -0.15, et);
-                            az = THREE.MathUtils.lerp(-0.15, -0.35, et); // Extend arm forward
-                            arx = THREE.MathUtils.lerp(0, 0.1, et);
-                            ary = THREE.MathUtils.lerp(-0.15, 0.3, et);
-                            arz = THREE.MathUtils.lerp(0.05, -0.05, et);
-
-                            // Knife wind up - uses config values
-                            kx = THREE.MathUtils.lerp(idleX, cfg.p1_kx, et);
-                            ky = THREE.MathUtils.lerp(idleY, cfg.p1_ky, et);
-                            kz = THREE.MathUtils.lerp(idleZ, cfg.p1_kz, et);
-                            krx = THREE.MathUtils.lerp(idleRX, cfg.p1_krx, et);
-                            kry = THREE.MathUtils.lerp(idleRY, cfg.p1_kry, et);
-                            krz = THREE.MathUtils.lerp(idleRZ, cfg.p1_krz, et);
-                        } else if (swingT < 0.45) {
-                            // Phase 2: Outward Slash (12% - 45%)
-                            const t = (swingT - 0.12) / 0.33;
-                            const et = 1 - Math.pow(1 - t, 3); // Cubic Out
-
-                            // Right Arm outward slash - reduced X movement, extended Z
-                            ax = THREE.MathUtils.lerp(0.0, 0.25, et);  // Reduced from 0.5 to 0.25
-                            ay = THREE.MathUtils.lerp(-0.15, -0.2, et);
-                            az = THREE.MathUtils.lerp(-0.35, -0.55, et); // Extended arm forward more
-                            arx = THREE.MathUtils.lerp(0.1, -0.05, et);
-                            ary = THREE.MathUtils.lerp(0.3, -0.8, et);  // Reduced rotation
-                            arz = THREE.MathUtils.lerp(-0.05, 0.15, et);
-
-                            // Left Arm reaction
-                            lx = THREE.MathUtils.lerp(-1.63, -1.8, et);
-                            lry = THREE.MathUtils.lerp(-0.56, -0.7, et);
-
-                            // Knife slash - uses config values
-                            kx = THREE.MathUtils.lerp(cfg.p1_kx, cfg.p2_kx, et);
-                            ky = THREE.MathUtils.lerp(cfg.p1_ky, cfg.p2_ky, et);
-                            kz = THREE.MathUtils.lerp(cfg.p1_kz, cfg.p2_kz, et);
-                            krx = THREE.MathUtils.lerp(cfg.p1_krx, cfg.p2_krx, et);
-                            kry = THREE.MathUtils.lerp(cfg.p1_kry, cfg.p2_kry, et);
-                            krz = THREE.MathUtils.lerp(cfg.p1_krz, cfg.p2_krz, et);
-                        } else {
-                            // Phase 3: Recovery (45% - 100%)
-                            const t = (swingT - 0.45) / 0.55;
-                            const et = t * t; // Quad In
-
-                            // Right Arm recovery - from new values
-                            ax = THREE.MathUtils.lerp(0.25, 0.02, et);
-                            ay = THREE.MathUtils.lerp(-0.2, 0.02, et);
-                            az = THREE.MathUtils.lerp(-0.55, -0.15, et); // Return from extended position
-                            arx = THREE.MathUtils.lerp(-0.05, 0, et);
-                            ary = THREE.MathUtils.lerp(-0.8, 0.36, et);
-                            arz = THREE.MathUtils.lerp(0.15, 0.05, et);
-
-                            // Left Arm recovery
-                            lx = THREE.MathUtils.lerp(-1.8, -1.63, et);
-                            lry = THREE.MathUtils.lerp(-0.7, -0.56, et);
-
-                            // Knife recovery - from config p2 to idle
-                            kx = THREE.MathUtils.lerp(cfg.p2_kx, idleX, et);
-                            ky = THREE.MathUtils.lerp(cfg.p2_ky, idleY, et);
-                            kz = THREE.MathUtils.lerp(cfg.p2_kz, idleZ, et);
-                            krx = THREE.MathUtils.lerp(cfg.p2_krx, idleRX, et);
-                            kry = THREE.MathUtils.lerp(cfg.p2_kry, idleRY, et);
-                            krz = THREE.MathUtils.lerp(cfg.p2_krz, idleRZ, et);
-                        }
-
-                        // Apply to Right Arm
-                        const rArm = weaponModel.getObjectByName('RightArmGroup');
-                        if (rArm) {
-                            rArm.position.set(ax, ay, az);
-                            rArm.rotation.set(arx, ary, arz);
-                        }
-                        // Apply to Left Arm
-                        const lArm = weaponModel.getObjectByName('LeftArmGroup');
-                        if (lArm) {
-                            lArm.position.set(lx, ly, lz);
-                            lArm.rotation.set(lrx, lry, lrz);
-                        }
-                        // Apply to Knife
-                        if (window.knifeModel) {
-                            window.knifeModel.position.set(kx, ky, kz);
-                            window.knifeModel.rotation.set(krx, kry, krz);
-                        }
-
-                    } else if (window.knifeModel) {
-                        // [FIX] Use WEAPONS data instead of hardcoded values for debug panel support
-                        const knifeWeapon = WEAPONS.find(weapon => weapon.type === 'KNIFE');
-                        if (knifeWeapon && knifeWeapon.glbHip) {
-                            window.knifeModel.position.copy(knifeWeapon.glbHip.pos);
-                            window.knifeModel.rotation.set(knifeWeapon.glbHip.rot.x, knifeWeapon.glbHip.rot.y, knifeWeapon.glbHip.rot.z);
-                            window.knifeModel.scale.copy(knifeWeapon.glbHip.scale);
-                        }
-                        const rArm = weaponModel.getObjectByName('RightArmGroup');
-                        if (rArm && knifeWeapon && knifeWeapon.rArmHip) {
-                            rArm.position.copy(knifeWeapon.rArmHip.pos);
-                            rArm.rotation.set(knifeWeapon.rArmHip.rot.x, knifeWeapon.rArmHip.rot.y, knifeWeapon.rArmHip.rot.z);
-                        }
-                        const lArm = weaponModel.getObjectByName('LeftArmGroup');
-                        if (lArm && knifeWeapon && knifeWeapon.lArmHip) {
-                            lArm.position.copy(knifeWeapon.lArmHip.pos);
-                            lArm.rotation.set(knifeWeapon.lArmHip.rot.x, knifeWeapon.lArmHip.rot.y, knifeWeapon.lArmHip.rot.z);
-                        }
-                    }
-                } else {
-
-                    // 다른 무기들은 원래대로 (recoil만 적용)
-                    const recoilScale = (isAiming && w.type === 'RIFLE') ? 0.35 : 1;
-                    weaponModel.position.y = THREE.MathUtils.lerp(weaponModel.position.y, 0, 10 * dt);
-                    const reloadRot = (isReloading && isAiming && w.type === 'RIFLE') ? 0.1 : (isReloading ? 0.5 : 0);
-                    weaponModel.rotation.x = recoil.x * recoilScale + reloadRot;
-                    weaponModel.position.z = recoil.z * recoilScale;
-                    // 재장전 제스처 중이 아닐 때만 rotation.z 초기화
-                    if (!sniperReloadGesture) {
-                        weaponModel.rotation.z = 0;
-                    }
-                }
-                elVignette.style.opacity = (isAiming && w.type !== 'KNIFE') ? 0.5 : 0;
+            // 나이프일 때만 특별한 위치/회전 처리
+            if (w.type === 'KNIFE') {
+                // Arms Stability: Reset weaponModel (container) to idle pose
+                weaponModel.rotation.set(0, 0, 0);
+                weaponModel.position.set(0.35, -0.15, -0.3); // [MOD]
 
                 if (window.knifeSwing > 0) {
-                    window.knifeSwing = Math.max(window.knifeSwing - dt, 0);
+                    // [FIX] Independent Right Arm Swing (Left arm stays still)
+
+                    // 1. Reset Internal Parts to Default
+                    if (window.knifeModel) {
+                        window.knifeModel.position.set(0, -0.2, -0.5);
+                        window.knifeModel.rotation.set(0.1, 1.8, -0.2); // [MOD] Updated Idle Rotation
+                    }
+                    if (window.knifeRightArm) {
+                        window.knifeRightArm.position.set(0.12, -0.2, -0.15); // [MOD] Sync with Shorter Handle
+                        window.knifeRightArm.rotation.set(0, -0.15, 0.05);
+                    }
+
+                    const swingT = 1 - (window.knifeSwing / window.KNIFE_SWING_DURATION);
+
+                    // weaponModel STAYS INITIAL (Fix for Left Arm moving)
+                    weaponModel.position.set(0.35, -0.15, -0.3);
+                    weaponModel.rotation.set(0, 0, 0);
+
+                    // Variables for Right Arm & Knife LOCAL transforms
+                    let ax = 0.12, ay = -0.2, az = -0.15;
+                    let arx = 0, ary = -0.15, arz = 0.05;
+
+                    // Variables for LEFT Arm
+                    let lx = -1.63, ly = -0.14, lz = -0.11;
+                    let lrx = 0.56, lry = -0.56, lrz = -1.98;
+
+                    let kx = 0, ky = -0.2, kz = -0.5;
+                    let krx = 0.1, kry = 1.18, krz = -0.1; // [MOD] Start from new idle rotation (approx)
+
+                    // ===== CONFIGURABLE SWING PARAMETERS =====
+                    // Adjust these via console: window.KNIFE_SWING_CONFIG
+                    if (!window.KNIFE_SWING_CONFIG) {
+                        window.KNIFE_SWING_CONFIG = {
+                            // Phase 1 End (Wind-up) - Knife position/rotation
+                            p1_kx: -0.2, p1_ky: 0.0, p1_kz: -0.35,
+                            p1_krx: 1.57, p1_kry: 1.57, p1_krz: 0.0,
+                            // Phase 2 End (Slash) - Knife position/rotation
+                            p2_kx: 0.4, p2_ky: -0.1, p2_kz: -0.5,
+                            p2_krx: 1.5, p2_kry: -0.5, p2_krz: 0.3,
+                            // Debug: freeze at specific swingT value (0-1), set to -1 to disable
+                            freezeAt: -1
+                        };
+                        console.log('[Knife Swing] Config loaded. Adjust via window.KNIFE_SWING_CONFIG');
+                    }
+                    const cfg = window.KNIFE_SWING_CONFIG;
+
+                    // Debug freeze mode
+                    if (cfg.freezeAt >= 0 && cfg.freezeAt <= 1) {
+                        swingT = cfg.freezeAt;
+                    }
+
+                    // New idle values from user's settings
+                    const idleX = 0.01, idleY = 0.00, idleZ = -0.29;
+                    const idleRX = 2.16, idleRY = -0.06, idleRZ = 2.08;
+
+                    if (swingT < 0.12) {
+                        // Phase 1: Wind Up (0% - 12%) - Pull blade to center/left
+                        const t = swingT / 0.12;
+                        const et = 1 - (1 - t) * (1 - t); // Quad Out
+
+                        // Right Arm wind up - pull toward center
+                        ax = THREE.MathUtils.lerp(0.12, 0.0, et);
+                        ay = THREE.MathUtils.lerp(-0.2, -0.15, et);
+                        az = THREE.MathUtils.lerp(-0.15, -0.35, et); // Extend arm forward
+                        arx = THREE.MathUtils.lerp(0, 0.1, et);
+                        ary = THREE.MathUtils.lerp(-0.15, 0.3, et);
+                        arz = THREE.MathUtils.lerp(0.05, -0.05, et);
+
+                        // Knife wind up - uses config values
+                        kx = THREE.MathUtils.lerp(idleX, cfg.p1_kx, et);
+                        ky = THREE.MathUtils.lerp(idleY, cfg.p1_ky, et);
+                        kz = THREE.MathUtils.lerp(idleZ, cfg.p1_kz, et);
+                        krx = THREE.MathUtils.lerp(idleRX, cfg.p1_krx, et);
+                        kry = THREE.MathUtils.lerp(idleRY, cfg.p1_kry, et);
+                        krz = THREE.MathUtils.lerp(idleRZ, cfg.p1_krz, et);
+                    } else if (swingT < 0.45) {
+                        // Phase 2: Outward Slash (12% - 45%)
+                        const t = (swingT - 0.12) / 0.33;
+                        const et = 1 - Math.pow(1 - t, 3); // Cubic Out
+
+                        // Right Arm outward slash - reduced X movement, extended Z
+                        ax = THREE.MathUtils.lerp(0.0, 0.25, et);  // Reduced from 0.5 to 0.25
+                        ay = THREE.MathUtils.lerp(-0.15, -0.2, et);
+                        az = THREE.MathUtils.lerp(-0.35, -0.55, et); // Extended arm forward more
+                        arx = THREE.MathUtils.lerp(0.1, -0.05, et);
+                        ary = THREE.MathUtils.lerp(0.3, -0.8, et);  // Reduced rotation
+                        arz = THREE.MathUtils.lerp(-0.05, 0.15, et);
+
+                        // Left Arm reaction
+                        lx = THREE.MathUtils.lerp(-1.63, -1.8, et);
+                        lry = THREE.MathUtils.lerp(-0.56, -0.7, et);
+
+                        // Knife slash - uses config values
+                        kx = THREE.MathUtils.lerp(cfg.p1_kx, cfg.p2_kx, et);
+                        ky = THREE.MathUtils.lerp(cfg.p1_ky, cfg.p2_ky, et);
+                        kz = THREE.MathUtils.lerp(cfg.p1_kz, cfg.p2_kz, et);
+                        krx = THREE.MathUtils.lerp(cfg.p1_krx, cfg.p2_krx, et);
+                        kry = THREE.MathUtils.lerp(cfg.p1_kry, cfg.p2_kry, et);
+                        krz = THREE.MathUtils.lerp(cfg.p1_krz, cfg.p2_krz, et);
+                    } else {
+                        // Phase 3: Recovery (45% - 100%)
+                        const t = (swingT - 0.45) / 0.55;
+                        const et = t * t; // Quad In
+
+                        // Right Arm recovery - from new values
+                        ax = THREE.MathUtils.lerp(0.25, 0.02, et);
+                        ay = THREE.MathUtils.lerp(-0.2, 0.02, et);
+                        az = THREE.MathUtils.lerp(-0.55, -0.15, et); // Return from extended position
+                        arx = THREE.MathUtils.lerp(-0.05, 0, et);
+                        ary = THREE.MathUtils.lerp(-0.8, 0.36, et);
+                        arz = THREE.MathUtils.lerp(0.15, 0.05, et);
+
+                        // Left Arm recovery
+                        lx = THREE.MathUtils.lerp(-1.8, -1.63, et);
+                        lry = THREE.MathUtils.lerp(-0.7, -0.56, et);
+
+                        // Knife recovery - from config p2 to idle
+                        kx = THREE.MathUtils.lerp(cfg.p2_kx, idleX, et);
+                        ky = THREE.MathUtils.lerp(cfg.p2_ky, idleY, et);
+                        kz = THREE.MathUtils.lerp(cfg.p2_kz, idleZ, et);
+                        krx = THREE.MathUtils.lerp(cfg.p2_krx, idleRX, et);
+                        kry = THREE.MathUtils.lerp(cfg.p2_kry, idleRY, et);
+                        krz = THREE.MathUtils.lerp(cfg.p2_krz, idleRZ, et);
+                    }
+
+                    // Apply to Right Arm
+                    const rArm = weaponModel.getObjectByName('RightArmGroup');
+                    if (rArm) {
+                        rArm.position.set(ax, ay, az);
+                        rArm.rotation.set(arx, ary, arz);
+                    }
+                    // Apply to Left Arm
+                    const lArm = weaponModel.getObjectByName('LeftArmGroup');
+                    if (lArm) {
+                        lArm.position.set(lx, ly, lz);
+                        lArm.rotation.set(lrx, lry, lrz);
+                    }
+                    // Apply to Knife
+                    if (window.knifeModel) {
+                        window.knifeModel.position.set(kx, ky, kz);
+                        window.knifeModel.rotation.set(krx, kry, krz);
+                    }
+
+                } else if (window.knifeModel) {
+                    // [FIX] Use WEAPONS data instead of hardcoded values for debug panel support
+                    const knifeWeapon = WEAPONS.find(weapon => weapon.type === 'KNIFE');
+                    if (knifeWeapon && knifeWeapon.glbHip) {
+                        window.knifeModel.position.copy(knifeWeapon.glbHip.pos);
+                        window.knifeModel.rotation.set(knifeWeapon.glbHip.rot.x, knifeWeapon.glbHip.rot.y, knifeWeapon.glbHip.rot.z);
+                        window.knifeModel.scale.copy(knifeWeapon.glbHip.scale);
+                    }
+                    const rArm = weaponModel.getObjectByName('RightArmGroup');
+                    if (rArm && knifeWeapon && knifeWeapon.rArmHip) {
+                        rArm.position.copy(knifeWeapon.rArmHip.pos);
+                        rArm.rotation.set(knifeWeapon.rArmHip.rot.x, knifeWeapon.rArmHip.rot.y, knifeWeapon.rArmHip.rot.z);
+                    }
+                    const lArm = weaponModel.getObjectByName('LeftArmGroup');
+                    if (lArm && knifeWeapon && knifeWeapon.lArmHip) {
+                        lArm.position.copy(knifeWeapon.lArmHip.pos);
+                        lArm.rotation.set(knifeWeapon.lArmHip.rot.x, knifeWeapon.lArmHip.rot.y, knifeWeapon.lArmHip.rot.z);
+                    }
                 }
+            } else {
 
-
-                updateShells(dt);
-
-                updateParticles(dt);
-                updateSparks(dt);
-                updateSmoke(dt);
-                updateGrenades(dt); // Grenade Physics
-                if (!isPaused) {
-                    updateHealthPills(dt);
-                    updateGrenadeDrops(dt);
+                // 다른 무기들은 원래대로 (recoil만 적용)
+                const recoilScale = (isAiming && w.type === 'RIFLE') ? 0.35 : 1;
+                weaponModel.position.y = THREE.MathUtils.lerp(weaponModel.position.y, 0, 10 * dt);
+                const reloadRot = (isReloading && isAiming && w.type === 'RIFLE') ? 0.1 : (isReloading ? 0.5 : 0);
+                weaponModel.rotation.x = recoil.x * recoilScale + reloadRot;
+                weaponModel.position.z = recoil.z * recoilScale;
+                // 재장전 제스처 중이 아닐 때만 rotation.z 초기화
+                if (!sniperReloadGesture) {
+                    weaponModel.rotation.z = 0;
                 }
-                // 모드별 업데이트
-                checkLowHealth(); // [FIX] Restore missing Low Health Check
+            }
+            elVignette.style.opacity = (isAiming && w.type !== 'KNIFE') ? 0.5 : 0;
 
-                if (gameMode === 'single') {
-                    updateEnemies(dt);
-                } else if (gameMode === 'multi') {
-                    // [FIX] Update Remote Players: Name Tag Visibility Only (No LookAt override)
-                    otherPlayers.forEach(p => {
-                        // Calculate distance to local player for name tag visibility
-                        const dist = p.position.distanceTo(camera.position);
-                        if (p.userData.nameSprite) {
-                            // Only show name if within 50 meters
-                            p.userData.nameSprite.visible = (dist < 50);
-                        }
+            if (window.knifeSwing > 0) {
+                window.knifeSwing = Math.max(window.knifeSwing - dt, 0);
+            }
+
+
+            updateShells(dt);
+
+            updateParticles(dt);
+            updateSparks(dt);
+            updateSmoke(dt);
+            updateGrenades(dt); // Grenade Physics
+            if (!isPaused) {
+                updateHealthPills(dt);
+                updateGrenadeDrops(dt);
+            }
+            // 모드별 업데이트
+            checkLowHealth(); // [FIX] Restore missing Low Health Check
+
+            if (gameMode === 'single') {
+                updateEnemies(dt);
+            } else if (gameMode === 'multi') {
+                // [FIX] Update Remote Players: Name Tag Visibility Only (No LookAt override)
+                otherPlayers.forEach(p => {
+                    // Calculate distance to local player for name tag visibility
+                    const dist = p.position.distanceTo(camera.position);
+                    if (p.userData.nameSprite) {
+                        // Only show name if within 50 meters
+                        p.userData.nameSprite.visible = (dist < 50);
+                    }
+                });
+
+                // 자신의 상태 서버 전송 (초당 약 30~60회 렌더링마다 전송하면 부하가 생길 수 있으므로 최적화 가능)
+                if (socket && socket.connected && !isDead) {
+                    socket.emit('playerMove', {
+                        position: { x: position.x, y: position.y, z: position.z },
+                        rotation: { x: rotation.x, y: rotation.y }
                     });
+                }
+            }
 
-                    // 자신의 상태 서버 전송 (초당 약 30~60회 렌더링마다 전송하면 부하가 생길 수 있으므로 최적화 가능)
-                    if (socket && socket.connected && !isDead) {
-                        socket.emit('playerMove', {
-                            position: { x: position.x, y: position.y, z: position.z },
-                            rotation: { x: rotation.x, y: rotation.y }
-                        });
-                    }
+            // 물리 엔진 업데이트
+            if (usePhysics && physicsWorld) {
+                updatePhysics(dt);
+            }
+
+            if (!isPaused) {
+                const camAccelX = -CAM_RECOIL_SPRING * cameraRecoil.x - CAM_RECOIL_DAMPING * cameraRecoilVel.x;
+                cameraRecoilVel.x += camAccelX * dt;
+                cameraRecoil.x += cameraRecoilVel.x * dt;
+                cameraRecoil.x = THREE.MathUtils.clamp(cameraRecoil.x, -CAM_RECOIL_MAX, CAM_RECOIL_MAX);
+
+                const camAccelY = -CAM_RECOIL_SPRING * cameraRecoil.y - CAM_RECOIL_DAMPING * cameraRecoilVel.y;
+                cameraRecoilVel.y += camAccelY * dt;
+                cameraRecoil.y += cameraRecoilVel.y * dt;
+                cameraRecoil.y = THREE.MathUtils.clamp(cameraRecoil.y, -CAM_RECOIL_MAX, CAM_RECOIL_MAX);
+
+                const deltaX = cameraRecoil.x - cameraRecoilApplied.x;
+                const deltaY = cameraRecoil.y - cameraRecoilApplied.y;
+                // [User Request] Remove vertical camera recoil (no muzzle climb) - recoil stays on weapon only
+                // camera.rotation.x += deltaX; // DISABLED: No vertical camera movement
+                camera.rotation.y += deltaY;
+                cameraRecoilApplied.x = cameraRecoil.x;
+                cameraRecoilApplied.y = cameraRecoil.y;
+
+                // Update sun light to follow player for consistent shadows
+                if (window.sunLight) {
+                    window.sunLight.position.set(position.x + 50, position.y + 120, position.z + 50);
+                    window.sunLight.target.position.set(position.x, position.y, position.z);
+                    window.sunLight.target.updateMatrixWorld();
                 }
 
-                // 물리 엔진 업데이트
-                if (usePhysics && physicsWorld) {
-                    updatePhysics(dt);
-                }
-
-                if (!isPaused) {
-                    const camAccelX = -CAM_RECOIL_SPRING * cameraRecoil.x - CAM_RECOIL_DAMPING * cameraRecoilVel.x;
-                    cameraRecoilVel.x += camAccelX * dt;
-                    cameraRecoil.x += cameraRecoilVel.x * dt;
-                    cameraRecoil.x = THREE.MathUtils.clamp(cameraRecoil.x, -CAM_RECOIL_MAX, CAM_RECOIL_MAX);
-
-                    const camAccelY = -CAM_RECOIL_SPRING * cameraRecoil.y - CAM_RECOIL_DAMPING * cameraRecoilVel.y;
-                    cameraRecoilVel.y += camAccelY * dt;
-                    cameraRecoil.y += cameraRecoilVel.y * dt;
-                    cameraRecoil.y = THREE.MathUtils.clamp(cameraRecoil.y, -CAM_RECOIL_MAX, CAM_RECOIL_MAX);
-
-                    const deltaX = cameraRecoil.x - cameraRecoilApplied.x;
-                    const deltaY = cameraRecoil.y - cameraRecoilApplied.y;
-                    // [User Request] Remove vertical camera recoil (no muzzle climb) - recoil stays on weapon only
-                    // camera.rotation.x += deltaX; // DISABLED: No vertical camera movement
-                    camera.rotation.y += deltaY;
-                    cameraRecoilApplied.x = cameraRecoil.x;
-                    cameraRecoilApplied.y = cameraRecoil.y;
-
-                    // Update sun light to follow player for consistent shadows
-                    if (window.sunLight) {
-                        window.sunLight.position.set(position.x + 50, position.y + 120, position.z + 50);
-                        window.sunLight.target.position.set(position.x, position.y, position.z);
-                        window.sunLight.target.updateMatrixWorld();
-                    }
-
-                    // 렌더링
-                    renderer.render(scene, camera);
-                }  // 후처리 효과 적용 (렌더링 후)
-                if (usePostProcessing && postProcessingEnabled) {
-                    applyPostProcessing();
-                }
+                // 렌더링
+                renderer.render(scene, camera);
+            }  // 후처리 효과 적용 (렌더링 후)
+            if (usePostProcessing && postProcessingEnabled) {
+                applyPostProcessing();
             }
         }
 
@@ -14570,77 +10146,4 @@
             // Also observe body for game-active class changes
             observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
         })();
-    </script>
-    <script>
-        // [FIX] Chat Input Logic: Prevent weapon switching and handle Enter key control
-        window.addEventListener('keydown', (e) => {
-            const chatInput = document.getElementById('chat-input');
-            const isChatFocused = (document.activeElement === chatInput);
-
-            if (isChatFocused) {
-                // Prevent number keys from switching weapons
-                if (['1', '2', '3', '4'].includes(e.key)) {
-                    e.stopPropagation();
-                    return;
-                }
-
-                // Enter to close chat and resume (Blur & Lock)
-                if (e.key === 'Enter') {
-                    // Slight delay to ensure any existing "send" logic fires first if it relies on Enter
-                    setTimeout(() => {
-                        chatInput.blur();
-                        if (!window.isMobile && document.body.requestPointerLock) {
-                            document.body.requestPointerLock();
-                        }
-                    }, 10);
-                }
-            } else if (e.key === 'Enter') {
-                // If chat is NOT focused and Enter is pressed, focus it
-                e.preventDefault();
-                chatInput.focus();
-            }
-        }, true); // Capture phase to handling before game logic
-    </script>
-
-    <button id="chat-toggle-btn">💬</button>
-
-    <script>
-        // Chat Toggle Logic for Mobile
-        document.addEventListener('DOMContentLoaded', () => {
-            const chatToggleBtn = document.getElementById('chat-toggle-btn');
-            const chatContainer = document.getElementById('chat-container');
-            const chatInput = document.getElementById('chat-input');
-
-            if (chatToggleBtn && chatContainer) {
-                chatToggleBtn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-
-                    const isHidden = getComputedStyle(chatContainer).display === 'none';
-                    if (isHidden) {
-                        chatContainer.style.setProperty('display', 'flex', 'important');
-                        // Optional: Auto-focus input if user wants to type immediately
-                        // chatInput.focus(); 
-                    } else {
-                        chatContainer.style.setProperty('display', 'none', 'important');
-                        chatInput.blur();
-                    }
-                });
-
-                // Hide chat when touching outside (optional, but good for UX)
-                document.addEventListener('touchstart', (e) => {
-                    if (window.innerWidth < 1024 && // Only on mobile logic
-                        chatContainer.style.display === 'flex' &&
-                        !chatContainer.contains(e.target) &&
-                        !chatToggleBtn.contains(e.target)) {
-                        chatContainer.style.setProperty('display', 'none', 'important');
-                        if (chatInput) chatInput.blur();
-                    }
-                });
-            }
-        });
-    </script>
-    <div id="low-health-overlay"></div>
-</body>
-
-</html>
+    

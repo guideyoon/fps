@@ -1,0 +1,363 @@
+{
+  "meta": {
+    "id": "bridge_post_apoc_mp_01",
+    "name": "Broken Bridge MP",
+    "theme": "post_apocalypse_bridge",
+    "version": "1.0.0",
+    "units": "m",
+    "author": "PeopleNetworks",
+    "createdAt": "2026-01-18"
+  },
+  "scene": {
+    "background": {
+      "color": "#1a1a1a",
+      "fog": { "type": "exp2", "color": "#151515", "density": 0.018 }
+    },
+    "environment": {
+      "skybox": {
+        "type": "color",
+        "colorTop": "#2a2a2a",
+        "colorHorizon": "#1b1b1b",
+        "colorBottom": "#0f0f0f"
+      },
+      "postprocess": {
+        "bloom": { "enabled": true, "strength": 0.35, "radius": 0.25, "threshold": 0.65 },
+        "vignette": { "enabled": true, "darkness": 0.35, "offset": 0.25 },
+        "filmGrain": { "enabled": true, "intensity": 0.08 }
+      },
+      "audio": {
+        "ambience": {
+          "url": "assets/audio/amb_bridge_wind_rumble.ogg",
+          "volume": 0.35,
+          "loop": true,
+          "positional": false
+        }
+      }
+    },
+    "lighting": {
+      "ambient": { "color": "#5a5a5a", "intensity": 0.55 },
+      "directional": [
+        {
+          "id": "sun_01",
+          "color": "#b3b3b3",
+          "intensity": 1.2,
+          "position": [120, 180, -80],
+          "castShadow": true,
+          "shadow": { "mapSize": 2048, "bias": -0.00012, "cameraFar": 500 }
+        }
+      ],
+      "points": [
+        {
+          "id": "fire_01",
+          "color": "#ffb26a",
+          "intensity": 9.0,
+          "distance": 22,
+          "decay": 2,
+          "position": [8, 1.2, 12],
+          "flicker": { "enabled": true, "speed": 3.2, "amount": 0.18 }
+        },
+        {
+          "id": "lamp_01",
+          "color": "#b7e7ff",
+          "intensity": 5.0,
+          "distance": 18,
+          "decay": 2,
+          "position": [-34, 3.8, -46]
+        }
+      ]
+    }
+  },
+  "materials": {
+    "asphalt_cracked": {
+      "type": "standard",
+      "map": "assets/tex/asphalt_cracked_albedo.jpg",
+      "normalMap": "assets/tex/asphalt_cracked_normal.jpg",
+      "roughnessMap": "assets/tex/asphalt_cracked_rough.jpg",
+      "metalness": 0.05,
+      "roughness": 0.95
+    },
+    "concrete_dirty": {
+      "type": "standard",
+      "map": "assets/tex/concrete_dirty_albedo.jpg",
+      "normalMap": "assets/tex/concrete_dirty_normal.jpg",
+      "roughness": 0.9,
+      "metalness": 0.02
+    },
+    "rebar_rust": {
+      "type": "standard",
+      "map": "assets/tex/rebar_rust_albedo.jpg",
+      "normalMap": "assets/tex/rebar_rust_normal.jpg",
+      "roughness": 0.85,
+      "metalness": 0.35
+    },
+    "vehicle_rust": {
+      "type": "standard",
+      "map": "assets/tex/vehicle_rust_albedo.jpg",
+      "normalMap": "assets/tex/vehicle_rust_normal.jpg",
+      "roughness": 0.78,
+      "metalness": 0.55
+    },
+    "tarp_fabric": {
+      "type": "standard",
+      "map": "assets/tex/tarp_fabric_albedo.jpg",
+      "normalMap": "assets/tex/tarp_fabric_normal.jpg",
+      "roughness": 0.92,
+      "metalness": 0.0,
+      "alphaMap": "assets/tex/tarp_fabric_alpha.png",
+      "transparent": true
+    }
+  },
+  "geometry": {
+    "static": [
+      {
+        "id": "bridge_deck_01",
+        "type": "mesh",
+        "src": "assets/models/bridge_deck.glb",
+        "position": [0, 0, 0],
+        "rotation": [0, 0, 0],
+        "scale": [1, 1, 1],
+        "collider": { "type": "trimesh", "static": true },
+        "materialOverrides": [
+          { "slot": "Deck", "material": "asphalt_cracked" },
+          { "slot": "Concrete", "material": "concrete_dirty" },
+          { "slot": "Rebar", "material": "rebar_rust" }
+        ],
+        "tags": ["ground", "bridge"]
+      },
+      {
+        "id": "bridge_pier_01",
+        "type": "mesh",
+        "src": "assets/models/bridge_pier_broken.glb",
+        "position": [0, -6, 12],
+        "rotation": [0, 0, 0],
+        "scale": [1, 1, 1],
+        "collider": { "type": "trimesh", "static": true },
+        "tags": ["cover", "pier"]
+      },
+      {
+        "id": "river_below",
+        "type": "water",
+        "size": [420, 420],
+        "position": [0, -18, 0],
+        "rotation": [-1.5708, 0, 0],
+        "options": { "color": "#0a0f12", "distortionScale": 2.2, "flowDirection": [0.06, 0.02] },
+        "collider": { "type": "plane", "static": true, "triggerOnly": true, "onEnter": "killzone_fall" },
+        "tags": ["hazard"]
+      }
+    ],
+    "props": [
+      {
+        "id": "car_wreck_01",
+        "type": "mesh",
+        "src": "assets/models/prop_car_wreck.glb",
+        "position": [-10, 0.1, -22],
+        "rotation": [0, 1.2, 0],
+        "scale": [1.05, 1.05, 1.05],
+        "collider": { "type": "box", "size": [2.1, 1.4, 4.6], "offset": [0, 0.7, 0] },
+        "materialOverrides": [{ "slot": "Body", "material": "vehicle_rust" }],
+        "tags": ["cover", "prop"]
+      },
+      {
+        "id": "concrete_barrier_line_01",
+        "type": "instanced",
+        "src": "assets/models/prop_concrete_barrier.glb",
+        "materialOverride": "concrete_dirty",
+        "instances": [
+          { "position": [-6, 0, -12], "rotation": [0, 0.2, 0], "scale": [1, 1, 1] },
+          { "position": [-2, 0, -10], "rotation": [0, 0.2, 0], "scale": [1, 1, 1] },
+          { "position": [2, 0, -8], "rotation": [0, 0.2, 0], "scale": [1, 1, 1] },
+          { "position": [6, 0, -6], "rotation": [0, 0.2, 0], "scale": [1, 1, 1] }
+        ],
+        "collider": { "type": "box", "size": [2.2, 1.1, 0.6], "offset": [0, 0.55, 0] },
+        "tags": ["cover", "barrier"]
+      },
+      {
+        "id": "tarp_shelter_01",
+        "type": "mesh",
+        "src": "assets/models/prop_tarp_shelter.glb",
+        "position": [18, 0, 6],
+        "rotation": [0, -0.7, 0],
+        "scale": [1, 1, 1],
+        "collider": { "type": "compound", "shapes": [{ "type": "box", "size": [3.0, 2.0, 3.0], "offset": [0, 1.0, 0] }] },
+        "materialOverrides": [{ "slot": "Tarp", "material": "tarp_fabric" }],
+        "tags": ["cover", "objective_area"]
+      },
+      {
+        "id": "sign_broken_01",
+        "type": "mesh",
+        "src": "assets/models/prop_sign_broken.glb",
+        "position": [-28, 0, -40],
+        "rotation": [0, 0.6, 0],
+        "scale": [1, 1, 1],
+        "collider": { "type": "box", "size": [1.2, 3.2, 0.4], "offset": [0, 1.6, 0] },
+        "tags": ["landmark"]
+      }
+    ],
+    "decals": [
+      { "id": "decal_blood_01", "type": "decal", "map": "assets/decals/blood_01.png", "position": [4, 0.01, 10], "rotation": [-1.5708, 0.4, 0], "size": [2.6, 2.6, 2.6] },
+      { "id": "decal_crack_01", "type": "decal", "map": "assets/decals/crack_02.png", "position": [-8, 0.01, -18], "rotation": [-1.5708, 1.0, 0], "size": [3.2, 3.2, 3.2] }
+    ]
+  },
+  "gameplay": {
+    "network": {
+      "tickRate": 30,
+      "stateInterpolationMs": 100,
+      "clientPrediction": { "enabled": true, "reconcile": true },
+      "lagCompensation": { "enabled": true, "maxMs": 200 }
+    },
+    "modes": {
+      "allowed": ["tdm", "domination", "ffa"],
+      "defaults": {
+        "tdm": { "scoreLimit": 80, "timeLimitSeconds": 600 },
+        "domination": { "scoreLimit": 200, "timeLimitSeconds": 720 },
+        "ffa": { "scoreLimit": 30, "timeLimitSeconds": 480 }
+      }
+    },
+    "bounds": {
+      "soft": { "min": [-120, -40, -120], "max": [120, 80, 120] },
+      "hardKill": { "min": [-170, -80, -170], "max": [170, 120, 170], "onExit": "killzone_outside" }
+    },
+    "player": {
+      "defaultLoadout": { "primary": "rifle_ak", "secondary": "pistol_9mm", "melee": "knife", "grenade": "frag" },
+      "movement": { "walkSpeed": 5.2, "runSpeed": 7.4, "crouchSpeed": 2.7, "jumpHeight": 1.1 },
+      "camera": { "fov": 78, "near": 0.05, "far": 650 }
+    },
+    "respawn": {
+      "respawnDelaySeconds": 3.5,
+      "spawnProtection": { "seconds": 1.2, "breakOnShoot": true, "breakOnDamage": true },
+      "antiSpawnKill": {
+        "enabled": true,
+        "minEnemyDistance": 14.0,
+        "minLineOfSightSeconds": 1.0,
+        "fallbackToSafeSpawns": true
+      }
+    },
+    "spawns": {
+      "teams": [
+        {
+          "teamId": "alpha",
+          "name": "North Ramp",
+          "safeRadius": 18.0,
+          "points": [
+            { "id": "a_01", "position": [-42, 0.2, -62], "rotationY": 0.9 },
+            { "id": "a_02", "position": [-36, 0.2, -58], "rotationY": 0.9 },
+            { "id": "a_03", "position": [-44, 0.2, -54], "rotationY": 0.9 },
+            { "id": "a_04", "position": [-50, 0.2, -58], "rotationY": 0.9 }
+          ]
+        },
+        {
+          "teamId": "bravo",
+          "name": "South Ramp",
+          "safeRadius": 18.0,
+          "points": [
+            { "id": "b_01", "position": [46, 0.2, 68], "rotationY": -2.2 },
+            { "id": "b_02", "position": [40, 0.2, 64], "rotationY": -2.2 },
+            { "id": "b_03", "position": [48, 0.2, 60], "rotationY": -2.2 },
+            { "id": "b_04", "position": [54, 0.2, 64], "rotationY": -2.2 }
+          ]
+        }
+      ],
+      "ffa": [
+        { "id": "f_01", "position": [-10, 0.2, -22], "rotationY": 0.3, "weight": 1.0 },
+        { "id": "f_02", "position": [18, 0.2, 6], "rotationY": -1.2, "weight": 1.0 },
+        { "id": "f_03", "position": [6, 0.2, -6], "rotationY": 2.8, "weight": 0.9 },
+        { "id": "f_04", "position": [0, 0.2, 18], "rotationY": -0.1, "weight": 0.9 },
+        { "id": "f_05", "position": [-28, 0.2, -40], "rotationY": 0.7, "weight": 0.75 }
+      ],
+      "spawnSelect": {
+        "strategy": "score_best",
+        "weights": {
+          "distanceToEnemies": 0.45,
+          "lineOfSightToEnemies": 0.3,
+          "distanceToAllies": 0.15,
+          "recentDeathsNearPoint": 0.1
+        },
+        "recentDeathWindowSeconds": 10
+      }
+    },
+    "objectives": [
+      {
+        "id": "dom_a",
+        "mode": "domination",
+        "type": "capture",
+        "name": "Pier",
+        "position": [0, 0.2, 12],
+        "radius": 6.5,
+        "height": 3.0,
+        "scorePerTick": 1,
+        "tickSeconds": 2.0
+      },
+      {
+        "id": "dom_b",
+        "mode": "domination",
+        "type": "capture",
+        "name": "Wreck",
+        "position": [-10, 0.2, -22],
+        "radius": 6.0,
+        "height": 3.0,
+        "scorePerTick": 1,
+        "tickSeconds": 2.0
+      },
+      {
+        "id": "dom_c",
+        "mode": "domination",
+        "type": "capture",
+        "name": "Shelter",
+        "position": [18, 0.2, 6],
+        "radius": 6.0,
+        "height": 3.0,
+        "scorePerTick": 1,
+        "tickSeconds": 2.0
+      }
+    ],
+    "items": {
+      "rules": {
+        "symmetry": "soft_mirror",
+        "denyNearTeamSpawnMeters": 16.0,
+        "denyInObjectiveRadiusMeters": 5.0
+      },
+      "pickups": [
+        { "id": "ammo_rifle_01", "type": "ammo", "ammoType": "rifle", "amount": 90, "respawnSeconds": 35, "position": [18, 0.6, 6], "radius": 0.7 },
+        { "id": "ammo_rifle_02", "type": "ammo", "ammoType": "rifle", "amount": 90, "respawnSeconds": 35, "position": [-18, 0.6, -6], "radius": 0.7 },
+        { "id": "medkit_01", "type": "heal", "amount": 45, "respawnSeconds": 40, "position": [-10, 0.6, -22], "radius": 0.7 },
+        { "id": "medkit_02", "type": "heal", "amount": 45, "respawnSeconds": 40, "position": [10, 0.6, 22], "radius": 0.7 },
+        { "id": "armor_01", "type": "armor", "amount": 35, "respawnSeconds": 55, "position": [2, 0.6, -8], "radius": 0.7 },
+        { "id": "armor_02", "type": "armor", "amount": 35, "respawnSeconds": 55, "position": [-2, 0.6, 8], "radius": 0.7 }
+      ],
+      "weapons": [
+        { "id": "shotgun_01", "type": "weapon", "weaponId": "shotgun_pump", "respawnSeconds": 60, "position": [0, 0.6, 18], "radius": 0.8 }
+      ]
+    },
+    "triggers": [
+      {
+        "id": "killzone_fall",
+        "type": "volume",
+        "shape": "box",
+        "center": [0, -20, 0],
+        "size": [500, 20, 500],
+        "onEnter": [{ "action": "damage", "amount": 9999, "reason": "fall" }]
+      },
+      {
+        "id": "killzone_outside",
+        "type": "bounds",
+        "onExit": [{ "action": "damage", "amount": 9999, "reason": "out_of_bounds" }]
+      },
+      {
+        "id": "wind_gust_zone",
+        "type": "volume",
+        "shape": "box",
+        "center": [0, 6, -10],
+        "size": [60, 12, 60],
+        "onEnter": [{ "action": "cameraShake", "intensity": 0.25, "seconds": 1.2 }],
+        "cooldownSeconds": 6
+      }
+    ]
+  },
+  "perf": {
+    "instancing": { "enabled": true, "maxInstancesPerMesh": 500 },
+    "lod": [
+      { "tag": "prop", "levels": [{ "distance": 0, "ratio": 1.0 }, { "distance": 80, "ratio": 0.6 }, { "distance": 140, "ratio": 0.35 }] }
+    ],
+    "physics": { "engineHint": "cannon-es", "fixedTimeStep": 0.0167, "maxSubSteps": 3 }
+  }
+}
