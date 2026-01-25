@@ -12852,6 +12852,17 @@
                 if (isOtherPlayer && p.userData.hp > 0) {
                     let dmg = w.damage;
                     let isHead = isHitPart(h.object, 'head');
+
+                    // [Fallback] Geometric Headshot Detection
+                    // If the mesh naming fails (GLB issue), check if the hit is high enough relative to player base.
+                    if (!isHead && p.position) {
+                        const hitHeight = h.point.y - p.position.y;
+                        if (hitHeight > 1.45) { // Assuming player height ~1.7-1.8m, >1.45m is roughly neck/head
+                            isHead = true;
+                            console.log('[Shoot] Geometric Headshot override! Height:', hitHeight.toFixed(2));
+                        }
+                    }
+
                     console.log('[Shoot] Hit Player. Part:', h.object.name, 'isHead:', isHead); // DEBUG
                     if (isHead) {
                         dmg *= 3;
