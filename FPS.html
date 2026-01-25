@@ -3353,11 +3353,17 @@
                     maxlength="10">
             </div>
             <div style="display: flex; gap: 20px;">
-                <button id="btn-confirm-name" class="mode-btn">
-                    <span class="btn-text"><i class="fas fa-check btn-icon"></i>승인</span>
+                <button id="btn-single-player" class="mode-btn" onclick="selectSinglePlayer()">
+                    <span class="btn-text">
+                        <i class="fas fa-user mb-2" style="font-size: 24px; display: block;"></i>
+                        혼자하기 (SINGLE OPS)
+                    </span>
                 </button>
-                <button class="mode-btn cancel" id="btn-back-to-mode">
-                    <span class="btn-text"><i class="fas fa-times btn-icon"></i>취소</span>
+                <button id="btn-multi-player" class="mode-btn" onclick="selectMultiPlayer()">
+                    <span class="btn-text">
+                        <i class="fas fa-users mb-2" style="font-size: 24px; display: block;"></i>
+                        함께하기 (JOINT OPS)
+                    </span>
                 </button>
             </div>
         </div>
@@ -6171,6 +6177,46 @@
             window.joinRoom = function (roomId) {
                 if (socket && socket.connected) {
                     socket.emit('joinRoom', roomId);
+                }
+            };
+
+            // [FIX] Global Mode Selection Handlers
+            window.selectSinglePlayer = function () {
+                const modeSel = document.getElementById('mode-selection');
+                const mapSel = document.getElementById('single-map-selection');
+                if (modeSel) modeSel.style.display = 'none';
+                if (mapSel) mapSel.style.display = 'flex';
+            };
+
+            window.selectMultiPlayer = function () {
+                const modeSel = document.getElementById('mode-selection');
+                if (modeSel) modeSel.style.display = 'none';
+
+                const serverAddr = 'http://localhost:3000';
+                gameMode = 'multi';
+                document.body.classList.remove('single-player');
+                document.body.classList.add('multi-player');
+
+                enterFullscreen();
+
+                // Skip name setup, go directly to room menu
+                const roomMenu = document.getElementById('room-menu');
+                if (roomMenu) roomMenu.style.display = 'flex';
+
+                // Connect to Server Lobby (Server will assign "Player N" automatically)
+                if (!socket || !socket.connected) {
+                    initMultiplayer(serverAddr, 'AutoPlayer');
+                } else {
+                    socket.emit('setIdentity', { name: 'AutoPlayer' });
+                }
+
+                // Show chat toggle in multiplayer
+                const chatToggle = document.getElementById('chat-toggle-btn');
+                if (chatToggle) chatToggle.style.display = 'flex';
+
+                // Pre-load assets for multiplayer
+                if (typeof preloadMultiplayerAssets === 'function') {
+                    preloadMultiplayerAssets();
                 }
             };
 
