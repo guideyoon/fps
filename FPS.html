@@ -6414,6 +6414,11 @@
 
                         playerHP = 0;
                         isDead = true;
+
+                        // HP UI 업데이트
+                        if (elHpBar) elHpBar.style.width = '0%';
+                        if (elHpText) elHpText.innerText = "HP: 0";
+                        if (elHpBar) elHpBar.style.background = "#f44336"; // 빨간색
                         isSpectating = true;
                         spectatingPlayerId = data.killerId;
 
