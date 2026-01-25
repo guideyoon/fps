@@ -3299,7 +3299,8 @@
     </div>
 
     <!-- 모드 선택 화면 (Tactical Side Menu) -->
-    <div id="mode-selection">
+    <!-- 모드 선택 화면 (Tactical Side Menu) -->
+    <div id="mode-selection" style="position: relative; z-index: 9999;">
         <div class="menu-title-container">
             <div class="tactical-subtitle">POST-APOCALYPSE SURVIVAL PROTOCOL</div>
         </div>
@@ -6182,6 +6183,7 @@
 
             // [FIX] Global Mode Selection Handlers
             window.selectSinglePlayer = function () {
+                console.log("Single Player Selected");
                 const modeSel = document.getElementById('mode-selection');
                 const mapSel = document.getElementById('single-map-selection');
                 if (modeSel) modeSel.style.display = 'none';
@@ -13532,7 +13534,7 @@
                 document.exitPointerLock();
             }
         }
-            }
+
 
 
 
@@ -14223,7 +14225,6 @@
             if (usePostProcessing && postProcessingEnabled) {
                 applyPostProcessing();
             }
-        }
         }
 
 
