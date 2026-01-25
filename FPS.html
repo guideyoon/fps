@@ -1153,7 +1153,7 @@
             flex-direction: column;
             justify-content: space-between;
             align-items: flex-start;
-            padding: 5vh 10%;
+            padding: 5vh 10% 2vh 10%;
             z-index: 200;
             overflow: hidden;
             pointer-events: auto;
@@ -1174,9 +1174,85 @@
             opacity: 0.3;
         }
 
-        .menu-title-container {
-            margin-bottom: 0;
+        /* Logo Light Sweep Effect */
+        #mode-selection::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -150%;
+            width: 150%;
+            height: 100%;
+            background: linear-gradient(90deg,
+                    transparent 0%,
+                    rgba(255, 255, 255, 0) 40%,
+                    rgba(0, 243, 255, 0.1) 45%,
+                    rgba(0, 243, 255, 0.3) 50%,
+                    rgba(0, 243, 255, 0.1) 55%,
+                    rgba(255, 255, 255, 0) 60%,
+                    transparent 100%);
+            transform: skewX(-25deg);
+            pointer-events: none;
+            mix-blend-mode: overlay;
+            animation: logoShine 6s infinite ease-in-out;
+            z-index: 10;
+        }
+
+        @keyframes logoShine {
+
+            0%,
+            20% {
+                left: -150%;
+                opacity: 0;
+            }
+
+            30% {
+                opacity: 0.5;
+            }
+
+            40% {
+                left: 150%;
+                opacity: 0;
+            }
+
+            100% {
+                left: 150%;
+                opacity: 0;
+            }
+        }
+
+        .menu-buttons-container {
+            display: flex;
+            flex-direction: column;
             z-index: 2;
+
+            /* [새로 추가] 위치 강제 지정 */
+            position: absolute;
+            /* 절대 위치 사용 */
+            bottom: 20vh;
+            /* 화면 바닥에서 5% 정도 띄움 (숫자를 줄이면 더 내려갑니다) */
+            width: 100%;
+            /* 너비 꽉 채우기 */
+            align-items: center;
+            /* 버튼 가운데 정렬 (필요시) */
+            padding-left: 0;
+            /* 기존 왼쪽 여백 무시 */
+        }
+
+        .menu-title-container {
+            /* [새로 추가] 위치 강제 지정 */
+            position: absolute;
+            /* 절대 위치 */
+            top: 35vh;
+            /* 화면 천장에서 15% 아래 (숫자를 줄이면 더 위로 갑니다 예: 10vh) */
+            width: 100%;
+            /* 너비 꽉 채우기 */
+            display: flex;
+            /* 중앙 정렬을 위해 필요 */
+            justify-content: center;
+            /* 가로 중앙 정렬 */
+            z-index: 2;
+            margin: 0;
+            /* 기존 여백 제거 */
         }
 
         .menu-buttons-container {
@@ -1278,7 +1354,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: radial-gradient(rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.98)), url('background.png') center/cover;
+            background: #09090b;
             color: white;
             display: none;
             flex-direction: column;
@@ -2860,7 +2936,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.95);
+            background: #09090b;
             color: white;
             display: none;
             flex-direction: column;
