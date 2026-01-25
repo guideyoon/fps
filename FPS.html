@@ -306,22 +306,21 @@
             /* Center vertically */
         }
 
-        /* Initial Positions (will be overridden by JS, but good defaults) */
+        /* Initial Positions (will be overridden by JS) */
         .crosshair .hair.top {
-            top: 15px;
-            /* Offset from container top (center is 30) -> Gap */
+            /* JS handles positioning via transform */
         }
 
         .crosshair .hair.bottom {
-            bottom: 15px;
+            /* JS handles positioning via transform */
         }
 
         .crosshair .hair.left {
-            left: 15px;
+            /* JS handles positioning via transform */
         }
 
         .crosshair .hair.right {
-            right: 15px;
+            /* JS handles positioning via transform */
         }
 
         .crosshair.firing .horizontal {
@@ -13483,7 +13482,7 @@
             // --- Dynamic Crosshair Update ---
             // Calculate current spread based on state
             let targetSpread = 0; // Base offset from center (default gap)
-            const BASE_GAP = 10;
+            const BASE_GAP = 15;
 
             // 1. Movement Spread (Walking)
             if (keys.w || keys.a || keys.s || keys.d) {
