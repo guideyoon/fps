@@ -1174,51 +1174,6 @@
             opacity: 0.3;
         }
 
-        /* Logo Light Sweep Effect */
-        #mode-selection::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -150%;
-            width: 150%;
-            height: 100%;
-            background: linear-gradient(90deg,
-                    transparent 0%,
-                    rgba(255, 255, 255, 0) 40%,
-                    rgba(0, 243, 255, 0.4) 45%,
-                    rgba(0, 243, 255, 0.8) 50%,
-                    rgba(0, 243, 255, 0.4) 55%,
-                    rgba(255, 255, 255, 0) 60%,
-                    transparent 100%);
-            transform: skewX(-25deg);
-            pointer-events: none;
-            mix-blend-mode: screen;
-            animation: logoShine 12s infinite ease-in-out;
-            z-index: 10;
-        }
-
-        @keyframes logoShine {
-
-            0%,
-            20% {
-                left: -150%;
-                opacity: 0;
-            }
-
-            30% {
-                opacity: 0.5;
-            }
-
-            40% {
-                left: 150%;
-                opacity: 0;
-            }
-
-            100% {
-                left: 150%;
-                opacity: 0;
-            }
-        }
 
         .menu-buttons-container {
             display: flex;
