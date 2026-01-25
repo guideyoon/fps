@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<!-- DEPLOY TRIGGER: 2026-01-25-1845 -->
-<!-- VERSION: 2026-01-25-CH-V4-ULTRA -->
+<!-- DEPLOY TRIGGER: 2026-01-25-1848 -->
+<!-- VERSION: 2026-01-25-CH-V5-FINAL -->
 <html lang="ko">
 
 <head>
@@ -269,10 +269,9 @@
 
         #hud-crosshair .dot {
             position: absolute;
-            width: 6px !important;
-            height: 6px !important;
-            background-color: #ff00ff !important;
-            /* Fuchsia for verification */
+            width: 5px !important;
+            height: 5px !important;
+            background-color: white !important;
             border-radius: 50%;
             box-shadow: 0 0 4px rgba(0, 0, 0, 1) !important;
             z-index: 102;
@@ -280,8 +279,7 @@
 
         #hud-crosshair .hair {
             position: absolute;
-            background-color: #00ff00 !important;
-            /* Lime for verification */
+            background-color: white !important;
             box-shadow: 0 0 3px rgba(0, 0, 0, 1) !important;
             transition: transform 0.1s ease-out;
             /* Smooth spread */
@@ -3494,8 +3492,8 @@
 
         <!-- Version Info Wrapper -->
         <div id="deploy-version-overlay"
-            style="position: absolute; bottom: 5px; right: 5px; font-size: 10px; color: #ff00ff; pointer-events: none; z-index: 9999; background: rgba(0,0,0,0.5); padding: 2px;">
-            ver: 2026-01-25-CH-V4
+            style="position: absolute; bottom: 5px; right: 5px; font-size: 10px; color: #ffffff; pointer-events: none; z-index: 9999; background: rgba(0,0,0,0.5); padding: 2px; opacity: 0.5;">
+            ver: 2026-01-25-CH-V5
         </div>
 
         <!-- Top Right: Kill Feed -->
@@ -13491,7 +13489,7 @@
             // --- Dynamic Crosshair Update ---
             // Calculate current spread based on state
             let targetSpread = 0; // Base offset from center (default gap)
-            const BASE_GAP = 25; // Significant increase to be clearly visible
+            const BASE_GAP = 15; // Set final gap to 15 for a clear, widened look
 
             // 1. Movement Spread (Walking)
             if (keys.w || keys.a || keys.s || keys.d) {
