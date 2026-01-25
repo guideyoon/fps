@@ -13054,7 +13054,14 @@
             return false;
         }
 
+        let currentRecoil = 0; // Variable to track recoil amount
+
         function shoot(w) {
+            // Add crosshair recoil impulse
+            currentRecoil = 25; // Jump by 25px when firing
+            // Cap max recoil to prevent too much expansion
+            if (currentRecoil > 40) currentRecoil = 40;
+
             // 멀티플레이어에서 다른 플레이어에게 발사 알림
             if (gameMode === 'multi' && socket && socket.connected) {
                 socket.emit('playerAction', {
@@ -13488,6 +13495,10 @@
             // --- Dynamic Crosshair Update ---
             // Calculate current spread based on state
             let targetSpread = 0; // Base offset from center (default gap)
+            // Add recoil impulse (decaying)
+            targetSpread += currentRecoil;
+            currentRecoil *= 0.85; // Fast decay for snappy feel
+            if (currentRecoil < 0.1) currentRecoil = 0;
             const BASE_GAP = 50; // Final user request: 50px gap
 
             // 1. Movement Spread (Walking)
