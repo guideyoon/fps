@@ -13481,10 +13481,10 @@
                     weaponContainer.visible = true;
                     elScope.style.display = 'none';
 
-                    // Sniper Scope - Show circular scope only for SNIPER when aiming
+                    // Sniper Scope - Show circular scope only for SNIPER when aiming (and NOT reloading)
                     const sniperScope = document.getElementById('sniper-scope');
                     if (sniperScope) {
-                        if (isAiming && w.type === 'SNIPER' && !isMobile) {
+                        if (isAiming && !isReloading && w.type === 'SNIPER' && !isMobile) {
                             sniperScope.style.display = 'block';
                         } else {
                             sniperScope.style.display = 'none';
@@ -13526,7 +13526,7 @@
                 // [User Request] Rotation Interpolation
                 let targetRot = w.rotHip || new THREE.Vector3(0, 0, 0);
 
-                if (isAiming) {
+                if (isAiming && !isReloading) {
                     if (w.type === 'SNIPER') targetFov = w.fovAds;
                     else if (w.type !== 'KNIFE') {
                         targetPos = w.posAds;
