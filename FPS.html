@@ -11720,12 +11720,24 @@
                     }
                     if (isDead || isPaused) return;
                     if (e.button === 0) isFiring = true;
-                    if (e.button === 2) isAiming = true;
+                    if (e.button === 2) {
+                        isAiming = true;
+                        // [FIX] Sync Right Click Zoom with Mouse Wheel Logic (Show Scope UI)
+                        if (WEAPONS[currentWeaponIdx].name.includes("SNIPER")) {
+                            const scope = document.getElementById('sniper-scope');
+                            if (scope) scope.style.display = 'block';
+                        }
+                    }
                 });
 
                 document.body.addEventListener('mouseup', (e) => {
                     if (e.button === 0) { isFiring = false; hasFiredSemi = false; hasClickedEmpty = false; }
-                    if (e.button === 2) isAiming = false;
+                    if (e.button === 2) {
+                        isAiming = false;
+                        // [FIX] Hide Scope UI on release
+                        const scope = document.getElementById('sniper-scope');
+                        if (scope) scope.style.display = 'none';
+                    }
                 });
                 document.body.addEventListener('mousemove', (e) => {
                     if (document.pointerLockElement === document.body && !isDead && !isPaused) {
