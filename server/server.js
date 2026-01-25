@@ -191,14 +191,27 @@ io.on('connection', (socket) => {
                 room.players[targetId].isDead = true;
                 room.players[targetId].deathTime = Date.now(); // Track death timestamp
 
+                // Update killer's kills
+                const killerId = socket.id;
+                if (room.players[killerId] && killerId !== targetId) {
+                    room.players[killerId].kills = (room.players[killerId].kills || 0) + 1;
+                }
+
                 // Send death event with killer info
                 io.to(roomId).emit('playerDied', {
                     id: targetId,
+                    victimName: room.players[targetId].name,
                     killerId: socket.id,
-                    killerName: room.players[socket.id] ? room.players[socket.id].name : 'Unknown'
+                    killerName: room.players[socket.id] ? room.players[socket.id].name : 'Unknown',
+                    isHeadshot: !!data.isHeadshot
                 });
             } else {
-                io.to(roomId).emit('playerDamaged', { id: targetId, hp: room.players[targetId].hp, dealerId: socket.id });
+                io.to(roomId).emit('playerDamaged', {
+                    id: targetId,
+                    hp: room.players[targetId].hp,
+                    dealerId: socket.id,
+                    isHeadshot: !!data.isHeadshot
+                });
             }
         }
     });
@@ -378,7 +391,8 @@ function joinRoom(socket, roomId) {
         position: spawnPos,
         rotation: { x: 0, y: 0 },
         weaponIdx: 0,
-        isInvincible: true
+        isInvincible: true,
+        kills: 0
     };
 
     room.players[socket.id] = newPlayer;

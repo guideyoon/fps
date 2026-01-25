@@ -4439,6 +4439,7 @@
         let debugShellVelocity = false;
         // isAiming is defined below with weapon state
         let aimLocked = false;
+        let lastGroundedState = false; // Separate from isGrounded for landing sound trigger tracking
         window.knifeSwing = window.knifeSwing ?? 0;
         window.KNIFE_SWING_DURATION = window.KNIFE_SWING_DURATION ?? 0.18; // Speed up: 0.25 -> 0.18
 
@@ -4892,9 +4893,9 @@
                     return;
                 }
 
-                // 소총(어썰트라이플)은 오디오 파일 사용 (User Request: 40% volume -> 32% volume)
+                // 소총(어썰트라이플)은 오디오 파일 사용 (User Request: set default volume to 50%)
                 if (type === 'RIFLE' && this.audioBuffers['gunshot']) {
-                    this.playAudioFile('gunshot', 0.32); // Reduced by 20% (0.4 -> 0.32)
+                    this.playAudioFile('gunshot', 0.16); // Halved from 0.32 per user request
                     return;
                 }
 
@@ -5080,8 +5081,9 @@
             },
             playLand: function () {
                 if (!this.ensureContext()) return;
-                // User Request: Use chak.mp3 (land) for landing
+                // User Request: Use chak.MP3 (land) for landing
                 if (this.audioBuffers['land']) {
+                    console.log('Playing landing sound...');
                     this.playAudioFile('land', 0.8);
                 } else {
                     // Fallback to synthetic thud if file missing
@@ -6356,6 +6358,24 @@
                 });
 
                 socket.on('playerDied', (data) => {
+                    // [NEW] Update killer's score in client-side state
+                    if (data.killerId && roomPlayersState[data.killerId]) {
+                        roomPlayersState[data.killerId].kills = (roomPlayersState[data.killerId].kills || 0) + 1;
+                        console.log(`Scoreboard Update: ${data.killerName} kills -> ${roomPlayersState[data.killerId].kills}`);
+                    }
+
+                    // [NEW] Show kill feed in multiplayer
+                    addKillFeed(data.killerName || 'Unknown', data.victimName || 'Unknown', data.isHeadshot);
+
+                    // [NEW] Trigger headshot overlay for both killer and victim
+                    if (data.isHeadshot) {
+                        if (data.id === myId || data.killerId === myId) {
+                            elHeadshot.classList.add('active');
+                            setTimeout(() => elHeadshot.classList.remove('active'), 500);
+                            SoundGen.playHeadshot();
+                        }
+                    }
+
                     if (data.id === myId) {
                         console.log('=== YOU DIED ===');
                         console.log('Killed by:', data.killerName, '(ID:', data.killerId, ')');
@@ -6647,6 +6667,9 @@
                 m.traverse((child) => {
                     if (child.name && child.name.toLowerCase().includes('head')) {
                         group.userData.head = child;
+                        // [NEW] Explicitly name the mesh 'head' for isHitPart detection
+                        child.name = 'head';
+                        child.traverse(c => { if (c.isMesh) c.name = 'head'; });
                     }
                 });
 
@@ -6857,40 +6880,53 @@
             if (SoundGen.ctx.state === 'suspended') SoundGen.ctx.resume();
 
             // 재장전 오디오 파일 로드
-            SoundGen.loadAudioFile('sounds/reload1.mp3', 'reload')
+            SoundGen.loadAudioFile('public/sounds/reload1.mp3', 'reload')
                 .catch(err => console.warn('Failed to load reload sound:', err));
 
             // 저격총 발사 오디오 파일 로드
-            SoundGen.loadAudioFile('sounds/rifle.mp3', 'rifle')
+            SoundGen.loadAudioFile('public/sounds/rifle.mp3', 'rifle')
                 .catch(err => console.warn('Failed to load rifle sound:', err));
 
             // 나이프 휘두르기 오디오 파일 로드
-            SoundGen.loadAudioFile('sounds/sword.mp3', 'sword')
+            SoundGen.loadAudioFile('public/sounds/sword.mp3', 'sword')
                 .catch(err => console.warn('Failed to load sword sound:', err));
 
             // 나이프 교체 오디오 파일 로드
-            SoundGen.loadAudioFile('sounds/c-sword.mp3', 'c-sword')
+            SoundGen.loadAudioFile('public/sounds/c-sword.mp3', 'c-sword')
                 .catch(err => console.warn('Failed to load c-sword sound:', err));
 
             // 소총 교체 오디오 파일 로드
-            SoundGen.loadAudioFile('sounds/c-sochong.mp3', 'c-sochong')
+            SoundGen.loadAudioFile('public/sounds/c-sochong.mp3', 'c-sochong')
                 .catch(err => console.warn('Failed to load c-sochong sound:', err));
 
             // 권총 교체 오디오 파일 로드
-            SoundGen.loadAudioFile('sounds/c-gun.mp3', 'c-gun')
+            SoundGen.loadAudioFile('public/sounds/c-gun.mp3', 'c-gun')
                 .catch(err => console.warn('Failed to load c-gun sound:', err));
 
             // 저격총 교체 오디오 파일 로드
-            SoundGen.loadAudioFile('sounds/c-rifle.mp3', 'c-rifle')
+            SoundGen.loadAudioFile('public/sounds/c-rifle.mp3', 'c-rifle')
                 .catch(err => console.warn('Failed to load c-rifle sound:', err));
 
             // 빈 격발 오디오 파일 로드
-            SoundGen.loadAudioFile('sounds/empty.mp3', 'empty')
+            SoundGen.loadAudioFile('public/sounds/empty.mp3', 'empty')
                 .catch(err => console.warn('Failed to load empty sound:', err));
 
             // 권총 발사 오디오 파일 로드
-            SoundGen.loadAudioFile('sounds/gunshot.mp3', 'gunshot')
+            SoundGen.loadAudioFile('public/sounds/gunshot.mp3', 'gunshot')
                 .catch(err => console.warn('Failed to load gunshot sound:', err));
+
+            // [NEW] 착지 및 기타 효과음 로드
+            SoundGen.loadAudioFile('public/sounds/chak.MP3', 'land')
+                .catch(err => console.warn('Failed to load land sound:', err));
+
+            SoundGen.loadAudioFile('public/sounds/grunt.mp3', 'jump')
+                .catch(err => console.warn('Failed to load jump sound:', err));
+
+            SoundGen.loadAudioFile('public/sounds/walking.MP3', 'walking')
+                .catch(err => console.warn('Failed to load walking sound:', err));
+
+            SoundGen.loadAudioFile('public/sounds/headshot.mp3', 'headshot')
+                .catch(err => console.warn('Failed to load headshot sound:', err));
         };
 
         // 데스크톱과 모바일 모두에서 오디오 파일 로드
@@ -12807,7 +12843,8 @@
                 // 다른 플레이어에게 데미지
                 if (isOtherPlayer && p.userData.hp > 0) {
                     let dmg = w.damage;
-                    if (isHitPart(h.object, 'head')) {
+                    let isHead = isHitPart(h.object, 'head');
+                    if (isHead) {
                         dmg *= 3;
                         elHeadshot.classList.add('active');
                         setTimeout(() => elHeadshot.classList.remove('active'), 500);
@@ -12821,7 +12858,8 @@
                     if (socket && socket.connected) {
                         socket.emit('damagePlayer', {
                             targetId: p.userData.playerId,
-                            damage: dmg
+                            damage: dmg,
+                            isHeadshot: isHead
                         });
                     }
 
@@ -13084,6 +13122,12 @@
                             isGrounded = false;
                         }
                     }
+
+                    // Landing Sound Trigger
+                    if (isGrounded && !lastGroundedState && velocityY <= 0) {
+                        SoundGen.playLand();
+                    }
+                    lastGroundedState = isGrounded;
 
                     let speed = 15.0; // Default: RUN (User Request - Increased from 9.0)
                     if (keys.shift) speed = 4.0; // Shift: SLOW WALK (increased from 2.0)
@@ -14011,6 +14055,10 @@
                         }
                     }, 10);
                 }
+            } else if (e.key === 'Enter') {
+                // If chat is NOT focused and Enter is pressed, focus it
+                e.preventDefault();
+                chatInput.focus();
             }
         }, true); // Capture phase to handling before game logic
     </script>
