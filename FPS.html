@@ -5700,7 +5700,7 @@
                     const overlay = document.getElementById('low-health-overlay');
                     if (overlay) {
                         overlay.classList.remove('active');
-                        overlay.style.opacity = 0;
+                        overlay.style.opacity = ""; // Clear inline opacity to allow CSS animation
                     }
 
                     // UI 초기화
@@ -7316,7 +7316,7 @@
                 const overlay = document.getElementById('low-health-overlay');
                 if (overlay) {
                     overlay.classList.remove('active');
-                    overlay.style.opacity = 0;
+                    overlay.style.opacity = ""; // Clear inline opacity to allow CSS animation
                 }
 
                 // Ensure lighting exists (in case scene was cleared or invalid)
@@ -13016,25 +13016,7 @@
         }
 
 
-        function checkLowHealth() {
-            const overlay = document.getElementById('low-health-overlay');
-            if (!overlay) return;
-
-            // HP <= 20% (Max 100) -> Show Red Overlay
-            if (!isDead && playerHP <= 20) {
-                if (!overlay.classList.contains('active')) {
-                    console.log('[LowHealth] Activated! HP:', playerHP);
-                    overlay.classList.add('active');
-                    overlay.style.opacity = 1;
-                }
-            } else {
-                if (overlay.classList.contains('active')) {
-                    console.log('[LowHealth] Deactivated. HP:', playerHP);
-                    overlay.classList.remove('active');
-                    overlay.style.opacity = 0;
-                }
-            }
-        }
+        // Duplicate checkLowHealth removed (consolidated at bottom of file)
 
         function onResize() {
             // Safety check: Ensure camera and renderer exist before resizing
@@ -13140,9 +13122,7 @@
                 const w = WEAPONS[curWeaponIdx];
                 if (isGameStarted) {
                     handleShooting(dt);
-
-                    // Check Low Health Effect (Every Frame)
-                    checkLowHealth();
+                    // Redundant checkLowHealth call removed (handled at end of loop)
 
                     // --- Improved Physics with Raycasting (Fix for Jumping on Objects) ---
                     const eyeHeight = keys.ctrl ? 1.0 : 1.7; // 1.7 is standard eye level
@@ -13785,14 +13765,17 @@
             const overlay = document.getElementById('low-health-overlay');
             if (!overlay) return;
 
+            // Clear any inline opacity that might block the animation
+            if (overlay.style.opacity !== "") overlay.style.opacity = "";
+
             // Only show if alive and playing
             if (isDead || !isGameStarted || isSpectating) {
                 overlay.classList.remove('active');
                 return;
             }
 
-            const ratio = playerHP / 100; // Hardcoded max HP to fix ReferenceError
-            if (ratio < 0.2 && playerHP > 0) {
+            // HP <= 20% -> Show pulsing red overlay
+            if (playerHP <= 20 && playerHP > 0) {
                 overlay.classList.add('active');
             } else {
                 overlay.classList.remove('active');
