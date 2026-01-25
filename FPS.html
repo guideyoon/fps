@@ -13777,22 +13777,24 @@
                 }
 
                 // Crosshair Logic
-                if (isMobile) {
-                    // 모바일: 항상 조준선 표시 (사용자 요청)
-                    elCrosshair.style.display = 'block';
-                    elCrosshair.style.opacity = 0.7; // 상시 표시는 약간 투명하게
-                } else if (w.type === 'PISTOL' || (!isAiming && w.type !== 'KNIFE')) {
-                    // PC: 권총이거나 비조준 상태(칼 제외)일 때 표시
-                    // Mobile PISTOL update: Aiming hidden crosshair logic same as PC now?
-                    // Actually, if mobile pistol behaves like rifle now (ADS available), hide crosshair when aiming
-                    if (isMobile && w.type === 'PISTOL' && isAiming) {
-                        elCrosshair.style.display = 'none';
-                    } else {
+                if (elCrosshair) {
+                    if (isMobile) {
+                        // 모바일: 항상 조준선 표시 (사용자 요청)
                         elCrosshair.style.display = 'block';
-                        elCrosshair.style.opacity = 1;
+                        elCrosshair.style.opacity = 0.7; // 상시 표시는 약간 투명하게
+                    } else if (w.type === 'PISTOL' || (!isAiming && w.type !== 'KNIFE')) {
+                        // PC: 권총이거나 비조준 상태(칼 제외)일 때 표시
+                        // Mobile PISTOL update: Aiming hidden crosshair logic same as PC now?
+                        // Actually, if mobile pistol behaves like rifle now (ADS available), hide crosshair when aiming
+                        if (isMobile && w.type === 'PISTOL' && isAiming) {
+                            elCrosshair.style.display = 'none';
+                        } else {
+                            elCrosshair.style.display = 'block';
+                            elCrosshair.style.opacity = 1;
+                        }
+                    } else {
+                        elCrosshair.style.display = 'none';
                     }
-                } else {
-                    elCrosshair.style.display = 'none';
                 }
             }
 
