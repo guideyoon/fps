@@ -5847,7 +5847,7 @@
 
             addSafeListener(document.getElementById('btn-multi-player'), () => {
                 modeSelection.style.display = 'none'; // Explicitly hide to prevent overlap
-                const serverAddr = 'https://foveolate-isobel-unsignable.ngrok-free.dev';
+                const serverAddr = 'http://localhost:3000';
                 gameMode = 'multi';
                 modeSelection.style.display = 'none';
                 document.body.classList.remove('single-player');
@@ -5931,7 +5931,7 @@
 
             document.getElementById('btn-confirm-name').addEventListener('click', () => {
                 const name = document.getElementById('player-name-input').value.trim() || 'Player';
-                const serverAddr = 'https://foveolate-isobel-unsignable.ngrok-free.dev';
+                const serverAddr = 'http://localhost:3000';
 
                 gameMode = 'multi';
                 nameSetup.style.display = 'none';
@@ -6093,6 +6093,8 @@
                     });
                     createRoomModal.style.display = 'none';
                     // Expected to receive 'roomJoined' event
+                } else {
+                    alert('서버에 연결되지 않았습니다. 잠시 후 다시 시도하거나 새로고침하세요.');
                 }
             });
 
