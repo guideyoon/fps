@@ -13468,7 +13468,7 @@
         function animate() {
             requestAnimationFrame(animate);
             const time = performance.now();
-            const dt = Math.min((time - lastTime) / 1000, 0.1);
+            var dt = Math.min((time - lastTime) / 1000, 0.1);
             lastTime = time;
 
             // 플레이 시간 업데이트 (싱글플레이어 전용)
@@ -13823,8 +13823,8 @@
                 else targetPos = w.posAds;
             }
 
-            currentPos.lerp(targetPos, 0.2);
-            currentRot.lerp(targetRot, 0.2); // Interpolate rotation
+            currentPos.lerp(targetPos, 15 * dt);
+            currentRot.lerp(targetRot, 15 * dt); // Interpolate rotation
 
             // [User Request] Dynamic Arm Scaling for all weapons (except Knife/Grenade)
             if (w.type !== 'KNIFE' && w.type !== 'GRENADE' && weaponModel) {
