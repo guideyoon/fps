@@ -12975,6 +12975,24 @@
         }
 
 
+        function checkLowHealth() {
+            const overlay = document.getElementById('low-health-overlay');
+            if (!overlay) return;
+
+            // HP <= 20% (Max 100) -> Show Red Overlay
+            if (!isDead && playerHP <= 20) {
+                if (!overlay.classList.contains('active')) {
+                    overlay.classList.add('active');
+                    overlay.style.opacity = 1;
+                }
+            } else {
+                if (overlay.classList.contains('active')) {
+                    overlay.classList.remove('active');
+                    overlay.style.opacity = 0;
+                }
+            }
+        }
+
         function onResize() {
             // Safety check: Ensure camera and renderer exist before resizing
             if (!camera || !renderer) return;
