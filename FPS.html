@@ -2746,7 +2746,7 @@
 
         /* Ensure mode selection is visible but compact when game is NOT active */
         body:not(.game-active) #mode-selection {
-            display: flex !important;
+            display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
@@ -5695,10 +5695,10 @@
             SoundGen.loadAudioFile('sounds/remove.mp3', 'grenade_switch').catch(e => console.log('Grenade switch sound (remove.mp3) not found or failed to load:', e));
 
             // 1. Mode Selection
-            modeSelection.style.display = 'flex';
+            // modeSelection.style.display = 'flex'; // Handled by CSS: body:not(.game-active)
 
             addSafeListener(document.getElementById('btn-single-player'), () => {
-                modeSelection.style.display = 'none';
+                modeSelection.style.display = 'none'; // Explicitly hide to prevent overlap
                 document.getElementById('single-map-selection').style.display = 'flex';
             });
 
@@ -5743,6 +5743,7 @@
             });
 
             addSafeListener(document.getElementById('btn-multi-player'), () => {
+                modeSelection.style.display = 'none'; // Explicitly hide to prevent overlap
                 const serverAddr = 'https://sharyn-unsubjected-overhostilely.ngrok-free.dev';
                 gameMode = 'multi';
                 modeSelection.style.display = 'none';
@@ -12301,8 +12302,9 @@
             // --- RELOAD SEQUENCE ---
             // Stage 1: Tilt Up & Drop Mag (0ms)
             if (weaponModel) {
-                weaponModel.rotation.z = 0.5;
-                weaponModel.position.y = -0.1;
+                // [User Request] Smaller motion (Reduced from 0.5 and -0.1)
+                weaponModel.rotation.z = 0.15;
+                weaponModel.position.y = -0.02;
                 if (mag) {
                     // Start drop animation (will be handled by lerp in future or simple offset here)
                     mag.position.y -= 0.2;
@@ -14167,7 +14169,7 @@
                                 bottom: 20px !important;
                             }
                             
-                            /* Hide chat in single player mode */
+                            /* Hide chat in single player mode (Mobile Landscape) */
                             body.single-player #chat-container,
                             body.single-player #chat-toggle-btn {
                                 display: none !important;
@@ -14231,6 +14233,10 @@
                         }
                         #chat-container {
                             display: ${isGameActive ? 'flex' : 'none'} !important;
+                        }
+                        /* Hide chat in single player mode (PC) */
+                        body.single-player #chat-container {
+                            display: none !important;
                         }
                         /* Hide Mobile Controls on PC */
                         #joystick-zone, 
