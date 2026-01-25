@@ -5137,10 +5137,10 @@
                 // Muzzle Flash Effect (Screen Flash)
                 const flashOverlay = document.getElementById('muzzle-flash-overlay');
                 if (flashOverlay) {
-                    flashOverlay.style.opacity = '0.4'; // [Refined] Stronger flash (was 0.15)
+                    flashOverlay.style.opacity = '0.2'; // [Refined] Subtle, distinct sparkle (was 0.4)
                     setTimeout(() => {
                         flashOverlay.style.opacity = '0';
-                    }, 50);
+                    }, 50); // Short flash
                 }
 
                 // Shell Ejection
@@ -13090,10 +13090,18 @@
 
             const shell = new THREE.Mesh(shellGeometry, shellMaterial);
 
-            // Initial position: relative to camera, slightly to the right and down
-            // In a real weapon rig, this would be a bone position.
-            // We'll approximate based on weapon holding position.
-            const shellPos = new THREE.Vector3(0.15, -0.15, -0.3);
+            // Initial position: relative to camera
+            // [User Request] Custom offsets per weapon type to ensure visibility
+            const shellPos = new THREE.Vector3(0.15, -0.15, -0.3); // Default (Pistol)
+
+            if (w.type === 'RIFLE') {
+                // Forward and Right for Rifle visibility
+                shellPos.set(0.25, -0.1, -0.6);
+            } else if (w.type === 'SNIPER') {
+                // Slightly forward for Sniper
+                shellPos.set(0.2, -0.15, -0.4);
+            }
+
             shellPos.applyQuaternion(camera.quaternion);
             shellPos.add(camera.position);
 
@@ -13225,6 +13233,10 @@
                         rotScale = 2.6;   // Idle: stronger kick
                         posScale = 30;    // Idle: stronger kick
                     }
+                } else if (w.type === 'PISTOL') {
+                    // [User Request] Pistol: Minimizing backward push (PosScale)
+                    rotScale = 1.2;
+                    posScale = 2.0; // Drastically reduced from 16 to 2
                 }
 
                 const rotImpulse = kick * rotScale;
