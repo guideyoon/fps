@@ -7536,6 +7536,8 @@
 
             // 0. 게임 통계 초기화
             gameStartTime = performance.now();
+            lastTime = gameStartTime; // [FIX] Reset delta time calculator
+            isDead = false; // [FIX] Ensure player is alive
             killCount = 0;
             playTime = 0;
             const gameOverTitle = document.getElementById('game-over-title');
