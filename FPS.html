@@ -7284,12 +7284,13 @@
                 const xhr = new XMLHttpRequest();
                 xhr.open('GET', url, false);
                 xhr.send(null);
-                if (xhr.status === 200) {
+                // For local files, status might be 0
+                if (xhr.status === 200 || xhr.status === 0) {
                     const mapData = JSON.parse(xhr.responseText);
                     createCustomMap(mapData);
                     console.log(`Map ${url} loaded successfully`);
                 } else {
-                    console.error(`Failed to load map ${url}, using factory`);
+                    console.error(`Failed to load map ${url} (Status: ${xhr.status}), using factory`);
                     createFactoryMap();
                 }
             } catch (err) {
@@ -7404,7 +7405,7 @@
             }
             // 1.6. 싱글플레이어 맵 생성 (강제 재생성)
             else if (gameMode === 'single') {
-                console.log('Creating Factory map for Single Player...');
+                console.log(`Loading Single Player Map: ${selectedSinglePlayerMap}`);
 
                 // Clear map group before creating new map
                 if (mapGroup) {
@@ -8002,6 +8003,20 @@
             });
 
             const materials = { matConcrete, matMetal, matRust, matWall };
+
+            // Ensure there is at least a floor if not present in data
+            const hasFloor = mapData.some(obj => obj.type === 'floor');
+            if (!hasFloor) {
+                console.log('No floor detected in map data, adding default floor');
+                const defaultFloor = {
+                    type: 'floor',
+                    pos: [0, 0, 0],
+                    rot: [0, 0, 0],
+                    size: [500, 500] // Large enough
+                };
+                const floorMesh = createMapObject(defaultFloor, materials);
+                mapGroup.add(floorMesh);
+            }
 
             // Helper function to add collider
             function addBoxCollider(mesh) {
