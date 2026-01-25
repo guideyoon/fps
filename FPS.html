@@ -13559,8 +13559,8 @@
 
                         // [MOD] Special compensation for Rifle ADS Reload to hide gaps/separation
                         if (w.type === 'RIFLE' && isAiming && isReloading) {
-                            // Make it thicker (X, Z) and longer (Y)
-                            currentTargetScale.set(1.2, 2.2, 1.2);
+                            // Make it slightly thicker (X, Z) and longer (Y) - Adjusted down from (1.2, 2.2, 1.2)
+                            currentTargetScale.set(0.9, 1.5, 0.9);
                         }
 
                         const sx = THREE.MathUtils.lerp(lArm.scale.x, currentTargetScale.x, 15 * dt);
