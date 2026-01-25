@@ -13033,7 +13033,7 @@
                 } else if (w.ammo <= 0 && w.type !== 'KNIFE' && w.type !== 'GRENADE') {
                     // [User Request] Auto-Reload if empty (no click sound)
                     if (!isReloading) {
-                        reload();
+                        doReload();
                     }
                 }
             }
