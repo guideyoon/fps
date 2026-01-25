@@ -4807,7 +4807,7 @@
         const SoundGen = {
             ctx: null,
             audioBuffers: {}, // 로드된 오디오 파일 캐시
-            masterVolume: 1.0, // 마스터 볼륨 (0.0 ~ 1.0)
+            masterVolume: 0.5, // Reduced from 1.0 to comfortable level per user request // 마스터 볼륨 (0.0 ~ 1.0)
             reloadVolume: 0.8, // 재장전 볼륨 (0.0 ~ 1.0)
             isStepPlaying: false, // 이동 소리 재생 중 여부
             init: function () {
@@ -4899,6 +4899,12 @@
                     return;
                 }
 
+                // [Multiplayer FIX] Ensure knife sounds are handled correctly
+                if (type === 'KNIFE') {
+                    this.playKnife();
+                    return;
+                }
+
                 // 소총(어썰트라이플)은 오디오 파일 사용 (User Request: set default volume to 50%)
                 if (type === 'RIFLE' && this.audioBuffers['gunshot']) {
                     this.playAudioFile('gunshot', 0.16); // Halved from 0.32 per user request
@@ -4907,7 +4913,7 @@
 
                 // 권총은 오디오 파일 사용, 없으면 기존 소리 생성
                 if (type === 'PISTOL' && this.audioBuffers['gunshot']) {
-                    this.playAudioFile('gunshot', 0.8);
+                    this.playAudioFile('gunshot', 0.4); // Reduced from 0.8 per user request
                     return;
                 }
 
@@ -4927,15 +4933,15 @@
                 filter.type = 'lowpass';
                 if (type === 'SNIPER') {
                     filter.frequency.value = 600;
-                    gain.gain.setValueAtTime(1.5, t);
+                    gain.gain.setValueAtTime(0.8, t); // Reduced from 1.5
                     gain.gain.exponentialRampToValueAtTime(0.01, t + 0.8);
                 } else if (type === 'RIFLE') {
                     filter.frequency.value = 1000;
-                    gain.gain.setValueAtTime(1, t);
+                    gain.gain.setValueAtTime(0.5, t); // Reduced from 1.0
                     gain.gain.exponentialRampToValueAtTime(0.01, t + 0.15);
                 } else {
                     filter.frequency.value = 1500;
-                    gain.gain.setValueAtTime(0.8, t);
+                    gain.gain.setValueAtTime(0.4, t); // Reduced from 0.8
                     gain.gain.exponentialRampToValueAtTime(0.01, t + 0.1);
                 }
 
@@ -5185,7 +5191,10 @@
 
                 // User Request: Play headshot.mp3 on headshot
                 if (this.audioBuffers['headshot']) {
-                    this.playAudioFile('headshot', 1.0);
+                    // [FIX] Add tiny delay (50ms) to distinguish from initial shot sound
+                    setTimeout(() => {
+                        this.playAudioFile('headshot', 0.82); // Slightly reduced from 1.0 (Master volume is already 0.5)
+                    }, 50);
                     return;
                 }
 
@@ -7165,6 +7174,8 @@
 
         // --- 게임 시작 함수 ---
         function startGame() {
+            if (window.isGameInitialized) return;
+            window.isGameInitialized = true;
             console.log('startGame() CALLED'); // DEBUG
             console.log('Current gameMode:', gameMode); // DEBUG: Check mode
 
@@ -11386,6 +11397,8 @@
         let isAimingHeld = false;
 
         function setupControls() {
+            if (window.isControlsSetup) return;
+            window.isControlsSetup = true;
             // Re-detect or confirm if we should use desktop controls
             // Priority: If it has a mouse (fine pointer), use desktop controls regardless of touch
             const hasFinePointer = window.matchMedia && window.matchMedia('(pointer: fine)').matches;
@@ -12823,7 +12836,7 @@
                 ray.ray.direction.x += (Math.random() - 0.5) * 0.05;
                 ray.ray.direction.y += (Math.random() - 0.5) * 0.05;
             }
-            const range = (w.type === 'KNIFE') ? 3.0 : 100;
+            const range = (w.type === 'KNIFE') ? 2.0 : 100; // Reduced from 3.0 to 2.0 per user request
 
             const targets = scene.children.filter(obj => obj !== weaponContainer);
             const hits = ray.intersectObjects(targets, true);
