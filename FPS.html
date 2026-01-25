@@ -12901,12 +12901,18 @@
 
                     // [Fallback] Geometric Headshot Detection
                     // If the mesh naming fails (GLB issue), check if the hit is high enough relative to player base.
-                    if (!isHead && p.position) {
+                    // Added upper bound (1.85) to prevent mid-air headshots above the model.
+                    if (!isHead && p.position && h.object.type !== 'Sprite') {
                         const hitHeight = h.point.y - p.position.y;
-                        if (hitHeight > 1.45) { // Assuming player height ~1.7-1.8m, >1.45m is roughly neck/head
+                        if (hitHeight > 1.45 && hitHeight < 1.85) { // Assuming player height ~1.7-1.8m
                             isHead = true;
                             console.log('[Shoot] Geometric Headshot override! Height:', hitHeight.toFixed(2));
                         }
+                    }
+
+                    // [NEW] Ignore hits on Sprites (like name tags) or anything too high
+                    if (h.object.type === 'Sprite' || (h.point.y - p.position.y > 1.9)) {
+                        continue;
                     }
 
                     console.log('[Shoot] Hit Player. Part:', h.object.name, 'isHead:', isHead); // DEBUG
@@ -12954,7 +12960,22 @@
                     createBlood(h.point);
 
                     let dmg = w.damage;
-                    if (isHitPart(h.object, 'head')) {
+                    let isHead = isHitPart(h.object, 'head');
+
+                    // [Fallback] Geometric for Enemies
+                    if (!isHead && p.position && h.object.type !== 'Sprite') {
+                        const hitHeight = h.point.y - p.position.y;
+                        if (hitHeight > 1.45 && hitHeight < 1.85) {
+                            isHead = true;
+                        }
+                    }
+
+                    // Ignore Sprite hits
+                    if (h.object.type === 'Sprite' || (h.point.y - p.position.y > 1.9)) {
+                        continue;
+                    }
+
+                    if (isHead) {
                         dmg *= 3;
                         elHeadshot.classList.add('active');
                         setTimeout(() => elHeadshot.classList.remove('active'), 500);
