@@ -13497,7 +13497,7 @@
             // 2. Jumping Spread (In Air)
             // Assuming 'playerVelocity.y' or height check. 
             // Simplified check: if jump button pressed or in air (needs 'canJump' variable context)
-            if (!canJump) { // Start with jump button/state if available, fall back to logic
+            if (!isGrounded) { // Start with jump button/state if available, fall back to logic
                 targetSpread += 15; // +15px when jumping/falling
             }
 
