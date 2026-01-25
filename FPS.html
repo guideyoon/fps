@@ -13845,7 +13845,8 @@
                     // 다른 무기들은 원래대로 (recoil만 적용)
                     const recoilScale = (isAiming && w.type === 'RIFLE') ? 0.35 : 1;
                     weaponModel.position.y = THREE.MathUtils.lerp(weaponModel.position.y, 0, 10 * dt);
-                    weaponModel.rotation.x = recoil.x * recoilScale + (isReloading ? 0.5 : 0);
+                    const reloadRot = (isReloading && isAiming && w.type === 'RIFLE') ? 0.1 : (isReloading ? 0.5 : 0);
+                    weaponModel.rotation.x = recoil.x * recoilScale + reloadRot;
                     weaponModel.position.z = recoil.z * recoilScale;
                     // 재장전 제스처 중이 아닐 때만 rotation.z 초기화
                     if (!sniperReloadGesture) {
