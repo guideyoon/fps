@@ -13827,7 +13827,7 @@
             currentRot.lerp(targetRot, 0.2); // Interpolate rotation
 
             // [User Request] Dynamic Arm Scaling for all weapons (except Knife/Grenade)
-            if (w.type !== 'KNIFE' && w.type !== 'GRENADE') {
+            if (w.type !== 'KNIFE' && w.type !== 'GRENADE' && weaponModel) {
                 const lArm = weaponModel.getObjectByName('LeftArmGroup');
                 const rArm = weaponModel.getObjectByName('RightArmGroup');
 
