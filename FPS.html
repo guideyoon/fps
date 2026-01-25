@@ -13030,13 +13030,10 @@
                             }
                         }
                     }
-                } else if (w.ammo <= 0 && w.type !== 'KNIFE') {
-                    // 매번 빈 격발 소리 재생 (hasClickedEmpty 체크 제거)
-                    if (fireCooldown <= 0) {
-                        SoundGen.playDryFire();
-                        elAmmoCurrent.classList.add('no-ammo');
-                        setTimeout(() => elAmmoCurrent.classList.remove('no-ammo'), 200);
-                        fireCooldown = 0.2; // 빈 격발도 쿨다운 적용
+                } else if (w.ammo <= 0 && w.type !== 'KNIFE' && w.type !== 'GRENADE') {
+                    // [User Request] Auto-Reload if empty (no click sound)
+                    if (!isReloading) {
+                        reload();
                     }
                 }
             }
