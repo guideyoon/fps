@@ -6698,20 +6698,26 @@
                     }
                 });
 
-                // Find head for hit detection
+                // Find head & limbs for hit detection
                 m.traverse((child) => {
-                    if (child.name && child.name.toLowerCase().includes('head')) {
+                    const lowName = child.name ? child.name.toLowerCase() : "";
+
+                    if (lowName.includes('head')) {
                         group.userData.head = child;
-                        // [NEW] Aggressively force name 'head' for ALL children meshes of the head bone
-                        console.log('[SetupModel] Found Head Bone:', child.name);
                         child.name = 'head';
+                        child.userData.isHead = true;
                         child.traverse(c => {
                             if (c.isMesh) {
-                                console.log('[SetupModel] Renaming head mesh:', c.name, '-> head');
                                 c.name = 'head';
-                                c.userData.isHead = true; // Extra flag for robustness
+                                c.userData.isHead = true;
                             }
                         });
+                    } else if (lowName.includes('arm') || lowName.includes('leg') || lowName.includes('hand') || lowName.includes('foot')) {
+                        child.userData.isLimb = true;
+                        // For Mixamo rigs, arms/legs are often bones, but we want the meshes too
+                        if (child.isMesh) {
+                            child.userData.isLimb = true;
+                        }
                     }
                 });
 
@@ -10684,6 +10690,7 @@
             lArmGroup.position.set(-0.28, 1.45, 0.05);
             lArmGroup.rotation.x = -1.4; // 앞으로 뻗음
             lArmGroup.rotation.z = 0.2;  // 약간 벌림
+            lArmGroup.name = 'limb'; // Explicitly name for hit detection
             enemy.add(lArmGroup);
             enemy.userData.lArm = lArmGroup; // 애니메이션용
 
@@ -10700,6 +10707,7 @@
             rArmGroup.position.set(0.28, 1.45, 0.05);
             rArmGroup.rotation.x = -1.3;
             rArmGroup.rotation.z = -0.2;
+            rArmGroup.name = 'limb'; // Explicitly name for hit detection
             enemy.add(rArmGroup);
             enemy.userData.rArm = rArmGroup;
 
@@ -10720,6 +10728,7 @@
             lLegGroup.add(lFoot);
 
             lLegGroup.position.set(-0.15, 0.8, 0);
+            lLegGroup.name = 'limb'; // Explicitly name for hit detection
             enemy.add(lLegGroup);
 
             // 오른쪽 다리
@@ -10737,6 +10746,7 @@
             rLegGroup.add(rFoot);
 
             rLegGroup.position.set(0.15, 0.8, 0);
+            rLegGroup.name = 'limb'; // Explicitly name for hit detection
             enemy.add(rLegGroup);
 
             // HP Bar (Billboard)
@@ -12661,9 +12671,30 @@
         function isHitPart(obj, partName) {
             let current = obj;
             const searchName = partName.toLowerCase();
+
+            // Define keywords for more robust "limb" detection
+            const limbKeywords = ['arm', 'leg', 'hand', 'foot', 'limb', 'finger', 'toe'];
+
             while (current) {
-                if (current.name && current.name.toLowerCase().includes(searchName)) return true;
-                if (partName === 'head' && current.userData && current.userData.isHead) return true; // Check flag
+                const lowName = (current.name || "").toLowerCase();
+
+                // 1. Direct name match
+                if (lowName.includes(searchName)) return true;
+
+                // 2. Head specific (Robust)
+                if (partName === 'head' && (current.userData?.isHead || lowName.includes('head'))) return true;
+
+                // 3. Limb specific (Robust with keywords)
+                if (partName === 'limb') {
+                    if (current.userData?.isLimb) return true;
+                    // Check if any keyword matches
+                    if (limbKeywords.some(kw => lowName.includes(kw))) {
+                        // Avoid false positives (spine, body, torso should not be limbs)
+                        if (lowName.includes('spine') || lowName.includes('body') || lowName.includes('torso')) return false;
+                        return true;
+                    }
+                }
+
                 current = current.parent;
             }
             return false;
