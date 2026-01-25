@@ -7279,20 +7279,13 @@
             }
         });
 
-        function loadJsonMapSync(url) {
+        async function loadJsonMap(url) {
             try {
-                const xhr = new XMLHttpRequest();
-                xhr.open('GET', url, false);
-                xhr.send(null);
-                // For local files, status might be 0
-                if (xhr.status === 200 || xhr.status === 0) {
-                    const mapData = JSON.parse(xhr.responseText);
-                    createCustomMap(mapData);
-                    console.log(`Map ${url} loaded successfully`);
-                } else {
-                    console.error(`Failed to load map ${url} (Status: ${xhr.status}), using factory`);
-                    createFactoryMap();
-                }
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const mapData = await response.json();
+                createCustomMap(mapData);
+                console.log(`Map ${url} loaded successfully via fetch`);
             } catch (err) {
                 console.error(`Error loading map ${url}:`, err);
                 createFactoryMap();
@@ -7300,7 +7293,7 @@
         }
 
         // --- 게임 시작 함수 ---
-        function startGame() {
+        async function startGame() {
             if (window.isGameInitialized) return;
             window.isGameInitialized = true;
             console.log('startGame() CALLED'); // DEBUG
@@ -7374,23 +7367,7 @@
                 if (currentMap === 'hotel') {
                     createHotelMap();
                 } else if (currentMap === 'test') {
-                    // Load custom test map from c.json synchronously using XMLHttpRequest
-                    try {
-                        const xhr = new XMLHttpRequest();
-                        xhr.open('GET', 'map/c.json', false); // false = synchronous
-                        xhr.send(null);
-                        if (xhr.status === 200) {
-                            const mapData = JSON.parse(xhr.responseText);
-                            createCustomMap(mapData);
-                            console.log('Test map loaded successfully');
-                        } else {
-                            console.error('Failed to load test map, using factory');
-                            createFactoryMap();
-                        }
-                    } catch (err) {
-                        console.error('Failed to load test map:', err);
-                        createFactoryMap(); // Fallback to factory
-                    }
+                    await loadJsonMap('map/c.json');
                 } else {
                     createFactoryMap(); // 기본값
                 }
@@ -7419,9 +7396,9 @@
                 if (selectedSinglePlayerMap === 'hotel') {
                     createHotelMap();
                 } else if (selectedSinglePlayerMap === 'test') {
-                    loadJsonMapSync('map/c.json');
+                    await loadJsonMap('map/c.json');
                 } else if (selectedSinglePlayerMap === 'bridge') {
-                    loadJsonMapSync('map/dari.json');
+                    await loadJsonMap('map/dari.json');
                 } else {
                     createFactoryMap(); // Default
                 }
