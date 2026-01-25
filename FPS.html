@@ -13555,8 +13555,18 @@
 
                     const targetArmScale = isAiming ? adsScale : idleScale;
                     if (lArm) {
-                        const s = THREE.MathUtils.lerp(lArm.scale.x, targetArmScale, 15 * dt);
-                        lArm.scale.set(s, s, s);
+                        let currentTargetScale = new THREE.Vector3(targetArmScale, targetArmScale, targetArmScale);
+
+                        // [MOD] Special compensation for Rifle ADS Reload to hide gaps/separation
+                        if (w.type === 'RIFLE' && isAiming && isReloading) {
+                            // Make it thicker (X, Z) and longer (Y)
+                            currentTargetScale.set(1.2, 2.2, 1.2);
+                        }
+
+                        const sx = THREE.MathUtils.lerp(lArm.scale.x, currentTargetScale.x, 15 * dt);
+                        const sy = THREE.MathUtils.lerp(lArm.scale.y, currentTargetScale.y, 15 * dt);
+                        const sz = THREE.MathUtils.lerp(lArm.scale.z, currentTargetScale.z, 15 * dt);
+                        lArm.scale.set(sx, sy, sz);
                     }
                     if (rArm) {
                         const s = THREE.MathUtils.lerp(rArm.scale.x, targetArmScale, 15 * dt);
