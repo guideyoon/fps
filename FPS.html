@@ -854,6 +854,20 @@
             z-index: 10;
         }
 
+        #muzzle-flash-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #fff;
+            opacity: 0;
+            pointer-events: none;
+            mix-blend-mode: overlay;
+            z-index: 15;
+            transition: opacity 0.05s ease-out;
+        }
+
         #crosshair {
             position: absolute;
             top: 50%;
@@ -3272,8 +3286,9 @@
         <div class="glitch-wrapper"></div>
     </div>
     <div id="game-container"></div>
-    <div id="vignette"></div>
     <div id="damage-overlay"></div>
+    <div id="muzzle-flash-overlay"></div>
+    <div id="vignette"></div>
     <div id="mobile-player-name"></div>
     <button id="chat-toggle-btn"><i class="fas fa-comment"></i></button>
     <div id="scope-overlay">
@@ -4828,25 +4843,20 @@
             {
                 id: 0, name: "ASSAULT RIFLE",
                 type: 'RIFLE', maxAmmo: 30, ammo: 30, automatic: true,
-                // [ROLLBACK] Restore working idle position, disable custom rotation for now
-                type: 'RIFLE', maxAmmo: 30, ammo: 30, automatic: true,
                 posHip: new THREE.Vector3(0.08, -0.25, -0.45),
-                // [User Request] Separate GLB transforms for Idle vs ADS
                 glbHip: {
                     pos: new THREE.Vector3(0.23, -0.47, 0.44),
                     rot: new THREE.Vector3(0.43, 1.69, -0.25),
                     scale: new THREE.Vector3(0.50, 0.50, 0.50)
                 },
                 glbAds: {
-                    // [User Request] Set to coordinates provide in image
                     pos: new THREE.Vector3(0.00, -0.47, -0.06),
                     rot: new THREE.Vector3(0.36, 1.57, -0.29),
                     scale: new THREE.Vector3(0.45, 0.45, 0.45)
                 },
-                // ADS: Z더 멀리 (-0.45), FOV 약간 증가 (25) for smaller appearance
                 posAds: new THREE.Vector3(0, -0.062, -0.45),
                 rotAds: new THREE.Vector3(0, 0, 0), // Aim Rotation (Default)
-                fovAds: 25, fireRate: 0.08, recoil: 0.06, damage: 30,
+                fovAds: 25, fireRate: 0.08, recoil: 0.25, damage: 30, // Recoil increased from 0.06
                 muzzleHip: new THREE.Vector3(0, 0.12, -0.65),
                 muzzleAds: new THREE.Vector3(-0.049, 0.024, -0.655),
                 lArmHip: { pos: new THREE.Vector3(-0.05, -0.25, -0.44), rot: new THREE.Vector3(0.54, -0.82, 0.60) },
@@ -4857,7 +4867,6 @@
                 id: 1, name: "TACTICAL PISTOL",
                 type: 'PISTOL', maxAmmo: 10, ammo: 10, automatic: false,
                 posHip: new THREE.Vector3(0.08, -0.2, -0.45),
-                // [User Request] Separate GLB transforms for Idle vs ADS
                 glbHip: {
                     pos: new THREE.Vector3(-0.02, 0.02, 0.09),
                     rot: new THREE.Vector3(0.04, 1.61, 0.05),
@@ -4868,9 +4877,8 @@
                     rot: new THREE.Vector3(-0.04, 1.57, 0.06),
                     scale: new THREE.Vector3(0.17, 0.17, 0.17)
                 },
-                // Pistol ADS: Centered and aligned to sights
                 posAds: new THREE.Vector3(0, -0.048, -0.35),
-                fovAds: 55, fireRate: 0.15, recoil: 0.1, damage: 20,
+                fovAds: 55, fireRate: 0.15, recoil: 0.8, damage: 20, // Recoil increased from 0.1
                 muzzleHip: new THREE.Vector3(-0.066, 0.190, -0.199),
                 muzzleAds: new THREE.Vector3(0.01, 0.01, -0.20),
                 switchSound: 'c-gun'
@@ -4879,7 +4887,6 @@
                 id: 2, name: "TAC-50 SNIPER",
                 type: 'SNIPER', maxAmmo: 4, ammo: 4, automatic: false,
                 posHip: new THREE.Vector3(0.08, -0.3, -0.5),
-                // [User Request] Sniper GLB Config
                 glbHip: {
                     pos: new THREE.Vector3(0.19, -0.11, 0.17),
                     rot: new THREE.Vector3(0.45, 1.59, -0.39),
@@ -4891,7 +4898,7 @@
                     scale: new THREE.Vector3(0.2, 0.2, 0.2)
                 },
                 posAds: new THREE.Vector3(0, -0.06, -0.15),
-                fovAds: 8, fireRate: 1.5, recoil: 0.4, damage: 100,
+                fovAds: 8, fireRate: 1.5, recoil: 1.2, damage: 100, // Recoil increased from 0.4
                 muzzleHip: new THREE.Vector3(0.0, 0.28, -2.5),
                 muzzleAds: new THREE.Vector3(0, 0.035, -0.85),
                 lArmHip: { pos: new THREE.Vector3(0.01, -0.24, -0.60), rot: new THREE.Vector3(0.72, -0.76, -0.02) },
@@ -4971,7 +4978,6 @@
         let swayOffset = { x: 0, y: 0 }; // 무기 울렁임 (Idle Sway)
 
         let shells = [];
-        let shellGeo, shellMat;
         let bloodParticles = [];
         let decals = [];
         let sparkParticles = [];
@@ -5127,6 +5133,21 @@
             playShoot: function (type) {
                 if (!this.ensureContext()) return;
                 console.log('[SoundGen] playShoot called for:', type);
+
+                // Muzzle Flash Effect (Screen Flash)
+                const flashOverlay = document.getElementById('muzzle-flash-overlay');
+                if (flashOverlay) {
+                    flashOverlay.style.opacity = '0.15'; // Subtle flash
+                    setTimeout(() => {
+                        flashOverlay.style.opacity = '0';
+                    }, 50);
+                }
+
+                // Shell Ejection
+                const w = WEAPONS[curWeaponIdx];
+                if (w.type === 'RIFLE' || w.type === 'PISTOL' || w.type === 'SNIPER') {
+                    createShell(w);
+                }
 
                 // 저격총은 오디오 파일 사용, 없으면 기존 소리 생성
                 if (type === 'SNIPER' && this.audioBuffers['rifle']) {
@@ -5360,6 +5381,7 @@
             },
             playStep: function () {
                 if (!this.ensureContext()) return;
+                if (isSpectating) return; // 관전 중에는 조작 불가
                 if (this.isStepPlaying) return; // 이미 재생 중이면 중복 재생 방지
 
                 // User Request: Use walking.MP3 for walking
@@ -13054,6 +13076,85 @@
             return false;
         }
 
+        // --- Shell Ejection System ---
+        // shells array is already declared globally at top of script
+        const shellGeometry = new THREE.CylinderGeometry(0.005, 0.005, 0.03, 8);
+        shellGeometry.rotateX(Math.PI / 2); // Align cylinder with Z axis initially
+        const shellMaterial = new THREE.MeshStandardMaterial({ color: 0xffff00, metalness: 0.8, roughness: 0.2 });
+
+        function createShell(w) {
+            if (!w || !camera) return;
+
+            // Only eject for Rifle, Pistol, Sniper
+            if (w.type === 'KNIFE' || w.type === 'GRENADE') return;
+
+            const shell = new THREE.Mesh(shellGeometry, shellMaterial);
+
+            // Initial position: relative to camera, slightly to the right and down
+            // In a real weapon rig, this would be a bone position.
+            // We'll approximate based on weapon holding position.
+            const shellPos = new THREE.Vector3(0.15, -0.15, -0.3);
+            shellPos.applyQuaternion(camera.quaternion);
+            shellPos.add(camera.position);
+
+            shell.position.copy(shellPos);
+            shell.quaternion.copy(camera.quaternion);
+
+            // Random rotation for realism
+            shell.rotation.z = Math.random() * Math.PI;
+            shell.rotation.x = Math.random() * Math.PI;
+
+            // Velocity: Right + Up + Back
+            const velocity = new THREE.Vector3(
+                0.8 + Math.random() * 0.5, // Right
+                0.5 + Math.random() * 0.5, // Up
+                0.2 + Math.random() * 0.2 // Back (towards player mostly)
+            );
+            velocity.applyQuaternion(camera.quaternion);
+
+            shells.push({
+                mesh: shell,
+                velocity: velocity,
+                rotVelocity: new THREE.Vector3(Math.random() * 10, Math.random() * 10, Math.random() * 10),
+                life: 1.0 // 1 second lifetime
+            });
+
+            scene.add(shell);
+        }
+
+        function updateShells(dt) {
+            for (let i = shells.length - 1; i >= 0; i--) {
+                const s = shells[i];
+                s.life -= dt;
+
+                if (s.life <= 0) {
+                    scene.remove(s.mesh);
+                    shells.splice(i, 1);
+                    continue;
+                }
+
+                // Gravity
+                s.velocity.y -= 9.8 * dt;
+
+                // Move
+                s.mesh.position.addScaledVector(s.velocity, dt);
+
+                // Rotate
+                s.mesh.rotation.x += s.rotVelocity.x * dt;
+                s.mesh.rotation.y += s.rotVelocity.y * dt;
+                s.mesh.rotation.z += s.rotVelocity.z * dt;
+
+                // Simple Floor Collision (approximate floor at Y=0)
+                if (s.mesh.position.y < 0.015) {
+                    s.mesh.position.y = 0.015;
+                    s.velocity.y *= -0.5; // Bounce
+                    s.velocity.x *= 0.5; // Friction
+                    s.velocity.z *= 0.5;
+                    s.rotVelocity.multiplyScalar(0.5); // Spin dampening
+                }
+            }
+        }
+
         let currentRecoil = 0; // Variable to track recoil amount
 
         function shoot(w) {
@@ -13491,6 +13592,9 @@
                     if (gameOverTitle) gameOverTitle.innerText = 'TIME OVER';
                 }
             }
+
+            // Update Shells
+            updateShells(dt);
 
             // --- Dynamic Crosshair Update ---
             // Calculate current spread based on state
