@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<!-- DEPLOY TRIGGER: 2026-01-24 -->
-<!-- VERSION: 2026-01-19-FORCE-UPDATE -->
+<!-- DEPLOY TRIGGER: 2026-01-25-1840 -->
+<!-- VERSION: 2026-01-25-CROSSHAIR-FORCE-V3 -->
 <html lang="ko">
 
 <head>
@@ -269,18 +269,18 @@
 
         .crosshair .dot {
             position: absolute;
-            width: 5px;
-            height: 5px;
-            background-color: white;
+            width: 6px !important;
+            height: 6px !important;
+            background-color: white !important;
             border-radius: 50%;
-            box-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
+            box-shadow: 0 0 4px rgba(0, 0, 0, 0.8) !important;
             z-index: 102;
         }
 
         .crosshair .hair {
             position: absolute;
-            background-color: white;
-            box-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
+            background-color: white !important;
+            box-shadow: 0 0 3px rgba(0, 0, 0, 0.8) !important;
             transition: transform 0.1s ease-out;
             /* Smooth spread */
             z-index: 101;
@@ -323,19 +323,20 @@
             /* JS handles positioning via transform */
         }
 
-        .crosshair.firing .horizontal {
+        .crosshair.firing .hair.horizontal {
             width: 35px;
             opacity: 0.5;
         }
 
-        .crosshair.firing .vertical {
+        .crosshair.firing .hair.vertical {
             height: 35px;
             opacity: 0.5;
         }
 
-        .crosshair.enemy-detected .line {
-            background: var(--neon-red);
-            box-shadow: 0 0 5px red;
+        .crosshair.enemy-detected .hair {
+            background: #ffffff !important;
+            /* Keep it white even on enemy for now to verify color change works */
+            box-shadow: 0 0 5px #ffffff !important;
         }
 
         /* Bottom Left: Vitals */
@@ -3487,6 +3488,12 @@
             <div class="timer" id="hud-timer">10:00</div>
             <div class="score enemy" id="hud-score-enemy">0</div>
             <div id="hud-kill-count">Kills: 0</div>
+        </div>
+
+        <!-- Version Info Wrapper -->
+        <div id="deploy-version-overlay"
+            style="position: absolute; bottom: 5px; right: 5px; font-size: 10px; color: #444; pointer-events: none; z-index: 9999;">
+            ver: 2026-01-25-CH-V3
         </div>
 
         <!-- Top Right: Kill Feed -->
@@ -13482,7 +13489,7 @@
             // --- Dynamic Crosshair Update ---
             // Calculate current spread based on state
             let targetSpread = 0; // Base offset from center (default gap)
-            const BASE_GAP = 15;
+            const BASE_GAP = 25; // Significant increase to be clearly visible
 
             // 1. Movement Spread (Walking)
             if (keys.w || keys.a || keys.s || keys.d) {
