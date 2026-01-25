@@ -12300,10 +12300,16 @@
             const initialMagPos = mag ? mag.position.clone() : null;
 
             // --- RELOAD SEQUENCE ---
-            // Stage 1: Drop Mag (0ms) - [MINIMIZED] No tilt/dip
-            if (mag) {
-                mag.position.y -= 0.2;
-                mag.visible = true;
+            // Stage 1: Tilt Up & Drop Mag (0ms)
+            if (weaponModel) {
+                // [User Request] Smaller motion (Reduced from 0.5 and -0.1)
+                weaponModel.rotation.z = 0.15;
+                weaponModel.position.y = -0.02;
+                if (mag) {
+                    // Start drop animation (will be handled by lerp in future or simple offset here)
+                    mag.position.y -= 0.2;
+                    mag.visible = true;
+                }
             }
 
             // Stage 2: Hide dropped mag (400ms)
@@ -12316,6 +12322,7 @@
                 if (mag) {
                     mag.position.y = initialMagPos.y - 0.4;
                     mag.visible = true;
+                    // Move up to initial position
                     const animateUp = () => {
                         const step = 0.05;
                         if (mag.position.y < initialMagPos.y) {
@@ -13474,10 +13481,10 @@
                     weaponContainer.visible = true;
                     elScope.style.display = 'none';
 
-                    // Sniper Scope - Show circular scope only for SNIPER when aiming (and NOT reloading)
+                    // Sniper Scope - Show circular scope only for SNIPER when aiming
                     const sniperScope = document.getElementById('sniper-scope');
                     if (sniperScope) {
-                        if (isAiming && !isReloading && w.type === 'SNIPER' && !isMobile) {
+                        if (isAiming && w.type === 'SNIPER' && !isMobile) {
                             sniperScope.style.display = 'block';
                         } else {
                             sniperScope.style.display = 'none';
@@ -13519,7 +13526,7 @@
                 // [User Request] Rotation Interpolation
                 let targetRot = w.rotHip || new THREE.Vector3(0, 0, 0);
 
-                if (isAiming && !isReloading) {
+                if (isAiming) {
                     if (w.type === 'SNIPER') targetFov = w.fovAds;
                     else if (w.type !== 'KNIFE') {
                         targetPos = w.posAds;
@@ -13838,7 +13845,7 @@
                     // 다른 무기들은 원래대로 (recoil만 적용)
                     const recoilScale = (isAiming && w.type === 'RIFLE') ? 0.35 : 1;
                     weaponModel.position.y = THREE.MathUtils.lerp(weaponModel.position.y, 0, 10 * dt);
-                    weaponModel.rotation.x = recoil.x * recoilScale + (isReloading ? 0.1 : 0);
+                    weaponModel.rotation.x = recoil.x * recoilScale + (isReloading ? 0.5 : 0);
                     weaponModel.position.z = recoil.z * recoilScale;
                     // 재장전 제스처 중이 아닐 때만 rotation.z 초기화
                     if (!sniperReloadGesture) {
