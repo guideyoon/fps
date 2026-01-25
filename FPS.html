@@ -4899,9 +4899,17 @@
                     return;
                 }
 
-                // [Multiplayer FIX] Ensure knife sounds are handled correctly
+                // [Multiplayer FIX] Ensure knife sounds are handled correctly (No fall-through to synth)
                 if (type === 'KNIFE') {
                     this.playKnife();
+                    return;
+                }
+
+                // [Remote Player FIX] Handle grenade throws for remote players
+                if (type === 'GRENADE') {
+                    if (typeof this.playGrenadeThrow === 'function') {
+                        this.playGrenadeThrow();
+                    }
                     return;
                 }
 
@@ -4917,7 +4925,10 @@
                     return;
                 }
 
-                // 기존 소리 생성 (폴백)
+                // [DEFENSIVE] Do not play any sound for unknown types or KNIFE/GRENADE that reached here
+                if (!type || type === 'KNIFE' || type === 'GRENADE') return;
+
+                // 기존 소리 생성 (폴백) - Firearms only
                 const t = this.ctx.currentTime;
                 const osc = this.ctx.createOscillator();
                 const gain = this.ctx.createGain();
@@ -6241,111 +6252,105 @@
                     const mesh = otherPlayersMap[data.id];
                     if (mesh) {
                         if (data.action === 'switch') {
-                            // loadRemoteWeaponObj(mesh, data.weaponIdx); // Disabled per user request (embedded weapon)
-                        } else if (data.action === 'shoot') {
-                            SoundGen.playShoot(WEAPONS[data.weaponIdx].type);
-
-                            // Visual shoot effect - High Quality Muzzle Flash (Sync with Local)
-                            if (!mesh.userData.muzzleFlash) {
-                                const points = 4;
-                                const outerRadius = 0.16 * 3; // Scaled up for visibility distance
-                                const innerRadius = 0.07 * 3;
-                                const muzzleShape = new THREE.Shape();
-                                for (let i = 0; i < points * 2; i++) {
-                                    const r = (i % 2 === 0) ? outerRadius : innerRadius;
-                                    const theta = (i / (points * 2)) * Math.PI * 2;
-                                    const x = Math.cos(theta) * r;
-                                    const y = Math.sin(theta) * r;
-                                    if (i === 0) muzzleShape.moveTo(x, y);
-                                    else muzzleShape.lineTo(x, y);
-                                }
-                                muzzleShape.closePath();
-
-                                const fGeo = new THREE.ShapeGeometry(muzzleShape);
-                                const fMat = new THREE.MeshBasicMaterial({
-                                    color: 0xffbb77,
-                                    transparent: true,
-                                    opacity: 0,
-                                    side: THREE.DoubleSide,
-                                    blending: THREE.AdditiveBlending,
-                                    depthWrite: false
-                                });
-                                const flash = new THREE.Mesh(fGeo, fMat);
-                                flash.visible = false;
-                                // Position Estimate: Slightly right, chest/head height, forward
-                                // Since we rotated mesh 90 deg, local Space might be tricky.
-                                // Trial: 0.2 (Right), 1.35 (Gun Height), 0.5 (Forward)
-                                flash.position.set(0.2, 1.35, 1.2);
-                                mesh.add(flash);
-                                mesh.userData.muzzleFlash = flash;
-                            }
-
-                            const flash = mesh.userData.muzzleFlash;
-                            flash.visible = true;
-                            flash.material.opacity = 0.6 + Math.random() * 0.2;
-                            flash.rotation.z = Math.random() * Math.PI * 2;
-                            const s = 1.0 + Math.random() * 0.5;
-                            flash.scale.set(s, s, 1);
-
-                            // Remove flash after brief moment
-                            setTimeout(() => {
-                                if (flash) {
-                                    flash.visible = false;
-                                    flash.material.opacity = 0;
-                                }
-                            }, 50);
-
-                            // Weapon recoil animation (find weapon child and animate)
-                            const weapon = mesh.children.find(child => child.geometry && child.geometry.type === 'BoxGeometry' && child.material.color.getHex() === 0x222222);
-                            if (weapon) {
-                                const originalZ = weapon.position.z;
-                                weapon.position.z -= 0.1; // Move back
-                                setTimeout(() => {
-                                    weapon.position.z = originalZ; // Return to original
-                                }, 100);
-                            }
-
-                            // Upper body and arms recoil animation
-                            mesh.children.forEach(child => {
-                                // Find arms by geometry type (CylinderGeometry with specific size)
-                                if (child.geometry && child.geometry.type === 'CylinderGeometry' &&
-                                    child.material.color && child.material.color.getHex() === 0xf4a460) {
-                                    // This is an arm
-                                    const originalRotX = child.rotation.x;
-                                    const originalPosZ = child.position.z;
-
-                                    // Pull back and lift slightly
-                                    child.rotation.x = originalRotX - 0.15;
-                                    child.position.z = originalPosZ - 0.05;
-
-                                    setTimeout(() => {
-                                        child.rotation.x = originalRotX;
-                                        child.position.z = originalPosZ;
-                                    }, 100);
-                                }
-
-                                // Find body (CylinderGeometry with blue color)
-                                if (child.geometry && child.geometry.type === 'CylinderGeometry' &&
-                                    child.material.color && child.material.color.getHex() === 0x4a90e2 &&
-                                    child.position.y > 1.0) { // Body is higher than legs
-                                    // This is the body
-                                    const originalRotX = child.rotation.x;
-
-                                    // Tilt back slightly
-                                    child.rotation.x = originalRotX - 0.08;
-
-                                    setTimeout(() => {
-                                        child.rotation.x = originalRotX;
-                                    }, 100);
-                                }
-                            });
-                        } else if (data.action === 'switch') {
                             // Update weapon mesh when remote player switches weapons
                             const newWeaponIdx = data.weaponIdx;
                             if (newWeaponIdx !== undefined && mesh.userData.weaponIdx !== newWeaponIdx) {
                                 mesh.userData.weaponIdx = newWeaponIdx;
                                 // loadRemoteWeaponObj(mesh, newWeaponIdx); // Disabled per user request
                                 console.log('Player', data.id, 'switched to weapon index:', newWeaponIdx);
+                            }
+                        } else if (data.action === 'shoot') {
+                            SoundGen.playShoot(WEAPONS[data.weaponIdx].type);
+
+                            // 나이프나 수류탄은 뮤즐 플래시 효과 제외
+                            const wType = WEAPONS[data.weaponIdx].type;
+                            if (wType === 'KNIFE' || wType === 'GRENADE') {
+                                // No visuals for these actions in basic shoot handler
+                            } else {
+                                // Visual shoot effect - High Quality Muzzle Flash (Sync with Local)
+                                if (!mesh.userData.muzzleFlash) {
+                                    const points = 4;
+                                    const outerRadius = 0.16 * 3; // Scaled up for visibility distance
+                                    const innerRadius = 0.07 * 3;
+                                    const muzzleShape = new THREE.Shape();
+                                    for (let i = 0; i < points * 2; i++) {
+                                        const r = (i % 2 === 0) ? outerRadius : innerRadius;
+                                        const theta = (i / (points * 2)) * Math.PI * 2;
+                                        const x = Math.cos(theta) * r;
+                                        const y = Math.sin(theta) * r;
+                                        if (i === 0) muzzleShape.moveTo(x, y);
+                                        else muzzleShape.lineTo(x, y);
+                                    }
+                                    muzzleShape.closePath();
+
+                                    const fGeo = new THREE.ShapeGeometry(muzzleShape);
+                                    const fMat = new THREE.MeshBasicMaterial({
+                                        color: 0xffbb77,
+                                        transparent: true,
+                                        opacity: 0,
+                                        side: THREE.DoubleSide,
+                                        blending: THREE.AdditiveBlending,
+                                        depthWrite: false
+                                    });
+                                    const flash = new THREE.Mesh(fGeo, fMat);
+                                    flash.visible = false;
+                                    // Position Estimate: Slightly right, chest/head height, forward
+                                    flash.position.set(0.2, 1.35, 1.2);
+                                    mesh.add(flash);
+                                    mesh.userData.muzzleFlash = flash;
+                                }
+
+                                const flash = mesh.userData.muzzleFlash;
+                                flash.visible = true;
+                                flash.material.opacity = 0.6 + Math.random() * 0.2;
+                                flash.rotation.z = Math.random() * Math.PI * 2;
+                                const s = 1.0 + Math.random() * 0.5;
+                                flash.scale.set(s, s, 1);
+
+                                // Remove flash after brief moment
+                                setTimeout(() => {
+                                    if (flash) {
+                                        flash.visible = false;
+                                        flash.material.opacity = 0;
+                                    }
+                                }, 50);
+
+                                // Weapon recoil animation (find weapon child and animate)
+                                const weapon = mesh.children.find(child => child.geometry && child.geometry.type === 'BoxGeometry' && child.material.color.getHex() === 0x222222);
+                                if (weapon) {
+                                    const originalZ = weapon.position.z;
+                                    weapon.position.z -= 0.1; // Move back
+                                    setTimeout(() => {
+                                        weapon.position.z = originalZ; // Return to original
+                                    }, 100);
+                                }
+
+                                // Upper body and arms recoil animation
+                                mesh.children.forEach(child => {
+                                    // Find arms
+                                    if (child.geometry && child.geometry.type === 'CylinderGeometry' &&
+                                        child.material.color && child.material.color.getHex() === 0xf4a460) {
+                                        const originalRotX = child.rotation.x;
+                                        const originalPosZ = child.position.z;
+                                        child.rotation.x = originalRotX - 0.15;
+                                        child.position.z = originalPosZ - 0.05;
+                                        setTimeout(() => {
+                                            child.rotation.x = originalRotX;
+                                            child.position.z = originalPosZ;
+                                        }, 100);
+                                    }
+
+                                    // Find body
+                                    if (child.geometry && child.geometry.type === 'CylinderGeometry' &&
+                                        child.material.color && child.material.color.getHex() === 0x4a90e2 &&
+                                        child.position.y > 1.0) {
+                                        const originalRotX = child.rotation.x;
+                                        child.rotation.x = originalRotX - 0.08;
+                                        setTimeout(() => {
+                                            child.rotation.x = originalRotX;
+                                        }, 100);
+                                    }
+                                });
                             }
                         }
                     }
