@@ -5973,7 +5973,7 @@
                 modeSelection.style.display = 'flex';
             });
 
-            document.getElementById('btn-confirm-name').addEventListener('click', () => {
+            addSafeListener(document.getElementById('btn-confirm-name'), () => {
                 const name = document.getElementById('player-name-input').value.trim() || 'Player';
                 const serverAddr = 'http://localhost:3000';
 
@@ -13748,8 +13748,7 @@
 
 
             if (isSniperAiming) {
-
-                weaponContainer.visible = false;
+                if (weaponContainer) weaponContainer.visible = false;
                 elScope.style.display = 'block';
                 if (isMobile) {
                     elCrosshair.style.display = 'block';
@@ -13761,7 +13760,7 @@
                 // PC/Mobile Common Scope Style (User Request: Mobile should look like PC)
                 elScope.style.background = 'radial-gradient(circle, transparent 20%, rgba(0, 0, 0, 0.7) 21%, rgba(0, 0, 0, 0.9) 100%)';
             } else {
-                weaponContainer.visible = true;
+                if (weaponContainer) weaponContainer.visible = true;
                 elScope.style.display = 'none';
 
                 // Sniper Scope - Show circular scope only for SNIPER when aiming
