@@ -12690,8 +12690,10 @@
                     // Check if any keyword matches
                     if (limbKeywords.some(kw => lowName.includes(kw))) {
                         // Avoid false positives (spine, body, torso should not be limbs)
-                        if (lowName.includes('spine') || lowName.includes('body') || lowName.includes('torso')) return false;
-                        return true;
+                        // [FIX] Continue searching parent instead of returning false immediately
+                        if (!(lowName.includes('spine') || lowName.includes('body') || lowName.includes('torso'))) {
+                            return true;
+                        }
                     }
                 }
 
@@ -12932,21 +12934,24 @@
 
                     // [Fallback] Geometric Headshot Detection
                     // If the mesh naming fails (GLB issue), check if the hit is high enough relative to player base.
-                    // Added upper bound (1.85) to prevent mid-air headshots above the model.
+                    // [IMPORTANT] Remote player p.position.y is EYE LEVEL (~1.7), while body base is y - 0.8
                     if (!isHead && p.position && h.object.type !== 'Sprite') {
-                        const hitHeight = h.point.y - p.position.y;
-                        if (hitHeight > 1.45 && hitHeight < 1.85) { // Assuming player height ~1.7-1.8m
+                        const playerFeetY = p.position.y - 0.8; // Approximate base based on createRemotePlayer logic
+                        const hitHeight = h.point.y - playerFeetY;
+
+                        // Height 1.3 - 1.8 from FEET is head area
+                        if (hitHeight > 1.35 && hitHeight < 1.85) {
                             isHead = true;
-                            console.log('[Shoot] Geometric Headshot override! Height:', hitHeight.toFixed(2));
+                            console.log('[Shoot] Geometric Headshot (Remote)! Height from feet:', hitHeight.toFixed(2));
                         }
                     }
 
-                    // [NEW] Ignore hits on Sprites (like name tags) or anything too high
-                    if (h.object.type === 'Sprite' || (h.point.y - p.position.y > 1.9)) {
+                    // [NEW] Ignore hits on Sprites (like name tags) or anything too high relative to feet
+                    if (h.object.type === 'Sprite' || (h.point.y - (p.position.y - 0.8) > 1.95)) {
                         continue;
                     }
 
-                    console.log('[Shoot] Hit Player. Part:', h.object.name, 'isHead:', isHead); // DEBUG
+                    console.log(`[Shoot] Hit Player: ${p.userData.playerName}. Damage: ${dmg} x ${isHead ? '3 (Head)' : (isHitPart(h.object, 'limb') ? '0.7 (Limb)' : '1 (Body)')}`);
                     if (isHead) {
                         dmg *= 3;
                         elHeadshot.classList.add('active');
