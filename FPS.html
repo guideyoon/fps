@@ -13698,6 +13698,8 @@
                     updateGrenadeDrops(dt);
                 }
                 // 모드별 업데이트
+                checkLowHealth(); // [FIX] Restore missing Low Health Check
+
                 if (gameMode === 'single') {
                     updateEnemies(dt);
                 } else if (gameMode === 'multi') {
