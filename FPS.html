@@ -13749,19 +13749,22 @@
 
             if (isSniperAiming) {
                 if (weaponContainer) weaponContainer.visible = false;
-                elScope.style.display = 'block';
-                if (isMobile) {
-                    elCrosshair.style.display = 'block';
-                } else {
-                    elCrosshair.style.display = 'none';
+                if (elScope) {
+                    elScope.style.display = 'block';
+                    // PC vs Mobile Scope Style Logic
+                    // PC/Mobile Common Scope Style (User Request: Mobile should look like PC)
+                    elScope.style.background = 'radial-gradient(circle, transparent 20%, rgba(0, 0, 0, 0.7) 21%, rgba(0, 0, 0, 0.9) 100%)';
                 }
-
-                // PC vs Mobile Scope Style Logic
-                // PC/Mobile Common Scope Style (User Request: Mobile should look like PC)
-                elScope.style.background = 'radial-gradient(circle, transparent 20%, rgba(0, 0, 0, 0.7) 21%, rgba(0, 0, 0, 0.9) 100%)';
+                if (elCrosshair) {
+                    if (isMobile) {
+                        elCrosshair.style.display = 'block';
+                    } else {
+                        elCrosshair.style.display = 'none';
+                    }
+                }
             } else {
                 if (weaponContainer) weaponContainer.visible = true;
-                elScope.style.display = 'none';
+                if (elScope) elScope.style.display = 'none';
 
                 // Sniper Scope - Show circular scope only for SNIPER when aiming
                 const sniperScope = document.getElementById('sniper-scope');
