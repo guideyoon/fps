@@ -257,38 +257,71 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            width: 60px;
+            height: 60px;
+            z-index: 100;
             pointer-events: none;
-            z-index: 20;
-        }
-
-        .crosshair .line {
-            background: rgba(255, 255, 255, 0.8);
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            transition: all 0.1s ease-out;
-            box-shadow: 0 0 2px black;
-        }
-
-        .crosshair .horizontal {
-            width: 20px;
-            height: 2px;
-        }
-
-        .crosshair .vertical {
-            width: 2px;
-            height: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* Transition for container if needed, but mainly for children */
         }
 
         .crosshair .dot {
+            position: absolute;
             width: 4px;
             height: 4px;
-            background: var(--neon-red);
+            background-color: white;
             border-radius: 50%;
+            box-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
+            z-index: 102;
+        }
+
+        .crosshair .hair {
+            position: absolute;
+            background-color: white;
+            box-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
+            transition: transform 0.1s ease-out;
+            /* Smooth spread */
+            z-index: 101;
+        }
+
+        /* Vertical Lines (Top/Bottom) - Width 2px, Height 10px */
+        .crosshair .hair.top,
+        .crosshair .hair.bottom {
+            width: 2px;
+            height: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            /* Center horizontally */
+        }
+
+        /* Horizontal Lines (Left/Right) - Width 10px, Height 2px */
+        .crosshair .hair.left,
+        .crosshair .hair.right {
+            width: 10px;
+            height: 2px;
+            top: 50%;
+            transform: translateY(-50%);
+            /* Center vertically */
+        }
+
+        /* Initial Positions (will be overridden by JS, but good defaults) */
+        .crosshair .hair.top {
+            top: 15px;
+            /* Offset from container top (center is 30) -> Gap */
+        }
+
+        .crosshair .hair.bottom {
+            bottom: 15px;
+        }
+
+        .crosshair .hair.left {
+            left: 15px;
+        }
+
+        .crosshair .hair.right {
+            right: 15px;
         }
 
         .crosshair.firing .horizontal {
@@ -3455,8 +3488,10 @@
 
         <!-- Center: Dynamic Crosshair -->
         <div class="crosshair" id="hud-crosshair">
-            <div class="line horizontal"></div>
-            <div class="line vertical"></div>
+            <div class="hair top"></div>
+            <div class="hair bottom"></div>
+            <div class="hair left"></div>
+            <div class="hair right"></div>
             <div class="dot"></div>
         </div>
 
@@ -13398,707 +13433,751 @@
                     isDead = true;
                     const gameOverTitle = document.getElementById('game-over-title');
                     if (gameOverTitle) gameOverTitle.innerText = 'TIME OVER';
-                    const gameOverKills = document.getElementById('final-kill-count');
-                    if (gameOverKills) gameOverKills.innerText = killCount;
-                    if (elGameOver) elGameOver.style.display = 'flex';
-                    const exitBtn = document.getElementById('exit-game-btn');
-                    if (exitBtn) exitBtn.style.display = 'none';
-                    if (!isMobile && document.pointerLockElement === document.body) {
-                        document.exitPointerLock();
-                    }
                 }
+            }
+
+            // --- Dynamic Crosshair Update ---
+            // Calculate current spread based on state
+            let targetSpread = 0; // Base offset from center (default gap)
+            const BASE_GAP = 5;
+
+            // 1. Movement Spread (Walking)
+            if (keys.w || keys.a || keys.s || keys.d) {
+                targetSpread += 5; // +5px when moving
+            }
+
+            // 2. Jumping Spread (In Air)
+            // Assuming 'playerVelocity.y' or height check. 
+            // Simplified check: if jump button pressed or in air (needs 'canJump' variable context)
+            if (!canJump) { // Start with jump button/state if available, fall back to logic
+                targetSpread += 15; // +15px when jumping/falling
+            }
+
+            // 3. Crouching/Walking (Ctrl/Shift) - Tighten
+            if (keys.ctrl || keys.shift) {
+                targetSpread -= 2; // Tighten by 2px (e.g., precise aim)
+            }
+
+            // Apply Spread to DOM
+            // Get elements (cache these if optimization needed, but benign for now)
+            const hairTop = document.querySelector('.crosshair .hair.top');
+            const hairBottom = document.querySelector('.crosshair .hair.bottom');
+            const hairLeft = document.querySelector('.crosshair .hair.left');
+            const hairRight = document.querySelector('.crosshair .hair.right');
+
+            if (hairTop && hairBottom && hairLeft && hairRight) {
+                const finalGap = BASE_GAP + targetSpread;
+                // Use transform for smooth performance (hardware accelerated)
+                // Top: Move Up (negative Y)
+                hairTop.style.transform = `translate(-50%, -${finalGap}px)`;
+                // Bottom: Move Down (positive Y)
+                hairBottom.style.transform = `translate(-50%, ${finalGap}px)`;
+                // Left: Move Left (negative X)
+                hairLeft.style.transform = `translate(-${finalGap}px, -50%)`;
+                // Right: Move Right (positive X)
+                hairRight.style.transform = `translate(${finalGap}px, -50%)`;
+            }
+            const gameOverKills = document.getElementById('final-kill-count');
+            if (gameOverKills) gameOverKills.innerText = killCount;
+            if (elGameOver) elGameOver.style.display = 'flex';
+            const exitBtn = document.getElementById('exit-game-btn');
+            if (exitBtn) exitBtn.style.display = 'none';
+            if (!isMobile && document.pointerLockElement === document.body) {
+                document.exitPointerLock();
+            }
+        }
             }
 
 
 
 
-            // Spectator Camera (Killcam) - 3rd Person Follow Camera
-            if (isSpectating && spectatingPlayerId && gameMode === 'multi') {
-                // Hide 1st person weapon model during 3rd person killcam
-                if (weaponContainer) weaponContainer.visible = false;
+        // Spectator Camera (Killcam) - 3rd Person Follow Camera
+        if (isSpectating && spectatingPlayerId && gameMode === 'multi') {
+            // Hide 1st person weapon model during 3rd person killcam
+            if (weaponContainer) weaponContainer.visible = false;
 
-                const killerMesh = otherPlayersMap[spectatingPlayerId];
-                if (killerMesh) {
-                    // Get killer's rotation (Y-axis = horizontal facing direction)
-                    const killerRotY = killerMesh.rotation.y || 0;
+            const killerMesh = otherPlayersMap[spectatingPlayerId];
+            if (killerMesh) {
+                // Get killer's rotation (Y-axis = horizontal facing direction)
+                const killerRotY = killerMesh.rotation.y || 0;
 
-                    // Camera offset: 5m behind, 3m above the killer
-                    const offsetDistance = 5;
-                    const offsetHeight = 3;
+                // Camera offset: 5m behind, 3m above the killer
+                const offsetDistance = 5;
+                const offsetHeight = 3;
 
-                    // Calculate camera position behind the killer
-                    const camX = killerMesh.position.x - Math.sin(killerRotY) * offsetDistance;
-                    const camY = killerMesh.position.y + offsetHeight;
-                    const camZ = killerMesh.position.z - Math.cos(killerRotY) * offsetDistance;
+                // Calculate camera position behind the killer
+                const camX = killerMesh.position.x - Math.sin(killerRotY) * offsetDistance;
+                const camY = killerMesh.position.y + offsetHeight;
+                const camZ = killerMesh.position.z - Math.cos(killerRotY) * offsetDistance;
 
-                    // Smoothly interpolate camera position for smoother following
-                    camera.position.lerp(new THREE.Vector3(camX, camY, camZ), 0.1);
+                // Smoothly interpolate camera position for smoother following
+                camera.position.lerp(new THREE.Vector3(camX, camY, camZ), 0.1);
 
-                    // Make camera look at the killer
-                    camera.lookAt(
-                        killerMesh.position.x,
-                        killerMesh.position.y + 1.0, // Look at chest/head level
-                        killerMesh.position.z
-                    );
-                }
-                // Skip normal player control during spectating
-            } else {
-                // Not spectating - ensure weapon is visible (if alive)
-                if (weaponContainer && !isDead) weaponContainer.visible = true;
+                // Make camera look at the killer
+                camera.lookAt(
+                    killerMesh.position.x,
+                    killerMesh.position.y + 1.0, // Look at chest/head level
+                    killerMesh.position.z
+                );
             }
+            // Skip normal player control during spectating
+        } else {
+            // Not spectating - ensure weapon is visible (if alive)
+            if (weaponContainer && !isDead) weaponContainer.visible = true;
+        }
 
 
-            if (!isDead && !isPaused) {
-                const w = WEAPONS[curWeaponIdx];
-                if (isGameStarted) {
-                    handleShooting(dt);
-                    // Redundant checkLowHealth call removed (handled at end of loop)
+        if (!isDead && !isPaused) {
+            const w = WEAPONS[curWeaponIdx];
+            if (isGameStarted) {
+                handleShooting(dt);
+                // Redundant checkLowHealth call removed (handled at end of loop)
 
-                    // --- Improved Physics with Raycasting (Fix for Jumping on Objects) ---
-                    const eyeHeight = keys.ctrl ? 1.0 : 1.7; // 1.7 is standard eye level
+                // --- Improved Physics with Raycasting (Fix for Jumping on Objects) ---
+                const eyeHeight = keys.ctrl ? 1.0 : 1.7; // 1.7 is standard eye level
 
-                    // Raycast down to find "ground"
-                    let groundY = 0.5; // Base floor level
+                // Raycast down to find "ground"
+                let groundY = 0.5; // Base floor level
 
-                    // Only cast ray if mapGroup exists
-                    if (mapGroup) {
-                        const rayOrigin = position.clone();
-                        rayOrigin.y += 0.5; // Start slightly above current foot position to detect very close ground
-                        const downRay = new THREE.Raycaster(rayOrigin, new THREE.Vector3(0, -1, 0), 0, 10);
-                        // Intersect with map objects (collidable)
-                        // Note: We need to traverse mapGroup to find meshes, or use a known list.
-                        // mapGroup.children contains meshes.
-                        const intersects = downRay.intersectObjects(mapGroup.children, true);
+                // Only cast ray if mapGroup exists
+                if (mapGroup) {
+                    const rayOrigin = position.clone();
+                    rayOrigin.y += 0.5; // Start slightly above current foot position to detect very close ground
+                    const downRay = new THREE.Raycaster(rayOrigin, new THREE.Vector3(0, -1, 0), 0, 10);
+                    // Intersect with map objects (collidable)
+                    // Note: We need to traverse mapGroup to find meshes, or use a known list.
+                    // mapGroup.children contains meshes.
+                    const intersects = downRay.intersectObjects(mapGroup.children, true);
 
-                        if (intersects.length > 0) {
-                            // Find highest valid intersection below player
-                            let bestGroundY = groundY;
-                            for (const hit of intersects) {
-                                if (!hit.face) continue;
-                                const worldNormal = hit.face.normal.clone().transformDirection(hit.object.matrixWorld);
-                                if (worldNormal.y > 0.3) {
-                                    bestGroundY = Math.max(bestGroundY, hit.point.y);
-                                }
+                    if (intersects.length > 0) {
+                        // Find highest valid intersection below player
+                        let bestGroundY = groundY;
+                        for (const hit of intersects) {
+                            if (!hit.face) continue;
+                            const worldNormal = hit.face.normal.clone().transformDirection(hit.object.matrixWorld);
+                            if (worldNormal.y > 0.3) {
+                                bestGroundY = Math.max(bestGroundY, hit.point.y);
                             }
-                            groundY = bestGroundY;
                         }
+                        groundY = bestGroundY;
                     }
+                }
 
-                    const targetY = groundY + eyeHeight;
-                    playerVelocity.copy(position).sub(lastPlayerPosition).multiplyScalar(1 / dt);
+                const targetY = groundY + eyeHeight;
+                playerVelocity.copy(position).sub(lastPlayerPosition).multiplyScalar(1 / dt);
 
-                    // Apply Gravity
-                    velocityY -= 30.0 * dt; // Stronger gravity for snappier feel
-                    let nextY = position.y + velocityY * dt;
+                // Apply Gravity
+                velocityY -= 30.0 * dt; // Stronger gravity for snappier feel
+                let nextY = position.y + velocityY * dt;
 
-                    // Ground Collision / Landing
-                    // We allow a small tolerance to "snap" to ground
-                    const groundTolerance = 0.15; // Allow small height difference for grounded state
+                // Ground Collision / Landing
+                // We allow a small tolerance to "snap" to ground
+                const groundTolerance = 0.15; // Allow small height difference for grounded state
 
-                    if (velocityY < 0 && nextY <= targetY) {
-                        // Landed
-                        position.y = targetY;
-                        velocityY = 0;
-                        isGrounded = true;
-                    } else if (Math.abs(position.y - targetY) < groundTolerance && velocityY <= 0) {
-                        // Very close to ground (within tolerance) - still considered grounded
-                        // This helps with walking on uneven surfaces or objects
-                        position.y = targetY;
-                        velocityY = 0;
-                        isGrounded = true;
+                if (velocityY < 0 && nextY <= targetY) {
+                    // Landed
+                    position.y = targetY;
+                    velocityY = 0;
+                    isGrounded = true;
+                } else if (Math.abs(position.y - targetY) < groundTolerance && velocityY <= 0) {
+                    // Very close to ground (within tolerance) - still considered grounded
+                    // This helps with walking on uneven surfaces or objects
+                    position.y = targetY;
+                    velocityY = 0;
+                    isGrounded = true;
+                } else {
+                    position.y = nextY;
+                    // Only set isGrounded to false if we're actually above ground by more than tolerance
+                    if (position.y > targetY + groundTolerance) {
+                        isGrounded = false;
+                    }
+                }
+
+                // Landing Sound Trigger
+                if (isGrounded && !lastGroundedState && velocityY <= 0) {
+                    SoundGen.playLand();
+                }
+                lastGroundedState = isGrounded;
+
+                let speed = 15.0; // Default: RUN (User Request - Increased from 9.0)
+                if (keys.shift) speed = 4.0; // Shift: SLOW WALK (increased from 2.0)
+
+                // Weapon-based movement speed multipliers
+                if (w.type === 'KNIFE') speed *= 1.1;
+                else if (w.type === 'PISTOL') speed *= 1.05;
+                else if (w.type === 'SNIPER') speed *= 0.9;
+                else if (w.type === 'GRENADE') speed *= 0.95;
+
+                // Overrides (Crouch & Aim take priority)
+                if (keys.ctrl) speed = 3.0; // [User Request] Slow movement when Crouched
+                if (isAiming) speed = 2.0;
+
+                const q = new THREE.Quaternion();
+                q.setFromEuler(new THREE.Euler(rotation.x, rotation.y, 0, 'YXZ'));
+                camera.quaternion.copy(q);
+
+                const dx = keys.d - keys.a; const dy = keys.s - keys.w;
+                if (dx !== 0 || dy !== 0) {
+                    const fwd = new THREE.Vector3(0, 0, -1).applyAxisAngle(new THREE.Vector3(0, 1, 0), rotation.y);
+                    const rgt = new THREE.Vector3(1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), rotation.y);
+                    const moveDir = fwd.multiplyScalar(-dy).add(rgt.multiplyScalar(dx)).normalize();
+                    const moveStep = moveDir.clone().multiplyScalar(speed * dt);
+
+                    const stepHeight = 0.6; // 등반 가능한 최대 높이 (계단 등)
+
+                    // X축 이동 및 Step Climbing
+                    let nextPosX = position.clone();
+                    nextPosX.x += moveStep.x;
+                    if (!checkCollision(nextPosX)) {
+                        position.x = nextPosX.x;
                     } else {
-                        position.y = nextY;
-                        // Only set isGrounded to false if we're actually above ground by more than tolerance
-                        if (position.y > targetY + groundTolerance) {
-                            isGrounded = false;
-                        }
-                    }
-
-                    // Landing Sound Trigger
-                    if (isGrounded && !lastGroundedState && velocityY <= 0) {
-                        SoundGen.playLand();
-                    }
-                    lastGroundedState = isGrounded;
-
-                    let speed = 15.0; // Default: RUN (User Request - Increased from 9.0)
-                    if (keys.shift) speed = 4.0; // Shift: SLOW WALK (increased from 2.0)
-
-                    // Weapon-based movement speed multipliers
-                    if (w.type === 'KNIFE') speed *= 1.1;
-                    else if (w.type === 'PISTOL') speed *= 1.05;
-                    else if (w.type === 'SNIPER') speed *= 0.9;
-                    else if (w.type === 'GRENADE') speed *= 0.95;
-
-                    // Overrides (Crouch & Aim take priority)
-                    if (keys.ctrl) speed = 3.0; // [User Request] Slow movement when Crouched
-                    if (isAiming) speed = 2.0;
-
-                    const q = new THREE.Quaternion();
-                    q.setFromEuler(new THREE.Euler(rotation.x, rotation.y, 0, 'YXZ'));
-                    camera.quaternion.copy(q);
-
-                    const dx = keys.d - keys.a; const dy = keys.s - keys.w;
-                    if (dx !== 0 || dy !== 0) {
-                        const fwd = new THREE.Vector3(0, 0, -1).applyAxisAngle(new THREE.Vector3(0, 1, 0), rotation.y);
-                        const rgt = new THREE.Vector3(1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), rotation.y);
-                        const moveDir = fwd.multiplyScalar(-dy).add(rgt.multiplyScalar(dx)).normalize();
-                        const moveStep = moveDir.clone().multiplyScalar(speed * dt);
-
-                        const stepHeight = 0.6; // 등반 가능한 최대 높이 (계단 등)
-
-                        // X축 이동 및 Step Climbing
-                        let nextPosX = position.clone();
-                        nextPosX.x += moveStep.x;
-                        if (!checkCollision(nextPosX)) {
+                        // 장애물 발견 시 위쪽 공간 체크
+                        let stepUpPos = nextPosX.clone();
+                        stepUpPos.y += stepHeight;
+                        if (!checkCollision(stepUpPos)) {
                             position.x = nextPosX.x;
-                        } else {
-                            // 장애물 발견 시 위쪽 공간 체크
-                            let stepUpPos = nextPosX.clone();
-                            stepUpPos.y += stepHeight;
-                            if (!checkCollision(stepUpPos)) {
-                                position.x = nextPosX.x;
-                                position.y += 0.1; // 살짝 들어올려줌 (부드러운 등반)
-                            }
+                            position.y += 0.1; // 살짝 들어올려줌 (부드러운 등반)
                         }
+                    }
 
-                        // Z축 이동 및 Step Climbing
-                        let nextPosZ = position.clone();
-                        nextPosZ.z += moveStep.z;
-                        if (!checkCollision(nextPosZ)) {
+                    // Z축 이동 및 Step Climbing
+                    let nextPosZ = position.clone();
+                    nextPosZ.z += moveStep.z;
+                    if (!checkCollision(nextPosZ)) {
+                        position.z = nextPosZ.z;
+                    } else {
+                        // 장애물 발견 시 위쪽 공간 체크
+                        let stepUpPos = nextPosZ.clone();
+                        stepUpPos.y += stepHeight;
+                        if (!checkCollision(stepUpPos)) {
                             position.z = nextPosZ.z;
-                        } else {
-                            // 장애물 발견 시 위쪽 공간 체크
-                            let stepUpPos = nextPosZ.clone();
-                            stepUpPos.y += stepHeight;
-                            if (!checkCollision(stepUpPos)) {
-                                position.z = nextPosZ.z;
-                                position.y += 0.1; // 살짝 들어올려줌
-                            }
-                        }
-
-                        if (!isAiming) {
-                            if (isGrounded && !keys.shift && !keys.ctrl) {
-                                SoundGen.playStep();
-                            }
-
-                            if (keys.shift || keys.ctrl) {
-                                // [User Request] Remove bobbing while sneaking or crouching
-                                swayOffset.x = 0;
-                                swayOffset.y = 0;
-                            } else {
-                                const bobFreq = 8;
-                                const bobAmp = 0.02;
-                                swayOffset.y = Math.sin(time * 0.001 * bobFreq) * bobAmp;
-                                swayOffset.x = Math.cos(time * 0.001 * (bobFreq / 2)) * bobAmp;
-                            }
-                        } else {
-                            // [FIX] Smoothly reset sway when aiming while moving (fixes pistol crosshair wobble)
-                            swayOffset.x = THREE.MathUtils.lerp(swayOffset.x, 0, 15 * dt);
-                            swayOffset.y = THREE.MathUtils.lerp(swayOffset.y, 0, 15 * dt);
-                        }
-                    } else {
-                        playerVelocity.set(0, 0, 0);
-                        // [User Request] Idle sway animation when standing still (all weapons)
-                        // Stop sway when aiming
-                        if (!isAiming) {
-                            const swayFreqX = 1.2; const swayFreqY = 0.9;
-                            const swayAmpX = 0.015; const swayAmpY = 0.012;
-                            swayOffset.x = Math.sin(time * 0.001 * swayFreqX) * swayAmpX;
-                            swayOffset.y = Math.sin(time * 0.001 * swayFreqY) * swayAmpY;
-                        } else {
-                            // Reset sway smoothly when aiming
-                            swayOffset.x = THREE.MathUtils.lerp(swayOffset.x, 0, 10 * dt);
-                            swayOffset.y = THREE.MathUtils.lerp(swayOffset.y, 0, 10 * dt);
+                            position.y += 0.1; // 살짝 들어올려줌
                         }
                     }
 
-                    lastPlayerPosition.copy(position);
+                    if (!isAiming) {
+                        if (isGrounded && !keys.shift && !keys.ctrl) {
+                            SoundGen.playStep();
+                        }
+
+                        if (keys.shift || keys.ctrl) {
+                            // [User Request] Remove bobbing while sneaking or crouching
+                            swayOffset.x = 0;
+                            swayOffset.y = 0;
+                        } else {
+                            const bobFreq = 8;
+                            const bobAmp = 0.02;
+                            swayOffset.y = Math.sin(time * 0.001 * bobFreq) * bobAmp;
+                            swayOffset.x = Math.cos(time * 0.001 * (bobFreq / 2)) * bobAmp;
+                        }
+                    } else {
+                        // [FIX] Smoothly reset sway when aiming while moving (fixes pistol crosshair wobble)
+                        swayOffset.x = THREE.MathUtils.lerp(swayOffset.x, 0, 15 * dt);
+                        swayOffset.y = THREE.MathUtils.lerp(swayOffset.y, 0, 15 * dt);
+                    }
+                } else {
+                    playerVelocity.set(0, 0, 0);
+                    // [User Request] Idle sway animation when standing still (all weapons)
+                    // Stop sway when aiming
+                    if (!isAiming) {
+                        const swayFreqX = 1.2; const swayFreqY = 0.9;
+                        const swayAmpX = 0.015; const swayAmpY = 0.012;
+                        swayOffset.x = Math.sin(time * 0.001 * swayFreqX) * swayAmpX;
+                        swayOffset.y = Math.sin(time * 0.001 * swayFreqY) * swayAmpY;
+                    } else {
+                        // Reset sway smoothly when aiming
+                        swayOffset.x = THREE.MathUtils.lerp(swayOffset.x, 0, 10 * dt);
+                        swayOffset.y = THREE.MathUtils.lerp(swayOffset.y, 0, 10 * dt);
+                    }
                 }
 
+                lastPlayerPosition.copy(position);
+            }
 
-                // --- Visual Updates (Runs even during countdown) ---
-                const isSniperAiming = isAiming && w.type === 'SNIPER';
+
+            // --- Visual Updates (Runs even during countdown) ---
+            const isSniperAiming = isAiming && w.type === 'SNIPER';
 
 
-                if (isSniperAiming) {
+            if (isSniperAiming) {
 
-                    weaponContainer.visible = false;
-                    elScope.style.display = 'block';
-                    if (isMobile) {
-                        elCrosshair.style.display = 'block';
+                weaponContainer.visible = false;
+                elScope.style.display = 'block';
+                if (isMobile) {
+                    elCrosshair.style.display = 'block';
+                } else {
+                    elCrosshair.style.display = 'none';
+                }
+
+                // PC vs Mobile Scope Style Logic
+                // PC/Mobile Common Scope Style (User Request: Mobile should look like PC)
+                elScope.style.background = 'radial-gradient(circle, transparent 20%, rgba(0, 0, 0, 0.7) 21%, rgba(0, 0, 0, 0.9) 100%)';
+            } else {
+                weaponContainer.visible = true;
+                elScope.style.display = 'none';
+
+                // Sniper Scope - Show circular scope only for SNIPER when aiming
+                const sniperScope = document.getElementById('sniper-scope');
+                if (sniperScope) {
+                    if (isAiming && w.type === 'SNIPER' && !isMobile) {
+                        sniperScope.style.display = 'block';
                     } else {
+                        sniperScope.style.display = 'none';
+                    }
+                }
+
+                // Crosshair Logic
+                if (isMobile) {
+                    // 모바일: 항상 조준선 표시 (사용자 요청)
+                    elCrosshair.style.display = 'block';
+                    elCrosshair.style.opacity = 0.7; // 상시 표시는 약간 투명하게
+                } else if (w.type === 'PISTOL' || (!isAiming && w.type !== 'KNIFE')) {
+                    // PC: 권총이거나 비조준 상태(칼 제외)일 때 표시
+                    // Mobile PISTOL update: Aiming hidden crosshair logic same as PC now?
+                    // Actually, if mobile pistol behaves like rifle now (ADS available), hide crosshair when aiming
+                    if (isMobile && w.type === 'PISTOL' && isAiming) {
                         elCrosshair.style.display = 'none';
-                    }
-
-                    // PC vs Mobile Scope Style Logic
-                    // PC/Mobile Common Scope Style (User Request: Mobile should look like PC)
-                    elScope.style.background = 'radial-gradient(circle, transparent 20%, rgba(0, 0, 0, 0.7) 21%, rgba(0, 0, 0, 0.9) 100%)';
-                } else {
-                    weaponContainer.visible = true;
-                    elScope.style.display = 'none';
-
-                    // Sniper Scope - Show circular scope only for SNIPER when aiming
-                    const sniperScope = document.getElementById('sniper-scope');
-                    if (sniperScope) {
-                        if (isAiming && w.type === 'SNIPER' && !isMobile) {
-                            sniperScope.style.display = 'block';
-                        } else {
-                            sniperScope.style.display = 'none';
-                        }
-                    }
-
-                    // Crosshair Logic
-                    if (isMobile) {
-                        // 모바일: 항상 조준선 표시 (사용자 요청)
-                        elCrosshair.style.display = 'block';
-                        elCrosshair.style.opacity = 0.7; // 상시 표시는 약간 투명하게
-                    } else if (w.type === 'PISTOL' || (!isAiming && w.type !== 'KNIFE')) {
-                        // PC: 권총이거나 비조준 상태(칼 제외)일 때 표시
-                        // Mobile PISTOL update: Aiming hidden crosshair logic same as PC now?
-                        // Actually, if mobile pistol behaves like rifle now (ADS available), hide crosshair when aiming
-                        if (isMobile && w.type === 'PISTOL' && isAiming) {
-                            elCrosshair.style.display = 'none';
-                        } else {
-                            elCrosshair.style.display = 'block';
-                            elCrosshair.style.opacity = 1;
-                        }
                     } else {
-                        elCrosshair.style.display = 'none';
-                    }
-                }
-
-                // Hide/Show front sight based on aiming
-                if (weaponModel) {
-                    weaponModel.traverse((child) => {
-                        if (child.userData && child.userData.isSight) {
-                            // 모바일에서 권총 강제 조준 제거 - 사용자 요청 (평상시에는 들고 있는 모습)
-                            const shouldAim = isAiming;
-                            child.visible = shouldAim;
-                        }
-                    });
-                }
-
-                let targetPos = w.posHip; let targetFov = 70;
-                // [User Request] Rotation Interpolation
-                let targetRot = w.rotHip || new THREE.Vector3(0, 0, 0);
-
-                if (isAiming) {
-                    if (w.type === 'SNIPER') targetFov = w.fovAds;
-                    else if (w.type !== 'KNIFE') {
-                        targetPos = w.posAds;
-                        targetFov = w.fovAds;
-                        targetRot = w.rotAds || new THREE.Vector3(0, 0, 0);
-                    }
-                    else targetPos = w.posAds;
-                }
-
-                currentPos.lerp(targetPos, 15 * dt);
-                currentRot.lerp(targetRot, 15 * dt); // Interpolate rotation
-
-                // [User Request] Dynamic Arm Scaling for all weapons (except Knife/Grenade)
-                if (w.type !== 'KNIFE' && w.type !== 'GRENADE') {
-                    const lArm = weaponModel.getObjectByName('LeftArmGroup');
-                    const rArm = weaponModel.getObjectByName('RightArmGroup');
-
-                    // [MOD] Weapon-specific scaling: Pistol is thinner than others
-                    let idleScale = 2.5;
-                    let adsScale = 0.8;
-
-                    if (w.type === 'PISTOL') {
-                        idleScale = 1.6;
-                        adsScale = 0.6;
-                    }
-
-                    const targetArmScale = isAiming ? adsScale : idleScale;
-                    if (lArm) {
-                        let currentTargetScale = new THREE.Vector3(targetArmScale, targetArmScale, targetArmScale);
-
-                        // [MOD] Special compensation for Rifle ADS Reload to hide gaps/separation
-                        if (w.type === 'RIFLE' && isAiming && isReloading) {
-                            // Make it slightly thicker (X, Z) and longer (Y) - Adjusted down from (1.2, 2.2, 1.2)
-                            currentTargetScale.set(0.9, 1.5, 0.9);
-                        }
-
-                        const sx = THREE.MathUtils.lerp(lArm.scale.x, currentTargetScale.x, 15 * dt);
-                        const sy = THREE.MathUtils.lerp(lArm.scale.y, currentTargetScale.y, 15 * dt);
-                        const sz = THREE.MathUtils.lerp(lArm.scale.z, currentTargetScale.z, 15 * dt);
-                        lArm.scale.set(sx, sy, sz);
-                    }
-                    if (rArm) {
-                        const s = THREE.MathUtils.lerp(rArm.scale.x, targetArmScale, 15 * dt);
-                        rArm.scale.set(s, s, s);
-                    }
-                }
-
-                if (window.rifleModel && w.type === 'RIFLE' && w.glbHip && w.glbAds) {
-                    const tPos = isAiming ? w.glbAds.pos : w.glbHip.pos;
-                    const tRot = isAiming ? w.glbAds.rot : w.glbHip.rot;
-                    const tScale = isAiming ? w.glbAds.scale : w.glbHip.scale;
-
-                    window.rifleModel.position.lerp(tPos, 15 * dt);
-                    // Manually lerp rotation euler
-                    window.rifleModel.rotation.x += (tRot.x - window.rifleModel.rotation.x) * 15 * dt;
-                    window.rifleModel.rotation.y += (tRot.y - window.rifleModel.rotation.y) * 15 * dt;
-                    window.rifleModel.rotation.z += (tRot.z - window.rifleModel.rotation.z) * 15 * dt;
-
-                    window.rifleModel.scale.lerp(tScale, 15 * dt);
-
-                    // [User Request] Dynamic Left Arm Lerping for Rifle
-                    const lArm = weaponModel.getObjectByName('LeftArmGroup');
-                    if (lArm && w.lArmHip && w.lArmAds) {
-                        const aPos = isAiming ? w.lArmAds.pos : w.lArmHip.pos;
-                        const aRot = isAiming ? w.lArmAds.rot : w.lArmHip.rot;
-                        lArm.position.lerp(aPos, 15 * dt);
-                        lArm.rotation.x += (aRot.x - lArm.rotation.x) * 15 * dt;
-                        lArm.rotation.y += (aRot.y - lArm.rotation.y) * 15 * dt;
-                        lArm.rotation.z += (aRot.z - lArm.rotation.z) * 15 * dt;
-                    }
-                }
-
-                if (window.pistolModel && w.type === 'PISTOL' && w.glbHip && w.glbAds) {
-                    const tPos = isAiming ? w.glbAds.pos : w.glbHip.pos;
-                    const tRot = isAiming ? w.glbAds.rot : w.glbHip.rot;
-                    const tScale = isAiming ? w.glbAds.scale : w.glbHip.scale;
-
-                    window.pistolModel.position.lerp(tPos, 15 * dt);
-                    window.pistolModel.rotation.x += (tRot.x - window.pistolModel.rotation.x) * 15 * dt;
-                    window.pistolModel.rotation.y += (tRot.y - window.pistolModel.rotation.y) * 15 * dt;
-                    window.pistolModel.rotation.z += (tRot.z - window.pistolModel.rotation.z) * 15 * dt;
-                    window.pistolModel.scale.lerp(tScale, 15 * dt);
-                }
-
-                // [User Request] ADS-Aware Muzzle Flash Lerping
-                if (muzzleFlash && w.muzzleHip && w.muzzleAds) {
-                    const tMuzzlePos = isAiming ? w.muzzleAds : w.muzzleHip;
-                    muzzleFlash.position.lerp(tMuzzlePos, 15 * dt);
-                }
-
-                if (window.sniperModel && w.type === 'SNIPER' && w.glbHip && w.glbAds) {
-                    const tPos = isAiming ? w.glbAds.pos : w.glbHip.pos;
-                    const tRot = isAiming ? w.glbAds.rot : w.glbHip.rot;
-                    const tScale = isAiming ? w.glbAds.scale : w.glbHip.scale;
-
-                    // [DEBUG] Disable interpolation to allow debug panel to work
-                    // window.sniperModel.position.lerp(tPos, 15 * dt);
-                    // window.sniperModel.rotation.x += (tRot.x - window.sniperModel.rotation.x) * 15 * dt;
-                    // window.sniperModel.rotation.y += (tRot.y - window.sniperModel.rotation.y) * 15 * dt;
-                    // window.sniperModel.rotation.z += (tRot.z - window.sniperModel.rotation.z) * 15 * dt;
-                    // window.sniperModel.scale.lerp(tScale, 15 * dt);
-                }
-
-                camera.fov += (targetFov - camera.fov) * 15 * dt;
-                camera.updateProjectionMatrix();
-
-                // 화면 흔들림 효과 적용 (피격 감각)
-                if (hitShake.intensity > 0) {
-                    hitShake.x = (Math.random() - 0.5) * hitShake.intensity;
-                    hitShake.y = (Math.random() - 0.5) * hitShake.intensity;
-                    hitShake.intensity *= 0.85; // 점진적으로 감소
-                    if (hitShake.intensity < 0.01) {
-                        hitShake.intensity = 0;
-                        hitShake.x = 0;
-                        hitShake.y = 0;
-                    }
-                }
-
-                camera.position.copy(position);
-                camera.position.x += hitShake.x;
-                camera.position.y += hitShake.y;
-
-                // [FIX] weaponContainer가 camera의 자식인지 확인하여 위치 업데이트 방식 결정
-                if (weaponContainer.parent === camera) {
-                    // 카메라의 자식일 경우: 로컬 오프셋만 설정 (카메라를 자동으로 따라감)
-                    weaponContainer.position.set(
-                        currentPos.x + hitShake.x + swayOffset.x,
-                        currentPos.y + hitShake.y + swayOffset.y,
-                        currentPos.z
-                    );
-                    // [User Request] Apply interpolated rotation to weapon container
-                    weaponContainer.rotation.set(currentRot.x, currentRot.y, currentRot.z);
-                } else {
-                    // scene의 자식일 경우: 월드 좌표 직접 업데이트 (기존 로직)
-                    weaponContainer.position.copy(position);
-                    weaponContainer.position.x += hitShake.x;
-                    weaponContainer.position.y += hitShake.y;
-                    weaponContainer.quaternion.copy(camera.quaternion);
-                    weaponContainer.translateX(currentPos.x + swayOffset.x);
-                    weaponContainer.translateY(currentPos.y + swayOffset.y);
-                    weaponContainer.translateZ(currentPos.z);
-                }
-
-                const recoilAccelX = -RECOIL_SPRING * recoil.x - RECOIL_DAMPING * recoilVel.x;
-                recoilVel.x += recoilAccelX * dt;
-                recoil.x += recoilVel.x * dt;
-                recoil.x = THREE.MathUtils.clamp(recoil.x, -RECOIL_MAX, RECOIL_MAX);
-
-                const recoilAccelZ = -RECOIL_SPRING * recoil.z - RECOIL_DAMPING * recoilVel.z;
-                recoilVel.z += recoilAccelZ * dt;
-                recoil.z += recoilVel.z * dt;
-                recoil.z = THREE.MathUtils.clamp(recoil.z, -RECOIL_POS_MAX, RECOIL_POS_MAX);
-
-
-                // 나이프일 때만 특별한 위치/회전 처리
-                if (w.type === 'KNIFE') {
-                    // Arms Stability: Reset weaponModel (container) to idle pose
-                    weaponModel.rotation.set(0, 0, 0);
-                    weaponModel.position.set(0.35, -0.15, -0.3); // [MOD]
-
-                    if (window.knifeSwing > 0) {
-                        // [FIX] Independent Right Arm Swing (Left arm stays still)
-
-                        // 1. Reset Internal Parts to Default
-                        if (window.knifeModel) {
-                            window.knifeModel.position.set(0, -0.2, -0.5);
-                            window.knifeModel.rotation.set(0.1, 1.8, -0.2); // [MOD] Updated Idle Rotation
-                        }
-                        if (window.knifeRightArm) {
-                            window.knifeRightArm.position.set(0.12, -0.2, -0.15); // [MOD] Sync with Shorter Handle
-                            window.knifeRightArm.rotation.set(0, -0.15, 0.05);
-                        }
-
-                        const swingT = 1 - (window.knifeSwing / window.KNIFE_SWING_DURATION);
-
-                        // weaponModel STAYS INITIAL (Fix for Left Arm moving)
-                        weaponModel.position.set(0.35, -0.15, -0.3);
-                        weaponModel.rotation.set(0, 0, 0);
-
-                        // Variables for Right Arm & Knife LOCAL transforms
-                        let ax = 0.12, ay = -0.2, az = -0.15;
-                        let arx = 0, ary = -0.15, arz = 0.05;
-
-                        // Variables for LEFT Arm
-                        let lx = -1.63, ly = -0.14, lz = -0.11;
-                        let lrx = 0.56, lry = -0.56, lrz = -1.98;
-
-                        let kx = 0, ky = -0.2, kz = -0.5;
-                        let krx = 0.1, kry = 1.18, krz = -0.1; // [MOD] Start from new idle rotation (approx)
-
-                        // ===== CONFIGURABLE SWING PARAMETERS =====
-                        // Adjust these via console: window.KNIFE_SWING_CONFIG
-                        if (!window.KNIFE_SWING_CONFIG) {
-                            window.KNIFE_SWING_CONFIG = {
-                                // Phase 1 End (Wind-up) - Knife position/rotation
-                                p1_kx: -0.2, p1_ky: 0.0, p1_kz: -0.35,
-                                p1_krx: 1.57, p1_kry: 1.57, p1_krz: 0.0,
-                                // Phase 2 End (Slash) - Knife position/rotation
-                                p2_kx: 0.4, p2_ky: -0.1, p2_kz: -0.5,
-                                p2_krx: 1.5, p2_kry: -0.5, p2_krz: 0.3,
-                                // Debug: freeze at specific swingT value (0-1), set to -1 to disable
-                                freezeAt: -1
-                            };
-                            console.log('[Knife Swing] Config loaded. Adjust via window.KNIFE_SWING_CONFIG');
-                        }
-                        const cfg = window.KNIFE_SWING_CONFIG;
-
-                        // Debug freeze mode
-                        if (cfg.freezeAt >= 0 && cfg.freezeAt <= 1) {
-                            swingT = cfg.freezeAt;
-                        }
-
-                        // New idle values from user's settings
-                        const idleX = 0.01, idleY = 0.00, idleZ = -0.29;
-                        const idleRX = 2.16, idleRY = -0.06, idleRZ = 2.08;
-
-                        if (swingT < 0.12) {
-                            // Phase 1: Wind Up (0% - 12%) - Pull blade to center/left
-                            const t = swingT / 0.12;
-                            const et = 1 - (1 - t) * (1 - t); // Quad Out
-
-                            // Right Arm wind up - pull toward center
-                            ax = THREE.MathUtils.lerp(0.12, 0.0, et);
-                            ay = THREE.MathUtils.lerp(-0.2, -0.15, et);
-                            az = THREE.MathUtils.lerp(-0.15, -0.35, et); // Extend arm forward
-                            arx = THREE.MathUtils.lerp(0, 0.1, et);
-                            ary = THREE.MathUtils.lerp(-0.15, 0.3, et);
-                            arz = THREE.MathUtils.lerp(0.05, -0.05, et);
-
-                            // Knife wind up - uses config values
-                            kx = THREE.MathUtils.lerp(idleX, cfg.p1_kx, et);
-                            ky = THREE.MathUtils.lerp(idleY, cfg.p1_ky, et);
-                            kz = THREE.MathUtils.lerp(idleZ, cfg.p1_kz, et);
-                            krx = THREE.MathUtils.lerp(idleRX, cfg.p1_krx, et);
-                            kry = THREE.MathUtils.lerp(idleRY, cfg.p1_kry, et);
-                            krz = THREE.MathUtils.lerp(idleRZ, cfg.p1_krz, et);
-                        } else if (swingT < 0.45) {
-                            // Phase 2: Outward Slash (12% - 45%)
-                            const t = (swingT - 0.12) / 0.33;
-                            const et = 1 - Math.pow(1 - t, 3); // Cubic Out
-
-                            // Right Arm outward slash - reduced X movement, extended Z
-                            ax = THREE.MathUtils.lerp(0.0, 0.25, et);  // Reduced from 0.5 to 0.25
-                            ay = THREE.MathUtils.lerp(-0.15, -0.2, et);
-                            az = THREE.MathUtils.lerp(-0.35, -0.55, et); // Extended arm forward more
-                            arx = THREE.MathUtils.lerp(0.1, -0.05, et);
-                            ary = THREE.MathUtils.lerp(0.3, -0.8, et);  // Reduced rotation
-                            arz = THREE.MathUtils.lerp(-0.05, 0.15, et);
-
-                            // Left Arm reaction
-                            lx = THREE.MathUtils.lerp(-1.63, -1.8, et);
-                            lry = THREE.MathUtils.lerp(-0.56, -0.7, et);
-
-                            // Knife slash - uses config values
-                            kx = THREE.MathUtils.lerp(cfg.p1_kx, cfg.p2_kx, et);
-                            ky = THREE.MathUtils.lerp(cfg.p1_ky, cfg.p2_ky, et);
-                            kz = THREE.MathUtils.lerp(cfg.p1_kz, cfg.p2_kz, et);
-                            krx = THREE.MathUtils.lerp(cfg.p1_krx, cfg.p2_krx, et);
-                            kry = THREE.MathUtils.lerp(cfg.p1_kry, cfg.p2_kry, et);
-                            krz = THREE.MathUtils.lerp(cfg.p1_krz, cfg.p2_krz, et);
-                        } else {
-                            // Phase 3: Recovery (45% - 100%)
-                            const t = (swingT - 0.45) / 0.55;
-                            const et = t * t; // Quad In
-
-                            // Right Arm recovery - from new values
-                            ax = THREE.MathUtils.lerp(0.25, 0.02, et);
-                            ay = THREE.MathUtils.lerp(-0.2, 0.02, et);
-                            az = THREE.MathUtils.lerp(-0.55, -0.15, et); // Return from extended position
-                            arx = THREE.MathUtils.lerp(-0.05, 0, et);
-                            ary = THREE.MathUtils.lerp(-0.8, 0.36, et);
-                            arz = THREE.MathUtils.lerp(0.15, 0.05, et);
-
-                            // Left Arm recovery
-                            lx = THREE.MathUtils.lerp(-1.8, -1.63, et);
-                            lry = THREE.MathUtils.lerp(-0.7, -0.56, et);
-
-                            // Knife recovery - from config p2 to idle
-                            kx = THREE.MathUtils.lerp(cfg.p2_kx, idleX, et);
-                            ky = THREE.MathUtils.lerp(cfg.p2_ky, idleY, et);
-                            kz = THREE.MathUtils.lerp(cfg.p2_kz, idleZ, et);
-                            krx = THREE.MathUtils.lerp(cfg.p2_krx, idleRX, et);
-                            kry = THREE.MathUtils.lerp(cfg.p2_kry, idleRY, et);
-                            krz = THREE.MathUtils.lerp(cfg.p2_krz, idleRZ, et);
-                        }
-
-                        // Apply to Right Arm
-                        const rArm = weaponModel.getObjectByName('RightArmGroup');
-                        if (rArm) {
-                            rArm.position.set(ax, ay, az);
-                            rArm.rotation.set(arx, ary, arz);
-                        }
-                        // Apply to Left Arm
-                        const lArm = weaponModel.getObjectByName('LeftArmGroup');
-                        if (lArm) {
-                            lArm.position.set(lx, ly, lz);
-                            lArm.rotation.set(lrx, lry, lrz);
-                        }
-                        // Apply to Knife
-                        if (window.knifeModel) {
-                            window.knifeModel.position.set(kx, ky, kz);
-                            window.knifeModel.rotation.set(krx, kry, krz);
-                        }
-
-                    } else if (window.knifeModel) {
-                        // [FIX] Use WEAPONS data instead of hardcoded values for debug panel support
-                        const knifeWeapon = WEAPONS.find(weapon => weapon.type === 'KNIFE');
-                        if (knifeWeapon && knifeWeapon.glbHip) {
-                            window.knifeModel.position.copy(knifeWeapon.glbHip.pos);
-                            window.knifeModel.rotation.set(knifeWeapon.glbHip.rot.x, knifeWeapon.glbHip.rot.y, knifeWeapon.glbHip.rot.z);
-                            window.knifeModel.scale.copy(knifeWeapon.glbHip.scale);
-                        }
-                        const rArm = weaponModel.getObjectByName('RightArmGroup');
-                        if (rArm && knifeWeapon && knifeWeapon.rArmHip) {
-                            rArm.position.copy(knifeWeapon.rArmHip.pos);
-                            rArm.rotation.set(knifeWeapon.rArmHip.rot.x, knifeWeapon.rArmHip.rot.y, knifeWeapon.rArmHip.rot.z);
-                        }
-                        const lArm = weaponModel.getObjectByName('LeftArmGroup');
-                        if (lArm && knifeWeapon && knifeWeapon.lArmHip) {
-                            lArm.position.copy(knifeWeapon.lArmHip.pos);
-                            lArm.rotation.set(knifeWeapon.lArmHip.rot.x, knifeWeapon.lArmHip.rot.y, knifeWeapon.lArmHip.rot.z);
-                        }
+                        elCrosshair.style.display = 'block';
+                        elCrosshair.style.opacity = 1;
                     }
                 } else {
-
-                    // 다른 무기들은 원래대로 (recoil만 적용)
-                    const recoilScale = (isAiming && w.type === 'RIFLE') ? 0.35 : 1;
-                    weaponModel.position.y = THREE.MathUtils.lerp(weaponModel.position.y, 0, 10 * dt);
-                    const reloadRot = (isReloading && isAiming && w.type === 'RIFLE') ? 0.1 : (isReloading ? 0.5 : 0);
-                    weaponModel.rotation.x = recoil.x * recoilScale + reloadRot;
-                    weaponModel.position.z = recoil.z * recoilScale;
-                    // 재장전 제스처 중이 아닐 때만 rotation.z 초기화
-                    if (!sniperReloadGesture) {
-                        weaponModel.rotation.z = 0;
-                    }
+                    elCrosshair.style.display = 'none';
                 }
-                elVignette.style.opacity = (isAiming && w.type !== 'KNIFE') ? 0.5 : 0;
+            }
+
+            // Hide/Show front sight based on aiming
+            if (weaponModel) {
+                weaponModel.traverse((child) => {
+                    if (child.userData && child.userData.isSight) {
+                        // 모바일에서 권총 강제 조준 제거 - 사용자 요청 (평상시에는 들고 있는 모습)
+                        const shouldAim = isAiming;
+                        child.visible = shouldAim;
+                    }
+                });
+            }
+
+            let targetPos = w.posHip; let targetFov = 70;
+            // [User Request] Rotation Interpolation
+            let targetRot = w.rotHip || new THREE.Vector3(0, 0, 0);
+
+            if (isAiming) {
+                if (w.type === 'SNIPER') targetFov = w.fovAds;
+                else if (w.type !== 'KNIFE') {
+                    targetPos = w.posAds;
+                    targetFov = w.fovAds;
+                    targetRot = w.rotAds || new THREE.Vector3(0, 0, 0);
+                }
+                else targetPos = w.posAds;
+            }
+
+            currentPos.lerp(targetPos, 15 * dt);
+            currentRot.lerp(targetRot, 15 * dt); // Interpolate rotation
+
+            // [User Request] Dynamic Arm Scaling for all weapons (except Knife/Grenade)
+            if (w.type !== 'KNIFE' && w.type !== 'GRENADE') {
+                const lArm = weaponModel.getObjectByName('LeftArmGroup');
+                const rArm = weaponModel.getObjectByName('RightArmGroup');
+
+                // [MOD] Weapon-specific scaling: Pistol is thinner than others
+                let idleScale = 2.5;
+                let adsScale = 0.8;
+
+                if (w.type === 'PISTOL') {
+                    idleScale = 1.6;
+                    adsScale = 0.6;
+                }
+
+                const targetArmScale = isAiming ? adsScale : idleScale;
+                if (lArm) {
+                    let currentTargetScale = new THREE.Vector3(targetArmScale, targetArmScale, targetArmScale);
+
+                    // [MOD] Special compensation for Rifle ADS Reload to hide gaps/separation
+                    if (w.type === 'RIFLE' && isAiming && isReloading) {
+                        // Make it slightly thicker (X, Z) and longer (Y) - Adjusted down from (1.2, 2.2, 1.2)
+                        currentTargetScale.set(0.9, 1.5, 0.9);
+                    }
+
+                    const sx = THREE.MathUtils.lerp(lArm.scale.x, currentTargetScale.x, 15 * dt);
+                    const sy = THREE.MathUtils.lerp(lArm.scale.y, currentTargetScale.y, 15 * dt);
+                    const sz = THREE.MathUtils.lerp(lArm.scale.z, currentTargetScale.z, 15 * dt);
+                    lArm.scale.set(sx, sy, sz);
+                }
+                if (rArm) {
+                    const s = THREE.MathUtils.lerp(rArm.scale.x, targetArmScale, 15 * dt);
+                    rArm.scale.set(s, s, s);
+                }
+            }
+
+            if (window.rifleModel && w.type === 'RIFLE' && w.glbHip && w.glbAds) {
+                const tPos = isAiming ? w.glbAds.pos : w.glbHip.pos;
+                const tRot = isAiming ? w.glbAds.rot : w.glbHip.rot;
+                const tScale = isAiming ? w.glbAds.scale : w.glbHip.scale;
+
+                window.rifleModel.position.lerp(tPos, 15 * dt);
+                // Manually lerp rotation euler
+                window.rifleModel.rotation.x += (tRot.x - window.rifleModel.rotation.x) * 15 * dt;
+                window.rifleModel.rotation.y += (tRot.y - window.rifleModel.rotation.y) * 15 * dt;
+                window.rifleModel.rotation.z += (tRot.z - window.rifleModel.rotation.z) * 15 * dt;
+
+                window.rifleModel.scale.lerp(tScale, 15 * dt);
+
+                // [User Request] Dynamic Left Arm Lerping for Rifle
+                const lArm = weaponModel.getObjectByName('LeftArmGroup');
+                if (lArm && w.lArmHip && w.lArmAds) {
+                    const aPos = isAiming ? w.lArmAds.pos : w.lArmHip.pos;
+                    const aRot = isAiming ? w.lArmAds.rot : w.lArmHip.rot;
+                    lArm.position.lerp(aPos, 15 * dt);
+                    lArm.rotation.x += (aRot.x - lArm.rotation.x) * 15 * dt;
+                    lArm.rotation.y += (aRot.y - lArm.rotation.y) * 15 * dt;
+                    lArm.rotation.z += (aRot.z - lArm.rotation.z) * 15 * dt;
+                }
+            }
+
+            if (window.pistolModel && w.type === 'PISTOL' && w.glbHip && w.glbAds) {
+                const tPos = isAiming ? w.glbAds.pos : w.glbHip.pos;
+                const tRot = isAiming ? w.glbAds.rot : w.glbHip.rot;
+                const tScale = isAiming ? w.glbAds.scale : w.glbHip.scale;
+
+                window.pistolModel.position.lerp(tPos, 15 * dt);
+                window.pistolModel.rotation.x += (tRot.x - window.pistolModel.rotation.x) * 15 * dt;
+                window.pistolModel.rotation.y += (tRot.y - window.pistolModel.rotation.y) * 15 * dt;
+                window.pistolModel.rotation.z += (tRot.z - window.pistolModel.rotation.z) * 15 * dt;
+                window.pistolModel.scale.lerp(tScale, 15 * dt);
+            }
+
+            // [User Request] ADS-Aware Muzzle Flash Lerping
+            if (muzzleFlash && w.muzzleHip && w.muzzleAds) {
+                const tMuzzlePos = isAiming ? w.muzzleAds : w.muzzleHip;
+                muzzleFlash.position.lerp(tMuzzlePos, 15 * dt);
+            }
+
+            if (window.sniperModel && w.type === 'SNIPER' && w.glbHip && w.glbAds) {
+                const tPos = isAiming ? w.glbAds.pos : w.glbHip.pos;
+                const tRot = isAiming ? w.glbAds.rot : w.glbHip.rot;
+                const tScale = isAiming ? w.glbAds.scale : w.glbHip.scale;
+
+                // [DEBUG] Disable interpolation to allow debug panel to work
+                // window.sniperModel.position.lerp(tPos, 15 * dt);
+                // window.sniperModel.rotation.x += (tRot.x - window.sniperModel.rotation.x) * 15 * dt;
+                // window.sniperModel.rotation.y += (tRot.y - window.sniperModel.rotation.y) * 15 * dt;
+                // window.sniperModel.rotation.z += (tRot.z - window.sniperModel.rotation.z) * 15 * dt;
+                // window.sniperModel.scale.lerp(tScale, 15 * dt);
+            }
+
+            camera.fov += (targetFov - camera.fov) * 15 * dt;
+            camera.updateProjectionMatrix();
+
+            // 화면 흔들림 효과 적용 (피격 감각)
+            if (hitShake.intensity > 0) {
+                hitShake.x = (Math.random() - 0.5) * hitShake.intensity;
+                hitShake.y = (Math.random() - 0.5) * hitShake.intensity;
+                hitShake.intensity *= 0.85; // 점진적으로 감소
+                if (hitShake.intensity < 0.01) {
+                    hitShake.intensity = 0;
+                    hitShake.x = 0;
+                    hitShake.y = 0;
+                }
+            }
+
+            camera.position.copy(position);
+            camera.position.x += hitShake.x;
+            camera.position.y += hitShake.y;
+
+            // [FIX] weaponContainer가 camera의 자식인지 확인하여 위치 업데이트 방식 결정
+            if (weaponContainer.parent === camera) {
+                // 카메라의 자식일 경우: 로컬 오프셋만 설정 (카메라를 자동으로 따라감)
+                weaponContainer.position.set(
+                    currentPos.x + hitShake.x + swayOffset.x,
+                    currentPos.y + hitShake.y + swayOffset.y,
+                    currentPos.z
+                );
+                // [User Request] Apply interpolated rotation to weapon container
+                weaponContainer.rotation.set(currentRot.x, currentRot.y, currentRot.z);
+            } else {
+                // scene의 자식일 경우: 월드 좌표 직접 업데이트 (기존 로직)
+                weaponContainer.position.copy(position);
+                weaponContainer.position.x += hitShake.x;
+                weaponContainer.position.y += hitShake.y;
+                weaponContainer.quaternion.copy(camera.quaternion);
+                weaponContainer.translateX(currentPos.x + swayOffset.x);
+                weaponContainer.translateY(currentPos.y + swayOffset.y);
+                weaponContainer.translateZ(currentPos.z);
+            }
+
+            const recoilAccelX = -RECOIL_SPRING * recoil.x - RECOIL_DAMPING * recoilVel.x;
+            recoilVel.x += recoilAccelX * dt;
+            recoil.x += recoilVel.x * dt;
+            recoil.x = THREE.MathUtils.clamp(recoil.x, -RECOIL_MAX, RECOIL_MAX);
+
+            const recoilAccelZ = -RECOIL_SPRING * recoil.z - RECOIL_DAMPING * recoilVel.z;
+            recoilVel.z += recoilAccelZ * dt;
+            recoil.z += recoilVel.z * dt;
+            recoil.z = THREE.MathUtils.clamp(recoil.z, -RECOIL_POS_MAX, RECOIL_POS_MAX);
+
+
+            // 나이프일 때만 특별한 위치/회전 처리
+            if (w.type === 'KNIFE') {
+                // Arms Stability: Reset weaponModel (container) to idle pose
+                weaponModel.rotation.set(0, 0, 0);
+                weaponModel.position.set(0.35, -0.15, -0.3); // [MOD]
 
                 if (window.knifeSwing > 0) {
-                    window.knifeSwing = Math.max(window.knifeSwing - dt, 0);
-                }
+                    // [FIX] Independent Right Arm Swing (Left arm stays still)
 
-
-                updateShells(dt);
-
-                updateParticles(dt);
-                updateSparks(dt);
-                updateSmoke(dt);
-                updateGrenades(dt); // Grenade Physics
-                if (!isPaused) {
-                    updateHealthPills(dt);
-                    updateGrenadeDrops(dt);
-                }
-                // 모드별 업데이트
-                checkLowHealth(); // [FIX] Restore missing Low Health Check
-
-                if (gameMode === 'single') {
-                    updateEnemies(dt);
-                } else if (gameMode === 'multi') {
-                    // [FIX] Update Remote Players: Name Tag Visibility Only (No LookAt override)
-                    otherPlayers.forEach(p => {
-                        // Calculate distance to local player for name tag visibility
-                        const dist = p.position.distanceTo(camera.position);
-                        if (p.userData.nameSprite) {
-                            // Only show name if within 50 meters
-                            p.userData.nameSprite.visible = (dist < 50);
-                        }
-                    });
-
-                    // 자신의 상태 서버 전송 (초당 약 30~60회 렌더링마다 전송하면 부하가 생길 수 있으므로 최적화 가능)
-                    if (socket && socket.connected && !isDead) {
-                        socket.emit('playerMove', {
-                            position: { x: position.x, y: position.y, z: position.z },
-                            rotation: { x: rotation.x, y: rotation.y }
-                        });
+                    // 1. Reset Internal Parts to Default
+                    if (window.knifeModel) {
+                        window.knifeModel.position.set(0, -0.2, -0.5);
+                        window.knifeModel.rotation.set(0.1, 1.8, -0.2); // [MOD] Updated Idle Rotation
                     }
-                }
-
-                // 물리 엔진 업데이트
-                if (usePhysics && physicsWorld) {
-                    updatePhysics(dt);
-                }
-
-                if (!isPaused) {
-                    const camAccelX = -CAM_RECOIL_SPRING * cameraRecoil.x - CAM_RECOIL_DAMPING * cameraRecoilVel.x;
-                    cameraRecoilVel.x += camAccelX * dt;
-                    cameraRecoil.x += cameraRecoilVel.x * dt;
-                    cameraRecoil.x = THREE.MathUtils.clamp(cameraRecoil.x, -CAM_RECOIL_MAX, CAM_RECOIL_MAX);
-
-                    const camAccelY = -CAM_RECOIL_SPRING * cameraRecoil.y - CAM_RECOIL_DAMPING * cameraRecoilVel.y;
-                    cameraRecoilVel.y += camAccelY * dt;
-                    cameraRecoil.y += cameraRecoilVel.y * dt;
-                    cameraRecoil.y = THREE.MathUtils.clamp(cameraRecoil.y, -CAM_RECOIL_MAX, CAM_RECOIL_MAX);
-
-                    const deltaX = cameraRecoil.x - cameraRecoilApplied.x;
-                    const deltaY = cameraRecoil.y - cameraRecoilApplied.y;
-                    // [User Request] Remove vertical camera recoil (no muzzle climb) - recoil stays on weapon only
-                    // camera.rotation.x += deltaX; // DISABLED: No vertical camera movement
-                    camera.rotation.y += deltaY;
-                    cameraRecoilApplied.x = cameraRecoil.x;
-                    cameraRecoilApplied.y = cameraRecoil.y;
-
-                    // Update sun light to follow player for consistent shadows
-                    if (window.sunLight) {
-                        window.sunLight.position.set(position.x + 50, position.y + 120, position.z + 50);
-                        window.sunLight.target.position.set(position.x, position.y, position.z);
-                        window.sunLight.target.updateMatrixWorld();
+                    if (window.knifeRightArm) {
+                        window.knifeRightArm.position.set(0.12, -0.2, -0.15); // [MOD] Sync with Shorter Handle
+                        window.knifeRightArm.rotation.set(0, -0.15, 0.05);
                     }
 
-                    // 렌더링
-                    renderer.render(scene, camera);
-                }  // 후처리 효과 적용 (렌더링 후)
-                if (usePostProcessing && postProcessingEnabled) {
-                    applyPostProcessing();
+                    const swingT = 1 - (window.knifeSwing / window.KNIFE_SWING_DURATION);
+
+                    // weaponModel STAYS INITIAL (Fix for Left Arm moving)
+                    weaponModel.position.set(0.35, -0.15, -0.3);
+                    weaponModel.rotation.set(0, 0, 0);
+
+                    // Variables for Right Arm & Knife LOCAL transforms
+                    let ax = 0.12, ay = -0.2, az = -0.15;
+                    let arx = 0, ary = -0.15, arz = 0.05;
+
+                    // Variables for LEFT Arm
+                    let lx = -1.63, ly = -0.14, lz = -0.11;
+                    let lrx = 0.56, lry = -0.56, lrz = -1.98;
+
+                    let kx = 0, ky = -0.2, kz = -0.5;
+                    let krx = 0.1, kry = 1.18, krz = -0.1; // [MOD] Start from new idle rotation (approx)
+
+                    // ===== CONFIGURABLE SWING PARAMETERS =====
+                    // Adjust these via console: window.KNIFE_SWING_CONFIG
+                    if (!window.KNIFE_SWING_CONFIG) {
+                        window.KNIFE_SWING_CONFIG = {
+                            // Phase 1 End (Wind-up) - Knife position/rotation
+                            p1_kx: -0.2, p1_ky: 0.0, p1_kz: -0.35,
+                            p1_krx: 1.57, p1_kry: 1.57, p1_krz: 0.0,
+                            // Phase 2 End (Slash) - Knife position/rotation
+                            p2_kx: 0.4, p2_ky: -0.1, p2_kz: -0.5,
+                            p2_krx: 1.5, p2_kry: -0.5, p2_krz: 0.3,
+                            // Debug: freeze at specific swingT value (0-1), set to -1 to disable
+                            freezeAt: -1
+                        };
+                        console.log('[Knife Swing] Config loaded. Adjust via window.KNIFE_SWING_CONFIG');
+                    }
+                    const cfg = window.KNIFE_SWING_CONFIG;
+
+                    // Debug freeze mode
+                    if (cfg.freezeAt >= 0 && cfg.freezeAt <= 1) {
+                        swingT = cfg.freezeAt;
+                    }
+
+                    // New idle values from user's settings
+                    const idleX = 0.01, idleY = 0.00, idleZ = -0.29;
+                    const idleRX = 2.16, idleRY = -0.06, idleRZ = 2.08;
+
+                    if (swingT < 0.12) {
+                        // Phase 1: Wind Up (0% - 12%) - Pull blade to center/left
+                        const t = swingT / 0.12;
+                        const et = 1 - (1 - t) * (1 - t); // Quad Out
+
+                        // Right Arm wind up - pull toward center
+                        ax = THREE.MathUtils.lerp(0.12, 0.0, et);
+                        ay = THREE.MathUtils.lerp(-0.2, -0.15, et);
+                        az = THREE.MathUtils.lerp(-0.15, -0.35, et); // Extend arm forward
+                        arx = THREE.MathUtils.lerp(0, 0.1, et);
+                        ary = THREE.MathUtils.lerp(-0.15, 0.3, et);
+                        arz = THREE.MathUtils.lerp(0.05, -0.05, et);
+
+                        // Knife wind up - uses config values
+                        kx = THREE.MathUtils.lerp(idleX, cfg.p1_kx, et);
+                        ky = THREE.MathUtils.lerp(idleY, cfg.p1_ky, et);
+                        kz = THREE.MathUtils.lerp(idleZ, cfg.p1_kz, et);
+                        krx = THREE.MathUtils.lerp(idleRX, cfg.p1_krx, et);
+                        kry = THREE.MathUtils.lerp(idleRY, cfg.p1_kry, et);
+                        krz = THREE.MathUtils.lerp(idleRZ, cfg.p1_krz, et);
+                    } else if (swingT < 0.45) {
+                        // Phase 2: Outward Slash (12% - 45%)
+                        const t = (swingT - 0.12) / 0.33;
+                        const et = 1 - Math.pow(1 - t, 3); // Cubic Out
+
+                        // Right Arm outward slash - reduced X movement, extended Z
+                        ax = THREE.MathUtils.lerp(0.0, 0.25, et);  // Reduced from 0.5 to 0.25
+                        ay = THREE.MathUtils.lerp(-0.15, -0.2, et);
+                        az = THREE.MathUtils.lerp(-0.35, -0.55, et); // Extended arm forward more
+                        arx = THREE.MathUtils.lerp(0.1, -0.05, et);
+                        ary = THREE.MathUtils.lerp(0.3, -0.8, et);  // Reduced rotation
+                        arz = THREE.MathUtils.lerp(-0.05, 0.15, et);
+
+                        // Left Arm reaction
+                        lx = THREE.MathUtils.lerp(-1.63, -1.8, et);
+                        lry = THREE.MathUtils.lerp(-0.56, -0.7, et);
+
+                        // Knife slash - uses config values
+                        kx = THREE.MathUtils.lerp(cfg.p1_kx, cfg.p2_kx, et);
+                        ky = THREE.MathUtils.lerp(cfg.p1_ky, cfg.p2_ky, et);
+                        kz = THREE.MathUtils.lerp(cfg.p1_kz, cfg.p2_kz, et);
+                        krx = THREE.MathUtils.lerp(cfg.p1_krx, cfg.p2_krx, et);
+                        kry = THREE.MathUtils.lerp(cfg.p1_kry, cfg.p2_kry, et);
+                        krz = THREE.MathUtils.lerp(cfg.p1_krz, cfg.p2_krz, et);
+                    } else {
+                        // Phase 3: Recovery (45% - 100%)
+                        const t = (swingT - 0.45) / 0.55;
+                        const et = t * t; // Quad In
+
+                        // Right Arm recovery - from new values
+                        ax = THREE.MathUtils.lerp(0.25, 0.02, et);
+                        ay = THREE.MathUtils.lerp(-0.2, 0.02, et);
+                        az = THREE.MathUtils.lerp(-0.55, -0.15, et); // Return from extended position
+                        arx = THREE.MathUtils.lerp(-0.05, 0, et);
+                        ary = THREE.MathUtils.lerp(-0.8, 0.36, et);
+                        arz = THREE.MathUtils.lerp(0.15, 0.05, et);
+
+                        // Left Arm recovery
+                        lx = THREE.MathUtils.lerp(-1.8, -1.63, et);
+                        lry = THREE.MathUtils.lerp(-0.7, -0.56, et);
+
+                        // Knife recovery - from config p2 to idle
+                        kx = THREE.MathUtils.lerp(cfg.p2_kx, idleX, et);
+                        ky = THREE.MathUtils.lerp(cfg.p2_ky, idleY, et);
+                        kz = THREE.MathUtils.lerp(cfg.p2_kz, idleZ, et);
+                        krx = THREE.MathUtils.lerp(cfg.p2_krx, idleRX, et);
+                        kry = THREE.MathUtils.lerp(cfg.p2_kry, idleRY, et);
+                        krz = THREE.MathUtils.lerp(cfg.p2_krz, idleRZ, et);
+                    }
+
+                    // Apply to Right Arm
+                    const rArm = weaponModel.getObjectByName('RightArmGroup');
+                    if (rArm) {
+                        rArm.position.set(ax, ay, az);
+                        rArm.rotation.set(arx, ary, arz);
+                    }
+                    // Apply to Left Arm
+                    const lArm = weaponModel.getObjectByName('LeftArmGroup');
+                    if (lArm) {
+                        lArm.position.set(lx, ly, lz);
+                        lArm.rotation.set(lrx, lry, lrz);
+                    }
+                    // Apply to Knife
+                    if (window.knifeModel) {
+                        window.knifeModel.position.set(kx, ky, kz);
+                        window.knifeModel.rotation.set(krx, kry, krz);
+                    }
+
+                } else if (window.knifeModel) {
+                    // [FIX] Use WEAPONS data instead of hardcoded values for debug panel support
+                    const knifeWeapon = WEAPONS.find(weapon => weapon.type === 'KNIFE');
+                    if (knifeWeapon && knifeWeapon.glbHip) {
+                        window.knifeModel.position.copy(knifeWeapon.glbHip.pos);
+                        window.knifeModel.rotation.set(knifeWeapon.glbHip.rot.x, knifeWeapon.glbHip.rot.y, knifeWeapon.glbHip.rot.z);
+                        window.knifeModel.scale.copy(knifeWeapon.glbHip.scale);
+                    }
+                    const rArm = weaponModel.getObjectByName('RightArmGroup');
+                    if (rArm && knifeWeapon && knifeWeapon.rArmHip) {
+                        rArm.position.copy(knifeWeapon.rArmHip.pos);
+                        rArm.rotation.set(knifeWeapon.rArmHip.rot.x, knifeWeapon.rArmHip.rot.y, knifeWeapon.rArmHip.rot.z);
+                    }
+                    const lArm = weaponModel.getObjectByName('LeftArmGroup');
+                    if (lArm && knifeWeapon && knifeWeapon.lArmHip) {
+                        lArm.position.copy(knifeWeapon.lArmHip.pos);
+                        lArm.rotation.set(knifeWeapon.lArmHip.rot.x, knifeWeapon.lArmHip.rot.y, knifeWeapon.lArmHip.rot.z);
+                    }
+                }
+            } else {
+
+                // 다른 무기들은 원래대로 (recoil만 적용)
+                const recoilScale = (isAiming && w.type === 'RIFLE') ? 0.35 : 1;
+                weaponModel.position.y = THREE.MathUtils.lerp(weaponModel.position.y, 0, 10 * dt);
+                const reloadRot = (isReloading && isAiming && w.type === 'RIFLE') ? 0.1 : (isReloading ? 0.5 : 0);
+                weaponModel.rotation.x = recoil.x * recoilScale + reloadRot;
+                weaponModel.position.z = recoil.z * recoilScale;
+                // 재장전 제스처 중이 아닐 때만 rotation.z 초기화
+                if (!sniperReloadGesture) {
+                    weaponModel.rotation.z = 0;
                 }
             }
+            elVignette.style.opacity = (isAiming && w.type !== 'KNIFE') ? 0.5 : 0;
+
+            if (window.knifeSwing > 0) {
+                window.knifeSwing = Math.max(window.knifeSwing - dt, 0);
+            }
+
+
+            updateShells(dt);
+
+            updateParticles(dt);
+            updateSparks(dt);
+            updateSmoke(dt);
+            updateGrenades(dt); // Grenade Physics
+            if (!isPaused) {
+                updateHealthPills(dt);
+                updateGrenadeDrops(dt);
+            }
+            // 모드별 업데이트
+            checkLowHealth(); // [FIX] Restore missing Low Health Check
+
+            if (gameMode === 'single') {
+                updateEnemies(dt);
+            } else if (gameMode === 'multi') {
+                // [FIX] Update Remote Players: Name Tag Visibility Only (No LookAt override)
+                otherPlayers.forEach(p => {
+                    // Calculate distance to local player for name tag visibility
+                    const dist = p.position.distanceTo(camera.position);
+                    if (p.userData.nameSprite) {
+                        // Only show name if within 50 meters
+                        p.userData.nameSprite.visible = (dist < 50);
+                    }
+                });
+
+                // 자신의 상태 서버 전송 (초당 약 30~60회 렌더링마다 전송하면 부하가 생길 수 있으므로 최적화 가능)
+                if (socket && socket.connected && !isDead) {
+                    socket.emit('playerMove', {
+                        position: { x: position.x, y: position.y, z: position.z },
+                        rotation: { x: rotation.x, y: rotation.y }
+                    });
+                }
+            }
+
+            // 물리 엔진 업데이트
+            if (usePhysics && physicsWorld) {
+                updatePhysics(dt);
+            }
+
+            if (!isPaused) {
+                const camAccelX = -CAM_RECOIL_SPRING * cameraRecoil.x - CAM_RECOIL_DAMPING * cameraRecoilVel.x;
+                cameraRecoilVel.x += camAccelX * dt;
+                cameraRecoil.x += cameraRecoilVel.x * dt;
+                cameraRecoil.x = THREE.MathUtils.clamp(cameraRecoil.x, -CAM_RECOIL_MAX, CAM_RECOIL_MAX);
+
+                const camAccelY = -CAM_RECOIL_SPRING * cameraRecoil.y - CAM_RECOIL_DAMPING * cameraRecoilVel.y;
+                cameraRecoilVel.y += camAccelY * dt;
+                cameraRecoil.y += cameraRecoilVel.y * dt;
+                cameraRecoil.y = THREE.MathUtils.clamp(cameraRecoil.y, -CAM_RECOIL_MAX, CAM_RECOIL_MAX);
+
+                const deltaX = cameraRecoil.x - cameraRecoilApplied.x;
+                const deltaY = cameraRecoil.y - cameraRecoilApplied.y;
+                // [User Request] Remove vertical camera recoil (no muzzle climb) - recoil stays on weapon only
+                // camera.rotation.x += deltaX; // DISABLED: No vertical camera movement
+                camera.rotation.y += deltaY;
+                cameraRecoilApplied.x = cameraRecoil.x;
+                cameraRecoilApplied.y = cameraRecoil.y;
+
+                // Update sun light to follow player for consistent shadows
+                if (window.sunLight) {
+                    window.sunLight.position.set(position.x + 50, position.y + 120, position.z + 50);
+                    window.sunLight.target.position.set(position.x, position.y, position.z);
+                    window.sunLight.target.updateMatrixWorld();
+                }
+
+                // 렌더링
+                renderer.render(scene, camera);
+            }  // 후처리 효과 적용 (렌더링 후)
+            if (usePostProcessing && postProcessingEnabled) {
+                applyPostProcessing();
+            }
+        }
         }
 
 
