@@ -5171,13 +5171,13 @@
 
                 // 소총(어썰트라이플)은 오디오 파일 사용 (User Request: set default volume to 50%)
                 if (type === 'RIFLE' && this.audioBuffers['gunshot']) {
-                    this.playAudioFile('gunshot', 0.16); // Halved from 0.32 per user request
+                    this.playAudioFile('gunshot', 0.3); // Boosted from 0.16 for visibility
                     return;
                 }
 
                 // 권총은 오디오 파일 사용, 없으면 기존 소리 생성
                 if (type === 'PISTOL' && this.audioBuffers['gunshot']) {
-                    this.playAudioFile('gunshot', 0.4); // Reduced from 0.8 per user request
+                    this.playAudioFile('gunshot', 0.65); // Boosted from 0.4 per user request
                     return;
                 }
 
@@ -13326,11 +13326,7 @@
                 // FIXED: REMOVED THE BUGGY EMISSIVE FLASH CODE HERE
 
                 // spawnShell(); // 탄피 효과 비활성화
-                if (w.type === 'RIFLE') {
-                    playRifleShot();
-                } else {
-                    SoundGen.playShoot(w.type);
-                }
+                SoundGen.playShoot(w.type);
             } else {
                 window.knifeSwing = window.KNIFE_SWING_DURATION;
                 SoundGen.playKnife();
