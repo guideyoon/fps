@@ -6667,9 +6667,16 @@
                 m.traverse((child) => {
                     if (child.name && child.name.toLowerCase().includes('head')) {
                         group.userData.head = child;
-                        // [NEW] Explicitly name the mesh 'head' for isHitPart detection
+                        // [NEW] Aggressively force name 'head' for ALL children meshes of the head bone
+                        console.log('[SetupModel] Found Head Bone:', child.name);
                         child.name = 'head';
-                        child.traverse(c => { if (c.isMesh) c.name = 'head'; });
+                        child.traverse(c => {
+                            if (c.isMesh) {
+                                console.log('[SetupModel] Renaming head mesh:', c.name, '-> head');
+                                c.name = 'head';
+                                c.userData.isHead = true; // Extra flag for robustness
+                            }
+                        });
                     }
                 });
 
@@ -12610,6 +12617,7 @@
             const searchName = partName.toLowerCase();
             while (current) {
                 if (current.name && current.name.toLowerCase().includes(searchName)) return true;
+                if (partName === 'head' && current.userData && current.userData.isHead) return true; // Check flag
                 current = current.parent;
             }
             return false;
