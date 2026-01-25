@@ -269,8 +269,8 @@
 
         .crosshair .dot {
             position: absolute;
-            width: 4px;
-            height: 4px;
+            width: 5px;
+            height: 5px;
             background-color: white;
             border-radius: 50%;
             box-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
@@ -286,21 +286,21 @@
             z-index: 101;
         }
 
-        /* Vertical Lines (Top/Bottom) - Width 2px, Height 10px */
+        /* Vertical Lines (Top/Bottom) - Width 3px, Height 14px */
         .crosshair .hair.top,
         .crosshair .hair.bottom {
-            width: 2px;
-            height: 10px;
+            width: 3px;
+            height: 14px;
             left: 50%;
             transform: translateX(-50%);
             /* Center horizontally */
         }
 
-        /* Horizontal Lines (Left/Right) - Width 10px, Height 2px */
+        /* Horizontal Lines (Left/Right) - Width 14px, Height 3px */
         .crosshair .hair.left,
         .crosshair .hair.right {
-            width: 10px;
-            height: 2px;
+            width: 14px;
+            height: 3px;
             top: 50%;
             transform: translateY(-50%);
             /* Center vertically */
@@ -13483,7 +13483,7 @@
             // --- Dynamic Crosshair Update ---
             // Calculate current spread based on state
             let targetSpread = 0; // Base offset from center (default gap)
-            const BASE_GAP = 5;
+            const BASE_GAP = 10;
 
             // 1. Movement Spread (Walking)
             if (keys.w || keys.a || keys.s || keys.d) {
