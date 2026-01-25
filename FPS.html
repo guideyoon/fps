@@ -12300,16 +12300,10 @@
             const initialMagPos = mag ? mag.position.clone() : null;
 
             // --- RELOAD SEQUENCE ---
-            // Stage 1: Tilt Up & Drop Mag (0ms)
-            if (weaponModel) {
-                // [User Request] Smaller motion (Reduced from 0.5 and -0.1)
-                weaponModel.rotation.z = 0.15;
-                weaponModel.position.y = -0.02;
-                if (mag) {
-                    // Start drop animation (will be handled by lerp in future or simple offset here)
-                    mag.position.y -= 0.2;
-                    mag.visible = true;
-                }
+            // Stage 1: Drop Mag (0ms) - [MINIMIZED] No tilt/dip
+            if (mag) {
+                mag.position.y -= 0.2;
+                mag.visible = true;
             }
 
             // Stage 2: Hide dropped mag (400ms)
@@ -12322,7 +12316,6 @@
                 if (mag) {
                     mag.position.y = initialMagPos.y - 0.4;
                     mag.visible = true;
-                    // Move up to initial position
                     const animateUp = () => {
                         const step = 0.05;
                         if (mag.position.y < initialMagPos.y) {
