@@ -12844,6 +12844,7 @@
                 if (isOtherPlayer && p.userData.hp > 0) {
                     let dmg = w.damage;
                     let isHead = isHitPart(h.object, 'head');
+                    console.log('[Shoot] Hit Player. Part:', h.object.name, 'isHead:', isHead); // DEBUG
                     if (isHead) {
                         dmg *= 3;
                         elHeadshot.classList.add('active');
