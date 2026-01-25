@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<!-- DEPLOY TRIGGER: 2026-01-25-1855 -->
-<!-- VERSION: 2026-01-25-CH-V7-RED-TEST -->
+<!-- DEPLOY TRIGGER: 2026-01-25-1858 -->
+<!-- VERSION: 2026-01-25-CH-V8-WHITE-FINAL -->
 <html lang="ko">
 
 <head>
@@ -269,23 +269,25 @@
 
         #hud-crosshair .dot {
             position: absolute;
-            width: 6px !important;
-            height: 6px !important;
-            background-color: #ff0000 !important;
-            /* RED for verification */
+            width: 5px !important;
+            height: 5px !important;
+            background-color: #ffffff !important;
             border-radius: 50%;
             box-shadow: 0 0 4px rgba(0, 0, 0, 1) !important;
             z-index: 102;
+            color-scheme: only light !important;
+            /* Prevent Chrome Force Dark Mode inversion */
         }
 
         #hud-crosshair .hair {
             position: absolute;
-            background-color: #ff0000 !important;
-            /* RED for verification */
+            background-color: #ffffff !important;
             box-shadow: 0 0 3px rgba(0, 0, 0, 1) !important;
             transition: transform 0.1s ease-out;
             /* Smooth spread */
             z-index: 101;
+            color-scheme: only light !important;
+            /* Prevent Chrome Force Dark Mode inversion */
         }
 
         /* Vertical Lines (Top/Bottom) - Width 3px, Height 14px */
@@ -3494,8 +3496,8 @@
 
         <!-- Version Info Wrapper -->
         <div id="deploy-version-overlay"
-            style="position: absolute; bottom: 5px; right: 80px; font-size: 14px; color: #fff; pointer-events: none; z-index: 9999; background: #ff0000; padding: 5px; font-weight: bold;">
-            ver: 2026-01-25-CH-V7-RED
+            style="position: absolute; bottom: 5px; right: 80px; font-size: 14px; color: #fff; pointer-events: none; z-index: 9999; background: #222; padding: 5px; font-weight: bold; opacity: 0.6;">
+            ver: 2026-01-25-CH-V8
         </div>
 
         <!-- Top Right: Kill Feed -->
@@ -13491,7 +13493,7 @@
             // --- Dynamic Crosshair Update ---
             // Calculate current spread based on state
             let targetSpread = 0; // Base offset from center (default gap)
-            const BASE_GAP = 30; // Maximum gap to ensure visibility in V6
+            const BASE_GAP = 18; // Final gap set to 18px for clear visibility
 
             // 1. Movement Spread (Walking)
             if (keys.w || keys.a || keys.s || keys.d) {

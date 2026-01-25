@@ -234,6 +234,7 @@ body.single-player #hud-kill-count {
 	transform: translate(-50%, -50%);
 	transition: all 0.1s ease-out;
 	box-shadow: 0 0 2px #000;
+	color-scheme: only light !important;
 }
 
 .crosshair .horizontal {
@@ -252,6 +253,7 @@ body.single-player #hud-kill-count {
 	background: #fff !important;
 	border-radius: 50%;
 	box-shadow: 0 0 4px #000;
+	color-scheme: only light !important;
 }
 
 .crosshair.firing .horizontal {
