@@ -3334,7 +3334,8 @@
         <div class="tactical-panel" style="width: 800px;">
             <div class="tactical-title"><i class="fas fa-list"></i> 작전 로비 (OPERATION LOBBY)</div>
             <div style="display: flex; gap: 15px; margin-bottom: 20px;">
-                <button id="btn-show-create-room" class="mode-btn" style="min-width: 200px; font-size: 18px;">
+                <button id="btn-show-create-room" class="mode-btn" style="min-width: 200px; font-size: 18px;"
+                    onclick="openCreateRoomModal()">
                     <span class="btn-text"><i class="fas fa-plus-circle btn-icon"></i>작전 생성</span>
                 </button>
                 <button id="btn-refresh-rooms" class="mode-btn" style="min-width: 200px; font-size: 18px;">
@@ -3386,10 +3387,10 @@
                 </select>
             </div>
             <div style="display: flex; gap: 20px; margin-top: 20px;">
-                <button id="btn-create-confirm" class="mode-btn">
+                <button id="btn-create-confirm" class="mode-btn" onclick="confirmCreateRoom()">
                     <span class="btn-text"><i class="fas fa-check btn-icon"></i>생성</span>
                 </button>
-                <button class="mode-btn cancel" id="btn-create-cancel">
+                <button class="mode-btn cancel" id="btn-create-cancel" onclick="closeCreateRoomModal()">
                     <span class="btn-text"><i class="fas fa-times btn-icon"></i>취소</span>
                 </button>
             </div>
@@ -6130,9 +6131,44 @@
             resetAmmo();
 
             // Global Join Function
+            // Global Join Function
             window.joinRoom = function (roomId) {
                 if (socket && socket.connected) {
                     socket.emit('joinRoom', roomId);
+                }
+            };
+
+            // [FIX] Global Create Room Handlers for Robustness
+            window.openCreateRoomModal = function () {
+                console.log("Opening Create Room Modal");
+                if (createRoomModal) {
+                    createRoomModal.style.display = 'flex';
+                    const nameInput = document.getElementById('new-room-name');
+                    if (nameInput) nameInput.focus();
+                } else {
+                    console.error("Create Room Modal not found!");
+                }
+            };
+
+            window.closeCreateRoomModal = function () {
+                if (createRoomModal) createRoomModal.style.display = 'none';
+            };
+
+            window.confirmCreateRoom = function () {
+                const roomName = document.getElementById('new-room-name').value || '새 방';
+                const maxPlayers = document.getElementById('new-room-max').value;
+                const mapName = document.getElementById('new-room-map').value;
+
+                if (socket && socket.connected) {
+                    socket.emit('createRoom', {
+                        name: roomName,
+                        maxPlayers: maxPlayers,
+                        map: mapName,
+                        gameMode: document.getElementById('new-room-mode').value
+                    });
+                    closeCreateRoomModal();
+                } else {
+                    alert('서버에 연결되지 않았습니다. 잠시 후 다시 시도하거나 새로고침하세요.');
                 }
             };
         }
