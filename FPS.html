@@ -5673,6 +5673,13 @@
                     isDead = false;
                     playerHP = 100;
 
+                    // [FIX] Reset Low Health Overlay
+                    const overlay = document.getElementById('low-health-overlay');
+                    if (overlay) {
+                        overlay.classList.remove('active');
+                        overlay.style.opacity = 0;
+                    }
+
                     // UI 초기화
                     document.getElementById('room-waiting').style.display = 'none';
                     chatContainer.style.display = 'none';
@@ -7285,6 +7292,13 @@
                 initPlayer();
                 isDead = false;
                 playerHP = 100;
+
+                // [FIX] Reset Low Health Overlay
+                const overlay = document.getElementById('low-health-overlay');
+                if (overlay) {
+                    overlay.classList.remove('active');
+                    overlay.style.opacity = 0;
+                }
 
                 // Ensure lighting exists (in case scene was cleared or invalid)
                 // Simply checking if we have lights, if not, add them.
