@@ -3494,11 +3494,6 @@
             <div id="hud-kill-count">Kills: 0</div>
         </div>
 
-        <!-- Version Info Wrapper -->
-        <div id="deploy-version-overlay"
-            style="position: absolute; bottom: 5px; right: 80px; font-size: 14px; color: #fff; pointer-events: none; z-index: 9999; background: #222; padding: 5px; font-weight: bold; opacity: 0.6;">
-            ver: 2026-01-25-CH-V8
-        </div>
 
         <!-- Top Right: Kill Feed -->
         <div class="kill-feed" id="hud-kill-feed"></div>
@@ -13493,7 +13488,7 @@
             // --- Dynamic Crosshair Update ---
             // Calculate current spread based on state
             let targetSpread = 0; // Base offset from center (default gap)
-            const BASE_GAP = 18; // Final gap set to 18px for clear visibility
+            const BASE_GAP = 50; // Final user request: 50px gap
 
             // 1. Movement Spread (Walking)
             if (keys.w || keys.a || keys.s || keys.d) {
