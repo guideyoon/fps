@@ -13823,8 +13823,8 @@
                 else targetPos = w.posAds;
             }
 
-            currentPos.lerp(targetPos, 15 * dt);
-            currentRot.lerp(targetRot, 15 * dt); // Interpolate rotation
+            currentPos.lerp(targetPos, 0.2);
+            currentRot.lerp(targetRot, 0.2); // Interpolate rotation
 
             // [User Request] Dynamic Arm Scaling for all weapons (except Knife/Grenade)
             if (w.type !== 'KNIFE' && w.type !== 'GRENADE') {
