@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<!-- DEPLOY TRIGGER: 2026-01-25-1840 -->
-<!-- VERSION: 2026-01-25-CROSSHAIR-FORCE-V3 -->
+<!-- DEPLOY TRIGGER: 2026-01-25-1845 -->
+<!-- VERSION: 2026-01-25-CH-V4-ULTRA -->
 <html lang="ko">
 
 <head>
@@ -267,20 +267,22 @@
             /* Transition for container if needed, but mainly for children */
         }
 
-        .crosshair .dot {
+        #hud-crosshair .dot {
             position: absolute;
             width: 6px !important;
             height: 6px !important;
-            background-color: white !important;
+            background-color: #ff00ff !important;
+            /* Fuchsia for verification */
             border-radius: 50%;
-            box-shadow: 0 0 4px rgba(0, 0, 0, 0.8) !important;
+            box-shadow: 0 0 4px rgba(0, 0, 0, 1) !important;
             z-index: 102;
         }
 
-        .crosshair .hair {
+        #hud-crosshair .hair {
             position: absolute;
-            background-color: white !important;
-            box-shadow: 0 0 3px rgba(0, 0, 0, 0.8) !important;
+            background-color: #00ff00 !important;
+            /* Lime for verification */
+            box-shadow: 0 0 3px rgba(0, 0, 0, 1) !important;
             transition: transform 0.1s ease-out;
             /* Smooth spread */
             z-index: 101;
@@ -3492,8 +3494,8 @@
 
         <!-- Version Info Wrapper -->
         <div id="deploy-version-overlay"
-            style="position: absolute; bottom: 5px; right: 5px; font-size: 10px; color: #444; pointer-events: none; z-index: 9999;">
-            ver: 2026-01-25-CH-V3
+            style="position: absolute; bottom: 5px; right: 5px; font-size: 10px; color: #ff00ff; pointer-events: none; z-index: 9999; background: rgba(0,0,0,0.5); padding: 2px;">
+            ver: 2026-01-25-CH-V4
         </div>
 
         <!-- Top Right: Kill Feed -->
@@ -13508,12 +13510,11 @@
                 targetSpread -= 2; // Tighten by 2px (e.g., precise aim)
             }
 
-            // Apply Spread to DOM
-            // Get elements (cache these if optimization needed, but benign for now)
-            const hairTop = document.querySelector('.crosshair .hair.top');
-            const hairBottom = document.querySelector('.crosshair .hair.bottom');
-            const hairLeft = document.querySelector('.crosshair .hair.left');
-            const hairRight = document.querySelector('.crosshair .hair.right');
+            // Apply Spread to DOM using ID for absolute precision
+            const hairTop = document.querySelector('#hud-crosshair .hair.top');
+            const hairBottom = document.querySelector('#hud-crosshair .hair.bottom');
+            const hairLeft = document.querySelector('#hud-crosshair .hair.left');
+            const hairRight = document.querySelector('#hud-crosshair .hair.right');
 
             if (hairTop && hairBottom && hairLeft && hairRight) {
                 const finalGap = BASE_GAP + targetSpread;
