@@ -5052,6 +5052,8 @@
             reloadVolume: 0.8, // 재장전 볼륨 (0.0 ~ 1.0)
             isStepPlaying: false, // 이동 소리 재생 중 여부
             lobbyMusicSource: null,
+            loadingPromises: {},
+            userInteracted: false,
             init: function () {
                 if (this.ctx) return;
                 try {
@@ -5074,7 +5076,12 @@
                     return Promise.resolve(this.audioBuffers[name]);
                 }
 
-                return fetch(url)
+                // 이미 로딩 중인 경우 약속(Promise) 반환
+                if (this.loadingPromises[name]) {
+                    return this.loadingPromises[name];
+                }
+
+                this.loadingPromises[name] = fetch(url)
                     .then(response => {
                         if (!response.ok) {
                             throw new Error(`HTTP error! status: ${response.status}`);
@@ -5087,12 +5094,16 @@
                     .then(audioBuffer => {
                         this.audioBuffers[name] = audioBuffer;
                         console.log(`Audio file loaded: ${name}`);
+                        delete this.loadingPromises[name];
                         return audioBuffer;
                     })
                     .catch(error => {
                         console.error(`Failed to load audio file ${url}:`, error);
+                        delete this.loadingPromises[name];
                         throw error;
                     });
+
+                return this.loadingPromises[name];
             },
             // 로드된 오디오 파일 재생 함수
             playAudioFile: function (name, volume = 1.0, loop = false) {
@@ -5654,8 +5665,25 @@
             startLobbyMusic: function () {
                 if (!this.ensureContext()) return;
                 if (this.lobbyMusicSource) return;
-                console.log('[SoundGen] Starting Lobby Music');
-                this.lobbyMusicSource = this.playAudioFile('main', 0.5, true);
+
+                const play = () => {
+                    if (this.lobbyMusicSource || !this.userInteracted) return;
+                    if (this.ctx.state === 'suspended') {
+                        this.ctx.resume().then(() => play());
+                        return;
+                    }
+                    console.log('[SoundGen] Playing Lobby Music');
+                    this.lobbyMusicSource = this.playAudioFile('main', 0.5, true);
+                };
+
+                if (this.audioBuffers['main']) {
+                    play();
+                } else {
+                    console.log('[SoundGen] Main BGM not ready yet, will play on load complete if user has interacted');
+                    this.loadAudioFile('sounds/main.mp3', 'main').then(() => {
+                        play();
+                    });
+                }
             },
             stopLobbyMusic: function () {
                 if (this.lobbyMusicSource) {
@@ -7309,20 +7337,16 @@
         }
 
         const loadAudioFiles = () => {
+            SoundGen.userInteracted = true;
             if (!SoundGen.ctx) SoundGen.init();
             if (SoundGen.ctx.state === 'suspended') {
                 SoundGen.ctx.resume().then(() => {
                     console.log('[SoundGen] AudioContext resumed via interaction');
-                    // Context가 활성화되면 BGM 재생 시도
                     SoundGen.startLobbyMusic();
                 });
             } else {
                 SoundGen.startLobbyMusic();
             }
-
-            // [PROACTIVE] Pre-fetch all other sounds if not already loading
-            // 이 함수는 mousedown에서 호출되므로 여기서 resume과 함께 재생을 트리거합니다.
-            // 로딩 자체는 아래에서 페이지 로드 시 즉시 시작하도록 변경합니다.
         };
 
         // [INIT] 페이지 로드 시 즉시 오디오 시스템 초기화 및 파일 로딩 시작
