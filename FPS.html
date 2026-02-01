@@ -13829,7 +13829,7 @@
                 // Right: Move Right (positive X)
                 hairRight.style.transform = `translate(${finalGap}px, -50%)`;
             }
-            if (isDead) {
+            if (isDead && gameMode === 'single') {
                 const gameOverKills = document.getElementById('final-kill-count');
                 if (gameOverKills) gameOverKills.innerText = killCount;
                 if (elGameOver) elGameOver.style.display = 'flex';
