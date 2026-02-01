@@ -5053,9 +5053,11 @@
             isStepPlaying: false, // 이동 소리 재생 중 여부
             lobbyMusicSource: null,
             init: function () {
+                if (this.ctx) return;
                 try {
                     window.AudioContext = window.AudioContext || window.webkitAudioContext;
                     this.ctx = new AudioContext();
+                    console.log('[SoundGen] AudioContext initialized');
                 } catch (e) {
                     console.warn('AudioContext initialization failed:', e);
                 }
@@ -5123,12 +5125,8 @@
                 }
             },
             ensureContext: function () {
-                if (!this.ctx) {
-                    this.init();
-                }
-                if (this.ctx && this.ctx.state === 'suspended') {
-                    this.ctx.resume().catch(e => console.warn('AudioContext resume failed:', e));
-                }
+                if (!this.ctx) this.init();
+                // Note: Actual resume MUST happen within a user event handler
                 return !!this.ctx;
             },
             playShoot: function (type) {
@@ -7312,67 +7310,46 @@
 
         const loadAudioFiles = () => {
             if (!SoundGen.ctx) SoundGen.init();
-            if (SoundGen.ctx.state === 'suspended') SoundGen.ctx.resume();
-
-            // 재장전 오디오 파일 로드
-            SoundGen.loadAudioFile('sounds/reload1.mp3', 'reload')
-                .catch(err => console.warn('Failed to load reload sound:', err));
-
-            // 저격총 발사 오디오 파일 로드
-            SoundGen.loadAudioFile('sounds/rifle.mp3', 'rifle')
-                .catch(err => console.warn('Failed to load rifle sound:', err));
-
-            // 나이프 휘두르기 오디오 파일 로드
-            SoundGen.loadAudioFile('sounds/sword.mp3', 'sword')
-                .catch(err => console.warn('Failed to load sword sound:', err));
-
-            // 나이프 교체 오디오 파일 로드
-            SoundGen.loadAudioFile('sounds/c-sword.mp3', 'c-sword')
-                .catch(err => console.warn('Failed to load c-sword sound:', err));
-
-            // 소총 교체 오디오 파일 로드
-            SoundGen.loadAudioFile('sounds/c-sochong.mp3', 'c-sochong')
-                .catch(err => console.warn('Failed to load c-sochong sound:', err));
-
-            // 권총 교체 오디오 파일 로드
-            SoundGen.loadAudioFile('sounds/c-gun.mp3', 'c-gun')
-                .catch(err => console.warn('Failed to load c-gun sound:', err));
-
-            // 저격총 교체 오디오 파일 로드
-            SoundGen.loadAudioFile('sounds/c-rifle.mp3', 'c-rifle')
-                .catch(err => console.warn('Failed to load c-rifle sound:', err));
-
-            // 빈 격발 오디오 파일 로드
-            SoundGen.loadAudioFile('sounds/empty.mp3', 'empty')
-                .catch(err => console.warn('Failed to load empty sound:', err));
-
-            // 권총 발사 오디오 파일 로드
-            SoundGen.loadAudioFile('sounds/gunshot.mp3', 'gunshot')
-                .catch(err => console.warn('Failed to load gunshot sound:', err));
-
-            // [NEW] 착지 및 기타 효과음 로드
-            SoundGen.loadAudioFile('sounds/chak.MP3', 'land')
-                .catch(err => console.warn('Failed to load land sound:', err));
-
-            SoundGen.loadAudioFile('sounds/grunt.mp3', 'jump')
-                .catch(err => console.warn('Failed to load jump sound:', err));
-
-            SoundGen.loadAudioFile('sounds/walking.MP3', 'walking')
-                .catch(err => console.warn('Failed to load walking sound:', err));
-
-            SoundGen.loadAudioFile('sounds/headshot.mp3', 'headshot')
-                .catch(err => console.warn('Failed to load headshot sound:', err));
-
-            // [NEW] 로비 BGM 및 버튼 효과음 로드
-            SoundGen.loadAudioFile('sounds/main.mp3', 'main')
-                .then(() => {
+            if (SoundGen.ctx.state === 'suspended') {
+                SoundGen.ctx.resume().then(() => {
+                    console.log('[SoundGen] AudioContext resumed via interaction');
+                    // Context가 활성화되면 BGM 재생 시도
                     SoundGen.startLobbyMusic();
-                })
-                .catch(err => console.warn('Failed to load main.mp3:', err));
+                });
+            } else {
+                SoundGen.startLobbyMusic();
+            }
 
-            SoundGen.loadAudioFile('sounds/button.mp3', 'button')
-                .catch(err => console.warn('Failed to load button.mp3:', err));
+            // [PROACTIVE] Pre-fetch all other sounds if not already loading
+            // 이 함수는 mousedown에서 호출되므로 여기서 resume과 함께 재생을 트리거합니다.
+            // 로딩 자체는 아래에서 페이지 로드 시 즉시 시작하도록 변경합니다.
         };
+
+        // [INIT] 페이지 로드 시 즉시 오디오 시스템 초기화 및 파일 로딩 시작
+        SoundGen.init();
+
+        // [NEW] 로비 BGM 및 버튼 효과음 사전 로드 (발생 즉시)
+        SoundGen.loadAudioFile('sounds/main.mp3', 'main')
+            .then(() => console.log('BGM pre-loaded'))
+            .catch(err => console.warn('Failed to pre-load main.mp3:', err));
+
+        SoundGen.loadAudioFile('sounds/button.mp3', 'button')
+            .catch(err => console.warn('Failed to pre-load button.mp3:', err));
+
+        // 재장전 및 전투 효과음 사전 로드
+        SoundGen.loadAudioFile('sounds/reload1.mp3', 'reload').catch(() => { });
+        SoundGen.loadAudioFile('sounds/rifle.mp3', 'rifle').catch(() => { });
+        SoundGen.loadAudioFile('sounds/sword.mp3', 'sword').catch(() => { });
+        SoundGen.loadAudioFile('sounds/c-sword.mp3', 'c-sword').catch(() => { });
+        SoundGen.loadAudioFile('sounds/c-sochong.mp3', 'c-sochong').catch(() => { });
+        SoundGen.loadAudioFile('sounds/c-gun.mp3', 'c-gun').catch(() => { });
+        SoundGen.loadAudioFile('sounds/c-rifle.mp3', 'c-rifle').catch(() => { });
+        SoundGen.loadAudioFile('sounds/empty.mp3', 'empty').catch(() => { });
+        SoundGen.loadAudioFile('sounds/gunshot.mp3', 'gunshot').catch(() => { });
+        SoundGen.loadAudioFile('sounds/chak.MP3', 'land').catch(() => { });
+        SoundGen.loadAudioFile('sounds/grunt.mp3', 'jump').catch(() => { });
+        SoundGen.loadAudioFile('sounds/walking.MP3', 'walking').catch(() => { });
+        SoundGen.loadAudioFile('sounds/headshot.mp3', 'headshot').catch(() => { });
 
         // 데스크톱과 모바일 모두에서 오디오 파일 로드
         document.body.addEventListener('mousedown', loadAudioFiles, { once: true });
