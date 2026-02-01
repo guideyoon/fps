@@ -6897,7 +6897,10 @@
                             if (mesh.userData.hpBar) {
                                 const maxWidth = mesh.userData.hpBarMaxWidth || 1.0;
                                 const hpPct = Math.max(0, mesh.userData.hp / 100);
-                                mesh.userData.hpBar.scale.x = maxWidth * hpPct;
+                                const currentWidth = maxWidth * hpPct;
+                                mesh.userData.hpBar.scale.x = currentWidth;
+                                // [FIX] Shift left as it shrinks to keep LEFT edge fixed (Right-to-Left effect)
+                                mesh.userData.hpBar.position.x = -(maxWidth - currentWidth) / 2;
                             }
                         }
                     }
@@ -7205,9 +7208,9 @@
             const hpBgTex = new THREE.CanvasTexture(hpBgCanvas);
             const hpBgMat = new THREE.SpriteMaterial({ map: hpBgTex });
             const hpBgSprite = new THREE.Sprite(hpBgMat);
-            hpBgSprite.center.set(0, 0.5); // Anchor left
+            hpBgSprite.center.set(0.5, 0.5);
             hpBgSprite.scale.set(1.5, 0.15, 1);
-            hpBgSprite.position.set(-0.75, 1.4, 0);
+            hpBgSprite.position.set(0, 1.4, 0);
             group.add(hpBgSprite);
             group.userData.hpBarBg = hpBgSprite;
 
@@ -7220,19 +7223,21 @@
             const hpTex = new THREE.CanvasTexture(hpCanvas);
             const hpMat = new THREE.SpriteMaterial({ map: hpTex });
             const hpSprite = new THREE.Sprite(hpMat);
-            hpSprite.center.set(0, 0.5); // Anchor left
+            hpSprite.center.set(0.5, 0.5);
             const maxHpWidth = 1.48;
             hpSprite.scale.set(maxHpWidth, 0.13, 1);
-            hpSprite.position.set(-0.74, 1.4, 0.01);
+            hpSprite.position.set(0, 1.4, 0.01);
             hpSprite.renderOrder = 10;
             group.add(hpSprite);
 
             group.userData.hpBar = hpSprite;
             group.userData.hpBarMaxWidth = maxHpWidth; // Store for update logic
 
-            // Initialize correct scale
+            // Initialize correct scale and position
             const hpPct = Math.max(0, (p.hp || 100) / 100);
-            hpSprite.scale.x = maxHpWidth * hpPct;
+            const currentWidth = maxHpWidth * hpPct;
+            hpSprite.scale.x = currentWidth;
+            hpSprite.position.x = -(maxHpWidth - currentWidth) / 2;
 
             // Load GLB character model
             // Load GLB character model using Cache
