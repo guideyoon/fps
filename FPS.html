@@ -7487,6 +7487,10 @@
         SoundGen.loadAudioFile('sounds/grunt.mp3', 'jump').catch(() => { });
         SoundGen.loadAudioFile('sounds/walking.MP3', 'walking').catch(() => { });
         SoundGen.loadAudioFile('sounds/headshot.mp3', 'headshot').catch(() => { });
+        SoundGen.loadAudioFile('sounds/hit.MP3', 'hit').catch(() => { });
+        SoundGen.loadAudioFile('sounds/uak.mp3', 'damage').catch(() => { });
+        SoundGen.loadAudioFile('sounds/grenade.mp3', 'grenade_explosion').catch(() => { });
+        SoundGen.loadAudioFile('sounds/remove.mp3', 'grenade_switch').catch(() => { });
 
         // 데스크톱과 모바일 모두에서 오디오 파일 로드
         document.getElementById('audio-unlock-overlay')?.addEventListener('mousedown', loadAudioFiles, { once: true });
