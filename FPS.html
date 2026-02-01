@@ -6889,7 +6889,7 @@
                         elDamage.style.opacity = 0.5;
                         setTimeout(() => elDamage.style.opacity = 0, 200);
                         hitShake.intensity = 0.1;
-                        SoundGen.playHit();
+                        SoundGen.playDamage(); // Requested: Play uak.mp3 upon taking damage
                     } else {
                         const mesh = otherPlayersMap[data.id];
                         if (mesh) {
