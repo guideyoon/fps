@@ -13524,11 +13524,23 @@
 
             const ray = new THREE.Raycaster();
             ray.setFromCamera(new THREE.Vector2(0, 0), camera);
-            if (!isAiming && w.type !== 'KNIFE') {
+
+            // [IMPROVED] Sniper has ZERO spread when aiming (scoped)
+            // Other weapons have spread when not aiming
+            if (!isAiming && w.type !== 'KNIFE' && w.type !== 'SNIPER') {
                 ray.ray.direction.x += (Math.random() - 0.5) * 0.05;
                 ray.ray.direction.y += (Math.random() - 0.5) * 0.05;
             }
-            const range = (w.type === 'KNIFE') ? 2.0 : 100; // Reduced from 3.0 to 2.0 per user request
+
+            // [NEW] Weapon-specific range values for realistic gameplay
+            let range;
+            switch (w.type) {
+                case 'KNIFE': range = 2.0; break;
+                case 'PISTOL': range = 25; break;
+                case 'RIFLE': range = 60; break;
+                case 'SNIPER': range = 150; break;
+                default: range = 50; break;
+            }
 
             const targets = scene.children.filter(obj => obj !== weaponContainer);
             const hits = ray.intersectObjects(targets, true);
