@@ -6894,7 +6894,11 @@
                         const mesh = otherPlayersMap[data.id];
                         if (mesh) {
                             mesh.userData.hp = data.hp;
-                            if (mesh.userData.hpBar) mesh.userData.hpBar.scale.x = Math.max(0, mesh.userData.hp / 100);
+                            if (mesh.userData.hpBar) {
+                                const maxWidth = mesh.userData.hpBarMaxWidth || 1.0;
+                                const hpPct = Math.max(0, mesh.userData.hp / 100);
+                                mesh.userData.hpBar.scale.x = maxWidth * hpPct;
+                            }
                         }
                     }
                 });
@@ -7191,6 +7195,43 @@
             nameSprite.position.y = 1.1; // Lowered (2.2 was too high at 2x scale)
             group.add(nameSprite);
             group.userData.nameSprite = nameSprite;
+
+            // [NEW] HP Bar Background (Black)
+            const hpBgCanvas = document.createElement('canvas');
+            hpBgCanvas.width = 1; hpBgCanvas.height = 1;
+            const hpBgCtx = hpBgCanvas.getContext('2d');
+            hpBgCtx.fillStyle = '#000000';
+            hpBgCtx.fillRect(0, 0, 1, 1);
+            const hpBgTex = new THREE.CanvasTexture(hpBgCanvas);
+            const hpBgMat = new THREE.SpriteMaterial({ map: hpBgTex });
+            const hpBgSprite = new THREE.Sprite(hpBgMat);
+            hpBgSprite.scale.set(1.5, 0.15, 1);
+            hpBgSprite.position.y = 1.4; // Above name
+            group.add(hpBgSprite);
+
+            // [NEW] HP Bar Foreground (Red)
+            const hpCanvas = document.createElement('canvas');
+            hpCanvas.width = 1; hpCanvas.height = 1;
+            const hpCtx = hpCanvas.getContext('2d');
+            hpCtx.fillStyle = '#f44336'; // Standard Red
+            hpCtx.fillRect(0, 0, 1, 1);
+            const hpTex = new THREE.CanvasTexture(hpCanvas);
+            const hpMat = new THREE.SpriteMaterial({ map: hpTex });
+            const hpSprite = new THREE.Sprite(hpMat);
+
+            const maxHpWidth = 1.48; // Slightly smaller than BG
+            hpSprite.scale.set(maxHpWidth, 0.13, 1);
+            hpSprite.position.y = 1.4;
+            hpSprite.position.z = 0.01;
+            hpSprite.renderOrder = 10; // Draw on top
+            group.add(hpSprite);
+
+            group.userData.hpBar = hpSprite;
+            group.userData.hpBarMaxWidth = maxHpWidth; // Store for update logic
+
+            // Initialize correct scale
+            const hpPct = Math.max(0, (p.hp || 100) / 100);
+            hpSprite.scale.x = maxHpWidth * hpPct;
 
             // Load GLB character model
             // Load GLB character model using Cache
