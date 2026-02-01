@@ -4955,7 +4955,7 @@
                 },
                 posAds: new THREE.Vector3(0, -0.062, -0.45),
                 rotAds: new THREE.Vector3(0, 0, 0), // Aim Rotation (Default)
-                fovAds: 25, fireRate: 0.08, recoil: 0.15, damage: 30, // Recoil restored for camera shake
+                fovAds: 25, fireRate: 0.08, recoil: 0.15, damage: 22, // Lowered from 30
                 muzzleHip: new THREE.Vector3(0, 0.12, -0.65),
                 muzzleAds: new THREE.Vector3(-0.049, 0.024, -0.655),
                 lArmHip: { pos: new THREE.Vector3(-0.05, -0.25, -0.44), rot: new THREE.Vector3(0.54, -0.82, 0.60) },
@@ -4977,7 +4977,7 @@
                     scale: new THREE.Vector3(0.17, 0.17, 0.17)
                 },
                 posAds: new THREE.Vector3(0, -0.048, -0.35),
-                fovAds: 55, fireRate: 0.15, recoil: 0.4, damage: 20, // Recoil restored for camera shake
+                fovAds: 55, fireRate: 0.15, recoil: 0.4, damage: 15, // Lowered from 20
                 muzzleHip: new THREE.Vector3(-0.066, 0.190, -0.199),
                 muzzleAds: new THREE.Vector3(0.01, 0.01, -0.20),
                 switchSound: 'c-gun'
@@ -5018,7 +5018,7 @@
                 },
                 lArmHip: { pos: new THREE.Vector3(-1.63, -0.14, -0.11), rot: new THREE.Vector3(0.56, -0.56, -1.98) },
                 rArmHip: { pos: new THREE.Vector3(0.02, 0.02, -0.15), rot: new THREE.Vector3(0.18, 0.36, 3.14) },
-                fovAds: 65, fireRate: 0.4, recoil: 0, damage: 15,
+                fovAds: 65, fireRate: 0.4, recoil: 0, damage: 35, // Increased for melee balance
                 switchSound: 'c-sword'
             },
             {
@@ -13532,21 +13532,40 @@
                 ray.ray.direction.y += (Math.random() - 0.5) * 0.05;
             }
 
-            // [NEW] Weapon-specific range values for realistic gameplay
-            let range;
+            // [NEW] Distance-based damage falloff configuration
+            // optimalRange: full damage up to this distance
+            // maxRange: minimum damage at this distance (only for limiting knife reach)
+            // falloffMultiplier: damage multiplier at extreme range (1.0 = no falloff)
+            let optimalRange, falloffMultiplier;
             switch (w.type) {
-                case 'KNIFE': range = 2.0; break;
-                case 'PISTOL': range = 25; break;
-                case 'RIFLE': range = 60; break;
-                case 'SNIPER': range = 150; break;
-                default: range = 50; break;
+                case 'KNIFE':
+                    optimalRange = 2.0;
+                    falloffMultiplier = 1.0; // Knife: fixed damage, limited reach
+                    break;
+                case 'PISTOL':
+                    optimalRange = 15;
+                    falloffMultiplier = 0.4; // 40% damage at extreme range
+                    break;
+                case 'RIFLE':
+                    optimalRange = 30;
+                    falloffMultiplier = 0.5; // 50% damage at extreme range
+                    break;
+                case 'SNIPER':
+                    optimalRange = 999;
+                    falloffMultiplier = 1.0; // No falloff for sniper
+                    break;
+                default:
+                    optimalRange = 30;
+                    falloffMultiplier = 0.5;
+                    break;
             }
 
             const targets = scene.children.filter(obj => obj !== weaponContainer);
             const hits = ray.intersectObjects(targets, true);
 
             for (let h of hits) {
-                if (h.distance > range) continue;
+                // [CHANGED] Only knife has a hard range limit
+                if (w.type === 'KNIFE' && h.distance > optimalRange) continue;
 
                 let isEnemy = false;
                 let isOtherPlayer = false;
@@ -13590,7 +13609,17 @@
 
                 // 다른 플레이어에게 데미지
                 if (isOtherPlayer && p.userData.hp > 0) {
+                    // [NEW] Calculate distance-based damage falloff
                     let dmg = w.damage;
+                    const distance = h.distance;
+
+                    if (w.type !== 'SNIPER' && w.type !== 'KNIFE' && distance > optimalRange) {
+                        // Linear falloff from 100% at optimalRange to falloffMultiplier at 3x optimalRange
+                        const falloffRange = optimalRange * 3;
+                        const falloffProgress = Math.min((distance - optimalRange) / (falloffRange - optimalRange), 1.0);
+                        const damageMultiplier = 1.0 - (1.0 - falloffMultiplier) * falloffProgress;
+                        dmg = Math.round(dmg * damageMultiplier);
+                    }
                     let isHead = isHitPart(h.object, 'head');
 
                     // [Fallback] Geometric Headshot Detection
