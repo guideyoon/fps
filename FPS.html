@@ -7205,10 +7205,11 @@
             const hpBgTex = new THREE.CanvasTexture(hpBgCanvas);
             const hpBgMat = new THREE.SpriteMaterial({ map: hpBgTex });
             const hpBgSprite = new THREE.Sprite(hpBgMat);
+            hpBgSprite.center.set(0, 0.5); // Anchor left
             hpBgSprite.scale.set(1.5, 0.15, 1);
-            hpBgSprite.position.y = 1.4; // Above name
+            hpBgSprite.position.set(-0.75, 1.4, 0);
             group.add(hpBgSprite);
-            group.userData.hpBarBg = hpBgSprite; // Store for visibility toggle
+            group.userData.hpBarBg = hpBgSprite;
 
             // [NEW] HP Bar Foreground (Red)
             const hpCanvas = document.createElement('canvas');
@@ -7219,12 +7220,11 @@
             const hpTex = new THREE.CanvasTexture(hpCanvas);
             const hpMat = new THREE.SpriteMaterial({ map: hpTex });
             const hpSprite = new THREE.Sprite(hpMat);
-
-            const maxHpWidth = 1.48; // Slightly smaller than BG
+            hpSprite.center.set(0, 0.5); // Anchor left
+            const maxHpWidth = 1.48;
             hpSprite.scale.set(maxHpWidth, 0.13, 1);
-            hpSprite.position.y = 1.4;
-            hpSprite.position.z = 0.01;
-            hpSprite.renderOrder = 10; // Draw on top
+            hpSprite.position.set(-0.74, 1.4, 0.01);
+            hpSprite.renderOrder = 10;
             group.add(hpSprite);
 
             group.userData.hpBar = hpSprite;
