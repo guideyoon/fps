@@ -7439,7 +7439,23 @@
             if (SoundGen.userInteracted) return; // Prevent multiple execution
             SoundGen.userInteracted = true;
 
-            console.log('[SoundGen] Interaction detected, unlocking audio...');
+            console.log('[SoundGen] Interaction detected, unlocking audio and entering fullscreen...');
+
+            // [NEW] Enter Fullscreen Mode
+            try {
+                const docEl = document.documentElement;
+                if (docEl.requestFullscreen) {
+                    docEl.requestFullscreen().catch(err => {
+                        console.warn(`Fullscreen request failed: ${err.message}`);
+                    });
+                } else if (docEl.webkitRequestFullscreen) { /* Safari */
+                    docEl.webkitRequestFullscreen();
+                } else if (docEl.msRequestFullscreen) { /* IE11 */
+                    docEl.msRequestFullscreen();
+                }
+            } catch (e) {
+                console.warn('Fullscreen execution error:', e);
+            }
 
             if (!SoundGen.ctx) SoundGen.init();
 
