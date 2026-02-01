@@ -3276,6 +3276,60 @@
             font-weight: 700;
             font-size: 20px;
         }
+
+        <style>
+
+        /* Audio Unlock Overlay */
+        #audio-unlock-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: opacity 0.5s ease;
+        }
+
+        #audio-unlock-overlay .unlock-text {
+            color: var(--tactical-cyan);
+            font-family: 'Inter', sans-serif;
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            animation: pulse-glow 2s infinite;
+        }
+
+        #audio-unlock-overlay .unlock-subtext {
+            color: white;
+            font-size: 14px;
+            margin-top: 10px;
+            opacity: 0.7;
+        }
+
+        @keyframes pulse-glow {
+            0% {
+                opacity: 0.5;
+                filter: drop-shadow(0 0 5px var(--tactical-cyan));
+            }
+
+            50% {
+                opacity: 1;
+                filter: drop-shadow(0 0 20px var(--tactical-cyan));
+            }
+
+            100% {
+                opacity: 0.5;
+                filter: drop-shadow(0 0 5px var(--tactical-cyan));
+            }
+        }
     </style>
 </head>
 
@@ -3331,6 +3385,12 @@
                 <span class="btn-text"><i class="fas fa-users-rays btn-icon"></i>함께하기 (MULTI)</span>
             </button>
         </div>
+    </div>
+
+    <!-- Audio Unlock Overlay -->
+    <div id="audio-unlock-overlay">
+        <div class="unlock-text">CLICK TO INITIALIZE SYSTEM</div>
+        <div class="unlock-subtext">BACKGROUND AUDIO WILL BE ACTIVATED</div>
     </div>
 
     <!-- 싱글 플레이어 맵 선택 화면 -->
@@ -7339,6 +7399,14 @@
         const loadAudioFiles = () => {
             SoundGen.userInteracted = true;
             if (!SoundGen.ctx) SoundGen.init();
+
+            // Hide overlay
+            const overlay = document.getElementById('audio-unlock-overlay');
+            if (overlay) {
+                overlay.style.opacity = '0';
+                setTimeout(() => overlay.style.display = 'none', 500);
+            }
+
             if (SoundGen.ctx.state === 'suspended') {
                 SoundGen.ctx.resume().then(() => {
                     console.log('[SoundGen] AudioContext resumed via interaction');
@@ -7376,8 +7444,8 @@
         SoundGen.loadAudioFile('sounds/headshot.mp3', 'headshot').catch(() => { });
 
         // 데스크톱과 모바일 모두에서 오디오 파일 로드
-        document.body.addEventListener('mousedown', loadAudioFiles, { once: true });
-        document.body.addEventListener('touchstart', loadAudioFiles, { once: true });
+        document.getElementById('audio-unlock-overlay')?.addEventListener('mousedown', loadAudioFiles, { once: true });
+        document.getElementById('audio-unlock-overlay')?.addEventListener('touchstart', loadAudioFiles, { once: true });
 
         // Global restartGame handler is already attached above
 
