@@ -7208,6 +7208,7 @@
             hpBgSprite.scale.set(1.5, 0.15, 1);
             hpBgSprite.position.y = 1.4; // Above name
             group.add(hpBgSprite);
+            group.userData.hpBarBg = hpBgSprite; // Store for visibility toggle
 
             // [NEW] HP Bar Foreground (Red)
             const hpCanvas = document.createElement('canvas');
@@ -14562,12 +14563,13 @@
                 } else if (gameMode === 'multi') {
                     // [FIX] Update Remote Players: Name Tag Visibility Only (No LookAt override)
                     otherPlayers.forEach(p => {
-                        // Calculate distance to local player for name tag visibility
+                        // Calculate distance to local player for UI visibility (Name & HP Bar)
                         const dist = p.position.distanceTo(camera.position);
-                        if (p.userData.nameSprite) {
-                            // Only show name if within 50 meters
-                            p.userData.nameSprite.visible = (dist < 50);
-                        }
+                        const isVisible = (dist < 70);
+
+                        if (p.userData.nameSprite) p.userData.nameSprite.visible = isVisible;
+                        if (p.userData.hpBar) p.userData.hpBar.visible = isVisible;
+                        if (p.userData.hpBarBg) p.userData.hpBarBg.visible = isVisible;
                     });
 
                     // 자신의 상태 서버 전송 (초당 약 30~60회 렌더링마다 전송하면 부하가 생길 수 있으므로 최적화 가능)
